@@ -1636,20 +1636,21 @@ function drawKhCharts(){
     </div>
     <div class="sc-actions">
       <button type="button" id="scEmbedConfig">Unduh HTML dengan konfigurasi</button>
-      <button type="button" class="primary" id="scConnect">Simpan konfigurasi &amp; masuk</button>
+      <button type="button" id="scSaveConfig">Simpan konfigurasi</button>
+      <button type="button" class="primary" id="scConnect">Masuk ke SATRIA</button>
       <button type="button" id="scPull" disabled>Tarik dari Supabase</button>
       <button type="button" id="scPush" disabled>Kirim snapshot lokal</button>
       <button type="button" class="danger" id="scSignOut" disabled>Keluar</button>
     </div>
     <p id="scStatus" class="sc-status" role="status" aria-live="polite">Belum terhubung.</p>
     <div class="sc-note"><b>Prosedur:</b> siapkan project staging → jalankan file SQL pendamping <code>satria-supabase-staging-bootstrap.sql</code> setelah ditinjau → buat akun Auth → bootstrap organisasi dan membership admin melalui SQL Editor → masukkan URL, publishable/anon key, dan UUID organisasi → login → tarik atau kirim snapshot. Ekspor backup lokal terlebih dahulu. Konflik versi harus diselesaikan dengan menarik versi terbaru; sistem tidak menggabungkan perubahan otomatis.</div>
-    <h3>Persiapan database</h3><p class="mut">SQL bootstrap disediakan sebagai file terpisah dari HTML. Setelah konfigurasi diunduh, file HTML hasilnya akan mengisi kembali Project URL, publishable/anon key, dan Organization UUID secara otomatis. Kata sandi tidak ditanam di file.</p>
+    <h3>Persiapan database</h3><p class="mut">SQL bootstrap disediakan sebagai file terpisah dari HTML. Konfigurasi juga dapat disimpan di browser melalui tombol Simpan konfigurasi. Saat file yang sama dibuka kembali pada browser/profil yang sama, URL, publishable/anon key, dan Organization UUID akan diisi otomatis. Kata sandi tidak disimpan. Gunakan Unduh HTML dengan konfigurasi bila ingin membawa konfigurasi bersama file ke browser/perangkat lain; file tersebut memuat publishable/anon key sehingga bagikan dengan bijak.</p>
   </section>
 </div>
 
 <script id="satriaEmbeddedSupabaseConfig">
-// Diisi otomatis oleh tombol “Unduh HTML dengan konfigurasi”.
-window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
+// Konfigurasi Supabase default tertanam, termasuk Organization UUID.
+window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.supabase.co","key":"sb_publishable_gdDUVrD16HQaVB-nrgdqeg_B2Rk7v9H","org":"64bec4e1-a687-4dce-8935-cc51363171db"};
 </script>
 <script>
 (function(){
@@ -1660,7 +1661,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
   const modal=$id('satriaCloudModal');
   const status=(msg,kind='')=>{const e=$id('scStatus');e.textContent=msg;e.dataset.kind=kind};
   const roleName=r=>({admin:'Admin',operator:'Operator',viewer:'Viewer'}[r]||'Viewer');
-  const config=()=>{let local={};try{local=JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}')}catch(_){}const embedded=window.SATRIA_EMBEDDED_SUPABASE_CONFIG||{};return {url:embedded.url||local.url||'',key:embedded.key||local.key||'',org:embedded.org||local.org||''}};
+  const config=()=>{let local={};try{local=JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}')}catch(_){}const embedded=window.SATRIA_EMBEDDED_SUPABASE_CONFIG||{};return {url:local.url||embedded.url||'',key:local.key||embedded.key||'',org:local.org||embedded.org||''}};
   function fillConfig(){const c=config();$id('scUrl').value=c.url||'';$id('scKey').value=c.key||'';$id('scOrg').value=c.org||''}
   function setButtons(){const ok=!!(client&&member);$id('scPull').disabled=!ok;$id('scPush').disabled=!ok||member?.role==='viewer';$id('scSignOut').disabled=!ok}
   function open(){fillConfig();modal.hidden=false;modal.setAttribute('aria-hidden','false');$id('scClose').focus();setButtons();if(member)status('Terhubung sebagai '+member.email+' · role '+member.role+' · versi lokal '+version,'ok')}
@@ -1673,10 +1674,16 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
     if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(org))throw new Error('Organization UUID belum valid.');
     return {url,key,org};
   }
+  function saveConfig(){
+    const cfg=readConfigFields();
+    try{localStorage.setItem(CONFIG_KEY,JSON.stringify(cfg));}
+    catch(e){throw new Error('Browser tidak mengizinkan penyimpanan konfigurasi. Buka file pada browser/profil yang sama atau gunakan Unduh HTML dengan konfigurasi. Detail: '+(e?.message||e));}
+    orgId=cfg.org;status('Konfigurasi tersimpan di browser ini. Login berikutnya tidak perlu memasukkan URL, key, atau UUID organisasi lagi.','ok');
+    return cfg;
+  }
   async function initClient(){
     if(!window.supabase||!window.supabase.createClient)throw new Error('Library Supabase JS tidak termuat. Periksa koneksi internet/CDN.');
-    const {url,key,org}=readConfigFields();orgId=org;
-    localStorage.setItem(CONFIG_KEY,JSON.stringify({url,key,org}));
+    const {url,key,org}=saveConfig();orgId=org;
     client=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
     return client;
   }
@@ -1769,7 +1776,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
   const headerRight=document.querySelector('header .header-right');if(headerRight)headerRight.insertBefore(openBtn,headerRight.firstChild);
   openBtn.addEventListener('click',open);$id('scClose').addEventListener('click',close);
   modal.addEventListener('click',e=>{if(e.target===modal)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
-  $id('scEmbedConfig').addEventListener('click',downloadConfiguredHtml);$id('scConnect').addEventListener('click',connect);$id('scPull').addEventListener('click',pull);$id('scPush').addEventListener('click',push);$id('scSignOut').addEventListener('click',signOut);
+  $id('scEmbedConfig').addEventListener('click',downloadConfiguredHtml);$id('scSaveConfig').addEventListener('click',()=>{try{saveConfig();}catch(e){showError(e)}});$id('scConnect').addEventListener('click',connect);$id('scPull').addEventListener('click',pull);$id('scPush').addEventListener('click',push);$id('scSignOut').addEventListener('click',signOut);
   const saved=config();if(saved.url)$id('scUrl').value=saved.url;if(saved.key)$id('scKey').value=saved.key;if(saved.org)$id('scOrg').value=saved.org;
   if(window.render){const originalRender=window.render;window.render=function(){originalRender();applyUserLock()}}
   // Restore an existing Supabase session after the static app has booted.
