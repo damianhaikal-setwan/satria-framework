@@ -1,76 +1,50 @@
-# SATRIA — Edge Function `admin-create-user`
+# SATRIA — daftar pengguna admin (`admin-list-users`)
 
-Function ini membuat akun Auth langsung dan memberi membership SATRIA tanpa mengirim email. Akun yang dibuat ditandai `email_confirm = true` oleh Auth Admin API. Ini hanya menandai akun tersebut sebagai terkonfirmasi; alamat dummy tidak benar-benar diverifikasi. **Tidak perlu mematikan Confirm Email secara global** di pengaturan Auth proyek.
+Paket ini menambahkan daftar anggota Supabase Auth pada halaman **Pengguna dan Hak Akses**. Cocokkan dengan bootstrap SATRIA yang menyediakan `public.satria_memberships(organization_id, user_id, role, active, created_at)` dan nilai role `admin`, `operator`, `viewer`.
 
-## Prasyarat dan file
+## File
 
-Bootstrap dasar SATRIA harus sudah dijalankan agar tabel `satria_memberships` dan helper RLS tersedia. Jalankan `supabase/migrations/20261024_satria_user_creation_security.sql` di SQL Editor sebelum deploy. Migrasi menambah kontrol laju pembuatan akun dan tabel audit.
+- `supabase/functions/admin-list-users/index.ts` — Edge Function. Letakkan di path yang sama pada repo Supabase.
+- `frontend/admin-list-users.js` — kode frontend mandiri untuk ditempel di dalam Supabase bridge IIFE, sesudah modal tambah user dan sebelum penutup bridge `})();`.
+- `SATRIA-Framework-3.0-Admin-Users.html` — salinan HTML tugas sebelumnya dengan panel daftar dan JavaScript sudah terintegrasi.
+- `supabase/config.toml` — setelan lokal agar gateway tetap memvalidasi JWT.
 
-Salin `supabase/functions/admin-create-user/index.ts` ke repo pada path yang sama. Tambahkan ke `supabase/config.toml`:
+## Keamanan
 
-```toml
-[functions.admin-create-user]
-verify_jwt = true
-```
+Gateway memvalidasi JWT (`verify_jwt = true`), kemudian fungsi memvalidasi token lagi terhadap Auth. Sebelum membaca data, fungsi memeriksa bahwa pemanggil memiliki membership `admin` **aktif** pada `organization_id` yang dikirim. Role, status aktif, dan organisasi tidak dipercaya dari frontend. Service/secret key hanya digunakan di Edge Function; tidak pernah ditanam di HTML.
 
-Jangan menonaktifkan verifikasi JWT. Function juga memverifikasi sesi ke Auth dan memeriksa membership admin aktif pada organisasi yang diminta.
+Query pertama mengambil hanya membership organisasi tersebut; data Auth yang dikembalikan hanya untuk user ID di hasil tersebut. Respons tidak mengembalikan `user_metadata` secara keseluruhan, hanya nama tampilan, email, role, status membership, serta tanggal. Respons diberi `no-store`. CORS memakai allowlist origin persis dan bukan pengganti otorisasi.
 
-## Konfigurasi dan deploy
+Daftar mencakup semua membership organisasi, termasuk yang nonaktif, sehingga admin dapat melihat statusnya. Data diurutkan berdasarkan waktu membership terbaru dan dipaginasi 50 baris/halaman. Frontend menyembunyikan panel dari non-admin demi UX, tetapi pemeriksaan server tetap menjadi kontrol keamanan yang menentukan.
 
-Isi `ALLOWED_ORIGINS` dengan origin persis situs Pages Anda, tanpa path dan tanpa wildcard. Contoh:
+## Deploy
 
-```bash
-supabase secrets set ALLOWED_ORIGINS="https://NAMA-SITUS.pages.dev,https://domain-anda.go.id"
-supabase db push
-supabase functions deploy admin-create-user
-```
-
-Edge Functions memperoleh URL dan API keys dari environment Supabase. Kode mendukung `SUPABASE_PUBLISHABLE_KEYS`/`SUPABASE_SECRET_KEYS` modern dan nama variabel legacy. **Jangan menaruh secret/service-role key di HTML, GitHub, Cloudflare Pages, atau browser.**
-
-Pembuatan role `operator` aktif secara default. Pembuatan admin baru sengaja dinonaktifkan. Jika memang diizinkan oleh kebijakan organisasi, aktifkan secara sadar:
+1. Salin folder `supabase/functions/admin-list-users` ke proyek Supabase.
+2. Gabungkan bagian dari `supabase/config.toml` dengan `config.toml` proyek (jangan menimpa konfigurasi fungsi lain).
+3. Isi allowlist dengan origin Pages/aplikasi yang benar, tanpa path atau wildcard. Runtime Supabase menyediakan URL dan key secara otomatis.
 
 ```bash
-supabase secrets set ALLOW_ADMIN_CREATION=true
+supabase secrets set ALLOWED_ORIGINS="https://nama-situs.pages.dev,https://domain-anda.go.id"
+supabase functions deploy admin-list-users
 ```
 
-Tanpa secret tersebut, permintaan role `admin` ditolak.
+Pastikan Supabase project telah menjalankan bootstrap SATRIA dan tabel membership memiliki kolom `created_at`. Fungsi tidak memerlukan migrasi tambahan.
 
-## Panggil dari HTML SATRIA
+## Frontend
 
-Admin yang sudah login dapat memanggil function dengan `supabase-js`:
+HTML terintegrasi sudah memanggil function menggunakan sesi admin aktif:
 
 ```js
-const initialPassword = initialPasswordInput.value;
-const { data, error } = await supabase.functions.invoke('admin-create-user', {
-  body: {
-    organization_id: currentOrganizationId,
-    email: emailInput.value,
-    role: 'operator',
-    initial_password: initialPassword,
-    display_name: nameInput.value
-  }
+const { data, error } = await client.functions.invoke('admin-list-users', {
+  body: { organization_id: orgId, page: 1, page_size: 50 }
 });
-initialPasswordInput.value = ''; // bersihkan field setelah request
-
-if (error) {
-  console.error(error); // jangan log body request atau password
-} else {
-  console.log('Akun dibuat:', data.user.id, 'email terkonfirmasi:', data.email_confirmed);
-}
 ```
 
-Password awal wajib 12–128 karakter. Function tidak pernah mencatat, menyimpan sendiri, atau mengembalikan password tersebut. Sampaikan password awal kepada operator lewat saluran terpisah yang aman; minta mereka menggantinya setelah login. Jangan kirim field `user_id`, `active`, `service_role`, `secret key`, atau field lain yang tidak tercantum.
+Untuk penerapan pada HTML lain, tambahkan juga wadah dengan ID yang digunakan di `vUser()` (`satriaCloudUserListCard`, `satriaAdminUsersRows`, tombol pagination/status). Kode JavaScript harus berada **di dalam** bridge IIFE yang memiliki closure `client`, `member`, dan `orgId`; memasangnya sebagai file script eksternal di luar closure tidak akan memiliki akses ke sesi tersebut. Setelah pembuatan user sukses, dispatch event `window.dispatchEvent(new CustomEvent('satria:user-created'))` agar daftar dimuat ulang.
 
-Pastikan email dummy **berformat valid dan unik untuk setiap akun**. Supabase tetap membutuhkan email unik meskipun konfirmasi dimatikan untuk akun itu. Karena alamat tersebut tidak bisa menerima email, pemulihan password via email juga tidak akan berfungsi. Siapkan proses reset oleh admin atau gunakan email yang dapat diakses operator.
+## Pengujian setelah deploy
 
-## Batasan keamanan
-
-Function ini hanya mengizinkan admin aktif organisasi target. Role admin/operator masih membaca seluruh JSON snapshot organisasi SATRIA. Function ini **belum** mengisolasi data per OPD atau per tahun. Jangan mengandalkan kode ini untuk pembatasan data lintas OPD; itu membutuhkan schema dan RLS terpisah.
-
-Migrasi menolak akses langsung pengguna ke tabel rate limit. Batasnya lima percobaan per menit per admin dan organisasi. Alamat email yang sudah terdaftar di proyek akan ditolak; menambahkan user lama ke organisasi memerlukan alur terpisah.
-
-## Referensi resmi
-
-- [Supabase Auth Admin createUser](https://supabase.com/docs/reference/javascript/auth-admin-createuser)
-- [Securing Edge Functions](https://supabase.com/docs/guides/functions/auth)
-- [Edge Function environment variables and secrets](https://supabase.com/docs/guides/functions/secrets)
+- Admin aktif pada organisasi yang dikirim harus menerima `200` berisi anggota organisasi itu saja.
+- Operator, viewer, admin nonaktif, user tanpa sesi, dan admin dari organisasi lain harus ditolak (`401` atau `403`).
+- Uji halaman berikutnya saat jumlah membership melebihi 50.
+- Periksa Network browser: request membawa sesi terautentikasi; tidak ada service/secret key; response memiliki `Cache-Control: no-store`.
