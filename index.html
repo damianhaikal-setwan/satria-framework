@@ -1151,7 +1151,7 @@ function vChat(){const L=S.chat||[];
 function vUser(){const U=S.users,act=U.filter(u=>u.aktif!==false),ROLES=['Admin','Operator','Viewer'];
  const kp=[['Total user lokal',U.length],['Admin aktif',act.filter(u=>u.role==='Admin').length],['Operator aktif',act.filter(u=>u.role==='Operator').length],['Viewer aktif',act.filter(u=>u.role==='Viewer').length]];
  return `<div class=grid id="satriaLocalUserStats">${kp.map(([l,v])=>`<div class="card kpi"><span>${l}</span><b>${v}</b></div>`).join('')}</div>
- <div class=card id="satriaCloudUserCreateCard" style="display:none"><div class=row style="align-items:center;justify-content:space-between"><div><h3 style="margin:0">Pengguna Supabase Auth</h3><p class=mut>Buat akun login untuk organisasi yang sedang terhubung.</p></div><button id="satriaOpenCreateUser" type="button">Tambah user operator</button></div><p class=mut>Email dummy harus berformat valid dan unik. Akun dibuat terkonfirmasi; tidak ada email yang dikirim. Sampaikan password awal melalui saluran terpisah yang aman.</p><div class=card style="border-color:#e0a800"><b class=warn>Catatan</b><p class=mut>Form ini membuat akun Auth dan membership organisasi. Penetapan OPD dan daftar seluruh akun cloud belum tersedia; membership saat ini masih memakai snapshot satu organisasi.</p></div>
+ <div class=card id="satriaCloudUserCreateCard" style="display:none"><div class=row style="align-items:center;justify-content:space-between"><div><h3 style="margin:0">Pengguna Supabase Auth</h3><p class=mut>Buat akun login untuk organisasi yang sedang terhubung.</p></div><button id="satriaOpenCreateUser" type="button">Tambah user operator</button></div><p class=mut>Email harus berformat valid dan unik. Akun dibuat terkonfirmasi; tidak ada email yang dikirim. Sampaikan password awal melalui saluran terpisah yang aman.</p><p class=mut>Setiap Operator wajib diberi minimal satu OPD. Assignment disimpan di Supabase dan dapat diubah kembali dari daftar pengguna di bawah.</p>
  <section class="card" id="satriaCloudUserListCard" style="display:none" aria-labelledby="satriaCloudUserListTitle">
   <div class="row" style="align-items:center;justify-content:space-between;gap:12px">
    <div><h3 id="satriaCloudUserListTitle" style="margin:0">Daftar pengguna organisasi</h3><p class="mut" style="margin:4px 0 0">Daftar ini hanya tersedia bagi admin aktif organisasi.</p></div>
@@ -1160,8 +1160,8 @@ function vUser(){const U=S.users,act=U.filter(u=>u.aktif!==false),ROLES=['Admin'
   <p id="satriaAdminUsersStatus" class="mut" role="status" aria-live="polite">Daftar belum dimuat.</p>
   <div style="overflow:auto">
    <table>
-    <thead><tr><th>Nama</th><th>Email / username</th><th>Role</th><th>Status</th><th>Bergabung</th></tr></thead>
-    <tbody id="satriaAdminUsersRows"><tr><td colspan="5">Daftar belum dimuat.</td></tr></tbody>
+    <thead><tr><th>Nama</th><th>Email / username</th><th>Role</th><th>OPD yang dapat diakses</th><th>Status</th><th>Bergabung</th><th>Aksi</th></tr></thead>
+    <tbody id="satriaAdminUsersRows"><tr><td colspan="7">Daftar belum dimuat.</td></tr></tbody>
    </table>
   </div>
   <div class="row" style="align-items:center;justify-content:space-between;margin-top:12px">
@@ -1792,7 +1792,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
     <style>
       #satriaCreateUserModal{position:fixed;inset:0;z-index:10020;background:rgba(15,23,42,.64);display:grid;place-items:center;padding:18px}
       #satriaCreateUserModal[hidden]{display:none}
-      .satria-user-modal{width:min(560px,100%);max-height:92vh;overflow:auto;background:#fff;border:1px solid #dbe3ea;border-radius:16px;box-shadow:0 24px 70px rgba(15,23,42,.28);padding:22px;color:#17212b;font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+      .satria-user-modal{width:min(720px,100%);max-height:92vh;overflow:auto;background:#fff;border:1px solid #dbe3ea;border-radius:16px;box-shadow:0 24px 70px rgba(15,23,42,.28);padding:22px;color:#17212b;font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
       .satria-user-modal h2{font-size:20px;margin:0 0 4px}.satria-user-modal p{margin:6px 0 14px;color:#52616f}
       .satria-user-modal label{display:block;font-weight:650;margin:12px 0 5px}
       .satria-user-modal input,.satria-user-modal select{width:100%;box-sizing:border-box;border:1px solid #cbd5df;border-radius:9px;padding:10px 11px;font:inherit;background:#fff;color:#17212b}
@@ -1802,6 +1802,12 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
       .satria-user-modal .satria-user-msg[data-kind="error"]{color:#b42318}.satria-user-modal .satria-user-msg[data-kind="ok"]{color:#067647}
       .satria-user-modal .satria-user-check{display:flex;gap:9px;align-items:flex-start;font-weight:400;font-size:12px;color:#475569}
       .satria-user-modal .satria-user-check input{width:auto;margin-top:3px}
+      .satria-user-modal .satria-opd-fieldset{border:1px solid #cbd5df;border-radius:10px;padding:12px;margin:14px 0 8px}
+      .satria-user-modal .satria-opd-fieldset legend{font-weight:700;padding:0 5px}
+      .satria-user-modal .satria-opd-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:7px 12px;max-height:220px;overflow:auto;padding:4px}
+      .satria-user-modal .satria-opd-choice{display:flex;align-items:flex-start;gap:8px;font-weight:400;margin:0;cursor:pointer}
+      .satria-user-modal .satria-opd-choice input{width:auto;flex:0 0 auto;margin:3px 0 0}
+      .satria-user-modal .satria-opd-empty,.satria-user-modal .satria-opd-help{font-size:12px;color:#64748b;margin:8px 2px 0}
       .satria-user-modal .satria-user-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}
       .satria-user-modal button{border:1px solid #cbd5df;border-radius:9px;padding:9px 14px;font:inherit;font-weight:650;cursor:pointer;background:#fff;color:#1f2937}
       .satria-user-modal button.primary{background:#0f766e;border-color:#0f766e;color:#fff}
@@ -1828,6 +1834,12 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
           <option value="admin" disabled>Admin (dinonaktifkan oleh kebijakan server)</option>
         </select>
 
+        <fieldset class="satria-opd-fieldset" id="satriaCreateUserOpdFieldset">
+          <legend>OPD yang dapat diakses Operator</legend>
+          <div class="satria-opd-choices" id="satriaCreateUserOpdChoices"><p class="satria-opd-empty">Memuat katalog OPD organisasi…</p></div>
+          <p class="satria-opd-help">Pilih 1–100 OPD. Daftar berasal dari katalog organisasi di Supabase, bukan dari input bebas di browser.</p>
+        </fieldset>
+
         <label for="satriaNewUserPassword">Password awal (minimal 12 karakter)</label>
         <input id="satriaNewUserPassword" name="initial_password" type="password" minlength="12" maxlength="128" required autocomplete="new-password">
 
@@ -1852,6 +1864,8 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
   const nameInput = root.querySelector('#satriaNewUserName');
   const emailInput = root.querySelector('#satriaNewUserEmail');
   const roleInput = root.querySelector('#satriaNewUserRole');
+  const opdChoices = root.querySelector('#satriaCreateUserOpdChoices');
+  let availableOpds = [];
   let busy = false;
 
   function setMessage(text, kind = '') {
@@ -1863,6 +1877,41 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
     password.value = '';
     passwordConfirm.value = '';
   }
+
+  function renderCreateOpdOptions(items) {
+    const selectedBeforeRefresh = new Set(Array.from(opdChoices.querySelectorAll('input[name="satria_create_opd_ids"]:checked')).map((input) => input.value));
+    availableOpds = Array.isArray(items) ? items.filter((item) => item && typeof item.id === 'string' && item.id && typeof item.name === 'string' && item.name) : [];
+    opdChoices.replaceChildren();
+    if (!availableOpds.length) {
+      const empty = document.createElement('p');
+      empty.className = 'satria-opd-empty';
+      empty.textContent = 'Katalog OPD belum tersedia. Tarik snapshot cloud yang valid dan pastikan migrasi assignment OPD sudah dijalankan.';
+      opdChoices.appendChild(empty);
+      return;
+    }
+    for (const opd of availableOpds) {
+      const label = document.createElement('label');
+      label.className = 'satria-opd-choice';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.name = 'satria_create_opd_ids';
+      input.value = opd.id;
+      input.checked = selectedBeforeRefresh.has(opd.id);
+      input.setAttribute('aria-label', `Izinkan akses ke ${opd.name}`);
+      const text = document.createElement('span');
+      text.textContent = opd.name + (opd.code ? ` (${opd.code})` : '');
+      label.append(input, text);
+      opdChoices.appendChild(label);
+    }
+  }
+
+  function selectedCreateOpds() {
+    return Array.from(form.querySelectorAll('input[name="satria_create_opd_ids"]:checked')).map((input) => input.value);
+  }
+
+  window.addEventListener('satria:opds-loaded', (event) => {
+    renderCreateOpdOptions(event.detail?.opds || []);
+  });
 
   function closeModal() {
     if (busy) return;
@@ -1885,7 +1934,9 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
     clearPasswords();
     roleInput.value = 'operator';
     setMessage('');
+    renderCreateOpdOptions(window.SATRIA_ADMIN_USERS?.getOpds?.() || availableOpds);
     root.hidden = false;
+    window.dispatchEvent(new CustomEvent('satria:load-opd-catalog'));
     nameInput.focus();
   }
 
@@ -1947,6 +1998,17 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
       setMessage('Konfirmasi penyampaian password awal secara aman terlebih dahulu.', 'error');
       return;
     }
+    const opdIds = selectedCreateOpds();
+    if (!availableOpds.length) {
+      setMessage('Katalog OPD belum tersedia. Muat ulang daftar pengguna dan pastikan snapshot OPD sudah ada di Supabase.', 'error');
+      window.dispatchEvent(new CustomEvent('satria:load-opd-catalog'));
+      return;
+    }
+    if (!opdIds.length || opdIds.length > 100) {
+      setMessage('Pilih minimal satu dan maksimal 100 OPD untuk user Operator.', 'error');
+      root.querySelector('#satriaCreateUserOpdFieldset')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
 
     busy = true;
     submit.disabled = true;
@@ -1966,6 +2028,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
           role,
           initial_password: initialPassword,
           display_name: displayName,
+          opd_ids: opdIds,
         },
       });
       if (error) throw new Error(await readableFunctionError(error));
@@ -1991,11 +2054,8 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
 
 
 /*
- * SATRIA 3.0 — daftar anggota Auth pada halaman Pengguna dan Hak Akses.
- * Tempel blok ini DI DALAM Supabase bridge IIFE, sesudah modal tambah user
- * dan sebelum penutup `})();` terakhir. Ia memakai closure `client`, `member`,
- * `orgId` serta `window.render` dari HTML SATRIA hasil tugas sebelumnya.
- * Otorisasi tetap ditegakkan oleh Edge Function; gate di browser hanya UX.
+ * SATRIA 3.0 — roster Auth + OPD assignment administration.
+ * Must remain inside the bridge IIFE so it uses the active Supabase client.
  */
 (() => {
   if (window.__satriaAdminUsersInstalled) return;
@@ -2004,9 +2064,13 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
   const PAGE_SIZE = 50;
   let page = 1;
   let busy = false;
+  let loadingPromise = null;
   let lastFetchedAt = 0;
   let lastFetchedOrg = '';
   let cachedPayload = null;
+  let opds = [];
+  let editingUser = null;
+  let assignmentBusy = false;
 
   const byId = (id) => document.getElementById(id);
 
@@ -2021,6 +2085,11 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
     return !!(client && member && member.role === 'admin' && orgId);
   }
 
+  function setCatalog(items) {
+    opds = Array.isArray(items) ? items.filter((item) => item && typeof item.id === 'string' && item.id && typeof item.name === 'string' && item.name) : [];
+    window.dispatchEvent(new CustomEvent('satria:opds-loaded', { detail: { opds: opds.map((item) => ({ ...item })) } }));
+  }
+
   function updateVisibility() {
     const card = byId('satriaCloudUserListCard');
     if (!card) return false;
@@ -2032,6 +2101,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
       lastFetchedAt = 0;
       lastFetchedOrg = '';
       page = 1;
+      setCatalog([]);
       byId('satriaAdminUsersRows')?.replaceChildren();
       if (!authorized) setStatus('Daftar pengguna hanya tersedia bagi admin aktif organisasi.', '');
     }
@@ -2042,15 +2112,12 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
     if (!value) return '—';
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return '—';
-    return new Intl.DateTimeFormat('id-ID', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(date);
+    return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
   }
 
   function addCell(row, value) {
     const cell = document.createElement('td');
-    cell.textContent = value == null ? '—' : String(value);
+    cell.textContent = value == null || value === '' ? '—' : String(value);
     row.appendChild(cell);
     return cell;
   }
@@ -2063,7 +2130,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
     if (!users.length) {
       const row = document.createElement('tr');
       const cell = document.createElement('td');
-      cell.colSpan = 5;
+      cell.colSpan = 7;
       cell.textContent = 'Belum ada anggota pada halaman ini.';
       row.appendChild(cell);
       body.appendChild(row);
@@ -2075,8 +2142,34 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
       addCell(row, user.display_name || user.email || '—');
       addCell(row, user.email || '—');
       addCell(row, ({ admin: 'Admin', operator: 'Operator', viewer: 'Viewer' })[user.role] || user.role || '—');
+
+      let opdLabel = '—';
+      if (user.role === 'admin') opdLabel = 'Semua OPD (akses admin)';
+      else if (user.role === 'operator') {
+        const names = Array.isArray(user.opd_names) ? user.opd_names : [];
+        const ids = Array.isArray(user.opd_ids) ? user.opd_ids : [];
+        opdLabel = names.length ? names.join(', ') + (ids.length > names.length ? ` (+${ids.length - names.length} OPD nonaktif)` : '') : (ids.length ? 'OPD lama/nonaktif perlu diperiksa' : 'Belum ditetapkan');
+      } else if (Array.isArray(user.opd_names) && user.opd_names.length) opdLabel = user.opd_names.join(', ');
+      const opdCell = addCell(row, opdLabel);
+      opdCell.style.minWidth = '190px';
+      opdCell.style.maxWidth = '340px';
+      opdCell.style.whiteSpace = 'normal';
+
       addCell(row, user.active ? 'Aktif' : 'Nonaktif');
       addCell(row, dateLabel(user.membership_created_at));
+      const actionCell = document.createElement('td');
+      if (user.role === 'operator') {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = (Array.isArray(user.opd_ids) && user.opd_ids.length) ? 'Ubah OPD' : 'Atur OPD';
+        button.dataset.satriaEditOpd = user.id;
+        button.disabled = !user.active || !opds.length;
+        button.title = !user.active ? 'Aktifkan user terlebih dahulu.' : (!opds.length ? 'Katalog OPD belum tersedia.' : 'Atur OPD yang dapat diakses user ini.');
+        actionCell.appendChild(button);
+      } else {
+        actionCell.textContent = '—';
+      }
+      row.appendChild(actionCell);
       body.appendChild(row);
     }
   }
@@ -2097,7 +2190,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
     if (next) next.disabled = busy || page >= pageCount;
   }
 
-  async function readableError(error) {
+  async function readableError(error, fallback = 'Permintaan tidak dapat diproses. Periksa sesi dan konfigurasi Edge Function.') {
     const context = error?.context;
     if (context && typeof context.clone === 'function') {
       try {
@@ -2105,52 +2198,196 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
         if (typeof body?.error === 'string') return body.error;
       } catch (_) {}
     }
-    return 'Daftar pengguna tidak dapat dimuat. Periksa sesi dan konfigurasi Edge Function.';
+    return fallback;
   }
 
   async function loadUsers(force = false) {
-    if (!updateVisibility()) return;
+    if (!updateVisibility()) return null;
     const requestedOrg = orgId;
-    if (busy) return;
+    if (busy && loadingPromise) return loadingPromise;
 
     const isFresh = cachedPayload && lastFetchedOrg === requestedOrg && (Date.now() - lastFetchedAt) < 30_000;
     if (!force && isFresh) {
+      setCatalog(cachedPayload.opds || []);
       renderRows(cachedPayload.users || []);
       renderPagination(cachedPayload);
       setStatus('Daftar diperbarui ' + dateLabel(lastFetchedAt), 'ok');
-      return;
+      return cachedPayload;
     }
 
     busy = true;
     const refreshButton = byId('satriaAdminUsersRefresh');
     if (refreshButton) refreshButton.disabled = true;
-    setStatus('Memuat daftar pengguna…');
+    setStatus('Memuat pengguna dan katalog OPD…');
     renderPagination(cachedPayload || { total: 0, page_size: PAGE_SIZE });
 
-    try {
-      const { data, error } = await client.functions.invoke('admin-list-users', {
-        body: { organization_id: requestedOrg, page, page_size: PAGE_SIZE },
-      });
-      if (error) throw new Error(await readableError(error));
-      if (!data?.ok || !Array.isArray(data.users)) {
-        throw new Error('Respons Edge Function tidak valid.');
-      }
-      if (requestedOrg !== orgId || !isAuthorizedInUi()) return;
+    loadingPromise = (async () => {
+      try {
+        const { data, error } = await client.functions.invoke('admin-list-users', {
+          body: { organization_id: requestedOrg, page, page_size: PAGE_SIZE },
+        });
+        if (error) throw new Error(await readableError(error, 'Daftar pengguna dan OPD tidak dapat dimuat.'));
+        if (!data?.ok || !Array.isArray(data.users) || !Array.isArray(data.opds)) {
+          throw new Error('Respons Edge Function tidak valid. Pastikan deployment fungsi sudah diperbarui.');
+        }
+        if (requestedOrg !== orgId || !isAuthorizedInUi()) return null;
 
-      cachedPayload = data;
-      lastFetchedAt = Date.now();
-      lastFetchedOrg = requestedOrg;
-      renderRows(data.users);
-      renderPagination(data);
-      setStatus('Daftar pengguna organisasi berhasil dimuat.', 'ok');
+        cachedPayload = data;
+        lastFetchedAt = Date.now();
+        lastFetchedOrg = requestedOrg;
+        setCatalog(data.opds);
+        renderRows(data.users);
+        renderPagination(data);
+        setStatus(`Daftar pengguna berhasil dimuat. Katalog OPD: ${opds.length}.`, 'ok');
+        return data;
+      } catch (error) {
+        const safeMessage = error instanceof Error ? error.message : 'Daftar pengguna tidak dapat dimuat.';
+        setCatalog([]);
+        renderRows([]);
+        setStatus(safeMessage, 'error');
+        return null;
+      } finally {
+        busy = false;
+        loadingPromise = null;
+        if (refreshButton) refreshButton.disabled = false;
+        renderPagination(cachedPayload || { total: 0, page_size: PAGE_SIZE });
+      }
+    })();
+    return loadingPromise;
+  }
+
+  function ensureAssignmentModal() {
+    let modal = byId('satriaEditUserOpdModal');
+    if (modal) return modal;
+    modal = document.createElement('div');
+    modal.id = 'satriaEditUserOpdModal';
+    modal.hidden = true;
+    modal.innerHTML = `
+      <style>
+        #satriaEditUserOpdModal{position:fixed;inset:0;z-index:10025;background:rgba(15,23,42,.64);display:grid;place-items:center;padding:18px}
+        #satriaEditUserOpdModal[hidden]{display:none}
+        .satria-edit-opd-dialog{width:min(760px,100%);max-height:92vh;overflow:auto;background:#fff;border:1px solid #dbe3ea;border-radius:16px;box-shadow:0 24px 70px rgba(15,23,42,.28);padding:22px;color:#17212b;font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+        .satria-edit-opd-dialog h2{margin:0;font-size:20px}.satria-edit-opd-dialog p{color:#52616f}
+        .satria-edit-opd-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px 12px;max-height:48vh;overflow:auto;border:1px solid #cbd5df;border-radius:10px;padding:12px}
+        .satria-edit-opd-choice{display:flex;gap:8px;align-items:flex-start;cursor:pointer}.satria-edit-opd-choice input{margin-top:4px}
+        .satria-edit-opd-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}
+        .satria-edit-opd-actions button{border:1px solid #cbd5df;border-radius:9px;padding:9px 14px;font:inherit;font-weight:650;cursor:pointer;background:#fff;color:#1f2937}
+        .satria-edit-opd-actions button.primary{background:#0f766e;color:#fff;border-color:#0f766e}
+        .satria-edit-opd-actions button:disabled{opacity:.55;cursor:not-allowed}
+        #satriaEditUserOpdMessage{min-height:20px;white-space:pre-wrap;font-size:13px}#satriaEditUserOpdMessage[data-kind=error]{color:#b42318}#satriaEditUserOpdMessage[data-kind=ok]{color:#067647}
+      </style>
+      <section class="satria-edit-opd-dialog" role="dialog" aria-modal="true" aria-labelledby="satriaEditUserOpdTitle">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div><h2 id="satriaEditUserOpdTitle">Atur OPD Operator</h2><p id="satriaEditUserOpdName"></p></div><button type="button" data-satria-edit-opd-close>Tutup</button></div>
+        <p>Pilih OPD yang dapat diakses oleh Operator ini. Perubahan akan divalidasi dan disimpan oleh server.</p>
+        <div id="satriaEditUserOpdChoices" class="satria-edit-opd-choices"></div>
+        <p id="satriaEditUserOpdMessage" role="status" aria-live="polite"></p>
+        <div class="satria-edit-opd-actions"><button type="button" data-satria-edit-opd-close>Batal</button><button id="satriaEditUserOpdSave" class="primary" type="button">Simpan assignment</button></div>
+      </section>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal || (event.target instanceof Element && event.target.closest('[data-satria-edit-opd-close]'))) closeAssignmentModal();
+    });
+    byId('satriaEditUserOpdSave').addEventListener('click', () => { void saveAssignment(); });
+    return modal;
+  }
+
+  function assignmentMessage(message, kind = '') {
+    const element = byId('satriaEditUserOpdMessage');
+    if (!element) return;
+    element.textContent = message;
+    element.dataset.kind = kind;
+  }
+
+  function closeAssignmentModal() {
+    if (assignmentBusy) return;
+    const modal = byId('satriaEditUserOpdModal');
+    if (modal) modal.hidden = true;
+    editingUser = null;
+    assignmentMessage('');
+  }
+
+  function openAssignmentModal(user) {
+    if (!user || user.role !== 'operator' || !user.active) return;
+    if (!isAuthorizedInUi()) {
+      setStatus('Sesi admin aktif diperlukan untuk mengubah assignment OPD.', 'error');
+      return;
+    }
+    const modal = ensureAssignmentModal();
+    editingUser = user;
+    byId('satriaEditUserOpdName').textContent = `${user.display_name || user.email} · ${user.email || ''}`;
+    const choices = byId('satriaEditUserOpdChoices');
+    choices.replaceChildren();
+    const selected = new Set(Array.isArray(user.opd_ids) ? user.opd_ids : []);
+    if (!opds.length) {
+      const empty = document.createElement('p');
+      empty.textContent = 'Katalog OPD belum tersedia. Muat ulang daftar pengguna.';
+      choices.appendChild(empty);
+    } else {
+      for (const opd of opds) {
+        const label = document.createElement('label');
+        label.className = 'satria-edit-opd-choice';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.name = 'satria_edit_opd_ids';
+        input.value = opd.id;
+        input.checked = selected.has(opd.id);
+        const text = document.createElement('span');
+        text.textContent = opd.name + (opd.code ? ` (${opd.code})` : '');
+        label.append(input, text);
+        choices.appendChild(label);
+      }
+      if ((user.opd_ids || []).some((id) => !opds.some((opd) => opd.id === id))) {
+        const warning = document.createElement('p');
+        warning.style.gridColumn = '1 / -1';
+        warning.style.color = '#92400e';
+        warning.textContent = 'Ada assignment lama yang OPD-nya tidak lagi aktif. Menyimpan pilihan baru akan menghapus assignment lama tersebut.';
+        choices.appendChild(warning);
+      }
+    }
+    assignmentMessage('');
+    byId('satriaEditUserOpdSave').disabled = !opds.length;
+    modal.hidden = false;
+    byId('satriaEditUserOpdSave').focus();
+  }
+
+  async function saveAssignment() {
+    if (assignmentBusy) return;
+    if (!editingUser || !isAuthorizedInUi()) {
+      assignmentMessage('Sesi admin tidak aktif. Masuk kembali dan ulangi.', 'error');
+      return;
+    }
+    const opdIds = Array.from(document.querySelectorAll('#satriaEditUserOpdChoices input[name="satria_edit_opd_ids"]:checked')).map((input) => input.value);
+    if (!opdIds.length || opdIds.length > 100) {
+      assignmentMessage('Pilih minimal satu dan maksimal 100 OPD sebelum menyimpan.', 'error');
+      return;
+    }
+    const saveButton = byId('satriaEditUserOpdSave');
+    assignmentBusy = true;
+    saveButton.disabled = true;
+    saveButton.textContent = 'Menyimpan…';
+    assignmentMessage('Memvalidasi dan menyimpan assignment OPD…');
+    try {
+      const requestedOrg = orgId;
+      const { data, error } = await client.functions.invoke('admin-update-user', {
+        body: { organization_id: requestedOrg, user_id: editingUser.id, opd_ids: opdIds },
+      });
+      if (error) throw new Error(await readableError(error, 'Assignment OPD gagal disimpan.'));
+      if (!data?.ok || data.user_id !== editingUser.id) throw new Error('Respons server tidak valid. Pastikan admin-update-user sudah di-deploy.');
+      if (requestedOrg !== orgId || !isAuthorizedInUi()) throw new Error('Organisasi atau sesi berubah selama proses penyimpanan. Muat ulang daftar.');
+      assignmentMessage(`Assignment tersimpan: ${Number(data.assignment_count) || opdIds.length} OPD.`, 'ok');
+      await loadUsers(true);
+      assignmentBusy = false;
+      const auditNote = data.audit_recorded === false ? ' Audit trail gagal disimpan; periksa log Edge Function.' : '';
+      setStatus('Assignment OPD operator berhasil diperbarui.' + auditNote, data.audit_recorded === false ? 'error' : 'ok');
+      closeAssignmentModal();
     } catch (error) {
-      const safeMessage = error instanceof Error ? error.message : 'Daftar pengguna tidak dapat dimuat.';
-      renderRows([]);
-      setStatus(safeMessage, 'error');
+      assignmentMessage(error instanceof Error ? error.message : 'Assignment OPD gagal disimpan.', 'error');
     } finally {
-      busy = false;
-      if (refreshButton) refreshButton.disabled = false;
-      renderPagination(cachedPayload || { total: 0, page_size: PAGE_SIZE });
+      assignmentBusy = false;
+      if (saveButton) {
+        saveButton.disabled = false;
+        saveButton.textContent = 'Simpan assignment';
+      }
     }
   }
 
@@ -2162,44 +2399,40 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
       void loadUsers(true);
     } else if (target.closest('#satriaAdminUsersPrevious')) {
       event.preventDefault();
-      if (!busy && page > 1) {
-        page -= 1;
-        void loadUsers(true);
-      }
+      if (!busy && page > 1) { page -= 1; void loadUsers(true); }
     } else if (target.closest('#satriaAdminUsersNext')) {
       event.preventDefault();
       const total = Number(cachedPayload?.total) || 0;
       const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
-      if (!busy && page < pageCount) {
-        page += 1;
-        void loadUsers(true);
+      if (!busy && page < pageCount) { page += 1; void loadUsers(true); }
+    } else {
+      const editButton = target.closest('[data-satria-edit-opd]');
+      if (editButton) {
+        event.preventDefault();
+        const userId = editButton.getAttribute('data-satria-edit-opd');
+        const user = cachedPayload?.users?.find((item) => item.id === userId);
+        openAssignmentModal(user);
       }
     }
   });
 
-  // Triggered after admin-create-user succeeds; also useful to other UI flows.
-  window.addEventListener('satria:user-created', () => {
-    page = 1;
-    void loadUsers(true);
-  });
+  window.addEventListener('satria:user-created', () => { page = 1; void loadUsers(true); });
+  window.addEventListener('satria:user-updated', () => { void loadUsers(true); });
+  window.addEventListener('satria:load-opd-catalog', () => { void loadUsers(true); });
+  window.SATRIA_ADMIN_USERS = Object.freeze({ getOpds: () => opds.map((item) => ({ ...item })), refresh: () => loadUsers(true) });
 
-  // Existing SATRIA routing replaces the page HTML on each render. Refresh the
-  // list when the Pengguna view is rendered; cache avoids unnecessary requests.
   if (typeof window.render === 'function') {
     const originalRender = window.render;
     window.render = function (...args) {
       const result = originalRender.apply(this, args);
-      requestAnimationFrame(() => {
-        if (updateVisibility()) void loadUsers(false);
-      });
+      requestAnimationFrame(() => { if (updateVisibility()) void loadUsers(false); });
       return result;
     };
   }
-
-  // The restored session may already be on the Pengguna route at install time.
-  requestAnimationFrame(() => {
-    if (updateVisibility()) void loadUsers(false);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && byId('satriaEditUserOpdModal') && !byId('satriaEditUserOpdModal').hidden) closeAssignmentModal();
   });
+  requestAnimationFrame(() => { if (updateVisibility()) void loadUsers(false); });
 })();
 
 })();
