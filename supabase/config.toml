@@ -1,0 +1,3 @@
+# Gabungkan blok ini ke supabase/config.toml proyek.
+[functions.admin-list-users]
+verify_jwt = true
