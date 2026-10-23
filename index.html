@@ -1149,16 +1149,17 @@ function vChat(){const L=S.chat||[];
 
 /* ===== MANAJEMEN USER ===== */
 function vUser(){const U=S.users,act=U.filter(u=>u.aktif!==false),ROLES=['Admin','Operator','Viewer'];
- const kp=[['Total user',U.length],['Admin aktif',act.filter(u=>u.role==='Admin').length],['Operator aktif',act.filter(u=>u.role==='Operator').length],['Viewer aktif',act.filter(u=>u.role==='Viewer').length]];
- return `<div class=grid>${kp.map(([l,v])=>`<div class="card kpi"><span>${l}</span><b>${v}</b></div>`).join('')}</div>
- <div class=card><h3>Tambah User Baru</h3><div class=row>
+ const kp=[['Total user lokal',U.length],['Admin aktif',act.filter(u=>u.role==='Admin').length],['Operator aktif',act.filter(u=>u.role==='Operator').length],['Viewer aktif',act.filter(u=>u.role==='Viewer').length]];
+ return `<div class=grid id="satriaLocalUserStats">${kp.map(([l,v])=>`<div class="card kpi"><span>${l}</span><b>${v}</b></div>`).join('')}</div>
+ <div class=card id="satriaCloudUserCreateCard" style="display:none"><div class=row style="align-items:center;justify-content:space-between"><div><h3 style="margin:0">Pengguna Supabase Auth</h3><p class=mut>Buat akun login untuk organisasi yang sedang terhubung.</p></div><button id="satriaOpenCreateUser" type="button">Tambah user operator</button></div><p class=mut>Email dummy harus berformat valid dan unik. Akun dibuat terkonfirmasi; tidak ada email yang dikirim. Sampaikan password awal melalui saluran terpisah yang aman.</p><div class=card style="border-color:#e0a800"><b class=warn>Catatan</b><p class=mut>Form ini membuat akun Auth dan membership organisasi. Penetapan OPD dan daftar seluruh akun cloud belum tersedia; membership saat ini masih memakai snapshot satu organisasi.</p></div></div>
+ <div class=card id="satriaLocalUserCreateCard"><h3>Tambah User Lokal (browser ini)</h3><div class=row>
  <div class=fg><label>Nama lengkap</label><input data-new="nama"></div>
  <div class=fg><label>Username</label><input data-new="username"></div>
  <div class=fg><label>Role</label><select data-new="role">${ROLES.map(r=>`<option ${r==='Operator'?'selected':''}>${r}</option>`).join('')}</select></div>
  <div class=fg><label>OPD</label><select data-new="opd"><option value="all">Semua OPD</option>${S.opd.map(o=>`<option value="${o.id}">${esc(o.singkat)}</option>`).join('')}</select></div>
- <button data-act="uadd">Simpan</button></div>
- <p class=mut>Admin: akses penuh termasuk pengaturan dan manajemen user. Operator: mengelola paket, master, dan dokumen. Viewer: hanya melihat dan mencetak.</p><div class=card style="border-color:#e0a800"><b class=warn>Catatan keamanan</b><p class=mut>Pemilihan user di header hanya membatasi tampilan di browser ini, bukan kontrol akses yang sebenarnya. Siapa pun yang membuka file ini dapat berpindah ke user Admin. Untuk data pengadaan yang sesungguhnya, gunakan sistem dengan autentikasi di sisi server.</p></div></div>
- <div class=card><table><tr><th>No</th><th>Nama</th><th>Username</th><th>Role</th><th>OPD</th><th>Status</th><th>Aksi</th></tr>
+ <button data-act="uadd">Simpan user lokal</button></div>
+ <p class=mut>Mode lokal hanya mengatur tampilan browser ini; username di sini bukan akun login Supabase.</p><div class=card style="border-color:#e0a800"><b class=warn>Catatan keamanan</b><p class=mut>Pemilihan user di header hanya membatasi tampilan di browser ini, bukan kontrol akses yang sebenarnya. Siapa pun yang membuka file ini dapat berpindah ke user Admin. Untuk data pengadaan yang sesungguhnya, gunakan sistem dengan autentikasi di sisi server.</p></div></div>
+ <div class=card id="satriaLocalUserTable"><h3>Daftar user lokal browser</h3><p class=mut>Daftar ini bukan roster akun Auth Supabase.</p><table><tr><th>No</th><th>Nama</th><th>Username</th><th>Role</th><th>OPD</th><th>Status</th><th>Aksi</th></tr>
  ${U.map((u,i)=>{const off=u.aktif===false,me=u.id===S.ui.user;return `<tr><td>${i+1}</td>
  <td><input value="${esc(u.nama)}" data-col="users" data-id="${u.id}" data-f="nama"></td>
  <td><input value="${esc(u.username)}" data-col="users" data-id="${u.id}" data-f="username"></td>
@@ -1682,7 +1683,13 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
     applyUserLock();
     return member;
   }
-  function applyUserLock(){const u=$id('selUser');if(u){u.disabled=!!member;u.title=member?'Identitas ditentukan oleh Supabase Auth; pemilih lokal dinonaktifkan.':''}['scUrl','scKey','scOrg'].forEach(id=>{const e=$id(id);if(e)e.disabled=!!member})}
+  function applyUserLock(){
+    const u=$id('selUser');if(u){u.disabled=!!member;u.title=member?'Identitas ditentukan oleh Supabase Auth; pemilih lokal dinonaktifkan.':''}
+    ['scUrl','scKey','scOrg'].forEach(id=>{const e=$id(id);if(e)e.disabled=!!member});
+    const cloudCard=$id('satriaCloudUserCreateCard');if(cloudCard)cloudCard.style.display=member?'':'none';
+    ['satriaLocalUserStats','satriaLocalUserCreateCard','satriaLocalUserTable'].forEach(id=>{const e=$id(id);if(e)e.style.display=member?'none':''});
+    const addBtn=$id('satriaOpenCreateUser');if(addBtn){addBtn.disabled=!member||member.role!=='admin';addBtn.title=member&&member.role==='admin'?'':'Hanya admin Supabase yang dapat membuat akun.'}
+  }
   function showError(e){console.error('SATRIA Supabase bridge:',e);status(e?.message||String(e),'error');setButtons()}
   async function connect(){
     try{status('Menyimpan konfigurasi dan menghubungkan…');await initClient();
@@ -1750,6 +1757,221 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"","key":"","org":""};
   if(window.render){const originalRender=window.render;window.render=function(){originalRender();applyUserLock()}}
   // Restore an existing Supabase session after the static app has booted.
   if(saved.url&&saved.key&&saved.org&&window.supabase?.createClient){try{client=window.supabase.createClient(saved.url,saved.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});orgId=saved.org;client.auth.getSession().then(({data,error})=>{if(error)throw error;if(data.session)loadMembership().catch(showError)}).catch(showError)}catch(e){showError(e)}}
+
+  // Modal tambah akun Auth menggunakan session, member, orgId dari bridge ini.
+/*
+ * SATRIA 3.0 — modal tambah akun Supabase Auth.
+ * Tempel kode ini DI DALAM Supabase bridge IIFE, sebelum penutup `})();` terakhir.
+ * Kode memakai variabel closure yang sudah ada di bridge: client, member, orgId.
+ * Tombol pembuka harus memiliki id="satriaOpenCreateUser".
+ */
+(() => {
+  if (document.getElementById('satriaCreateUserModal')) return;
+
+  const root = document.createElement('div');
+  root.id = 'satriaCreateUserModal';
+  root.hidden = true;
+  root.innerHTML = `
+    <style>
+      #satriaCreateUserModal{position:fixed;inset:0;z-index:10020;background:rgba(15,23,42,.64);display:grid;place-items:center;padding:18px}
+      #satriaCreateUserModal[hidden]{display:none}
+      .satria-user-modal{width:min(560px,100%);max-height:92vh;overflow:auto;background:#fff;border:1px solid #dbe3ea;border-radius:16px;box-shadow:0 24px 70px rgba(15,23,42,.28);padding:22px;color:#17212b;font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+      .satria-user-modal h2{font-size:20px;margin:0 0 4px}.satria-user-modal p{margin:6px 0 14px;color:#52616f}
+      .satria-user-modal label{display:block;font-weight:650;margin:12px 0 5px}
+      .satria-user-modal input,.satria-user-modal select{width:100%;box-sizing:border-box;border:1px solid #cbd5df;border-radius:9px;padding:10px 11px;font:inherit;background:#fff;color:#17212b}
+      .satria-user-modal input:focus,.satria-user-modal select:focus{outline:3px solid rgba(13,148,136,.18);border-color:#0d9488}
+      .satria-user-modal .satria-user-note{padding:10px 12px;border-radius:9px;background:#fff7e6;border:1px solid #f3d38b;color:#674d12;font-size:12px}
+      .satria-user-modal .satria-user-msg{min-height:20px;margin:10px 0;font-size:13px;color:#334155;white-space:pre-wrap}
+      .satria-user-modal .satria-user-msg[data-kind="error"]{color:#b42318}.satria-user-modal .satria-user-msg[data-kind="ok"]{color:#067647}
+      .satria-user-modal .satria-user-check{display:flex;gap:9px;align-items:flex-start;font-weight:400;font-size:12px;color:#475569}
+      .satria-user-modal .satria-user-check input{width:auto;margin-top:3px}
+      .satria-user-modal .satria-user-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}
+      .satria-user-modal button{border:1px solid #cbd5df;border-radius:9px;padding:9px 14px;font:inherit;font-weight:650;cursor:pointer;background:#fff;color:#1f2937}
+      .satria-user-modal button.primary{background:#0f766e;border-color:#0f766e;color:#fff}
+      .satria-user-modal button:disabled{opacity:.6;cursor:not-allowed}
+    </style>
+    <section class="satria-user-modal" role="dialog" aria-modal="true" aria-labelledby="satriaUserModalTitle">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+        <div><h2 id="satriaUserModalTitle">Tambah akun operator</h2><p>Buat akun Auth dan membership SATRIA.</p></div>
+        <button type="button" data-satria-user-close aria-label="Tutup modal">Tutup</button>
+      </div>
+      <div class="satria-user-note">
+        Email dummy harus berformat valid dan unik, tetapi tidak perlu menerima email. Tidak ada email konfirmasi yang dikirim. Password awal wajib disampaikan kepada operator melalui saluran terpisah yang aman; pemulihan lewat email tidak tersedia untuk alamat dummy.
+      </div>
+      <form id="satriaCreateUserForm" autocomplete="off">
+        <label for="satriaNewUserName">Nama operator</label>
+        <input id="satriaNewUserName" name="display_name" type="text" minlength="2" maxlength="100" required autocomplete="off">
+
+        <label for="satriaNewUserEmail">Email / username login</label>
+        <input id="satriaNewUserEmail" name="email" type="email" maxlength="254" required autocomplete="off" placeholder="operator01@example.com">
+
+        <label for="satriaNewUserRole">Role</label>
+        <select id="satriaNewUserRole" name="role" required>
+          <option value="operator" selected>Operator</option>
+          <option value="admin" disabled>Admin (dinonaktifkan oleh kebijakan server)</option>
+        </select>
+
+        <label for="satriaNewUserPassword">Password awal (minimal 12 karakter)</label>
+        <input id="satriaNewUserPassword" name="initial_password" type="password" minlength="12" maxlength="128" required autocomplete="new-password">
+
+        <label for="satriaNewUserPasswordConfirm">Ulangi password awal</label>
+        <input id="satriaNewUserPasswordConfirm" name="password_confirm" type="password" minlength="12" maxlength="128" required autocomplete="new-password">
+
+        <label class="satria-user-check"><input id="satriaPasswordShareConfirm" type="checkbox" required><span>Saya akan menyampaikan password awal secara terpisah dan aman, lalu meminta operator menggantinya setelah login.</span></label>
+        <div id="satriaCreateUserMessage" class="satria-user-msg" role="status" aria-live="polite"></div>
+        <div class="satria-user-actions">
+          <button type="button" data-satria-user-close>Batal</button>
+          <button id="satriaCreateUserSubmit" class="primary" type="submit">Buat akun</button>
+        </div>
+      </form>
+    </section>`;
+  document.body.appendChild(root);
+
+  const form = root.querySelector('#satriaCreateUserForm');
+  const message = root.querySelector('#satriaCreateUserMessage');
+  const submit = root.querySelector('#satriaCreateUserSubmit');
+  const password = root.querySelector('#satriaNewUserPassword');
+  const passwordConfirm = root.querySelector('#satriaNewUserPasswordConfirm');
+  const nameInput = root.querySelector('#satriaNewUserName');
+  const emailInput = root.querySelector('#satriaNewUserEmail');
+  const roleInput = root.querySelector('#satriaNewUserRole');
+  let busy = false;
+
+  function setMessage(text, kind = '') {
+    message.textContent = text;
+    message.dataset.kind = kind;
+  }
+
+  function clearPasswords() {
+    password.value = '';
+    passwordConfirm.value = '';
+  }
+
+  function closeModal() {
+    if (busy) return;
+    root.hidden = true;
+    form.reset();
+    clearPasswords();
+    setMessage('');
+  }
+
+  function openModal() {
+    if (!client || !member) {
+      toast('Masuk ke Supabase terlebih dahulu.');
+      return;
+    }
+    if (member.role !== 'admin') {
+      toast('Hanya admin organisasi yang dapat membuat akun.');
+      return;
+    }
+    form.reset();
+    clearPasswords();
+    roleInput.value = 'operator';
+    setMessage('');
+    root.hidden = false;
+    nameInput.focus();
+  }
+
+  async function readableFunctionError(error) {
+    const context = error?.context;
+    if (context && typeof context.clone === 'function') {
+      try {
+        const body = await context.clone().json();
+        if (typeof body?.error === 'string') return body.error;
+      } catch (_) {}
+    }
+    return 'Gagal membuat akun. Periksa koneksi dan konfigurasi Edge Function.';
+  }
+
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (target.closest('#satriaOpenCreateUser')) {
+      event.preventDefault();
+      openModal();
+      return;
+    }
+    if (target.closest('[data-satria-user-close]')) {
+      event.preventDefault();
+      closeModal();
+      return;
+    }
+    if (target === root && !busy) closeModal();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !root.hidden && !busy) closeModal();
+  });
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (busy) return;
+    if (!client || !member || member.role !== 'admin' || !orgId) {
+      setMessage('Sesi admin Supabase tidak aktif. Masuk kembali sebagai admin.', 'error');
+      return;
+    }
+
+    const email = emailInput.value.trim().toLowerCase();
+    const displayName = nameInput.value.trim();
+    const role = roleInput.value;
+    const initialPassword = password.value;
+    const confirmPassword = passwordConfirm.value;
+
+    if (initialPassword.length < 12 || initialPassword.length > 128) {
+      setMessage('Password awal harus 12–128 karakter.', 'error');
+      return;
+    }
+    if (initialPassword !== confirmPassword) {
+      setMessage('Password dan pengulangannya tidak sama.', 'error');
+      passwordConfirm.focus();
+      return;
+    }
+    if (!document.querySelector('#satriaPasswordShareConfirm').checked) {
+      setMessage('Konfirmasi penyampaian password awal secara aman terlebih dahulu.', 'error');
+      return;
+    }
+
+    busy = true;
+    submit.disabled = true;
+    submit.textContent = 'Membuat akun…';
+    setMessage('Memverifikasi sesi admin dan membuat akun…');
+
+    try {
+      const { data: authData, error: authError } = await client.auth.getUser();
+      if (authError || !authData?.user || authData.user.id !== member.id) {
+        throw new Error('Sesi login tidak valid. Masuk kembali sebagai admin.');
+      }
+
+      const { data, error } = await client.functions.invoke('admin-create-user', {
+        body: {
+          organization_id: orgId,
+          email,
+          role,
+          initial_password: initialPassword,
+          display_name: displayName,
+        },
+      });
+      if (error) throw new Error(await readableFunctionError(error));
+      if (!data?.ok || !data?.user?.id) throw new Error('Function tidak mengembalikan hasil pembuatan akun yang valid.');
+
+      form.reset();
+      clearPasswords();
+      roleInput.value = 'operator';
+      const auditWarning = data.audit_recorded === false ? ' Catatan audit gagal disimpan; periksa log Edge Function.' : '';
+      setMessage(`Akun berhasil dibuat. UID: ${data.user.id}. Email ditandai terkonfirmasi dan tidak ada email yang dikirim. Sampaikan password awal secara aman kepada operator.${auditWarning}`, auditWarning ? 'error' : 'ok');
+    } catch (error) {
+      const safeMessage = error instanceof Error ? error.message : 'Gagal membuat akun.';
+      setMessage(safeMessage, 'error');
+    } finally {
+      clearPasswords();
+      busy = false;
+      submit.disabled = false;
+      submit.textContent = 'Buat akun';
+    }
+  });
+})();
+
+
 })();
 </script>
 
