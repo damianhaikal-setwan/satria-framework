@@ -1,0 +1,4 @@
+# Merge this section into the project's existing supabase/config.toml.
+# Keep JWT verification enabled for this user-facing admin function.
+[functions.admin-create-user]
+verify_jwt = true
