@@ -1,0 +1,32 @@
+{
+  "name": "SATRIA - Sistem Administrasi Pengadaan",
+  "short_name": "SATRIA",
+  "description": "SATRIA Framework 3.0 - Integrated Government Intelligence Platform - E-Purchasing - Kapuas Hulu",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7faf9",
+  "theme_color": "#0F766E",
+  "orientation": "any",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "business",
+    "productivity",
+    "government"
+  ],
+  "lang": "id-ID",
+  "dir": "ltr"
+}
