@@ -1151,7 +1151,7 @@ function vChat(){const L=S.chat||[];
 function vUser(){const U=S.users,act=U.filter(u=>u.aktif!==false),ROLES=['Admin','Operator','Viewer'];
  const kp=[['Total user lokal',U.length],['Admin aktif',act.filter(u=>u.role==='Admin').length],['Operator aktif',act.filter(u=>u.role==='Operator').length],['Viewer aktif',act.filter(u=>u.role==='Viewer').length]];
  return `<div class=grid id="satriaLocalUserStats">${kp.map(([l,v])=>`<div class="card kpi"><span>${l}</span><b>${v}</b></div>`).join('')}</div>
- <div class=card id="satriaCloudUserCreateCard" style="display:none"><div class=row style="align-items:center;justify-content:space-between"><div><h3 style="margin:0">Pengguna Supabase Auth</h3><p class=mut>Buat akun login untuk organisasi yang sedang terhubung.</p></div><button id="satriaOpenCreateUser" type="button">Tambah user operator</button></div><p class=mut>Email harus berformat valid dan unik. Akun dibuat terkonfirmasi; tidak ada email yang dikirim. Sampaikan password awal melalui saluran terpisah yang aman.</p><p class=mut>Setiap Operator wajib diberi minimal satu OPD. Assignment disimpan di Supabase dan dapat diubah kembali dari daftar pengguna di bawah.</p>
+ <div class=card id="satriaCloudUserCreateCard" style="display:none"><div class=row style="align-items:center;justify-content:space-between"><div><h3 style="margin:0">Pengguna Supabase Auth</h3><p class=mut>Buat akun login untuk organisasi yang sedang terhubung.</p></div><button id="satriaOpenCreateUser" type="button">Tambah user operator</button></div><p class=mut>Email harus berformat valid dan unik. Lengkapi password awal di formulir pendaftaran. Akun dibuat terkonfirmasi dan tidak ada email yang dikirim; sampaikan password awal melalui saluran terpisah yang aman.</p><p class=mut>Setiap Operator wajib diberi minimal satu OPD. Daftar akun dan pengaturan OPD tersedia pada panel terpisah di bawah.</p></div>
  <section class="card" id="satriaCloudUserListCard" style="display:none" aria-labelledby="satriaCloudUserListTitle">
   <div class="row" style="align-items:center;justify-content:space-between;gap:12px">
    <div><h3 id="satriaCloudUserListTitle" style="margin:0">Daftar pengguna organisasi</h3><p class="mut" style="margin:4px 0 0">Daftar ini hanya tersedia bagi admin aktif organisasi.</p></div>
@@ -1168,7 +1168,7 @@ function vUser(){const U=S.users,act=U.filter(u=>u.aktif!==false),ROLES=['Admin'
    <span id="satriaAdminUsersPageSummary" class="mut" aria-live="polite">—</span>
    <div class="row"><button id="satriaAdminUsersPrevious" type="button" disabled>Sebelumnya</button><button id="satriaAdminUsersNext" type="button" disabled>Berikutnya</button></div>
   </div>
- </section></div>
+ </section>
  <div class=card id="satriaLocalUserCreateCard"><h3>Tambah User Lokal (browser ini)</h3><div class=row>
  <div class=fg><label>Nama lengkap</label><input data-new="nama"></div>
  <div class=fg><label>Username</label><input data-new="username"></div>
@@ -1612,6 +1612,10 @@ function drawKhCharts(){
 #satriaCloudModal .sc-status{min-height:24px;padding:8px 10px;border-radius:8px;background:var(--bg-2);font-size:12px;overflow-wrap:anywhere}
 #satriaCloudModal .sc-status[data-kind="error"]{color:#991b1b;background:#fee2e2}
 #satriaCloudModal .sc-status[data-kind="ok"]{color:#065f46;background:#d1fae5}
+#satriaCloudModal .sc-recovery[hidden]{display:none!important}
+#satriaCloudModal .sc-recovery{border:1px solid var(--bd);border-radius:10px;padding:12px;margin:10px 0;background:var(--card-2)}
+#satriaCloudModal .sc-recovery-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+#satriaCloudModal .sc-recovery input{box-sizing:border-box}
 #satriaCloudModal pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:170px;overflow:auto;background:#0f172a;color:#e2e8f0;padding:12px;border-radius:8px}
 @media(max-width:680px){#satriaCloudModal .sc-grid{grid-template-columns:1fr}#satriaCloudModal .sc-dialog{padding:16px}.satria-cloud-btn{padding:0 9px;font-size:11px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -1638,13 +1642,22 @@ function drawKhCharts(){
       <button type="button" id="scEmbedConfig">Unduh HTML dengan konfigurasi</button>
       <button type="button" id="scSaveConfig">Simpan konfigurasi</button>
       <button type="button" class="primary" id="scConnect">Masuk ke SATRIA</button>
+      <button type="button" id="scResetPassword">Lupa kata sandi?</button>
       <button type="button" id="scPull" disabled>Tarik dari Supabase</button>
       <button type="button" id="scPush" disabled>Kirim snapshot lokal</button>
       <button type="button" class="danger" id="scSignOut" disabled>Keluar</button>
     </div>
+    <div id="scRecoveryPanel" class="sc-recovery" hidden>
+      <b>Atur kata sandi baru</b>
+      <p class="mut" style="margin:6px 0 8px">Panel ini muncul setelah tautan pemulihan Supabase dibuka. Pilih kata sandi baru yang kuat dan jangan gunakan ulang kata sandi lama.</p>
+      <label>Kata sandi baru<input id="scNewPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Minimal 8 karakter"></label>
+      <label>Ulangi kata sandi baru<input id="scConfirmNewPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Ulangi kata sandi baru"></label>
+      <div class="sc-recovery-actions"><button type="button" class="primary" id="scSaveNewPassword">Simpan kata sandi baru</button><button type="button" id="scCancelRecovery">Batal</button></div>
+    </div>
     <p id="scStatus" class="sc-status" role="status" aria-live="polite">Belum terhubung.</p>
+    <div class="sc-note sc-warning"><b>Jika muncul “Invalid login credentials”:</b> pastikan akun email ada di Supabase Dashboard → Authentication → Users pada project yang tertanam di file ini, lalu cek kata sandinya. Organization UUID tidak menentukan validitas email/kata sandi. Jika akun belum ada, buat akun Auth terlebih dahulu; setelah login berhasil, akun juga harus memiliki membership aktif pada organisasi ini.</div>
     <div class="sc-note"><b>Prosedur:</b> siapkan project staging → jalankan file SQL pendamping <code>satria-supabase-staging-bootstrap.sql</code> setelah ditinjau → buat akun Auth → bootstrap organisasi dan membership admin melalui SQL Editor → masukkan URL, publishable/anon key, dan UUID organisasi → login → tarik atau kirim snapshot. Ekspor backup lokal terlebih dahulu. Konflik versi harus diselesaikan dengan menarik versi terbaru; sistem tidak menggabungkan perubahan otomatis.</div>
-    <h3>Persiapan database</h3><p class="mut">SQL bootstrap disediakan sebagai file terpisah dari HTML. Konfigurasi juga dapat disimpan di browser melalui tombol Simpan konfigurasi. Saat file yang sama dibuka kembali pada browser/profil yang sama, URL, publishable/anon key, dan Organization UUID akan diisi otomatis. Kata sandi tidak disimpan. Gunakan Unduh HTML dengan konfigurasi bila ingin membawa konfigurasi bersama file ke browser/perangkat lain; file tersebut memuat publishable/anon key sehingga bagikan dengan bijak.</p>
+    <h3>Persiapan database</h3><p class="mut">Untuk pemulihan kata sandi, alamat halaman SATRIA harus diizinkan di Supabase Dashboard → Authentication → URL Configuration → Redirect URLs. SQL bootstrap disediakan sebagai file terpisah dari HTML. Konfigurasi juga dapat disimpan di browser melalui tombol Simpan konfigurasi. Saat file yang sama dibuka kembali pada browser/profil yang sama, URL, publishable/anon key, dan Organization UUID akan diisi otomatis. Kata sandi tidak disimpan. Gunakan Unduh HTML dengan konfigurasi bila ingin membawa konfigurasi bersama file ke browser/perangkat lain; file tersebut memuat publishable/anon key sehingga bagikan dengan bijak.</p>
   </section>
 </div>
 
@@ -1656,7 +1669,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
 (function(){
   'use strict';
   const CONFIG_KEY='satria-supabase-bridge-config-v1';
-  let client=null, member=null, orgId='', version=0, localUsersBackup=null;
+  let client=null, member=null, orgId='', version=0, localUsersBackup=null, recoveryListenerClient=null;
   const $id=id=>document.getElementById(id);
   const modal=$id('satriaCloudModal');
   const status=(msg,kind='')=>{const e=$id('scStatus');e.textContent=msg;e.dataset.kind=kind};
@@ -1714,9 +1727,54 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     ['satriaLocalUserStats','satriaLocalUserCreateCard','satriaLocalUserTable'].forEach(id=>{const e=$id(id);if(e)e.style.display=member?'none':''});
     const addBtn=$id('satriaOpenCreateUser');if(addBtn){addBtn.disabled=!member||member.role!=='admin';addBtn.title=member&&member.role==='admin'?'':'Hanya admin Supabase yang dapat membuat akun.'}
   }
-  function showError(e){console.error('SATRIA Supabase bridge:',e);status(e?.message||String(e),'error');setButtons()}
+  function friendlyError(e){
+    const raw=String(e?.message||e||'Terjadi kesalahan.');
+    if(/invalid login credentials/i.test(raw)) return 'Email atau kata sandi ditolak oleh Supabase. Ini bukan masalah Organization UUID. Pastikan email akun benar dan akun tersebut sudah ada di Authentication → Users pada project Supabase yang tertanam. Jika akun sudah ada tetapi kata sandi lupa, gunakan “Lupa kata sandi?”. Jika akun belum ada, buat akun Auth dahulu di Dashboard Supabase, lalu buat membership admin untuk Organization UUID ini.';
+    if(/email not confirmed/i.test(raw)) return 'Email akun belum dikonfirmasi. Periksa Authentication → Users atau konfigurasikan konfirmasi email di Supabase sebelum login.';
+    if(/password should be at least|weak password/i.test(raw)) return 'Kata sandi baru belum memenuhi kebijakan keamanan Supabase. Gunakan kata sandi yang lebih kuat.';
+    if(/redirect.*not allowed|not allowed.*redirect/i.test(raw)) return 'Alamat aplikasi belum diizinkan untuk pemulihan kata sandi. Tambahkan URL halaman SATRIA ke Supabase → Authentication → URL Configuration → Redirect URLs, lalu ulangi.';
+    return raw;
+  }
+  function showError(e){console.error('SATRIA Supabase bridge:',e);status(friendlyError(e),'error');setButtons()}
+  function bindRecoveryListener(c){
+    if(!c||recoveryListenerClient===c)return;
+    recoveryListenerClient=c;
+    c.auth.onAuthStateChange((event)=>{
+      if(event==='PASSWORD_RECOVERY'){
+        $id('scRecoveryPanel').hidden=false;
+        modal.hidden=false;modal.setAttribute('aria-hidden','false');
+        status('Tautan pemulihan diterima. Masukkan kata sandi baru di bawah.','ok');
+        try{$id('scNewPassword').focus()}catch(_){}
+      }
+    });
+  }
+  async function requestPasswordReset(){
+    try{
+      const email=$id('scEmail').value.trim();
+      if(!email||!/^\S+@\S+\.\S+$/.test(email)) throw new Error('Masukkan email akun Supabase yang valid terlebih dahulu.');
+      status('Meminta tautan pemulihan…');
+      await initClient();bindRecoveryListener(client);
+      const redirectTo=window.location.origin==='null'?'':(window.location.origin+window.location.pathname+window.location.search);
+      const options=redirectTo?{redirectTo}:undefined;
+      const {error}=await client.auth.resetPasswordForEmail(email,options);if(error)throw error;
+      status('Permintaan pemulihan diproses. Jika email terdaftar pada project ini dan email delivery Supabase aktif, tautan akan dikirim. Periksa Inbox/Spam. Jika akun belum dibuat, buat akun lewat Authentication → Users terlebih dahulu.','ok');
+    }catch(e){showError(e)}
+  }
+  async function saveRecoveredPassword(){
+    const password=$id('scNewPassword').value,confirmPassword=$id('scConfirmNewPassword').value;
+    try{
+      if(!password||password.length<8)throw new Error('Kata sandi baru minimal 8 karakter.');
+      if(password!==confirmPassword)throw new Error('Konfirmasi kata sandi tidak sama.');
+      if(!client)await initClient();
+      status('Menyimpan kata sandi baru…');
+      const {error}=await client.auth.updateUser({password});if(error)throw error;
+      $id('scNewPassword').value='';$id('scConfirmNewPassword').value='';$id('scRecoveryPanel').hidden=true;
+      status('Kata sandi berhasil diperbarui. Memeriksa akses organisasi…','ok');
+      try{await loadMembership()}catch(e){status('Kata sandi berhasil diperbarui, tetapi akses organisasi belum aktif: '+friendlyError(e),'error')}
+    }catch(e){showError(e)}
+  }
   async function connect(){
-    try{status('Menyimpan konfigurasi dan menghubungkan…');await initClient();
+    try{status('Memeriksa konfigurasi dan menghubungkan…');await initClient();bindRecoveryListener(client);
       const email=$id('scEmail').value.trim(),password=$id('scPassword').value;
       if(email&&password){const {error}=await client.auth.signInWithPassword({email,password});if(error)throw error;$id('scPassword').value='';await loadMembership()}
       else {const {data,error}=await client.auth.getSession();if(error)throw error;if(data.session)await loadMembership();else status('Konfigurasi tersimpan. Masukkan email dan kata sandi akun Auth untuk masuk.')}
@@ -1776,11 +1834,11 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
   const headerRight=document.querySelector('header .header-right');if(headerRight)headerRight.insertBefore(openBtn,headerRight.firstChild);
   openBtn.addEventListener('click',open);$id('scClose').addEventListener('click',close);
   modal.addEventListener('click',e=>{if(e.target===modal)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
-  $id('scEmbedConfig').addEventListener('click',downloadConfiguredHtml);$id('scSaveConfig').addEventListener('click',()=>{try{saveConfig();}catch(e){showError(e)}});$id('scConnect').addEventListener('click',connect);$id('scPull').addEventListener('click',pull);$id('scPush').addEventListener('click',push);$id('scSignOut').addEventListener('click',signOut);
+  $id('scEmbedConfig').addEventListener('click',downloadConfiguredHtml);$id('scSaveConfig').addEventListener('click',()=>{try{saveConfig();}catch(e){showError(e)}});$id('scConnect').addEventListener('click',connect);$id('scResetPassword').addEventListener('click',requestPasswordReset);$id('scSaveNewPassword').addEventListener('click',saveRecoveredPassword);$id('scCancelRecovery').addEventListener('click',()=>{$id('scRecoveryPanel').hidden=true;$id('scNewPassword').value='';$id('scConfirmNewPassword').value='';});$id('scPull').addEventListener('click',pull);$id('scPush').addEventListener('click',push);$id('scSignOut').addEventListener('click',signOut);
   const saved=config();if(saved.url)$id('scUrl').value=saved.url;if(saved.key)$id('scKey').value=saved.key;if(saved.org)$id('scOrg').value=saved.org;
   if(window.render){const originalRender=window.render;window.render=function(){originalRender();applyUserLock()}}
   // Restore an existing Supabase session after the static app has booted.
-  if(saved.url&&saved.key&&saved.org&&window.supabase?.createClient){try{client=window.supabase.createClient(saved.url,saved.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});orgId=saved.org;client.auth.getSession().then(({data,error})=>{if(error)throw error;if(data.session)loadMembership().catch(showError)}).catch(showError)}catch(e){showError(e)}}
+  if(saved.url&&saved.key&&saved.org&&window.supabase?.createClient){try{client=window.supabase.createClient(saved.url,saved.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});bindRecoveryListener(client);orgId=saved.org;client.auth.getSession().then(({data,error})=>{if(error)throw error;if(data.session)loadMembership().catch(showError)}).catch(showError)}catch(e){showError(e)}}
 
   // Modal tambah akun Auth menggunakan session, member, orgId dari bridge ini.
 /*
@@ -1809,6 +1867,13 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
       .satria-user-modal .satria-user-msg[data-kind="error"]{color:#b42318}.satria-user-modal .satria-user-msg[data-kind="ok"]{color:#067647}
       .satria-user-modal .satria-user-check{display:flex;gap:9px;align-items:flex-start;font-weight:400;font-size:12px;color:#475569}
       .satria-user-modal .satria-user-check input{width:auto;margin-top:3px}
+      .satria-user-modal .satria-password-fieldset{border:1px solid #cbd5df;border-radius:10px;padding:12px;margin:14px 0 8px;min-width:0}
+      .satria-user-modal .satria-password-fieldset legend{font-weight:750;padding:0 5px;color:#0f766e}
+      .satria-user-modal .satria-password-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+      .satria-user-modal .satria-password-row input{min-width:0}
+      .satria-user-modal button.satria-password-toggle{align-self:end;white-space:nowrap;padding:10px 12px;min-height:42px;border-color:#8fb8b4;color:#0f766e;background:#f0fdfa}
+      .satria-user-modal .satria-password-fieldset .satria-opd-help{margin:8px 0 0}
+      @media(max-width:520px){.satria-user-modal{padding:14px;max-height:94dvh;width:calc(100% - 28px)}.satria-user-modal .satria-password-row{grid-template-columns:minmax(0,1fr) auto;gap:6px}.satria-user-modal button.satria-password-toggle{padding:9px 10px;font-size:12px}}
       .satria-user-modal .satria-opd-fieldset{border:1px solid #cbd5df;border-radius:10px;padding:12px;margin:14px 0 8px}
       .satria-user-modal .satria-opd-fieldset legend{font-weight:700;padding:0 5px}
       .satria-user-modal .satria-opd-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:7px 12px;max-height:220px;overflow:auto;padding:4px}
@@ -1835,6 +1900,21 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
         <label for="satriaNewUserEmail">Email / username login</label>
         <input id="satriaNewUserEmail" name="email" type="email" maxlength="254" required autocomplete="off" placeholder="operator01@example.com">
 
+        <fieldset class="satria-password-fieldset">
+          <legend>Password login (wajib diisi)</legend>
+          <label for="satriaNewUserPassword">Password awal (minimal 12 karakter)</label>
+          <div class="satria-password-row">
+            <input id="satriaNewUserPassword" name="initial_password" type="password" minlength="12" maxlength="128" required autocomplete="new-password" aria-describedby="satriaPasswordHelp">
+            <button type="button" class="satria-password-toggle" data-satria-password-toggle="satriaNewUserPassword" aria-pressed="false">Tampilkan</button>
+          </div>
+          <label for="satriaNewUserPasswordConfirm">Ulangi password awal</label>
+          <div class="satria-password-row">
+            <input id="satriaNewUserPasswordConfirm" name="password_confirm" type="password" minlength="12" maxlength="128" required autocomplete="new-password">
+            <button type="button" class="satria-password-toggle" data-satria-password-toggle="satriaNewUserPasswordConfirm" aria-pressed="false">Tampilkan</button>
+          </div>
+          <p id="satriaPasswordHelp" class="satria-opd-help">Password tidak disimpan di browser. Sampaikan kepada operator melalui saluran terpisah yang aman.</p>
+        </fieldset>
+
         <label for="satriaNewUserRole">Role</label>
         <select id="satriaNewUserRole" name="role" required>
           <option value="operator" selected>Operator</option>
@@ -1846,12 +1926,6 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
           <div class="satria-opd-choices" id="satriaCreateUserOpdChoices"><p class="satria-opd-empty">Memuat katalog OPD organisasi…</p></div>
           <p class="satria-opd-help">Pilih 1–100 OPD. Daftar berasal dari katalog organisasi di Supabase, bukan dari input bebas di browser.</p>
         </fieldset>
-
-        <label for="satriaNewUserPassword">Password awal (minimal 12 karakter)</label>
-        <input id="satriaNewUserPassword" name="initial_password" type="password" minlength="12" maxlength="128" required autocomplete="new-password">
-
-        <label for="satriaNewUserPasswordConfirm">Ulangi password awal</label>
-        <input id="satriaNewUserPasswordConfirm" name="password_confirm" type="password" minlength="12" maxlength="128" required autocomplete="new-password">
 
         <label class="satria-user-check"><input id="satriaPasswordShareConfirm" type="checkbox" required><span>Saya akan menyampaikan password awal secara terpisah dan aman, lalu meminta operator menggantinya setelah login.</span></label>
         <div id="satriaCreateUserMessage" class="satria-user-msg" role="status" aria-live="polite"></div>
@@ -1874,6 +1948,17 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
   const opdChoices = root.querySelector('#satriaCreateUserOpdChoices');
   let availableOpds = [];
   let busy = false;
+
+  root.querySelectorAll('[data-satria-password-toggle]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const input = root.querySelector('#' + button.dataset.satriaPasswordToggle);
+      if (!input) return;
+      const revealing = input.type === 'password';
+      input.type = revealing ? 'text' : 'password';
+      button.textContent = revealing ? 'Sembunyikan' : 'Tampilkan';
+      button.setAttribute('aria-pressed', String(revealing));
+    });
+  });
 
   function setMessage(text, kind = '') {
     message.textContent = text;
@@ -2170,8 +2255,8 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
         button.type = 'button';
         button.textContent = (Array.isArray(user.opd_ids) && user.opd_ids.length) ? 'Ubah OPD' : 'Atur OPD';
         button.dataset.satriaEditOpd = user.id;
-        button.disabled = !user.active || !opds.length;
-        button.title = !user.active ? 'Aktifkan user terlebih dahulu.' : (!opds.length ? 'Katalog OPD belum tersedia.' : 'Atur OPD yang dapat diakses user ini.');
+        button.disabled = !user.active;
+        button.title = !user.active ? 'Akun Operator nonaktif; aktifkan membership lebih dahulu.' : (!opds.length ? 'Katalog OPD belum tersedia; buka untuk melihat petunjuk.' : 'Atur OPD yang dapat diakses user ini.');
         actionCell.appendChild(button);
       } else {
         actionCell.textContent = '—';
@@ -2245,7 +2330,11 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
         setCatalog(data.opds);
         renderRows(data.users);
         renderPagination(data);
-        setStatus(`Daftar pengguna berhasil dimuat. Katalog OPD: ${opds.length}.`, 'ok');
+        if (!opds.length) {
+          setStatus('Daftar pengguna sudah dimuat, tetapi katalog OPD aktif masih kosong. Klik Atur OPD pada baris Operator untuk petunjuk; pastikan master OPD sudah diisi, snapshot OPD organisasi sudah dikirim ke Supabase, dan migrasi OPD sudah diterapkan.', 'error');
+        } else {
+          setStatus(`Daftar pengguna berhasil dimuat. Katalog OPD aktif: ${opds.length}.`, 'ok');
+        }
         return data;
       } catch (error) {
         const safeMessage = error instanceof Error ? error.message : 'Daftar pengguna tidak dapat dimuat.';
@@ -2327,7 +2416,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     const selected = new Set(Array.isArray(user.opd_ids) ? user.opd_ids : []);
     if (!opds.length) {
       const empty = document.createElement('p');
-      empty.textContent = 'Katalog OPD belum tersedia. Muat ulang daftar pengguna.';
+      empty.textContent = 'Pilihan OPD belum muncul karena katalog OPD aktif kosong. Buka Data Master untuk melengkapi OPD, kirim snapshot lokal ke Supabase sebagai admin, lalu klik Muat ulang. Pastikan migrasi satria_opds dan satria_membership_opds sudah diterapkan.';
       choices.appendChild(empty);
     } else {
       for (const opd of opds) {
