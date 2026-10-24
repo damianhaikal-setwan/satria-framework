@@ -7,13 +7,15 @@ type CreateUserBody = {
   role: NewRole;
   initial_password: string;
   display_name?: string;
+  opd_ids?: unknown;
 };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MAX_BODY_BYTES = 8_192;
+const MAX_BODY_BYTES = 32_768;
 const MIN_PASSWORD_LENGTH = 12;
 const MAX_PASSWORD_LENGTH = 128;
+const MAX_OPD_ASSIGNMENTS = 100;
 
 function defaultKey(mapEnv: string, singularEnv: string, legacyEnv: string): string {
   const mapped = Deno.env.get(mapEnv);
@@ -73,6 +75,20 @@ function normalizeDisplayName(value: unknown): string | undefined {
   return cleaned;
 }
 
+function normalizeOpdIds(value: unknown): string[] {
+  if (!Array.isArray(value) || value.length < 1 || value.length > MAX_OPD_ASSIGNMENTS) {
+    throw new Error("Pilih minimal satu OPD dan maksimal 100 OPD.");
+  }
+  const ids = value.map((item) => {
+    if (typeof item !== "string") throw new Error("Identitas OPD tidak valid.");
+    const id = item.trim();
+    if (!id || id.length > 128) throw new Error("Identitas OPD tidak valid.");
+    return id;
+  });
+  if (new Set(ids).size !== ids.length) throw new Error("Terdapat pilihan OPD yang duplikat.");
+  return ids;
+}
+
 Deno.serve(async (request: Request): Promise<Response> => {
   const requestId = crypto.randomUUID();
   let config: ReturnType<typeof getConfig>;
@@ -122,7 +138,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
     const parsed: unknown = JSON.parse(rawBody);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("body must be an object");
     const candidate = parsed as Record<string, unknown>;
-    const allowedFields = new Set(["organization_id", "email", "role", "initial_password", "display_name"]);
+    const allowedFields = new Set(["organization_id", "email", "role", "initial_password", "display_name", "opd_ids"]);
     if (Object.keys(candidate).some((key) => !allowedFields.has(key))) throw new Error("unexpected field");
     body = candidate as CreateUserBody;
   } catch {
@@ -154,6 +170,17 @@ Deno.serve(async (request: Request): Promise<Response> => {
   }
   if (role === "admin" && Deno.env.get("ALLOW_ADMIN_CREATION") !== "true") {
     return response(request, 403, { error: "Pembuatan admin baru belum diaktifkan.", request_id: requestId }, config.allowedOrigins);
+  }
+
+  let opdIds: string[] = [];
+  if (role === "operator") {
+    try {
+      opdIds = normalizeOpdIds(body.opd_ids);
+    } catch (error) {
+      return response(request, 400, { error: error instanceof Error ? error.message : "Penetapan OPD tidak valid.", request_id: requestId }, config.allowedOrigins);
+    }
+  } else if (body.opd_ids !== undefined && (!Array.isArray(body.opd_ids) || body.opd_ids.length > 0)) {
+    return response(request, 400, { error: "Admin memiliki akses organisasi; assignment OPD tidak perlu dikirim.", request_id: requestId }, config.allowedOrigins);
   }
 
   const authorization = request.headers.get("Authorization") ?? "";
@@ -216,7 +243,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
 
   const { error: insertMembershipError } = await adminClient
     .from("satria_memberships")
-    .insert({ organization_id: organizationId, user_id: createdUser.id, role, active: true });
+    .insert({ organization_id: organizationId, user_id: createdUser.id, role, active: true, login_email: email, display_name: displayName });
 
   if (insertMembershipError) {
     const { error: rollbackError } = await adminClient.auth.admin.deleteUser(createdUser.id);
@@ -237,12 +264,44 @@ Deno.serve(async (request: Request): Promise<Response> => {
     }, config.allowedOrigins);
   }
 
+  if (role === "operator") {
+    const { error: assignmentError } = await adminClient.rpc("satria_admin_set_membership_opds", {
+      p_organization_id: organizationId,
+      p_actor_user_id: actor.id,
+      p_target_user_id: createdUser.id,
+      p_opd_ids: opdIds,
+    });
+    if (assignmentError) {
+      const { error: membershipRollbackError } = await adminClient
+        .from("satria_memberships")
+        .delete()
+        .eq("organization_id", organizationId)
+        .eq("user_id", createdUser.id);
+      const { error: authRollbackError } = await adminClient.auth.admin.deleteUser(createdUser.id);
+      console.error(JSON.stringify({
+        event: "opd_assignment_failed",
+        requestId,
+        actorId: actor.id,
+        organizationId,
+        targetUserId: createdUser.id,
+        assignmentCode: assignmentError.code ?? "unknown",
+        rollbackSucceeded: !membershipRollbackError && !authRollbackError,
+      }));
+      return response(request, 400, {
+        error: membershipRollbackError || authRollbackError
+          ? "Penetapan OPD gagal; pembersihan akun tidak tuntas. Admin proyek perlu memeriksa akun tersebut."
+          : "Penetapan OPD gagal. Akun baru sudah dibatalkan; periksa katalog OPD dan jalankan migrasi assignment.",
+        request_id: requestId,
+      }, config.allowedOrigins);
+    }
+  }
+
   const { error: auditError } = await adminClient.from("satria_admin_audit_logs").insert({
     organization_id: organizationId,
     actor_user_id: actor.id,
     target_user_id: createdUser.id,
     action: "user_created",
-    details: { role, email_confirmed: true },
+    details: { role, email_confirmed: true, opd_ids: role === "operator" ? opdIds : [] },
   });
   if (auditError) {
     console.error(JSON.stringify({ event: "audit_insert_failed", requestId, actorId: actor.id, organizationId, targetUserId: createdUser.id }));
@@ -253,6 +312,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
     ok: true,
     user: { id: createdUser.id, email: createdUser.email },
     role,
+    opd_ids: role === "operator" ? opdIds : [],
     email_confirmed: true,
     email_sent: false,
     audit_recorded: !auditError,

@@ -1,3 +1,9 @@
-# Gabungkan blok ini ke supabase/config.toml proyek.
+# Gabungkan blok ini ke supabase/config.toml proyek; pertahankan konfigurasi fungsi lain.
 [functions.admin-list-users]
+verify_jwt = true
+
+[functions.admin-create-user]
+verify_jwt = true
+
+[functions.admin-update-user]
 verify_jwt = true

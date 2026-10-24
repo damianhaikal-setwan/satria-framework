@@ -1,4 +1,11 @@
+# Merge these sections into the project config; keep JWT verification enabled.
+[functions.admin-list-users]
+verify_jwt = true
+
 # Merge this section into the project's existing supabase/config.toml.
 # Keep JWT verification enabled for this user-facing admin function.
 [functions.admin-create-user]
+verify_jwt = true
+
+[functions.admin-update-user]
 verify_jwt = true

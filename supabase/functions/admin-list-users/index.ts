@@ -205,6 +205,98 @@ Deno.serve(async (request: Request): Promise<Response> => {
     return errorResponse(request, 403, "Hanya admin aktif pada organisasi ini yang dapat melihat daftar pengguna.", requestId, config.allowedOrigins);
   }
 
+  // The current SATRIA app still stores its OPD master in the organization
+  // snapshot. Mirror that trusted server-side snapshot into the canonical
+  // assignment catalog; never accept browser-provided OPD names as authority.
+  const { data: stateRow, error: stateError } = await adminClient
+    .from("satria_state")
+    .select("payload")
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+  if (stateError) {
+    console.error(JSON.stringify({ event: "opd_snapshot_lookup_error", requestId, actorId: actor.id, organizationId }));
+    return errorResponse(request, 500, "Snapshot OPD organisasi tidak dapat dibaca.", requestId, config.allowedOrigins);
+  }
+
+  const snapshotPayload = stateRow?.payload as Record<string, unknown> | null;
+  const rawOpds = snapshotPayload?.opd;
+  if (Array.isArray(rawOpds)) {
+    const parsed = rawOpds.map((item) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+      const source = item as Record<string, unknown>;
+      const opdId = typeof source.id === "string" || typeof source.id === "number" ? String(source.id).trim() : "";
+      const shortName = typeof source.singkat === "string" ? source.singkat.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 80) : "";
+      const nameRaw = typeof source.nama === "string" ? source.nama : shortName;
+      const name = nameRaw.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 200);
+      if (!opdId || opdId.length > 128 || !name) return null;
+      return { organization_id: organizationId, opd_id: opdId, name, code: shortName || null, active: true };
+    }).filter((item): item is { organization_id: string; opd_id: string; name: string; code: string | null; active: boolean } => item !== null);
+
+    // The catalog has a unique (organization, code) constraint. Suppress
+    // ambiguous codes rather than making the whole directory sync fail.
+    const codeCounts = new Map<string, number>();
+    for (const item of parsed) if (item.code) codeCounts.set(item.code, (codeCounts.get(item.code) ?? 0) + 1);
+    const normalized = parsed.map((item) => ({
+      ...item,
+      code: item.code && codeCounts.get(item.code) === 1 ? item.code : null,
+    }));
+    if (new Set(normalized.map((item) => item.opd_id)).size !== normalized.length) {
+      console.error(JSON.stringify({ event: "opd_catalog_duplicate_id", requestId, actorId: actor.id, organizationId }));
+      return errorResponse(request, 409, "Data master OPD memiliki ID duplikat. Perbaiki data sebelum mengatur hak akses pengguna.", requestId, config.allowedOrigins);
+    }
+    if (rawOpds.length > 0 && normalized.length === 0) {
+      console.error(JSON.stringify({ event: "opd_catalog_no_valid_rows", requestId, actorId: actor.id, organizationId }));
+      return errorResponse(request, 409, "Tidak ada baris OPD yang valid pada snapshot. Perbaiki master OPD sebelum mengatur hak akses.", requestId, config.allowedOrigins);
+    }
+
+    const { data: existingCatalog, error: existingCatalogError } = await adminClient
+      .from("satria_opds")
+      .select("opd_id,active")
+      .eq("organization_id", organizationId);
+    if (existingCatalogError) {
+      console.error(JSON.stringify({ event: "opd_catalog_read_error", requestId, actorId: actor.id, organizationId }));
+      return errorResponse(request, 500, "Katalog OPD tidak dapat dimuat.", requestId, config.allowedOrigins);
+    }
+    const activeSnapshotIds = new Set(normalized.map((item) => item.opd_id));
+    for (const old of existingCatalog ?? []) {
+      if (old.active && !activeSnapshotIds.has(old.opd_id)) {
+        // Clear a potentially reused code before the partial unique index is
+        // checked by upsert, while retaining the old assignment history.
+        const { error: deactivateError } = await adminClient
+          .from("satria_opds")
+          .update({ active: false, code: null })
+          .eq("organization_id", organizationId)
+          .eq("opd_id", old.opd_id);
+        if (deactivateError) {
+          console.error(JSON.stringify({ event: "opd_catalog_deactivate_error", requestId, actorId: actor.id, organizationId }));
+          return errorResponse(request, 500, "Katalog OPD lama tidak dapat dinonaktifkan dengan aman.", requestId, config.allowedOrigins);
+        }
+      }
+    }
+
+    if (normalized.length) {
+      const { error: upsertError } = await adminClient
+        .from("satria_opds")
+        .upsert(normalized, { onConflict: "organization_id,opd_id" });
+      if (upsertError) {
+        console.error(JSON.stringify({ event: "opd_catalog_upsert_error", requestId, actorId: actor.id, organizationId, code: upsertError.code ?? "unknown" }));
+        return errorResponse(request, 500, "Katalog OPD belum dapat disiapkan. Periksa migrasi dan data master OPD.", requestId, config.allowedOrigins);
+      }
+    }
+  }
+
+  const { data: opds, error: opdsError } = await adminClient
+    .from("satria_opds")
+    .select("opd_id,name,code")
+    .eq("organization_id", organizationId)
+    .eq("active", true)
+    .order("name", { ascending: true });
+  if (opdsError) {
+    console.error(JSON.stringify({ event: "opd_catalog_list_error", requestId, actorId: actor.id, organizationId }));
+    return errorResponse(request, 500, "Katalog OPD tidak dapat dimuat. Jalankan migrasi assignment OPD.", requestId, config.allowedOrigins);
+  }
+  const opdNameById = new Map((opds ?? []).map((opd) => [opd.opd_id, opd.name]));
+
   const offset = (page - 1) * pageSize;
   const { data: memberships, error: listError, count } = await adminClient
     .from("satria_memberships")
@@ -220,7 +312,23 @@ Deno.serve(async (request: Request): Promise<Response> => {
   }
 
   try {
-    const users = await mapWithConcurrency(memberships as MembershipRow[], AUTH_LOOKUP_CONCURRENCY, async (row) => {
+    const membershipRows = (memberships ?? []) as MembershipRow[];
+    const assignmentByUser = new Map<string, string[]>();
+    if (membershipRows.length) {
+      const { data: assignmentRows, error: assignmentError } = await adminClient
+        .from("satria_membership_opds")
+        .select("user_id,opd_id")
+        .eq("organization_id", organizationId)
+        .in("user_id", membershipRows.map((row) => row.user_id));
+      if (assignmentError) throw new Error("OPD assignments could not be loaded");
+      for (const assignment of assignmentRows ?? []) {
+        const ids = assignmentByUser.get(assignment.user_id) ?? [];
+        ids.push(assignment.opd_id);
+        assignmentByUser.set(assignment.user_id, ids);
+      }
+    }
+
+    const users = await mapWithConcurrency(membershipRows, AUTH_LOOKUP_CONCURRENCY, async (row) => {
       const { data, error } = await adminClient.auth.admin.getUserById(row.user_id);
       if (error || !data.user) throw new Error("Auth user lookup failed");
       const user = data.user;
@@ -234,17 +342,21 @@ Deno.serve(async (request: Request): Promise<Response> => {
         active: row.active,
         membership_created_at: row.created_at,
         auth_created_at: user.created_at,
+        opd_ids: (assignmentByUser.get(row.user_id) ?? []).sort(),
+        opd_names: (assignmentByUser.get(row.user_id) ?? []).map((id) => opdNameById.get(id)).filter((name): name is string => !!name),
       };
     });
 
     console.info(JSON.stringify({ event: "admin_user_listed", requestId, actorId: actor.id, organizationId, page, returned: users.length }));
     return jsonResponse(request, 200, {
       ok: true,
+      api_version: "satria-admin-users-v2",
       organization_id: organizationId,
       page,
       page_size: pageSize,
       total: count ?? 0,
       users,
+      opds: (opds ?? []).map((opd) => ({ id: opd.opd_id, name: opd.name, code: opd.code })),
       request_id: requestId,
     }, config.allowedOrigins);
   } catch {
