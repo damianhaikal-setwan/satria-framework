@@ -1977,8 +1977,15 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     if (!availableOpds.length) {
       const empty = document.createElement('p');
       empty.className = 'satria-opd-empty';
-      empty.textContent = 'Memuat katalog OPD dari snapshot Supabase. Jika tetap kosong, klik Muat ulang; pastikan snapshot cloud memuat master OPD dan migrasi OPD telah diterapkan.';
+      empty.textContent = `Katalog cloud kosong. Jika Data Master lokal memiliki ${Array.isArray(S?.opd) ? S.opd.length : 0} OPD, sinkronkan master OPD saja; paket dan dokumen tidak ikut diganti.`;
       opdChoices.appendChild(empty);
+      const syncButton = document.createElement('button');
+      syncButton.type = 'button';
+      syncButton.dataset.satriaSyncLocalOpds = 'true';
+      syncButton.textContent = 'Sinkronkan master OPD dari Data Master';
+      syncButton.style.marginTop = '8px';
+      syncButton.style.maxWidth = '100%';
+      opdChoices.appendChild(syncButton);
       return;
     }
     for (const opd of availableOpds) {
@@ -2438,6 +2445,72 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     };
   }
 
+  async function syncLocalOpdCatalog() {
+    if (!isAuthorizedInUi()) {
+      setStatus('Login admin aktif diperlukan untuk sinkronisasi master OPD.', 'error');
+      return;
+    }
+    const localRows = Array.isArray(S?.opd) ? S.opd : [];
+    if (!localRows.length) {
+      assignmentMessage('Data Master lokal belum memiliki OPD. Tambahkan OPD terlebih dahulu melalui menu Data Master.', 'error');
+      setStatus('Tidak ada OPD pada Data Master lokal untuk disinkronkan.', 'error');
+      return;
+    }
+    const catalogRows = localRows.map((row) => ({
+      id: row?.id,
+      nama: row?.nama,
+      singkat: row?.singkat,
+      alamat: row?.alamat,
+      kontak: row?.kontak,
+      tempat: row?.tempat,
+    }));
+    const invalidCount = catalogRows.filter((row) => row.id == null || !String(row.id).trim() || typeof row.nama !== 'string' || !row.nama.trim()).length;
+    if (invalidCount) {
+      setStatus(`Sinkronisasi dibatalkan: ${invalidCount} baris OPD tidak memiliki ID/nama valid. Perbaiki Data Master terlebih dahulu.`, 'error');
+      return;
+    }
+    if (!confirm(`Sinkronkan ${catalogRows.length} OPD dari Data Master lokal ke Supabase? Tindakan ini hanya memperbarui master OPD di snapshot cloud dan katalog assignment; paket, dokumen, dan bagian snapshot lain tidak diganti. Versi cloud harus sama dengan versi terakhir yang dimuat.`)) return;
+
+    const buttons = Array.from(document.querySelectorAll('[data-satria-sync-local-opds]'));
+    buttons.forEach((button) => { button.disabled = true; });
+    setStatus('Menyinkronkan master OPD ke cloud dengan pemeriksaan versi…');
+    try {
+      const { data, error } = await client.functions.invoke('admin-list-users', {
+        body: {
+          action: 'sync_local_catalog',
+          organization_id: orgId,
+          expected_version: version,
+          opds: catalogRows,
+        },
+      });
+      if (error) throw new Error(await readableError(error, 'Sinkronisasi master OPD gagal. Deploy ulang Edge Function admin-list-users dari paket terbaru.'));
+      if (!data?.ok || !Array.isArray(data.opds) || !data.catalog_sync?.synced) {
+        throw new Error('Edge Function belum mendukung sinkronisasi master OPD. Deploy ulang supabase/functions/admin-list-users dari ZIP terbaru.');
+      }
+      if (Number.isInteger(Number(data.snapshot_version))) version = Number(data.snapshot_version);
+      setCatalog(data.opds);
+      cachedPayload = null;
+      lastFetchedAt = 0;
+      const refreshed = await loadUsers(true);
+      if (!refreshed || !Array.isArray(refreshed.opds) || !refreshed.opds.length) {
+        throw new Error('Snapshot OPD telah dikirim, tetapi katalog belum dapat dimuat. Periksa migrasi 20261024052900 dan deploy ulang admin-list-users dari paket terbaru.');
+      }
+      const total = data.catalog_sync.count || data.opds.length;
+      setStatus(`Master OPD berhasil disinkronkan (${total} OPD). Data paket/dokumen dan bagian snapshot lainnya tidak diganti. Versi cloud ${version}.`, 'ok');
+      const createMessage = byId('satriaCreateUserMessage');
+      if (createMessage && byId('satriaCreateUserModal') && !byId('satriaCreateUserModal').hidden) { createMessage.textContent = `Katalog OPD berhasil disinkronkan (${total} OPD). Pilih OPD untuk melanjutkan.`; createMessage.dataset.kind = 'ok'; }
+      if (byId('satriaEditUserOpdModal') && !byId('satriaEditUserOpdModal').hidden && editingUser) openAssignmentModal(editingUser);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Sinkronisasi master OPD gagal.';
+      assignmentMessage(message, 'error');
+      const createMessage = byId('satriaCreateUserMessage');
+      if (createMessage && byId('satriaCreateUserModal') && !byId('satriaCreateUserModal').hidden) { createMessage.textContent = message; createMessage.dataset.kind = 'error'; }
+      setStatus(message, 'error');
+    } finally {
+      buttons.forEach((button) => { button.disabled = false; });
+    }
+  }
+
   async function loadUsers(force = false) {
     if (!updateVisibility()) return null;
     const requestedOrg = orgId;
@@ -2583,8 +2656,16 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     const selected = new Set(Array.isArray(user.opd_ids) ? user.opd_ids : []);
     if (!opds.length) {
       const empty = document.createElement('p');
-      empty.textContent = 'Pilihan OPD belum tersedia. Buka Data Master, pastikan master OPD sudah tersimpan pada snapshot cloud, lalu klik Muat ulang. Katalog akan disinkronkan otomatis dari snapshot; jika migrasi belum diterapkan, jalankan 20261024052900_satria_opd_assignments_rls.sql dan 20261024053100_satria_catalog_and_assignment_repair.sql.';
+      empty.style.gridColumn = '1 / -1';
+      empty.textContent = `Katalog cloud kosong, sementara status aplikasi menunjukkan perubahan lokal belum di-backup. Jika Data Master sudah memiliki ${Array.isArray(S?.opd) ? S.opd.length : 0} OPD, sinkronkan master OPD saja di bawah. Paket, dokumen, dan bagian snapshot lainnya tidak akan ditimpa.`;
       choices.appendChild(empty);
+      const syncButton = document.createElement('button');
+      syncButton.type = 'button';
+      syncButton.dataset.satriaSyncLocalOpds = 'true';
+      syncButton.textContent = 'Sinkronkan master OPD dari Data Master';
+      syncButton.style.gridColumn = '1 / -1';
+      syncButton.style.justifySelf = 'start';
+      choices.appendChild(syncButton);
     } else {
       for (const opd of opds) {
         const label = document.createElement('label');
@@ -2676,6 +2757,9 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
       const total = Number(cachedPayload?.total) || 0;
       const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
       if (!busy && page < pageCount) { page += 1; void loadUsers(true); }
+    } else if (target.closest('[data-satria-sync-local-opds]')) {
+      event.preventDefault();
+      void syncLocalOpdCatalog();
     } else {
       const editButton = target.closest('[data-satria-edit-opd]');
       if (editButton) {
@@ -2690,7 +2774,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
   window.addEventListener('satria:user-created', () => { page = 1; void loadUsers(true); });
   window.addEventListener('satria:user-updated', () => { void loadUsers(true); });
   window.addEventListener('satria:load-opd-catalog', () => { void loadUsers(true); });
-  window.SATRIA_ADMIN_USERS = Object.freeze({ version: '2026-10-24-opd-fallback-v2', getOpds: () => opds.map((item) => ({ ...item })), refresh: () => loadUsers(true) });
+  window.SATRIA_ADMIN_USERS = Object.freeze({ version: '2026-10-24-opd-local-catalog-sync-v3', getOpds: () => opds.map((item) => ({ ...item })), refresh: () => loadUsers(true) });
 
   if (typeof window.render === 'function') {
     const originalRender = window.render;
