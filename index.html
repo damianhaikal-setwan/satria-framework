@@ -855,52 +855,9 @@ main{overflow-anchor:none}
   .doc-virtual-viewport{max-height:50vh}
 }
 
-
-/* ===== RINGKASAN UTAMA & LAPORAN - D3 LAZY LOAD ===== */
-.chart-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin:16px 0}
-.chart-card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;content-visibility:auto;contain-intrinsic-size:0 320px;min-height:320px}
-.chart-card.wide{grid-column:span 12}
-.chart-card.half{grid-column:span 6}
-.chart-card.third{grid-column:span 4}
-.chart-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-soft);opacity:.6}
-.kh-accent{height:3px;border-radius:3px;margin:-16px -16px 14px -16px}
-.chart-title{font-size:13px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.chart-title .badge{font-size:10px;padding:3px 8px;border-radius:9999px;font-weight:700}
-.d3-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:11px;font-weight:600;color:var(--mut)}
-.d3-legend-item{display:flex;align-items:center;gap:6px}
-.d3-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.d3-tooltip{position:absolute;pointer-events:none;background:rgba(15,23,42,.92);color:#fff;padding:8px 10px;border-radius:8px;font-size:11px;font-weight:600;z-index:1000;opacity:0;transition:opacity .18s;max-width:260px;backdrop-filter:blur(8px)}
-.chart-skeleton{display:grid;place-items:center;height:280px;background:linear-gradient(90deg, var(--bg-2) 25%, var(--bg) 50%, var(--bg-2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:12px;color:var(--mut);font-size:12px;font-weight:600}
-.chart-skeleton .spinner{width:28px;height:28px;border:3px solid var(--bd);border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:10px}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.satria-command-header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:20px;box-shadow:var(--shadow-sm);margin-bottom:16px;position:relative;overflow:hidden}
-.satria-command-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-kh)}
-.satria-command-badge{display:inline-flex;align-items:center;gap:6px;background:var(--acc-soft);border:1px solid var(--bd);color:var(--acc);font-size:10px;font-weight:800;letter-spacing:.07em;padding:4px 10px;border-radius:9999px;margin-bottom:10px}
-.satria-command-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--acc-ring);animation:pulseDot 2s infinite}
-.satria-command-title h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.02em}
-.satria-command-title p{margin:6px 0 0;color:var(--mut);font-size:13px}
-.satria-command-meta{display:flex;gap:12px}
-.satria-meta-card{background:var(--bg-2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;min-width:90px;text-align:center}
-.satria-meta-card span{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin-bottom:4px}
-.satria-meta-card b{font-size:18px;font-weight:800;color:var(--ink)}
-.satria-overview .satria-metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:16px;padding-top:16px;border-top:1px solid var(--bd)}
-.satria-overview .satria-metrics-row > div{background:var(--bg-2);border:1px solid var(--bd);border-radius:12px;padding:12px}
-.satria-overview .satria-metrics-row span{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px}
-.satria-overview .satria-metrics-row b{font-size:16px;font-weight:800;display:block;color:var(--ink)}
-.satria-overview .satria-metrics-row small{font-size:11px;color:var(--mut);margin-top:2px;display:block}
-@media(max-width:768px){
-  .chart-grid{grid-template-columns:1fr;gap:12px}
-  .chart-card.wide, .chart-card.half, .chart-card.third{grid-column:span 1}
-  .chart-card{min-height:260px}
-  .satria-command-header{flex-direction:column;padding:16px;border-radius:16px}
-  .satria-command-meta{width:100%;justify-content:space-between}
-  .satria-meta-card{flex:1;min-width:0}
-  .satria-overview .satria-metrics-row{grid-template-columns:1fr 1fr;gap:10px}
-}
-
 </style>
 
-  <!-- PWA / AWA - SATRIA 3.0 -->
+  <!-- PWA / AWA - SATRIA 3.0 Fixed v2 -->
   <meta name="theme-color" content="#0F766E">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -911,12 +868,10 @@ main{overflow-anchor:none}
   <link rel="apple-touch-icon" href="./icon-192.png">
   <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
-  <!-- Preconnect for Supabase + CDN -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link rel="preconnect" href="https://d3js.org">
   <style>
-  /* PWA install banner */
   #pwaInstallBanner{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:9999;background:#0F766E;color:#fff;padding:12px 18px;border-radius:9999px;display:flex;gap:10px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.2);font:600 13px system-ui;max-width:90vw}
   #pwaInstallBanner[hidden]{display:none!important}
   #pwaInstallBanner button{background:#fff;color:#0F766E;border:none;padding:6px 14px;border-radius:9999px;font-weight:800;cursor:pointer}
@@ -2029,13 +1984,139 @@ function drawKhCharts(){
   }
 }
 function drawKhChartsSingle(targetId){
-  // This will be overridden by dash_js, but keep placeholder
-  if(typeof window.drawKhChartsSingle === 'function' && window.drawKhChartsSingle !== drawKhChartsSingle){
-    return window.drawKhChartsSingle(targetId);
-  }
-  // Fallback: call original logic via dash_js
+  // placeholder, overridden by lazy engine
 }
 
+
+// ===== D3 CHARTS LAZY LOAD ENGINE - Fixed =====
+window.__chartObserver = null;
+window.__renderedCharts = new Set();
+
+function initChartLazyLoad(){
+  if(!('IntersectionObserver' in window)){
+    setTimeout(()=>{ if(typeof window.drawKhChartsSingle==='function'){ ['chartMultiYear','chartDonut','chartBarPaket','chartStatus','chartHpsPagu','chartOpd'].forEach(id=>{ const el=document.getElementById(id); if(el) drawKhChartsSingle(id); }); } }, 800);
+    return;
+  }
+  const chartIds = ['chartMultiYear','chartDonut','chartBarPaket','chartStatus','chartHpsPagu','chartOpd'];
+  if(window.__chartObserver) try{ window.__chartObserver.disconnect(); }catch(_){}
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const id = entry.target.id;
+        if(!window.__renderedCharts.has(id)){
+          window.__renderedCharts.add(id);
+          requestAnimationFrame(()=>{ drawKhChartsSingle(id); });
+        }
+      }
+    });
+  }, {rootMargin:'200px 0px', threshold:0.1});
+  
+  chartIds.forEach(id=>{
+    const el = document.getElementById(id);
+    if(el){
+      if(!el.innerHTML.trim() || el.innerHTML.includes('chart-skeleton')){
+        // keep skeleton, observer will replace
+      }
+      observer.observe(el);
+    }
+  });
+  window.__chartObserver = observer;
+}
+
+function drawKhChartsSingle(targetId){
+  if(typeof d3==='undefined') return;
+  const el = document.getElementById(targetId);
+  if(!el) return;
+  const isMobile = window.innerWidth <= 768;
+  const L = (typeof filt==='function') ? filt() : [];
+  const isDark = document.documentElement.getAttribute('data-theme')==='dark';
+  const colMut = getComputedStyle(document.documentElement).getPropertyValue('--mut').trim() || '#64748b';
+  const colBd = getComputedStyle(document.documentElement).getPropertyValue('--bd').trim() || '#e2e8f0';
+  const colInk = getComputedStyle(document.documentElement).getPropertyValue('--ink-2').trim() || '#334155';
+  const COLORS = {pagu: isDark ? '#22d3ee' : '#0891B2', kontrak: isDark ? '#2dd4bf' : '#0F766E', efisiensi: isDark ? '#34d399' : '#10B981', hps: isDark ? '#818cf8' : '#2563EB'};
+  function showTip(html, e){
+    let tip=document.getElementById('globalD3Tip');
+    if(!tip){ tip=document.createElement('div'); tip.id='globalD3Tip'; tip.className='d3-tooltip'; document.body.appendChild(tip); }
+    tip.textContent=String(html).replace(/<br\s*\/?\s*>/gi, '\n'); tip.style.whiteSpace='pre-line'; tip.style.opacity='1';
+    tip.style.left=(e.pageX+14)+'px'; tip.style.top=(e.pageY-28)+'px';
+  }
+  function hideTip(){ const tip=document.getElementById('globalD3Tip'); if(tip) tip.style.opacity='0'; }
+  
+  if(targetId==='chartMultiYear'){
+    el.innerHTML=''; const W=el.clientWidth, H=isMobile?280:340, m={top:20, right:20, bottom:32, left:64};
+    const data=S.tahun.map(t=>{ const x=filt(t); return {tahun:t, pagu:sum(x,p=>p.pagu), kontrak:sum(x,kontrak), efisiensi:sum(x,p=>p.pagu)-sum(x,kontrak)}; });
+    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
+    const x=d3.scaleBand().domain(data.map(d=>d.tahun)).range([m.left, W-m.right]).padding(0.28);
+    const y=d3.scaleLinear().domain([0, (d3.max(data,d=>Math.max(d.pagu, d.kontrak))||1)*1.15]).nice().range([H-m.bottom, m.top]);
+    svg.append('g').selectAll('line').data(y.ticks(isMobile?3:5)).join('line').attr('x1',m.left).attr('x2',W-m.right).attr('y1',d=>y(d)).attr('y2',d=>y(d)).attr('stroke',colBd).attr('stroke-dasharray','3 3').attr('opacity',.6);
+    svg.append('g').attr('transform',`translate(0,${H-m.bottom})`).call(d3.axisBottom(x).tickSize(0)).selectAll('text').attr('font-weight',700).attr('font-size', isMobile?'10px':'12px');
+    svg.append('g').attr('transform',`translate(${m.left},0)`).call(d3.axisLeft(y).ticks(isMobile?3:5).tickFormat(d=> (d/1e6).toFixed(1)+'jt')).selectAll('text').attr('fill',colMut).attr('font-size', isMobile?'10px':'11px');
+    const barW=x.bandwidth()/2.4;
+    svg.selectAll('.bar-pagu').data(data).join('rect').attr('x',d=>x(d.tahun)+2).attr('y',d=>y(d.pagu)).attr('width',barW).attr('height',d=>H-m.bottom-y(d.pagu)).attr('fill',COLORS.pagu).attr('rx',6).on('mousemove', function(e,d){ showTip(`TA ${d.tahun} • Pagu ${rp(d.pagu)}`, e); }).on('mouseleave', hideTip);
+    svg.selectAll('.bar-kontrak').data(data).join('rect').attr('x',d=>x(d.tahun)+barW+6).attr('y',d=>y(d.kontrak)).attr('width',barW).attr('height',d=>H-m.bottom-y(d.kontrak)).attr('fill',COLORS.kontrak).attr('rx',6).on('mousemove', function(e,d){ showTip(`TA ${d.tahun} • Kontrak ${rp(d.kontrak)}`, e); }).on('mouseleave', hideTip);
+    const line=d3.line().x(d=>x(d.tahun)+x.bandwidth()/2).y(d=>y(d.efisiensi)).curve(d3.curveMonotoneX);
+    svg.append('path').datum(data).attr('fill','none').attr('stroke',COLORS.efisiensi).attr('stroke-width', isMobile?2:3).attr('stroke-linecap','round').attr('d',line);
+    svg.selectAll('.dot-eff').data(data).join('circle').attr('cx',d=>x(d.tahun)+x.bandwidth()/2).attr('cy',d=>y(d.efisiensi)).attr('r', isMobile?4:5).attr('fill',COLORS.efisiensi).attr('stroke','#fff').attr('stroke-width',2);
+    const leg=document.getElementById('legendMultiYear'); if(leg) leg.innerHTML=`<div class="d3-legend-item"><span class="d3-legend-dot" style="background:${COLORS.pagu}"></span>Pagu</div><div class="d3-legend-item"><span class="d3-legend-dot" style="background:${COLORS.kontrak}"></span>Kontrak</div><div class="d3-legend-item"><span class="d3-legend-dot" style="background:${COLORS.efisiensi}"></span>Efisiensi</div>`;
+  } else if(targetId==='chartDonut'){
+    el.innerHTML=''; const W=isMobile?240:280, H=isMobile?240:280, R=Math.min(W,H)/2-12; const pagu=sum(L,p=>p.pagu), k=sum(L,kontrak), sisa=pagu-k;
+    const data=[{label:'Kontrak', value:k, color:COLORS.kontrak},{label:'Efisiensi', value:sisa, color:COLORS.efisiensi}];
+    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`).append('g').attr('transform',`translate(${W/2},${H/2})`);
+    const pie=d3.pie().value(d=>d.value).sort(null).padAngle(0.04); const arc=d3.arc().innerRadius(R*0.62).outerRadius(R).cornerRadius(8);
+    svg.selectAll('.arc').data(pie(data)).join('path').attr('d',arc).attr('fill',d=>d.data.color).on('mousemove',(e,d)=>showTip(`${d.data.label}: ${rp(d.data.value)} (${(d.data.value/(pagu||1)*100).toFixed(1)}%)`, e)).on('mouseleave',hideTip);
+    svg.append('text').attr('text-anchor','middle').attr('dy','-6').attr('font-size','11px').attr('font-weight','800').attr('fill',colMut).text('TOTAL PAGU');
+    svg.append('text').attr('text-anchor','middle').attr('dy','14').attr('font-size', isMobile?'14px':'16px').attr('font-weight','800').attr('fill',colInk).text(rp(pagu).replace('Rp ',''));
+  } else if(targetId==='chartBarPaket'){
+    el.innerHTML=''; const W=el.clientWidth, H=isMobile?240:280, m={top:10,right:12,bottom:28,left:48};
+    const data=filt().map(p=>({nama:p.nama.slice(0,isMobile?16:22), efisiensi:p.pagu-kontrak(p), pagu:p.pagu})).sort((a,b)=>b.efisiensi-a.efisiensi).slice(0,isMobile?5:8); if(!data.length) return;
+    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
+    const x=d3.scaleLinear().domain([0, (d3.max(data,d=>d.efisiensi)||1)*1.2]).range([m.left, W-m.right]); const y=d3.scaleBand().domain(data.map(d=>d.nama)).range([m.top, H-m.bottom]).padding(0.22);
+    svg.append('g').attr('transform',`translate(0,${H-m.bottom})`).call(d3.axisBottom(x).ticks(isMobile?3:4).tickFormat(d=>d>=1e6?(d/1e6).toFixed(1)+'jt':d)).selectAll('text').attr('fill',colMut).attr('font-size','10px');
+    svg.append('g').attr('transform',`translate(${m.left},0)`).call(d3.axisLeft(y).tickSize(0)).selectAll('text').attr('fill',colInk).attr('font-weight','600').attr('font-size', isMobile?'9px':'10px');
+    svg.selectAll('.bar').data(data).join('rect').attr('x',m.left).attr('y',d=>y(d.nama)).attr('width',d=>x(d.efisiensi)-m.left).attr('height',y.bandwidth()).attr('fill', COLORS.efisiensi).attr('rx',6).on('mousemove',(e,d)=>showTip(`${d.nama}: Efisiensi ${rp(d.efisiensi)}`, e)).on('mouseleave',hideTip);
+  } else if(targetId==='chartStatus'){
+    el.innerHTML=''; const W=isMobile?200:240,H=isMobile?200:240,R=isMobile?70:90; const counts={}; filt().forEach(p=>{const s=stt(p); counts[s]=(counts[s]||0)+1;});
+    const data=Object.entries(counts).map(([k,v])=>({label:k, value:v})); const color=d3.scaleOrdinal().domain(data.map(d=>d.label)).range([COLORS.kontrak, COLORS.pagu, COLORS.efisiensi, '#8b5cf6', '#f59e0b']);
+    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`).append('g').attr('transform',`translate(${W/2},${H/2})`);
+    const pie=d3.pie().value(d=>d.value).sort(null); const arc=d3.arc().innerRadius(R*0.55).outerRadius(R).cornerRadius(6);
+    svg.selectAll('path').data(pie(data)).join('path').attr('d',arc).attr('fill',d=>color(d.data.label)).on('mousemove',(e,d)=>showTip(`${d.data.label}: ${d.data.value} paket`, e)).on('mouseleave',hideTip);
+  } else if(targetId==='chartHpsPagu'){
+    el.innerHTML=''; const W=el.clientWidth,H=isMobile?200:240,m={top:10,right:10,bottom:28,left:44}; const data=filt().map(p=>({hps:hps(p), pagu:p.pagu, nama:p.nama.slice(0,18)}));
+    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
+    const mx=(d3.max(data,d=>Math.max(d.pagu,d.hps))||1)*1.1; const x=d3.scaleLinear().domain([0,mx]).range([m.left,W-m.right]); const y=d3.scaleLinear().domain([0,mx]).range([H-m.bottom,m.top]);
+    svg.append('g').attr('transform',`translate(0,${H-m.bottom})`).call(d3.axisBottom(x).ticks(isMobile?2:3).tickFormat(d=> (d/1e6).toFixed(0)+'jt')).selectAll('text').attr('fill',colMut).attr('font-size','10px');
+    svg.append('g').attr('transform',`translate(${m.left},0)`).call(d3.axisLeft(y).ticks(isMobile?3:4).tickFormat(d=> (d/1e6).toFixed(0)+'jt')).selectAll('text').attr('fill',colMut).attr('font-size','10px');
+    svg.append('line').attr('x1',x(0)).attr('y1',y(0)).attr('x2',x(mx)).attr('y2',y(mx)).attr('stroke',colBd).attr('stroke-dasharray','4 4');
+    svg.selectAll('circle').data(data).join('circle').attr('cx',d=>x(d.pagu)).attr('cy',d=>y(d.hps)).attr('r', isMobile?4:6).attr('fill',COLORS.kontrak).attr('stroke','#fff').attr('stroke-width',2).on('mousemove',(e,d)=>showTip(`${d.nama} Pagu ${rp(d.pagu)} HPS ${rp(d.hps)}`, e)).on('mouseleave',hideTip);
+  } else if(targetId==='chartOpd'){
+    el.innerHTML=''; const W=el.clientWidth,H=isMobile?200:240,m={top:6,right:10,bottom:24,left:80}; const map={}; filt().forEach(p=>{const k=O(p.opd).singkat||'OPD'; map[k]=(map[k]||0)+kontrak(p);});
+    const data=Object.entries(map).map(([k,v])=>({opd:k, val:v})).sort((a,b)=>b.val-a.val).slice(0, isMobile?5:10);
+    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
+    const x=d3.scaleLinear().domain([0,d3.max(data,d=>d.val)||1]).range([m.left,W-m.right]); const y=d3.scaleBand().domain(data.map(d=>d.opd)).range([m.top,H-m.bottom]).padding(0.3);
+    svg.append('g').attr('transform',`translate(0,${H-m.bottom})`).call(d3.axisBottom(x).ticks(isMobile?2:3).tickFormat(d=> (d/1e6).toFixed(0)+'jt')).selectAll('text').attr('fill',colMut).attr('font-size','10px');
+    svg.append('g').attr('transform',`translate(${m.left},0)`).call(d3.axisLeft(y).tickSize(0)).selectAll('text').attr('fill',colInk).attr('font-weight','700').attr('font-size', isMobile?'10px':'11px');
+    svg.selectAll('.bar').data(data).join('rect').attr('x',m.left).attr('y',d=>y(d.opd)).attr('width',d=>x(d.val)-m.left).attr('height',y.bandwidth()).attr('fill',COLORS.kontrak).attr('rx',6).on('mousemove',(e,d)=>showTip(`${d.opd}: ${rp(d.val)}`, e)).on('mouseleave',hideTip);
+  }
+}
+
+
+// Hook to render
+(function(){
+  if(window.render){
+    const orig=window.render;
+    window.render=function(){
+      orig();
+      requestAnimationFrame(drawKhCharts);
+    };
+  }
+  window.addEventListener('resize', ()=>{ clearTimeout(window._khResize); window._khResize=setTimeout(drawKhCharts, 250); });
+  document.addEventListener('DOMContentLoaded', drawKhCharts);
+  setTimeout(drawKhCharts, 600);
+})();
+
+</script>
+
+<style>
 /* SATRIA single-file migration bridge */
 .satria-cloud-btn{height:38px;padding:0 13px;border:1px solid var(--bd-strong);border-radius:11px;background:var(--card-solid);color:var(--ink);font-weight:700;cursor:pointer}
 .satria-cloud-btn:hover{background:var(--acc-soft);border-color:var(--acc)}
@@ -2300,49 +2381,6 @@ main{overflow-anchor:none}
   .doc-virtual-viewport{max-height:50vh}
 }
 
-
-/* ===== RINGKASAN UTAMA & LAPORAN - D3 LAZY LOAD ===== */
-.chart-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin:16px 0}
-.chart-card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;content-visibility:auto;contain-intrinsic-size:0 320px;min-height:320px}
-.chart-card.wide{grid-column:span 12}
-.chart-card.half{grid-column:span 6}
-.chart-card.third{grid-column:span 4}
-.chart-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-soft);opacity:.6}
-.kh-accent{height:3px;border-radius:3px;margin:-16px -16px 14px -16px}
-.chart-title{font-size:13px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.chart-title .badge{font-size:10px;padding:3px 8px;border-radius:9999px;font-weight:700}
-.d3-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:11px;font-weight:600;color:var(--mut)}
-.d3-legend-item{display:flex;align-items:center;gap:6px}
-.d3-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.d3-tooltip{position:absolute;pointer-events:none;background:rgba(15,23,42,.92);color:#fff;padding:8px 10px;border-radius:8px;font-size:11px;font-weight:600;z-index:1000;opacity:0;transition:opacity .18s;max-width:260px;backdrop-filter:blur(8px)}
-.chart-skeleton{display:grid;place-items:center;height:280px;background:linear-gradient(90deg, var(--bg-2) 25%, var(--bg) 50%, var(--bg-2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:12px;color:var(--mut);font-size:12px;font-weight:600}
-.chart-skeleton .spinner{width:28px;height:28px;border:3px solid var(--bd);border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:10px}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.satria-command-header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:20px;box-shadow:var(--shadow-sm);margin-bottom:16px;position:relative;overflow:hidden}
-.satria-command-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-kh)}
-.satria-command-badge{display:inline-flex;align-items:center;gap:6px;background:var(--acc-soft);border:1px solid var(--bd);color:var(--acc);font-size:10px;font-weight:800;letter-spacing:.07em;padding:4px 10px;border-radius:9999px;margin-bottom:10px}
-.satria-command-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--acc-ring);animation:pulseDot 2s infinite}
-.satria-command-title h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.02em}
-.satria-command-title p{margin:6px 0 0;color:var(--mut);font-size:13px}
-.satria-command-meta{display:flex;gap:12px}
-.satria-meta-card{background:var(--bg-2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;min-width:90px;text-align:center}
-.satria-meta-card span{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin-bottom:4px}
-.satria-meta-card b{font-size:18px;font-weight:800;color:var(--ink)}
-.satria-overview .satria-metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:16px;padding-top:16px;border-top:1px solid var(--bd)}
-.satria-overview .satria-metrics-row > div{background:var(--bg-2);border:1px solid var(--bd);border-radius:12px;padding:12px}
-.satria-overview .satria-metrics-row span{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px}
-.satria-overview .satria-metrics-row b{font-size:16px;font-weight:800;display:block;color:var(--ink)}
-.satria-overview .satria-metrics-row small{font-size:11px;color:var(--mut);margin-top:2px;display:block}
-@media(max-width:768px){
-  .chart-grid{grid-template-columns:1fr;gap:12px}
-  .chart-card.wide, .chart-card.half, .chart-card.third{grid-column:span 1}
-  .chart-card{min-height:260px}
-  .satria-command-header{flex-direction:column;padding:16px;border-radius:16px}
-  .satria-command-meta{width:100%;justify-content:space-between}
-  .satria-meta-card{flex:1;min-width:0}
-  .satria-overview .satria-metrics-row{grid-template-columns:1fr 1fr;gap:10px}
-}
-
 </style>
 
 
@@ -2459,10 +2497,10 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
   const roleName=r=>({admin:'Admin',operator:'Operator',viewer:'Viewer'}[r]||'Viewer');
   const config=()=>{let local={};try{local=JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}')}catch(_){}const embedded=window.SATRIA_EMBEDDED_SUPABASE_CONFIG||{};return {url:local.url||embedded.url||'',key:local.key||embedded.key||'',org:local.org||embedded.org||''}};
   window.SATRIA_CLOUD_CONFIGURED=!!(config().url&&config().key&&config().org);
-  function fillConfig(){const c=config();$id('scUrl').value=c.url||'';$id('scKey').value=c.key||'';$id('scOrg').value=c.org||''}
-  function setButtons(){const ok=!!(client&&member);$id('scPull').disabled=!ok;$id('scPush').disabled=!ok||member?.role==='viewer'||(!cloudStateReady&&!(member?.role==='admin'&&window.SATRIA_CLOUD_ADMIN_IMPORT_READY===true));$id('scSignOut').disabled=!ok}
-  function open(){fillConfig();modal.hidden=false;modal.setAttribute('aria-hidden','false');$id('scClose').focus();setButtons();if(member)status('Terhubung sebagai '+member.email+' · role '+member.role+' · versi lokal '+version,'ok')}
-  function close(){modal.hidden=true;modal.setAttribute('aria-hidden','true')}
+  function fillConfig(){const c=config(); const a=$id('scUrl'), b=$id('scKey'), cc=$id('scOrg'); if(a) a.value=c.url||''; if(b) b.value=c.key||''; if(cc) cc.value=c.org||''; }
+  function setButtons(){const ok=!!(client&&member); const p=$id('scPull'), pu=$id('scPush'), so=$id('scSignOut'); if(p) p.disabled=!ok; if(pu) pu.disabled=!ok||member?.role==='viewer'||(!cloudStateReady&&!(member?.role==='admin'&&window.SATRIA_CLOUD_ADMIN_IMPORT_READY===true)); if(so) so.disabled=!ok; }
+  function open(){fillConfig(); if(!modal){ console.warn('Modal not found'); return; } modal.hidden=false;modal.setAttribute('aria-hidden','false'); const c=$id('scClose'); if(c) c.focus(); setButtons(); if(member)status('Terhubung sebagai '+member.email+' · role '+member.role+' · versi lokal '+version,'ok')}
+  function close(){ if(modal){ modal.hidden=true; modal.setAttribute('aria-hidden','true'); } }
   function readConfigFields(){
     const url=$id('scUrl').value.trim(),key=$id('scKey').value.trim(),org=$id('scOrg').value.trim();
     let parsed;try{parsed=new URL(url)}catch(_){throw new Error('Project URL Supabase tidak valid.')}
@@ -2831,10 +2869,10 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
   openBtn.addEventListener('click',open);syncIndicator('Belum login ke cloud','muted');
   window.addEventListener('online',()=>{if(member&&S.dirty&&!conflictActive)requestAutosave('browser-online');if(member)checkRemoteVersion()});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&member){checkRemoteVersion();if(S.dirty&&!conflictActive)requestAutosave('tab-visible')}});
-  $id('scClose').addEventListener('click',close);
-  modal.addEventListener('click',e=>{if(e.target===modal)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
-  $id('scEmbedConfig').addEventListener('click',downloadConfiguredHtml);$id('scSaveConfig').addEventListener('click',()=>{try{saveConfig();}catch(e){showError(e)}});$id('scConnect').addEventListener('click',connect);$id('scResetPassword').addEventListener('click',requestPasswordReset);$id('scSaveNewPassword').addEventListener('click',saveRecoveredPassword);$id('scCancelRecovery').addEventListener('click',()=>{$id('scRecoveryPanel').hidden=true;$id('scNewPassword').value='';$id('scConfirmNewPassword').value='';});$id('scPull').addEventListener('click',pull);$id('scPush').addEventListener('click',push);$id('scSignOut').addEventListener('click',signOut);
-  const saved=config();if(saved.url)$id('scUrl').value=saved.url;if(saved.key)$id('scKey').value=saved.key;if(saved.org)$id('scOrg').value=saved.org;
+  { const e=$id('scClose'); if(e) e.addEventListener('click',close); }
+  if(modal) modal.addEventListener('click',e=>{if(e.target===modal)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
+  { const _el=$id('scEmbedConfig'); if(_el) _el.addEventListener('click',downloadConfiguredHtml);$id('scSaveConfig').addEventListener('click',()=>{try{saveConfig();}catch(e){showError(e)}});$id('scConnect').addEventListener('click',connect);$id('scResetPassword').addEventListener('click',requestPasswordReset);$id('scSaveNewPassword').addEventListener('click',saveRecoveredPassword);$id('scCancelRecovery').addEventListener('click',()=>{$id('scRecoveryPanel').hidden=true;$id('scNewPassword').value='';$id('scConfirmNewPassword').value='';});$id('scPull').addEventListener('click',pull);$id('scPush').addEventListener('click',push);$id('scSignOut').addEventListener('click',signOut); }
+  { const saved=config(); const a=$id('scUrl'), b=$id('scKey'), c=$id('scOrg'); if(saved.url && a) a.value=saved.url; if(saved.key && b) b.value=saved.key; if(saved.org && c) c.value=saved.org; }
   if(window.render){const originalRender=window.render;window.render=function(){originalRender();applyUserLock()}}
   // Restore an existing Supabase session after the static app has booted.
   if(saved.url&&saved.key&&saved.org&&window.supabase?.createClient){try{client=window.supabase.createClient(saved.url,saved.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});bindRecoveryListener(client);orgId=saved.org;client.auth.getSession().then(({data,error})=>{if(error)throw error;if(data.session)loadMembership().catch(showError)}).catch(showError)}catch(e){showError(e)}}
@@ -3117,49 +3155,6 @@ main{overflow-anchor:none}
   .doc table{font-size:11px;min-width:500px;display:block;overflow-x:auto;white-space:nowrap}
   .doc table th, .doc table td{white-space:normal;word-break:break-word}
   .doc-virtual-viewport{max-height:50vh}
-}
-
-
-/* ===== RINGKASAN UTAMA & LAPORAN - D3 LAZY LOAD ===== */
-.chart-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin:16px 0}
-.chart-card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;content-visibility:auto;contain-intrinsic-size:0 320px;min-height:320px}
-.chart-card.wide{grid-column:span 12}
-.chart-card.half{grid-column:span 6}
-.chart-card.third{grid-column:span 4}
-.chart-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-soft);opacity:.6}
-.kh-accent{height:3px;border-radius:3px;margin:-16px -16px 14px -16px}
-.chart-title{font-size:13px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.chart-title .badge{font-size:10px;padding:3px 8px;border-radius:9999px;font-weight:700}
-.d3-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:11px;font-weight:600;color:var(--mut)}
-.d3-legend-item{display:flex;align-items:center;gap:6px}
-.d3-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.d3-tooltip{position:absolute;pointer-events:none;background:rgba(15,23,42,.92);color:#fff;padding:8px 10px;border-radius:8px;font-size:11px;font-weight:600;z-index:1000;opacity:0;transition:opacity .18s;max-width:260px;backdrop-filter:blur(8px)}
-.chart-skeleton{display:grid;place-items:center;height:280px;background:linear-gradient(90deg, var(--bg-2) 25%, var(--bg) 50%, var(--bg-2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:12px;color:var(--mut);font-size:12px;font-weight:600}
-.chart-skeleton .spinner{width:28px;height:28px;border:3px solid var(--bd);border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:10px}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.satria-command-header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:20px;box-shadow:var(--shadow-sm);margin-bottom:16px;position:relative;overflow:hidden}
-.satria-command-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-kh)}
-.satria-command-badge{display:inline-flex;align-items:center;gap:6px;background:var(--acc-soft);border:1px solid var(--bd);color:var(--acc);font-size:10px;font-weight:800;letter-spacing:.07em;padding:4px 10px;border-radius:9999px;margin-bottom:10px}
-.satria-command-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--acc-ring);animation:pulseDot 2s infinite}
-.satria-command-title h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.02em}
-.satria-command-title p{margin:6px 0 0;color:var(--mut);font-size:13px}
-.satria-command-meta{display:flex;gap:12px}
-.satria-meta-card{background:var(--bg-2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;min-width:90px;text-align:center}
-.satria-meta-card span{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin-bottom:4px}
-.satria-meta-card b{font-size:18px;font-weight:800;color:var(--ink)}
-.satria-overview .satria-metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:16px;padding-top:16px;border-top:1px solid var(--bd)}
-.satria-overview .satria-metrics-row > div{background:var(--bg-2);border:1px solid var(--bd);border-radius:12px;padding:12px}
-.satria-overview .satria-metrics-row span{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px}
-.satria-overview .satria-metrics-row b{font-size:16px;font-weight:800;display:block;color:var(--ink)}
-.satria-overview .satria-metrics-row small{font-size:11px;color:var(--mut);margin-top:2px;display:block}
-@media(max-width:768px){
-  .chart-grid{grid-template-columns:1fr;gap:12px}
-  .chart-card.wide, .chart-card.half, .chart-card.third{grid-column:span 1}
-  .chart-card{min-height:260px}
-  .satria-command-header{flex-direction:column;padding:16px;border-radius:16px}
-  .satria-command-meta{width:100%;justify-content:space-between}
-  .satria-meta-card{flex:1;min-width:0}
-  .satria-overview .satria-metrics-row{grid-template-columns:1fr 1fr;gap:10px}
 }
 
 </style>
@@ -4208,49 +4203,6 @@ main{overflow-anchor:none}
   .doc-virtual-viewport{max-height:50vh}
 }
 
-
-/* ===== RINGKASAN UTAMA & LAPORAN - D3 LAZY LOAD ===== */
-.chart-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin:16px 0}
-.chart-card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;content-visibility:auto;contain-intrinsic-size:0 320px;min-height:320px}
-.chart-card.wide{grid-column:span 12}
-.chart-card.half{grid-column:span 6}
-.chart-card.third{grid-column:span 4}
-.chart-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-soft);opacity:.6}
-.kh-accent{height:3px;border-radius:3px;margin:-16px -16px 14px -16px}
-.chart-title{font-size:13px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.chart-title .badge{font-size:10px;padding:3px 8px;border-radius:9999px;font-weight:700}
-.d3-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:11px;font-weight:600;color:var(--mut)}
-.d3-legend-item{display:flex;align-items:center;gap:6px}
-.d3-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.d3-tooltip{position:absolute;pointer-events:none;background:rgba(15,23,42,.92);color:#fff;padding:8px 10px;border-radius:8px;font-size:11px;font-weight:600;z-index:1000;opacity:0;transition:opacity .18s;max-width:260px;backdrop-filter:blur(8px)}
-.chart-skeleton{display:grid;place-items:center;height:280px;background:linear-gradient(90deg, var(--bg-2) 25%, var(--bg) 50%, var(--bg-2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:12px;color:var(--mut);font-size:12px;font-weight:600}
-.chart-skeleton .spinner{width:28px;height:28px;border:3px solid var(--bd);border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:10px}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.satria-command-header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:20px;box-shadow:var(--shadow-sm);margin-bottom:16px;position:relative;overflow:hidden}
-.satria-command-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-kh)}
-.satria-command-badge{display:inline-flex;align-items:center;gap:6px;background:var(--acc-soft);border:1px solid var(--bd);color:var(--acc);font-size:10px;font-weight:800;letter-spacing:.07em;padding:4px 10px;border-radius:9999px;margin-bottom:10px}
-.satria-command-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--acc-ring);animation:pulseDot 2s infinite}
-.satria-command-title h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.02em}
-.satria-command-title p{margin:6px 0 0;color:var(--mut);font-size:13px}
-.satria-command-meta{display:flex;gap:12px}
-.satria-meta-card{background:var(--bg-2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;min-width:90px;text-align:center}
-.satria-meta-card span{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin-bottom:4px}
-.satria-meta-card b{font-size:18px;font-weight:800;color:var(--ink)}
-.satria-overview .satria-metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:16px;padding-top:16px;border-top:1px solid var(--bd)}
-.satria-overview .satria-metrics-row > div{background:var(--bg-2);border:1px solid var(--bd);border-radius:12px;padding:12px}
-.satria-overview .satria-metrics-row span{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px}
-.satria-overview .satria-metrics-row b{font-size:16px;font-weight:800;display:block;color:var(--ink)}
-.satria-overview .satria-metrics-row small{font-size:11px;color:var(--mut);margin-top:2px;display:block}
-@media(max-width:768px){
-  .chart-grid{grid-template-columns:1fr;gap:12px}
-  .chart-card.wide, .chart-card.half, .chart-card.third{grid-column:span 1}
-  .chart-card{min-height:260px}
-  .satria-command-header{flex-direction:column;padding:16px;border-radius:16px}
-  .satria-command-meta{width:100%;justify-content:space-between}
-  .satria-meta-card{flex:1;min-width:0}
-  .satria-overview .satria-metrics-row{grid-template-columns:1fr 1fr;gap:10px}
-}
-
 </style>
       <section class="satria-edit-opd-dialog" role="dialog" aria-modal="true" aria-labelledby="satriaEditUserOpdTitle">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div><h2 id="satriaEditUserOpdTitle">Atur OPD Pengguna</h2><p id="satriaEditUserOpdName"></p></div><button type="button" data-satria-edit-opd-close>Tutup</button></div>
@@ -5246,398 +5198,51 @@ if(location.hash.startsWith('#dok')){
 
 console.log('[SATRIA] Dokumen Pengadaan lazy load + virtual scroll active');
 
-
-// ===== D3 CHARTS LAZY LOAD ENGINE =====
-window.__chartObserver = null;
-window.__renderedCharts = new Set();
-window.__chartDataCache = {};
-
-function initChartLazyLoad(){
-  if(!('IntersectionObserver' in window)){
-    // Fallback: render all after delay
-    setTimeout(()=>{ if(typeof drawKhCharts==='function') drawKhCharts(); }, 800);
-    return;
-  }
-  
-  const chartIds = ['chartMultiYear','chartDonut','chartBarPaket','chartStatus','chartHpsPagu','chartOpd'];
-  const observer = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting){
-        const id = entry.target.id;
-        if(!window.__renderedCharts.has(id)){
-          window.__renderedCharts.add(id);
-          // Render only this chart
-          requestAnimationFrame(()=>{
-            renderSingleChart(id);
-          });
-        }
-      }
-    });
-  }, {rootMargin:'200px 0px', threshold:0.1});
-  
-  chartIds.forEach(id=>{
-    const el = document.getElementById(id);
-    if(el){
-      // Add skeleton if empty
-      if(!el.innerHTML.trim()){
-        el.innerHTML = `<div class="chart-skeleton"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading chart...</div></div>`;
-      }
-      observer.observe(el);
-    }
-  });
-  
-  window.__chartObserver = observer;
-  console.log('[SATRIA] Chart lazy observer active for', chartIds.length, 'charts');
-}
-
-function renderSingleChart(chartId){
-  if(typeof d3==='undefined') return;
-  const el = document.getElementById(chartId);
-  if(!el) return;
-  
-  const isMobile = window.innerWidth <= 768;
-  // Reduce complexity on mobile
-  if(isMobile){
-    // For mobile, simplify charts
-    el.style.height = chartId==='chartMultiYear' ? '280px' : '240px';
-  }
-  
-  // Call specific chart render based on id
-  if(typeof window.drawSingleChart === 'function'){
-    window.drawSingleChart(chartId);
-  } else {
-    // Fallback to full draw but with optimization
-    if(typeof drawKhCharts==='function'){
-      // Only draw if this chart exists
-      drawKhChartsSingle(chartId);
-    }
-  }
-}
-
-function drawKhChartsSingle(targetId){
-  if(typeof d3==='undefined') return;
-  const L = filt();
-  const isDark = document.documentElement.getAttribute('data-theme')==='dark';
-  const colMut = getComputedStyle(document.documentElement).getPropertyValue('--mut').trim() || '#64748b';
-  const colBd = getComputedStyle(document.documentElement).getPropertyValue('--bd').trim() || '#e2e8f0';
-  const colInk = getComputedStyle(document.documentElement).getPropertyValue('--ink-2').trim() || '#334155';
-  const COLORS = {
-    pagu: isDark ? '#22d3ee' : '#0891B2',
-    kontrak: isDark ? '#2dd4bf' : '#0F766E',
-    efisiensi: isDark ? '#34d399' : '#10B981',
-    hps: isDark ? '#818cf8' : '#2563EB',
-  };
-  
-  const isMobile = window.innerWidth <= 768;
-  
-  // Helper to show tip
-  function showTip(html, e){
-    let tip=document.getElementById('globalD3Tip');
-    if(!tip){ tip=document.createElement('div'); tip.id='globalD3Tip'; tip.className='d3-tooltip'; document.body.appendChild(tip); }
-    tip.textContent=String(html).replace(/<br\s*\/?\s*>/gi, '\n'); tip.style.whiteSpace='pre-line'; tip.style.opacity='1';
-    tip.style.left=(e.pageX+14)+'px'; tip.style.top=(e.pageY-28)+'px';
-  }
-  function hideTip(){ const tip=document.getElementById('globalD3Tip'); if(tip) tip.style.opacity='0'; }
-  
-  if(targetId==='chartMultiYear'){
-    const el=document.getElementById('chartMultiYear'); if(!el) return; el.innerHTML='';
-    const W=el.clientWidth, H=isMobile?280:340, m={top:20, right:20, bottom:32, left:64};
-    const data=S.tahun.map(t=>{ const x=filt(t); return {tahun:t, pagu:sum(x,p=>p.pagu), kontrak:sum(x,kontrak), efisiensi:sum(x,p=>p.pagu)-sum(x,kontrak), paket:x.length}; });
-    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
-    const x=d3.scaleBand().domain(data.map(d=>d.tahun)).range([m.left, W-m.right]).padding(0.28);
-    const y=d3.scaleLinear().domain([0, d3.max(data,d=>Math.max(d.pagu, d.kontrak))*1.15]).nice().range([H-m.bottom, m.top]);
-    svg.append('g').attr('class','grid').selectAll('line').data(y.ticks(isMobile?3:5)).join('line').attr('x1',m.left).attr('x2',W-m.right).attr('y1',d=>y(d)).attr('y2',d=>y(d)).attr('stroke',colBd).attr('stroke-dasharray','3 3').attr('opacity',.6);
-    svg.append('g').attr('transform',`translate(0,${H-m.bottom})`).call(d3.axisBottom(x).tickSize(0)).selectAll('text').attr('font-weight',700).attr('font-size', isMobile?'10px':'12px');
-    svg.append('g').attr('transform',`translate(${m.left},0)`).call(d3.axisLeft(y).ticks(isMobile?3:5).tickFormat(d=> (d/1e6).toFixed(1)+'jt')).selectAll('text').attr('fill',colMut).attr('font-size', isMobile?'10px':'11px');
-    const barW=x.bandwidth()/2.4;
-    svg.selectAll('.bar-pagu').data(data).join('rect').attr('x',d=>x(d.tahun)+2).attr('y',d=>y(d.pagu)).attr('width',barW).attr('height',d=>H-m.bottom-y(d.pagu)).attr('fill',COLORS.pagu).attr('rx',6).on('mousemove', function(e,d){ showTip(`TA ${d.tahun} • Pagu ${rp(d.pagu)}`, e); }).on('mouseleave', hideTip);
-    svg.selectAll('.bar-kontrak').data(data).join('rect').attr('x',d=>x(d.tahun)+barW+6).attr('y',d=>y(d.kontrak)).attr('width',barW).attr('height',d=>H-m.bottom-y(d.kontrak)).attr('fill',COLORS.kontrak).attr('rx',6).on('mousemove', function(e,d){ showTip(`TA ${d.tahun} • Kontrak ${rp(d.kontrak)}`, e); }).on('mouseleave', hideTip);
-    const line=d3.line().x(d=>x(d.tahun)+x.bandwidth()/2).y(d=>y(d.efisiensi)).curve(d3.curveMonotoneX);
-    svg.append('path').datum(data).attr('fill','none').attr('stroke',COLORS.efisiensi).attr('stroke-width', isMobile?2:3).attr('stroke-linecap','round').attr('d',line);
-    svg.selectAll('.dot-eff').data(data).join('circle').attr('cx',d=>x(d.tahun)+x.bandwidth()/2).attr('cy',d=>y(d.efisiensi)).attr('r', isMobile?4:5).attr('fill',COLORS.efisiensi).attr('stroke','#fff').attr('stroke-width',2);
-    const leg=document.getElementById('legendMultiYear'); if(leg) leg.innerHTML=`<div class="d3-legend-item"><span class="d3-legend-dot" style="background:${COLORS.pagu}"></span>Pagu</div><div class="d3-legend-item"><span class="d3-legend-dot" style="background:${COLORS.kontrak}"></span>Kontrak</div><div class="d3-legend-item"><span class="d3-legend-dot" style="background:${COLORS.efisiensi}"></span>Efisiensi</div>`;
-  }
-  
-  if(targetId==='chartDonut'){
-    const el=document.getElementById('chartDonut'); if(!el) return; el.innerHTML='';
-    const W=isMobile?240:280, H=isMobile?240:280, R=Math.min(W,H)/2-12;
-    const L=filt(); const pagu=sum(L,p=>p.pagu), k=sum(L,kontrak), sisa=pagu-k;
-    const data=[{label:'Kontrak', value:k, color:COLORS.kontrak},{label:'Efisiensi', value:sisa, color:COLORS.efisiensi}];
-    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`).append('g').attr('transform',`translate(${W/2},${H/2})`);
-    const pie=d3.pie().value(d=>d.value).sort(null).padAngle(0.04);
-    const arc=d3.arc().innerRadius(R*0.62).outerRadius(R).cornerRadius(8);
-    svg.selectAll('.arc').data(pie(data)).join('path').attr('d',arc).attr('fill',d=>d.data.color).on('mousemove',(e,d)=>showTip(`${d.data.label}: ${rp(d.data.value)} (${(d.data.value/pagu*100).toFixed(1)}%)`, e)).on('mouseleave',hideTip);
-    svg.append('text').attr('text-anchor','middle').attr('dy','-6').attr('font-size','11px').attr('font-weight','800').attr('fill',colMut).text('TOTAL PAGU');
-    svg.append('text').attr('text-anchor','middle').attr('dy','14').attr('font-size', isMobile?'14px':'16px').attr('font-weight','800').attr('fill',colInk).text(rp(pagu).replace('Rp ',''));
-  }
-  
-  if(targetId==='chartBarPaket'){
-    const el=document.getElementById('chartBarPaket'); if(!el) return; el.innerHTML='';
-    const W=el.clientWidth, H=isMobile?240:280, m={top:10,right:12,bottom:28,left:48};
-    const data=filt().map(p=>({nama:p.nama.slice(0,isMobile?16:22), efisiensi:p.pagu-kontrak(p), pagu:p.pagu})).sort((a,b)=>b.efisiensi-a.efisiensi).slice(0,isMobile?5:8);
-    if(!data.length) return;
-    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
-    const x=d3.scaleLinear().domain([0, d3.max(data,d=>d.efisiensi)*1.2]).range([m.left, W-m.right]);
-    const y=d3.scaleBand().domain(data.map(d=>d.nama)).range([m.top, H-m.bottom]).padding(0.22);
-    svg.append('g').attr('transform',`translate(0,${H-m.bottom})`).call(d3.axisBottom(x).ticks(isMobile?3:4).tickFormat(d=>d>=1e6?(d/1e6).toFixed(1)+'jt':d)).selectAll('text').attr('fill',colMut).attr('font-size','10px');
-    svg.append('g').attr('transform',`translate(${m.left},0)`).call(d3.axisLeft(y).tickSize(0)).selectAll('text').attr('fill',colInk).attr('font-weight','600').attr('font-size', isMobile?'9px':'10px');
-    svg.selectAll('.bar').data(data).join('rect').attr('x',m.left).attr('y',d=>y(d.nama)).attr('width',d=>x(d.efisiensi)-m.left).attr('height',y.bandwidth()).attr('fill', COLORS.efisiensi).attr('rx',6).on('mousemove',(e,d)=>showTip(`${d.nama}: Efisiensi ${rp(d.efisiensi)}`, e)).on('mouseleave',hideTip);
-  }
-  
-  if(targetId==='chartStatus'){
-    const el=document.getElementById('chartStatus'); if(!el) return; el.innerHTML='';
-    const W=isMobile?200:240,H=isMobile?200:240,R=isMobile?70:90;
-    const counts={}; filt().forEach(p=>{const s=stt(p); counts[s]=(counts[s]||0)+1;});
-    const data=Object.entries(counts).map(([k,v])=>({label:k, value:v}));
-    const color=d3.scaleOrdinal().domain(data.map(d=>d.label)).range([COLORS.kontrak, COLORS.pagu, COLORS.efisiensi, '#8b5cf6', '#f59e0b']);
-    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`).append('g').attr('transform',`translate(${W/2},${H/2})`);
-    const pie=d3.pie().value(d=>d.value).sort(null);
-    const arc=d3.arc().innerRadius(R*0.55).outerRadius(R).cornerRadius(6);
-    svg.selectAll('path').data(pie(data)).join('path').attr('d',arc).attr('fill',d=>color(d.data.label)).on('mousemove',(e,d)=>showTip(`${d.data.label}: ${d.data.value} paket`, e)).on('mouseleave',hideTip);
-  }
-  
-  if(targetId==='chartHpsPagu'){
-    const el=document.getElementById('chartHpsPagu'); if(!el) return; el.innerHTML='';
-    const W=el.clientWidth,H=isMobile?200:240,m={top:10,right:10,bottom:28,left:44};
-    const data=filt().map(p=>({hps:hps(p), pagu:p.pagu, nama:p.nama.slice(0,18)}));
-    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
-    const mx=d3.max(data,d=>Math.max(d.pagu,d.hps))*1.1;const x=d3.scaleLinear().domain([0,mx]).range([m.left,W-m.right]);
-    const y=d3.scaleLinear().domain([0,mx]).range([H-m.bottom,m.top]);
-    svg.append('g').attr('transform',`translate(0,${H-m.bottom})`).call(d3.axisBottom(x).ticks(isMobile?2:3).tickFormat(d=> (d/1e6).toFixed(0)+'jt')).selectAll('text').attr('fill',colMut).attr('font-size','10px');
-    svg.append('g').attr('transform',`translate(${m.left},0)`).call(d3.axisLeft(y).ticks(isMobile?3:4).tickFormat(d=> (d/1e6).toFixed(0)+'jt')).selectAll('text').attr('fill',colMut).attr('font-size','10px');
-    svg.append('line').attr('x1',x(0)).attr('y1',y(0)).attr('x2',x(mx)).attr('y2',y(mx)).attr('stroke',colBd).attr('stroke-dasharray','4 4');
-    svg.selectAll('circle').data(data).join('circle').attr('cx',d=>x(d.pagu)).attr('cy',d=>y(d.hps)).attr('r', isMobile?4:6).attr('fill',COLORS.kontrak).attr('stroke','#fff').attr('stroke-width',2).on('mousemove',(e,d)=>showTip(`${d.nama}<br>Pagu ${rp(d.pagu)} • HPS ${rp(d.hps)}`, e)).on('mouseleave',hideTip);
-  }
-  
-  if(targetId==='chartOpd'){
-    const el=document.getElementById('chartOpd'); if(!el) return; el.innerHTML='';
-    const W=el.clientWidth,H=isMobile?200:240,m={top:6,right:10,bottom:24,left:80};
-    const map={}; filt().forEach(p=>{const k=O(p.opd).singkat||'OPD'; map[k]=(map[k]||0)+kontrak(p);});
-    const data=Object.entries(map).map(([k,v])=>({opd:k, val:v})).sort((a,b)=>b.val-a.val).slice(0, isMobile?5:10);
-    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
-    const x=d3.scaleLinear().domain([0,d3.max(data,d=>d.val)||1]).range([m.left,W-m.right]);
-    const y=d3.scaleBand().domain(data.map(d=>d.opd)).range([m.top,H-m.bottom]).padding(0.3);
-    svg.append('g').attr('transform',`translate(0,${H-m.bottom})`).call(d3.axisBottom(x).ticks(isMobile?2:3).tickFormat(d=> (d/1e6).toFixed(0)+'jt')).selectAll('text').attr('fill',colMut).attr('font-size','10px');
-    svg.append('g').attr('transform',`translate(${m.left},0)`).call(d3.axisLeft(y).tickSize(0)).selectAll('text').attr('fill',colInk).attr('font-weight','700').attr('font-size', isMobile?'10px':'11px');
-    svg.selectAll('.bar').data(data).join('rect').attr('x',m.left).attr('y',d=>y(d.opd)).attr('width',d=>x(d.val)-m.left).attr('height',y.bandwidth()).attr('fill',COLORS.kontrak).attr('rx',6).on('mousemove',(e,d)=>showTip(`${d.opd}: ${rp(d.val)}`, e)).on('mouseleave',hideTip);
-  }
-}
-
-// Override original drawKhCharts to use lazy
-const originalDrawKhCharts = window.drawKhCharts;
-window.drawKhCharts = function(){
-  // If already using lazy, just ensure visible charts are rendered
-  if(window.__renderedCharts && window.__renderedCharts.size>0){
-    document.querySelectorAll('[id^="chart"]').forEach(el=>{
-      if(el.getBoundingClientRect().top < window.innerHeight + 200){
-        if(!window.__renderedCharts.has(el.id)){
-          window.__renderedCharts.add(el.id);
-          drawKhChartsSingle(el.id);
-        }
-      }
-    });
-    return;
-  }
-  // Initial load - use lazy
-  initChartLazyLoad();
-};
-
-// Hook to render
-(function(){
-  if(window.render){
-    const orig=window.render;
-    window.render=function(){
-      orig();
-      requestAnimationFrame(()=>{
-        initChartLazyLoad();
-      });
-    };
-  }
-  window.addEventListener('resize', ()=>{ 
-    clearTimeout(window._khResize); 
-    window._khResize=setTimeout(()=>{
-      window.__renderedCharts.clear();
-      initChartLazyLoad();
-    }, 300); 
-  }, {passive:true});
-  document.addEventListener('DOMContentLoaded', ()=>{
-    setTimeout(initChartLazyLoad, 800);
-  });
-})();
-
-// Laporan Analisis virtual scroll
-window.__lapVirtualData = [];
-function initLapVirtualScroll(){
-  const table = document.querySelector('#lapTable');
-  if(!table) return;
-  const rows = table.querySelectorAll('tbody tr');
-  if(rows.length <= 30) return; // Only virtualize if many rows
-  
-  const container = table.parentElement;
-  if(container.classList.contains('virtualized')) return;
-  
-  container.classList.add('virtualized');
-  container.style.maxHeight = '60vh';
-  container.style.overflow = 'auto';
-  container.style.contain = 'layout';
-  
-  // Add virtual scroll indicator
-  const indicator = document.createElement('div');
-  indicator.className = 'satria-virtual-footer';
-  indicator.innerHTML = `<span>${rows.length} baris • scroll untuk lihat semua • virtual aktif</span><span class="mut">Hemat DOM di mobile</span>`;
-  indicator.style.marginTop = '8px';
-  container.parentNode.insertBefore(indicator, container.nextSibling);
-}
-
-setTimeout(initLapVirtualScroll, 1000);
-window.addEventListener('hashchange', ()=>{
-  if(location.hash.startsWith('#lap')){
-    setTimeout(initLapVirtualScroll, 300);
-  }
-});
-
-console.log('[SATRIA] Dashboard lazy charts + Laporan virtual active');
-
 </script>
 
 
-<!-- PWA AWA + Supabase Auto Sync HP -->
+<!-- PWA AWA Fixed v2 -->
 <div id="pwaInstallBanner" hidden>
-  <span>📲 Install SATRIA ke HP untuk auto-sync Supabase?</span>
-  <button id="pwaInstallBtn">Install</button>
-  <button id="pwaDismissBtn" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3)">Nanti</button>
+  <span>📲 Install SATRIA ke HP?</span>
+  <button id="pwaInstallBtn" type="button">Install</button>
+  <button id="pwaDismissBtn" type="button" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3)">Nanti</button>
 </div>
-<div id="satriaSyncBadge" class="satria-sync-badge" hidden><span class="dot" style="width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block"></span><span id="syncBadgeText">Siap</span></div>
-
+<div id="satriaSyncBadge" class="satria-sync-badge" hidden><span style="width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block"></span><span id="syncBadgeText">Siap</span></div>
 <script>
-// ===== PWA AWA - Auto Sync Supabase di HP =====
+// PWA Safe
 (function(){
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
-  const badge = document.getElementById('satriaSyncBadge');
-  const badgeText = document.getElementById('syncBadgeText');
-  let deferredPrompt = null;
-  
-  // 1. Register Service Worker
-  if('serviceWorker' in navigator){
-    window.addEventListener('load', async ()=>{
+  try{
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    if('serviceWorker' in navigator){
+      window.addEventListener('load', function(){
+        navigator.serviceWorker.register('./sw.js').then(function(r){ console.log('[PWA] SW', r.scope); }).catch(function(e){ console.warn('SW fail', e); });
+      });
+    }
+    let deferredPrompt=null;
+    window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferredPrompt=e; const b=document.getElementById('pwaInstallBanner'); if(b && !localStorage.getItem('satria-pwa-dismissed')) b.hidden=false; });
+    const ib=document.getElementById('pwaInstallBtn'); if(ib) ib.addEventListener('click', function(){ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; } const b=document.getElementById('pwaInstallBanner'); if(b) b.hidden=true; });
+    const db=document.getElementById('pwaDismissBtn'); if(db) db.addEventListener('click', function(){ const b=document.getElementById('pwaInstallBanner'); if(b) b.hidden=true; try{localStorage.setItem('satria-pwa-dismissed','1');}catch(_){} });
+    function setSyncState(s,t){ const b=document.getElementById('satriaSyncBadge'), tx=document.getElementById('syncBadgeText'); if(!b||!tx) return; b.hidden=false; b.dataset.state=s; tx.textContent=t; if(s==='idle') setTimeout(function(){b.hidden=true;},3500); }
+    let hookInt=setInterval(function(){
+      if(typeof window.SATRIA_AUTO_SYNC_REQUEST==='function' && !window.__satriaSyncHooked){
+        const orig=window.SATRIA_AUTO_SYNC_REQUEST;
+        window.SATRIA_AUTO_SYNC_REQUEST=function(k,l){ setSyncState('syncing','⏳ Sync...'); try{orig(k,l);}catch(e){} };
+        window.__satriaSyncHooked=true; clearInterval(hookInt);
+      }
+    },800);
+    setTimeout(function(){clearInterval(hookInt);},15000);
+    window.addEventListener('online', function(){ setSyncState('idle','🌐 Online'); });
+    window.addEventListener('offline', function(){ setSyncState('error','📴 Offline di HP'); });
+    setTimeout(function(){
       try{
-        const reg = await navigator.serviceWorker.register('./sw.js');
-        console.log('[SATRIA PWA] SW registered', reg.scope);
-        // Check update every hour
-        setInterval(()=>reg.update(), 3600000);
-      }catch(e){ console.warn('[SATRIA PWA] SW failed', e); }
-    });
-  }
-  
-  // 2. PWA Install prompt
-  window.addEventListener('beforeinstallprompt', (e)=>{
-    e.preventDefault();
-    deferredPrompt = e;
-    const banner = document.getElementById('pwaInstallBanner');
-    if(banner && !localStorage.getItem('satria-pwa-dismissed')) banner.hidden = false;
-  });
-  document.getElementById('pwaInstallBtn')?.addEventListener('click', async ()=>{
-    if(deferredPrompt){ deferredPrompt.prompt(); const {outcome} = await deferredPrompt.userChoice; console.log('[PWA] install', outcome); deferredPrompt=null; }
-    document.getElementById('pwaInstallBanner').hidden=true;
-  });
-  document.getElementById('pwaDismissBtn')?.addEventListener('click', ()=>{
-    document.getElementById('pwaInstallBanner').hidden=true;
-    localStorage.setItem('satria-pwa-dismissed','1');
-  });
-  window.addEventListener('appinstalled', ()=>{ console.log('[PWA] installed'); document.getElementById('pwaInstallBanner').hidden=true; });
-  
-  // 3. Supabase Auto Sync di HP - enhanced
-  function setSyncState(state, text){
-    if(!badge) return;
-    badge.hidden = false;
-    badge.dataset.state = state;
-    badgeText.textContent = text;
-    if(state==='idle') setTimeout(()=>badge.hidden=true, 3000);
-  }
-  
-  // Override toast to also show sync badge on mobile
-  const origToast = window.toast;
-  window.toast = function(m){
-    if(origToast) origToast(m);
-    if(isMobile && m.includes('Perubahan dicatat')) setSyncState('syncing','⏳ Menyimpan ke HP & Cloud...');
-  };
-  
-  // Hook ke SATRIA_AUTO_SYNC_REQUEST yang sudah ada
-  let syncRequestCount = 0;
-  const checkSyncHook = setInterval(()=>{
-    if(typeof window.SATRIA_AUTO_SYNC_REQUEST === 'function' && !window.__satriaSyncHooked){
-      const origSync = window.SATRIA_AUTO_SYNC_REQUEST;
-      window.SATRIA_AUTO_SYNC_REQUEST = function(k,label){
-        syncRequestCount++;
-        setSyncState('syncing','⏳ Auto-sync ke Supabase...');
-        console.log('[SATRIA SYNC] HP -> Supabase request', k, label, 'count', syncRequestCount);
-        // Panggil original yang sudah debounce 850ms
-        origSync(k,label);
-        // Monitor status
-        const check = setInterval(()=>{
-          const indicator = document.getElementById('satriaCloudSyncIndicator');
-          if(indicator){
-            const txt = indicator.textContent||'';
-            if(txt.includes('tersinkron') || txt.includes('Cloud terhubung')){
-              setSyncState('idle','✅ Sinkron ke Supabase');
-              clearInterval(check);
-            } else if(txt.includes('error') || txt.includes('Konflik')){
-              setSyncState('error','⚠️ '+txt.slice(0,40));
-              clearInterval(check);
-            }
-          }
-        }, 800);
-        setTimeout(()=>clearInterval(check), 15000);
-      };
-      window.__satriaSyncHooked = true;
-      console.log('[SATRIA] HP auto-sync hook active');
-      clearInterval(checkSyncHook);
-    }
-  }, 500);
-  
-  // 4. Online/offline handling untuk HP
-  window.addEventListener('online', ()=>{ setSyncState('idle','🌐 Online • siap sync'); if(typeof window.SATRIA_AUTO_SYNC_REQUEST==='function') window.SATRIA_AUTO_SYNC_REQUEST('online','Koneksi pulih'); });
-  window.addEventListener('offline', ()=>{ setSyncState('error','📴 Offline • disimpan di HP'); });
-  
-  // 5. Visibility change - sync saat kembali ke app
-  document.addEventListener('visibilitychange', ()=>{
-    if(!document.hidden && navigator.onLine && typeof window.SATRIA_AUTO_SYNC_REQUEST==='function'){
-      // Jika ada dirty, sync
-      if(window.S && window.S.dirty){ window.SATRIA_AUTO_SYNC_REQUEST('visibility','Kembali ke aplikasi'); }
-    }
-  });
-  
-  // 6. Before unload - warning jika belum sync
-  window.addEventListener('beforeunload', (e)=>{
-    if(window.S && window.S.dirty && window.SATRIA_CLOUD_CONFIGURED){
-      e.preventDefault(); e.returnValue = 'Ada perubahan belum sinkron ke Supabase. Yakin keluar?';
-    }
-  });
-  
-  // 7. Embedded Supabase config helper untuk HP (jika belum ada config, buka modal otomatis di mobile)
-  setTimeout(()=>{
-    const hasConfig = !!localStorage.getItem('satria-supabase-bridge-config-v1') || !!window.SATRIA_EMBEDDED_SUPABASE_CONFIG;
-    if(!hasConfig && isMobile){
-      console.log('[SATRIA] No Supabase config on HP, showing hint');
-      setSyncState('error','⚙️ Atur Supabase di Pengaturan → Cloud Sync');
-    } else if(hasConfig){
-      setSyncState('idle','✅ Auto-sync aktif');
-    }
-  }, 2000);
-  
-  console.log('[SATRIA AWA] PWA + HP auto-sync to Supabase active, mobile:', isMobile);
+        const hasConfig=!!localStorage.getItem('satria-supabase-bridge-config-v1') || (window.SATRIA_EMBEDDED_SUPABASE_CONFIG && window.SATRIA_EMBEDDED_SUPABASE_CONFIG.url);
+        if(hasConfig) setSyncState('idle','✅ Auto-sync aktif');
+      }catch(_){}
+    },2500);
+  }catch(e){ console.warn('PWA init', e); }
 })();
 </script>
-
-<!-- EMBEDDED SUPABASE CONFIG - ISI DI SINI UNTUK AUTO-LOGIN DI HP (opsional, aman untuk anon key) -->
-<script>
-// Jika mau auto-sync tanpa input manual di HP, isi config di bawah, lalu build ulang.
-// JANGAN isi service_role key di sini, hanya anon/publishable key.
-// Contoh:
-window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.supabase.co","key":"sb_publishable_gdDUVrD16HQaVB-nrgdqeg_B2Rk7v9H","org":"64bec4e1-a687-4dce-8935-cc51363171db"};
-// Biarkan kosong jika mau login manual via modal Cloud Sync.
-window.SATRIA_EMBEDDED_SUPABASE_CONFIG = window.SATRIA_EMBEDDED_SUPABASE_CONFIG || {};
-</script>
+<script>window.SATRIA_EMBEDDED_SUPABASE_CONFIG = window.SATRIA_EMBEDDED_SUPABASE_CONFIG || {};</script>
 
 </body>
 </html>
