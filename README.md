@@ -20,6 +20,7 @@ Repo ini menyediakan modul pengguna Supabase Auth dan assignment OPD untuk aplik
 - `supabase/migrations/20261024052900_satria_opd_assignments_rls.sql`
 - `supabase/migrations/20261024053000_satria_user_opd_assignment_api.sql`
 - `supabase/migrations/20261024053100_satria_catalog_and_assignment_repair.sql`
+- `supabase/migrations/20261024053200_satria_scoped_access_and_years.sql`
 - `supabase/migrations/20261024_satria_user_creation_security.sql`
 - `supabase/satria-supabase-staging-bootstrap.sql`
 
@@ -30,9 +31,10 @@ Repo ini menyediakan modul pengguna Supabase Auth dan assignment OPD untuk aplik
 3. Terapkan `supabase/migrations/20261024052900_satria_opd_assignments_rls.sql`.
 4. Terapkan `supabase/migrations/20261024053000_satria_user_opd_assignment_api.sql`.
 5. Terapkan `supabase/migrations/20261024053100_satria_catalog_and_assignment_repair.sql`.
-6. Gabungkan konfigurasi `supabase/config.toml` dengan konfigurasi project yang sudah ada; jangan menimpa fungsi lain.
-7. Set `ALLOWED_ORIGINS` ke origin aplikasi yang tepat. Pastikan Supabase runtime menyediakan `SUPABASE_URL`, publishable key, dan secret/service-role key.
-8. Deploy Edge Function:
+6. Terapkan `supabase/migrations/20261024053200_satria_scoped_access_and_years.sql` terakhir untuk hardening OPD + tahun.
+7. Gabungkan konfigurasi `supabase/config.toml` dengan konfigurasi project yang sudah ada; jangan menimpa fungsi lain.
+8. Set `ALLOWED_ORIGINS` ke origin aplikasi yang tepat. Pastikan Supabase runtime menyediakan `SUPABASE_URL`, publishable key, dan secret/service-role key.
+9. Deploy Edge Function:
 
 ```bash
 supabase functions deploy admin-list-users
@@ -48,9 +50,11 @@ Semua fungsi memakai `verify_jwt = true` dan tetap memeriksa token serta members
 
 Lihat `frontend/OPD-Frontend-Integration.md` untuk alur penggunaan, pengujian, dan batas keamanan saat ini.
 
-## Batas keamanan penting
+## Batas keamanan penting — rilis scope tahap 1–3
 
-SATRIA masih menyimpan data bisnis sebagai satu snapshot JSON organisasi. Assignment OPD tersimpan dengan benar dan tersedia bagi kebijakan RLS pada tabel terstruktur, tetapi belum otomatis menyaring isi `satria_state.payload` per OPD. Isolasi data penuh membutuhkan migrasi data bisnis ke tabel terstruktur atau API server yang menerapkan scope OPD sebelum mengirim respons. Jangan menganggap assignment ini sebagai pengamanan penuh terhadap pembacaan payload JSON organisasi.
+Setelah migrasi `20261024053200_satria_scoped_access_and_years.sql` diterapkan dan fungsi frontend terbaru dideploy, pembacaan snapshot langsung dan penggantian snapshot penuh dibatasi untuk admin aktif. Operator/Viewer memakai RPC allowlist yang memfilter OPD dan tahun, sedangkan Operator menulis melalui RPC merge yang memvalidasi scope dan referential integrity. Ini adalah batas keamanan database; filter browser hanya untuk tampilan.
+
+Data bisnis masih disimpan dalam snapshot JSON sehingga ini merupakan jembatan kompatibilitas, bukan skema relasional final. Tabel bisnis terstruktur dengan foreign key dan RLS per record tetap direkomendasikan untuk isolasi granular, audit yang lebih mudah, dan pengurangan konflik versi. **Jangan menganggap kontrol runtime aktif sebelum seluruh migrasi diterapkan, Edge Functions diperbarui, dan matriks uji negatif di staging lulus.**
 
 ## Persistensi konfigurasi koneksi
 
@@ -85,3 +89,12 @@ The client has a friendly diagnostic for `Invalid login credentials`, a password
 Jika antarmuka menampilkan `Respons Edge Function tidak valid`, fungsi `admin-list-users` yang aktif belum memakai kontrak respons terbaru. HTML baru tetap mencoba jalur fallback yang dibatasi RLS: membaca membership dan assignment dari tabel organisasi, serta menyinkronkan katalog OPD dari `satria_state.payload.opd` menjadi `satria_opds`. Jalur ini hanya menampilkan data apabila sesi admin aktif dan policy database mengizinkan akses.
 
 Urutan pemulihan yang diperlukan: (1) pastikan snapshot cloud organisasi memuat array `opd` yang benar; (2) jalankan migrasi `20261024053100_satria_catalog_and_assignment_repair.sql`; (3) deploy ulang `admin-list-users` dan `admin-create-user` dari paket ini. Tombol simpan assignment menggunakan RPC baru `satria_admin_assign_my_membership_opds` yang memverifikasi `auth.uid()` sebagai admin aktif, menyimpan perubahan secara atomic, dan menulis audit dalam transaksi yang sama. Jangan memberi izin eksekusi ke fungsi lama yang menerima actor ID arbitrer untuk role `authenticated`.
+
+
+## Perbaikan sinkronisasi katalog OPD dari Data Master lokal (24 Oktober 2026)
+
+Jika daftar pengguna tampil tetapi modal Atur OPD kosong sementara indikator aplikasi menunjukkan perubahan belum di-backup, versi HTML terbaru menampilkan tombol **Sinkronkan master OPD dari Data Master**. Ini memanggil action `sync_local_catalog` pada Edge Function `admin-list-users`, memvalidasi admin aktif, memeriksa versi snapshot, lalu memperbarui hanya `payload.opd` dan katalog `satria_opds`. Bagian paket/dokumen dan bagian snapshot lainnya tidak diganti. Untuk mengaktifkan fitur, deploy ulang `admin-list-users` dari paket ini. Jika terjadi konflik versi, tarik snapshot terbaru dan bandingkan sebelum mengulang.
+
+## OPD + Tahun access hardening (Stage 1–3)
+
+See [`docs/SECURITY_SCOPE_HARDENING.md`](docs/SECURITY_SCOPE_HARDENING.md) for the deployment order and required staging tests. The latest migration is `supabase/migrations/20261024053200_satria_scoped_access_and_years.sql`. It makes direct snapshot read/full replacement admin-only, adds explicit year assignments, serializes scope changes against reads/writes, validates package-to-master/winner references, and moves non-admin reads/writes to scoped RPCs. After applying the migration, existing Operators and Viewers must be assigned both OPD and fiscal year by an admin before they can access scoped data. Deploy the updated `admin-list-users` and `admin-create-user` Edge Functions, then run `supabase/tests/security_hardening_assertions.sql` and the live negative test matrix in `docs/SECURITY_SCOPE_HARDENING.md`.

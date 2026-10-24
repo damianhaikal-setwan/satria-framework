@@ -8,6 +8,7 @@ type CreateUserBody = {
   initial_password: string;
   display_name?: string;
   opd_ids?: unknown;
+  year_ids?: unknown;
 };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -16,6 +17,7 @@ const MAX_BODY_BYTES = 32_768;
 const MIN_PASSWORD_LENGTH = 12;
 const MAX_PASSWORD_LENGTH = 128;
 const MAX_OPD_ASSIGNMENTS = 100;
+const MAX_YEAR_ASSIGNMENTS = 40;
 
 function defaultKey(mapEnv: string, singularEnv: string, legacyEnv: string): string {
   const mapped = Deno.env.get(mapEnv);
@@ -89,6 +91,20 @@ function normalizeOpdIds(value: unknown): string[] {
   return ids;
 }
 
+function normalizeYears(value: unknown): number[] {
+  if (!Array.isArray(value) || value.length < 1 || value.length > MAX_YEAR_ASSIGNMENTS) {
+    throw new Error("Pilih minimal satu tahun anggaran dan maksimal 40 tahun.");
+  }
+  const years = value.map((item) => {
+    if (typeof item !== "number" || !Number.isInteger(item) || item < 2000 || item > 2200) {
+      throw new Error("Tahun anggaran harus berupa angka bulat antara 2000 dan 2200.");
+    }
+    return item;
+  });
+  if (new Set(years).size !== years.length) throw new Error("Terdapat tahun anggaran yang duplikat.");
+  return years.sort((a, b) => a - b);
+}
+
 Deno.serve(async (request: Request): Promise<Response> => {
   const requestId = crypto.randomUUID();
   let config: ReturnType<typeof getConfig>;
@@ -138,7 +154,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
     const parsed: unknown = JSON.parse(rawBody);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("body must be an object");
     const candidate = parsed as Record<string, unknown>;
-    const allowedFields = new Set(["organization_id", "email", "role", "initial_password", "display_name", "opd_ids"]);
+    const allowedFields = new Set(["organization_id", "email", "role", "initial_password", "display_name", "opd_ids", "year_ids"]);
     if (Object.keys(candidate).some((key) => !allowedFields.has(key))) throw new Error("unexpected field");
     body = candidate as CreateUserBody;
   } catch {
@@ -181,6 +197,17 @@ Deno.serve(async (request: Request): Promise<Response> => {
     }
   } else if (body.opd_ids !== undefined && (!Array.isArray(body.opd_ids) || body.opd_ids.length > 0)) {
     return response(request, 400, { error: "Admin memiliki akses organisasi; assignment OPD tidak perlu dikirim.", request_id: requestId }, config.allowedOrigins);
+  }
+
+  let yearIds: number[] = [];
+  if (role === "operator") {
+    try {
+      yearIds = normalizeYears(body.year_ids);
+    } catch (error) {
+      return response(request, 400, { error: error instanceof Error ? error.message : "Penetapan tahun tidak valid.", request_id: requestId }, config.allowedOrigins);
+    }
+  } else if (body.year_ids !== undefined && (!Array.isArray(body.year_ids) || body.year_ids.length > 0)) {
+    return response(request, 400, { error: "Admin memiliki akses seluruh tahun; assignment tahun tidak perlu dikirim.", request_id: requestId }, config.allowedOrigins);
   }
 
   const authorization = request.headers.get("Authorization") ?? "";
@@ -296,12 +323,44 @@ Deno.serve(async (request: Request): Promise<Response> => {
     }
   }
 
+  if (role === "operator") {
+    const { error: yearAssignmentError } = await adminClient.rpc("satria_admin_set_membership_years", {
+      p_organization_id: organizationId,
+      p_actor_user_id: actor.id,
+      p_target_user_id: createdUser.id,
+      p_years: yearIds,
+    });
+    if (yearAssignmentError) {
+      const { error: membershipRollbackError } = await adminClient
+        .from("satria_memberships")
+        .delete()
+        .eq("organization_id", organizationId)
+        .eq("user_id", createdUser.id);
+      const { error: authRollbackError } = await adminClient.auth.admin.deleteUser(createdUser.id);
+      console.error(JSON.stringify({
+        event: "year_assignment_failed",
+        requestId,
+        actorId: actor.id,
+        organizationId,
+        targetUserId: createdUser.id,
+        assignmentCode: yearAssignmentError.code ?? "unknown",
+        rollbackSucceeded: !membershipRollbackError && !authRollbackError,
+      }));
+      return response(request, 400, {
+        error: membershipRollbackError || authRollbackError
+          ? "Penetapan tahun gagal; pembersihan akun tidak tuntas. Admin proyek perlu memeriksa akun tersebut."
+          : "Penetapan tahun gagal. Akun baru sudah dibatalkan; terapkan migrasi scope OPD/tahun terbaru.",
+        request_id: requestId,
+      }, config.allowedOrigins);
+    }
+  }
+
   const { error: auditError } = await adminClient.from("satria_admin_audit_logs").insert({
     organization_id: organizationId,
     actor_user_id: actor.id,
     target_user_id: createdUser.id,
     action: "user_created",
-    details: { role, email_confirmed: true, opd_ids: role === "operator" ? opdIds : [] },
+    details: { role, email_confirmed: true, opd_ids: role === "operator" ? opdIds : [], year_ids: role === "operator" ? yearIds : [] },
   });
   if (auditError) {
     console.error(JSON.stringify({ event: "audit_insert_failed", requestId, actorId: actor.id, organizationId, targetUserId: createdUser.id }));
@@ -313,6 +372,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
     user: { id: createdUser.id, email: createdUser.email },
     role,
     opd_ids: role === "operator" ? opdIds : [],
+    year_ids: role === "operator" ? yearIds : [],
     email_confirmed: true,
     email_sent: false,
     audit_recorded: !auditError,

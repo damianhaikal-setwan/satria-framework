@@ -1236,11 +1236,28 @@ document.addEventListener('click',e=>{
  const t=e.target.closest('[data-act]');if(!t)return;
  const a=t.dataset.act,id=t.dataset.id,pid=t.dataset.pid,d=t.dataset;
  if(WRITE.includes(a)&&!canWrite()){toast('Akun Viewer hanya dapat melihat data');return}
+ if(window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE&&window.SATRIA_CLOUD_ROLE!=='admin'){
+   if(['addopd','addyear','delyear','rmlogo','reset','clearsample','uadd','utoggle','udel'].includes(a)){
+     toast('Pengaturan organisasi, daftar OPD/tahun, dan reset penuh hanya dapat dilakukan admin.');return;
+   }
+   if(a==='madd'&&['opd','akun','kode'].includes(d.m)){
+     toast('Master OPD dan referensi akun/kode bersifat organisasi; hanya admin yang dapat mengubahnya.');return;
+   }
+   if(a==='addrow'&&['opd','akun','kode','users'].includes(d.c)){
+     toast('Master organisasi ini hanya dapat diubah oleh admin.');return;
+   }
+   if(a==='delrow'&&['opd','akun','kode','users'].includes(d.c)){
+     toast('Master organisasi ini hanya dapat diubah oleh admin.');return;
+   }
+   if(a==='medit'&&['opd','akun','kode'].includes(S.ui.mtab)){
+     toast('Master organisasi ini hanya dapat diubah oleh admin.');return;
+   }
+ }
  if(a==='chatsend'){return chatSend($('#chatIn').value)}
  if(a==='chatq'){return chatSend(d.q)}
  if(a==='chatclear'){S.chat=[];return render()}
  if(a==='newpaket'){const opd=S.ui.opd==='all'?S.opd[0].id:S.ui.opd;const p={id:uid('k'),tahun:S.ui.tahun,opd,unit:(S.unit.find(u=>u.opd===opd)||{}).id,seq:nextSeq(S.ui.tahun,opd),nama:'Paket baru',rup:'',pagu:0,sumber:S.pemda.sumber,sub:S.kode[0].kode,ppk:pjId(opd,'PPK'),pp:pjId(opd,'PP'),kabid:pjId(opd,'Kabid'),masaHk:7,jenisPengadaan:'Barang',metodePemilihan:'E-Purchasing dengan Negosiasi Harga',lokasiPengiriman:O(opd).tempat||O(opd).alamat||'',tglSurvei:'',tglEvaluasi:'',tglNego:'',tglPenetapan:'',tglNodis:'',tglDpp:'',tglSppbj:'',tglBahp:'',batas:'',pemenangId:null,items:[],penawaran:[]};S.paket.push(p);S.ui.ptab='data';location.hash='#paket/'+p.id;sync('paket','Paket baru dibuat');return render()}
- if(a==='copy'){const s=P(id);if(!S.tahun.includes(s.tahun+1)){S.tahun.push(s.tahun+1);S.tahun.sort()}const n=JSON.parse(JSON.stringify(s));Object.assign(n,{id:uid('k'),tahun:s.tahun+1,seq:nextSeq(s.tahun+1,s.opd),rup:'',pemenangId:null,penawaran:[],tglNodis:'',tglSurvei:'',tglEvaluasi:'',tglNego:'',tglPenetapan:'',tglDpp:'',tglSppbj:'',tglBahp:''});S.paket.push(n);S.ui.tahun=n.tahun;location.hash='#paket/'+n.id;sync('paket','Paket disalin ke TA '+n.tahun);return render()}
+ if(a==='copy'){const s=P(id);if(window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE&&window.SATRIA_CLOUD_ROLE!=='admin'&&!S.tahun.includes(s.tahun+1)){toast('Tidak dapat menyalin ke tahun yang belum ditetapkan. Minta admin menambahkan assignment tahun lebih dahulu.');return}if(!S.tahun.includes(s.tahun+1)){S.tahun.push(s.tahun+1);S.tahun.sort()}const n=JSON.parse(JSON.stringify(s));Object.assign(n,{id:uid('k'),tahun:s.tahun+1,seq:nextSeq(s.tahun+1,s.opd),rup:'',pemenangId:null,penawaran:[],tglNodis:'',tglSurvei:'',tglEvaluasi:'',tglNego:'',tglPenetapan:'',tglDpp:'',tglSppbj:'',tglBahp:''});S.paket.push(n);S.ui.tahun=n.tahun;location.hash='#paket/'+n.id;sync('paket','Paket disalin ke TA '+n.tahun);return render()}
  if(a==='delpaket'){if(!confirm('Hapus paket ini?'))return;S.paket=S.paket.filter(p=>p.id!==id);location.hash='#paket';return}
  if(a==='ptab'){S.ui.ptab=d.tab;return render()}
  if(a==='mtab'){S.ui.mtab=d.tab;S.ui.me=null;S.ui.ms='';return render()}
@@ -1288,13 +1305,18 @@ if(t.id==='selTahun'){S.ui.tahun=+t.value;return render()}
  if(t.id==='qPaket'){S.ui.q=t.value;return render()}
  if(t.id==='selUser'){S.ui.user=t.value;if(!allowed(S.ui.page))S.ui.page='dash';return render()}
  if(!canWrite()&&(d.col||d.up||d.kopup||d.new!==undefined||d.addpw||t.id==='imp'||t.id==='logoFile')){toast('Akun Viewer hanya dapat melihat data');return render()}
+ if(window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE&&window.SATRIA_CLOUD_ROLE!=='admin'){
+   if(['pemda','penomoran'].includes(d.col)||d.col==='opd'||d.col==='akun'||d.col==='kode'||t.id==='logoFile'){
+     toast('Pengaturan dan master organisasi hanya dapat diubah admin.');return render();
+   }
+ }
  if(d.col==='users'&&d.f==='role'&&t.value!=='Admin'&&isLastAdmin(d.id)){toast('Harus ada minimal satu Admin aktif');return render()}
  if(t.id==='mSearch'){S.ui.ms=t.value;return render()}
  if(d.new!==undefined)return;
  if(d.kopup){const f=t.files[0];if(!f)return;if(f.size>1024*1024){toast('Gambar kop maksimal 1 MB');return render()}const rd=new FileReader();rd.onload=()=>{const o=S.opd.find(x=>x.id===d.kopup);if(o){o.kop=rd.result;sync('settings','Kop '+o.singkat+' diperbarui')}render()};rd.readAsDataURL(f);return}
  if(d.up){const f=t.files[0];if(!f)return;if(f.size>300*1024){toast('Gambar maksimal 300 KB');return render()}const rd=new FileReader();rd.onload=()=>{S.pejabat.find(x=>x.id===d.id)[d.up]=rd.result;sync('master','Gambar '+d.up+' diperbarui');render()};rd.readAsDataURL(f);return}
  if(t.id==='logoFile'){const f=t.files[0];if(!f)return;if(f.size>300*1024){toast('Ukuran logo maksimal 300 KB');return render()}const r=new FileReader();r.onload=()=>{S.pemda.logo=r.result;sync('settings','Logo instansi diperbarui');render()};r.readAsDataURL(f);return}
- if(t.id==='imp'){const f=t.files[0];if(!f)return;if(f.size>25*1024*1024){toast('File backup terlalu besar (maks. 25 MB).');t.value='';return}const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);validateBackup(o);const arr=v=>Array.isArray(v);if(!confirm('Impor akan MENGGANTI data aktif dengan isi backup ini. Unduh backup kondisi sekarang terlebih dahulu bila belum dilakukan. Lanjutkan impor?')){t.value='';return}const base=JSON.parse(JSON.stringify(SEED));Object.assign(S,base,o,{ui:S.ui,log:[],dirty:true,chat:[],chatCtx:null});if(!arr(S.users)||!S.users.length)S.users=[{id:'u1',nama:'Administrator',username:'admin',role:'Admin',opd:'all',aktif:true}];if(!arr(S.unit))S.unit=(S.opd||[]).map(x=>({id:'u'+x.id,opd:x.id,kode:x.unit||'',bidang:x.bidang||''}));if(!arr(S.akun))S.akun=[];if(!S.penomoran||typeof S.penomoran!=='object')S.penomoran=base.penomoran;normalizeData();S.tahun=[...new Set([...S.tahun.map(Number),...S.paket.map(p=>+p.tahun).filter(Number.isFinite)])].filter(Number.isInteger).sort((a,b)=>a-b);if(!S.tahun.length)S.tahun=[new Date().getFullYear()];S.ui.tahun=S.tahun.includes(+S.ui.tahun)?+S.ui.tahun:S.tahun[0];S.ui.opd='all';S.ui.pid=null;S.ui.user=(S.users.find(u=>u.aktif!==false)||S.users[0]).id;sync('settings','Backup JSON dipulihkan');toast('Backup berhasil dimuat dan divalidasi. Periksa indikator kelengkapan sebelum mencetak dokumen.');render()}catch(err){console.warn('Backup import ditolak',err);toast('Backup tidak valid atau strukturnya tidak didukung. Data aktif tidak diubah.')}finally{t.value=''}};r.readAsText(f);return}
+ if(t.id==='imp'){if(window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE!=='admin'){t.value='';toast('Impor backup penuh hanya tersedia bagi admin; Operator/Viewer hanya memakai data hasil scope server.');return}const f=t.files[0];if(!f)return;if(f.size>25*1024*1024){toast('File backup terlalu besar (maks. 25 MB).');t.value='';return}const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);validateBackup(o);const arr=v=>Array.isArray(v);if(!confirm('Impor akan MENGGANTI data aktif dengan isi backup ini. Unduh backup kondisi sekarang terlebih dahulu bila belum dilakukan. Lanjutkan impor?')){t.value='';return}const base=JSON.parse(JSON.stringify(SEED));Object.assign(S,base,o,{ui:S.ui,log:[],dirty:true,chat:[],chatCtx:null});if(!arr(S.users)||!S.users.length)S.users=[{id:'u1',nama:'Administrator',username:'admin',role:'Admin',opd:'all',aktif:true}];if(!arr(S.unit))S.unit=(S.opd||[]).map(x=>({id:'u'+x.id,opd:x.id,kode:x.unit||'',bidang:x.bidang||''}));if(!arr(S.akun))S.akun=[];if(!S.penomoran||typeof S.penomoran!=='object')S.penomoran=base.penomoran;normalizeData();S.tahun=[...new Set([...S.tahun.map(Number),...S.paket.map(p=>+p.tahun).filter(Number.isFinite)])].filter(Number.isInteger).sort((a,b)=>a-b);if(!S.tahun.length)S.tahun=[new Date().getFullYear()];S.ui.tahun=S.tahun.includes(+S.ui.tahun)?+S.ui.tahun:S.tahun[0];S.ui.opd='all';S.ui.pid=null;S.ui.user=(S.users.find(u=>u.aktif!==false)||S.users[0]).id;sync('settings','Backup JSON dipulihkan');if(window.SATRIA_CLOUD_ROLE==='admin')window.SATRIA_CLOUD_ADMIN_IMPORT_READY=true;toast('Backup berhasil dimuat dan divalidasi. Periksa indikator kelengkapan sebelum mencetak dokumen.');render()}catch(err){console.warn('Backup import ditolak',err);toast('Backup tidak valid atau strukturnya tidak didukung. Data aktif tidak diubah.')}finally{t.value=''}};r.readAsText(f);return}
  if(d.addpw){if(t.value){P(d.addpw).penawaran.push({id:uid('w'),pen:t.value,sumberHarga:'',tanggalHarga:'',ongkir:0,catatan:'',harga:{},nego:{}});sync('nego','Penyedia ditambahkan ke survei')}return render()}
  if(d.rp){const n=+String(t.value).replace(/[^0-9]/g,'')||0;
   if(d.col==='item'){P(d.pid).items.find(x=>x.id===d.id)[d.f]=n;sync('items','Harga satuan HPS diperbarui')}
@@ -1322,8 +1344,25 @@ async function persistNow(){if(ENGINE!=='dexie'||!DB)return false;try{await DB.k
 function schedulePersist(){if(ENGINE!=='dexie')return;clearTimeout(pTimer);pTimer=setTimeout(()=>{persistNow()},500)}
 async function loadSaved(){try{const r=await DB.kv.get('main');if(r&&r.v&&r.v.paket&&r.v.opd){const ui=S.ui;Object.assign(S,r.v,{ui,log:[],dirty:false,chat:[],chatCtx:null});normalizeData();if(!S.users.some(u=>u.id===ui.user))ui.user=S.users[0].id;if(!S.tahun.includes(ui.tahun))ui.tahun=S.tahun[0]}}catch(e){console.warn('Gagal memuat dari IndexedDB',e)}}
 function setEngineSelect(){const s=$('#selEngine');s.innerHTML=(DB?'<option value="dexie">IndexedDB (Dexie)</option>':'')+'<option value="memory">Memori sesi</option>';s.value=ENGINE;if(!DB){s.disabled=true;s.title='Dexie.js tidak termuat, memakai memori sesi'}}
-async function boot(){init();if(dbInit())await loadSaved();setEngineSelect();route()}
-boot();
+async function boot(){
+  init();
+  const hasCloudConfig=(()=>{try{const local=JSON.parse(localStorage.getItem('satria-supabase-bridge-config-v1')||'{}');const embedded=window.SATRIA_EMBEDDED_SUPABASE_CONFIG||{};return !!((local.url||embedded.url)&&(local.key||embedded.key)&&(local.org||embedded.org))}catch(_){return !!window.SATRIA_EMBEDDED_SUPABASE_CONFIG?.url}})();
+  const dbReady=dbInit();
+  if(dbReady&&!hasCloudConfig)await loadSaved();
+  if(dbReady&&hasCloudConfig){
+    // Keep the prior local cache to avoid silent data loss, but never read/render it when cloud config exists.
+    // The first authenticated pull replaces it; non-admin pull failures clear the active cache fail-closed.
+  }
+  if(hasCloudConfig){
+    // Do not render a cached admin snapshot before the authenticated principal/scope is known.
+    S.paket=[];S.opd=[];S.unit=[];S.pejabat=[];S.penyedia=[];S.akun=[];S.kode=[];S.tahun=[new Date().getFullYear()];
+    S.pemda={nama:'',kota:'',provinsi:'',sumber:''};S.meta={};S.penomoran={};
+    S.users=[{id:'cloud-login-required',nama:'Login Supabase diperlukan',username:'',role:'Viewer',opd:'all',aktif:false}];
+    S.ui.user=S.users[0].id;S.ui.tahun=S.tahun[0];S.dirty=false;
+  }
+  setEngineSelect();route();
+}
+window.addEventListener('DOMContentLoaded',()=>{void boot()},{once:true});
 
 </script>
 <script>
@@ -1629,7 +1668,7 @@ function drawKhCharts(){
       <div><h2 id="scTitle">Koneksi Supabase</h2><div class="mut">Jembatan migrasi untuk SATRIA Framework 3.0</div></div>
       <button type="button" id="scClose" aria-label="Tutup">Tutup</button>
     </div>
-    <div class="sc-note sc-warning"><b>Penting:</b> sinkronisasi tahap ini memakai satu snapshot JSON per organisasi untuk menjaga kompatibilitas HTML lama. Semua anggota organisasi yang aktif dapat membaca seluruh data snapshot; pembatasan per OPD belum diterapkan. Gunakan hanya pada staging/pilot setelah meninjau SQL. Skema relasional, Storage, dan RLS granular tetap diperlukan sebelum produksi multi-OPD.</div>
+    <div class="sc-note sc-warning"><b>Penting — kontrol scope baru:</b> Admin dapat membaca/mengganti snapshot organisasi penuh. Operator dan Viewer wajib memakai RPC server yang mengembalikan proyeksi allowlist berdasarkan assignment OPD dan tahun; akses langsung ke snapshot ditolak RLS. Operator hanya dapat menyimpan record dalam scope-nya. Terapkan semua migrasi keamanan dan deploy fungsi terkait sebelum mengandalkan pembatasan ini. JSON snapshot masih merupakan jembatan kompatibilitas; migrasi ke tabel bisnis terstruktur dengan RLS per record tetap menjadi sasaran arsitektur jangka panjang.</div>
     <div class="sc-grid">
       <label>Supabase Project URL<input id="scUrl" type="url" placeholder="https://project-ref.supabase.co" autocomplete="url"></label>
       <label>Publishable / anon key<input id="scKey" type="password" placeholder="sb_publishable_… atau anon key" autocomplete="off"></label>
@@ -1669,14 +1708,15 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
 (function(){
   'use strict';
   const CONFIG_KEY='satria-supabase-bridge-config-v1';
-  let client=null, member=null, orgId='', version=0, localUsersBackup=null, recoveryListenerClient=null;
+  let client=null, member=null, orgId='', version=0, localUsersBackup=null, recoveryListenerClient=null, cloudStateReady=false;
   const $id=id=>document.getElementById(id);
   const modal=$id('satriaCloudModal');
   const status=(msg,kind='')=>{const e=$id('scStatus');e.textContent=msg;e.dataset.kind=kind};
   const roleName=r=>({admin:'Admin',operator:'Operator',viewer:'Viewer'}[r]||'Viewer');
   const config=()=>{let local={};try{local=JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}')}catch(_){}const embedded=window.SATRIA_EMBEDDED_SUPABASE_CONFIG||{};return {url:local.url||embedded.url||'',key:local.key||embedded.key||'',org:local.org||embedded.org||''}};
+  window.SATRIA_CLOUD_CONFIGURED=!!(config().url&&config().key&&config().org);
   function fillConfig(){const c=config();$id('scUrl').value=c.url||'';$id('scKey').value=c.key||'';$id('scOrg').value=c.org||''}
-  function setButtons(){const ok=!!(client&&member);$id('scPull').disabled=!ok;$id('scPush').disabled=!ok||member?.role==='viewer';$id('scSignOut').disabled=!ok}
+  function setButtons(){const ok=!!(client&&member);$id('scPull').disabled=!ok;$id('scPush').disabled=!ok||member?.role==='viewer'||(!cloudStateReady&&!(member?.role==='admin'&&window.SATRIA_CLOUD_ADMIN_IMPORT_READY===true));$id('scSignOut').disabled=!ok}
   function open(){fillConfig();modal.hidden=false;modal.setAttribute('aria-hidden','false');$id('scClose').focus();setButtons();if(member)status('Terhubung sebagai '+member.email+' · role '+member.role+' · versi lokal '+version,'ok')}
   function close(){modal.hidden=true;modal.setAttribute('aria-hidden','true')}
   function readConfigFields(){
@@ -1706,26 +1746,42 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     const {data,error}=await client.from('satria_memberships').select('role,active').eq('organization_id',orgId).eq('user_id',user.id).maybeSingle();
     if(error)throw new Error('Tidak dapat memeriksa membership. Pastikan SQL/RLS telah dijalankan: '+error.message);
     if(!data||!data.active)throw new Error('Akun ini belum memiliki membership aktif pada organisasi tersebut. Minta admin menambahkannya melalui alur admin.');
-    member={id:user.id,email:user.email||'Pengguna Supabase',role:data.role};
+    member={id:user.id,email:user.email||'Pengguna Supabase',role:data.role,scope:null};
+    cloudStateReady=false;
+    window.SATRIA_CLOUD_ROLE=member.role;
     if(!['admin','operator','viewer'].includes(member.role))throw new Error('Role membership tidak dikenal.');
     if(!localUsersBackup)localUsersBackup=JSON.parse(JSON.stringify(S.users||[]));
+    // Never leave an old full snapshot visible when a non-admin authenticates.
+    if(member.role!=='admin') resetCloudScopedView();
     S.users=[{id:'auth-'+member.id,nama:member.email,username:member.email,role:roleName(member.role),opd:'all',aktif:true}];
     S.ui.user=S.users[0].id;
-    const {data:remote,error:remoteErr}=await client.from('satria_state').select('version').eq('organization_id',orgId).maybeSingle();
-    if(remoteErr)throw new Error('Login berhasil, tetapi pemeriksaan versi gagal: '+remoteErr.message);
-    version=remote?.version||0;
+    version=0;
     setButtons();
-    status('Masuk sebagai '+member.email+' · '+member.role+' · versi cloud '+version,'ok');
-    if(typeof render==='function')render();
     applyUserLock();
+    await pull();
     return member;
   }
+  function resetCloudScopedView(){
+    const currentYear=new Date().getFullYear();
+    const ui={...(S.ui||{}),page:'dash',tahun:currentYear,opd:'all',pid:null,user:'cloud-login-required'};
+    Object.assign(S,{
+      pemda:{nama:'',kota:'',provinsi:'',sumber:''},meta:{},penomoran:{},tahun:[currentYear],
+      users:[{id:'cloud-login-required',nama:'Login Supabase diperlukan',username:'',role:'Viewer',opd:'all',aktif:false}],
+      akun:[],kode:[],opd:[],unit:[],pejabat:[],penyedia:[],paket:[],
+      ui,log:[],dirty:false,chat:[],chatCtx:null,persistError:''
+    });
+    S.ui.user=S.users[0].id;
+  }
+
   function applyUserLock(){
+    window.SATRIA_CLOUD_ROLE=member?.role||null;
     const u=$id('selUser');if(u){u.disabled=!!member;u.title=member?'Identitas ditentukan oleh Supabase Auth; pemilih lokal dinonaktifkan.':''}
     ['scUrl','scKey','scOrg'].forEach(id=>{const e=$id(id);if(e)e.disabled=!!member});
     const cloudCard=$id('satriaCloudUserCreateCard');if(cloudCard)cloudCard.style.display=member?'':'none';
     ['satriaLocalUserStats','satriaLocalUserCreateCard','satriaLocalUserTable'].forEach(id=>{const e=$id(id);if(e)e.style.display=member?'none':''});
     const addBtn=$id('satriaOpenCreateUser');if(addBtn){addBtn.disabled=!member||member.role!=='admin';addBtn.title=member&&member.role==='admin'?'':'Hanya admin Supabase yang dapat membuat akun.'}
+    const importInput=$id('imp');if(importInput){importInput.disabled=!!(window.SATRIA_CLOUD_CONFIGURED&&member?.role!=='admin');importInput.title=importInput.disabled?'Impor snapshot/backup penuh hanya boleh dilakukan oleh admin terautentikasi.':'Impor backup JSON.'}
+    setButtons();
   }
   function friendlyError(e){
     const raw=String(e?.message||e||'Terjadi kesalahan.');
@@ -1788,31 +1844,88 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     return o;
   }
   async function pull(){
-    try{if(!client||!member)throw new Error('Hubungkan dan masuk terlebih dahulu.');status('Membaca snapshot cloud…');
-      const {data,error}=await client.from('satria_state').select('payload,version,updated_at,updated_by').eq('organization_id',orgId).maybeSingle();
-      if(error)throw error;if(!data)throw new Error('Belum ada snapshot untuk organisasi ini. Ambil backup lokal, lalu gunakan Kirim snapshot lokal (khusus admin/operator).');
-      if(!data.payload||typeof data.payload!=='object'||!Array.isArray(data.payload.paket)||!Array.isArray(data.payload.opd))throw new Error('Snapshot cloud tidak memiliki struktur SATRIA yang valid.');
-      const ui=S.ui;Object.assign(S,data.payload,{ui,log:[],dirty:false,chat:[],chatCtx:null});
-      S.users=[{id:'auth-'+member.id,nama:member.email,username:member.email,role:roleName(member.role),opd:'all',aktif:true}];S.ui.user=S.users[0].id;
-      if(typeof normalizeData==='function')normalizeData();version=Number(data.version)||0;S.dirty=false;
+    cloudStateReady=false;setButtons();
+    try{
+      if(!client||!member)throw new Error('Hubungkan dan masuk terlebih dahulu.');
+      status('Membaca snapshot sesuai scope akses…');
+      let data=null,error=null;
+      if(member.role==='admin'){
+        const response=await client.from('satria_state').select('payload,version,updated_at,updated_by').eq('organization_id',orgId).maybeSingle();
+        data=response.data;error=response.error;
+      }else{
+        // Non-admins never query satria_state directly. The security-definer RPC returns a whitelist-only projection.
+        const response=await client.rpc('satria_get_scoped_state',{p_organization_id:orgId});
+        error=response.error;
+        const scoped=response.data;
+        if(!error&&scoped&&typeof scoped==='object'){
+          member.scope=scoped.scope||null;
+          data={payload:scoped.payload,version:scoped.version,updated_at:scoped.updated_at,updated_by:scoped.updated_by};
+        }
+      }
+      if(error)throw error;
+      if(!data)throw new Error('Snapshot/scoped state belum tersedia. Admin harus menginisialisasi snapshot dan menetapkan minimal satu OPD serta satu tahun untuk akun non-admin.');
+      if(!data.payload||typeof data.payload!=='object'||!Array.isArray(data.payload.paket)||!Array.isArray(data.payload.opd))throw new Error('Respons snapshot tidak memiliki struktur SATRIA yang valid.');
+      const ui={...(S.ui||{})};
+      Object.assign(S,data.payload,{ui,log:[],dirty:false,chat:[],chatCtx:null});
+      S.users=[{id:'auth-'+member.id,nama:member.email,username:member.email,role:roleName(member.role),opd:member.role==='admin'?'all':(member.scope?.opd_ids||[]),aktif:true}];S.ui.user=S.users[0].id;
+      if(typeof normalizeData==='function')normalizeData();
+      version=Number(data.version)||0;S.dirty=false;cloudStateReady=true;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;
+      if(member.role!=='admin'){
+        const allowedOpds=Array.isArray(member.scope?.opd_ids)?member.scope.opd_ids.map(String):[];
+        const allowedYears=Array.isArray(member.scope?.years)?member.scope.years.map(Number):[];
+        if(!allowedOpds.length||!allowedYears.length)throw new Error('Akses akun belum memiliki assignment OPD dan tahun yang lengkap. Minta admin menetapkan keduanya.');
+        if(S.ui.opd!=='all'&&!allowedOpds.includes(String(S.ui.opd)))S.ui.opd='all';
+        if(!allowedYears.includes(Number(S.ui.tahun)))S.ui.tahun=allowedYears[0];
+        // Persist only the scoped projection. In memory mode, remove the old full-snapshot cache instead of leaving it available to a later offline startup.
+        if(ENGINE==='dexie'&&typeof persistNow==='function'){
+          const persisted=await persistNow();
+          if(!persisted&&DB&&DB.kv){try{await DB.kv.delete('main')}catch(_) {}}
+        }else if(DB&&DB.kv){try{await DB.kv.delete('main')}catch(_) {}}
+
+      }
       if(typeof route==='function')route();applyUserLock();
-      status('Snapshot ditarik. Versi '+version+' · diperbarui '+(data.updated_at||'waktu tidak tersedia')+'. Buat backup JSON setelah verifikasi.','ok');
-    }catch(e){showError(e)}
+      const scopeText=member.role==='admin'?'seluruh organisasi':`${member.scope.opd_ids.length} OPD · TA ${member.scope.years.join(', ')}`;
+      status('Snapshot dimuat sesuai scope '+scopeText+'. Versi '+version+' · diperbarui '+(data.updated_at||'waktu tidak tersedia')+'.','ok');
+    }catch(e){
+      // Fail closed for every role: a failed cloud pull must never leave seed/stale data pushable.
+      resetCloudScopedView();
+      cloudStateReady=false;version=0;
+      if(member&&member.role!=='admin'){try{if(DB&&DB.kv)await DB.kv.delete('main')}catch(_){}}
+      if(typeof route==='function')route();
+      applyUserLock();
+      showError(e);
+    }
   }
   async function push(){
-    try{if(!client||!member)throw new Error('Hubungkan dan masuk terlebih dahulu.');if(member.role==='viewer')throw new Error('Viewer tidak dapat mengirim perubahan.');
-      if(!confirm('Kirim seluruh keadaan lokal SATRIA sebagai snapshot organisasi? Ini tidak menggabungkan perubahan. Pastikan backup JSON sudah dibuat dan data lokal telah diverifikasi.'))return;
-      status('Mengirim snapshot dengan pemeriksaan versi…');const payload=currentPayload();
-      const {data,error}=await client.rpc('satria_save_state',{p_organization_id:orgId,p_expected_version:version,p_payload:payload});
-      if(error)throw error;version=Number(data)||version+1;S.dirty=false;
-      status('Snapshot tersimpan di Supabase. Versi '+version+'. Ini masih penyimpanan transisi berbasis JSON.','ok');
+    try{
+      if(!client||!member)throw new Error('Hubungkan dan masuk terlebih dahulu.');
+      if(member.role==='viewer')throw new Error('Viewer hanya dapat membaca data sesuai scope OPD dan tahun.');
+      if(!cloudStateReady && !(member.role==='admin'&&window.SATRIA_CLOUD_ADMIN_IMPORT_READY===true)) throw new Error('Snapshot cloud belum berhasil dimuat. Tekan Tarik dari Supabase dan selesaikan error terlebih dahulu. Untuk bootstrap pertama, admin harus mengimpor backup JSON yang telah diverifikasi, lalu mengirimkannya dengan konfirmasi penuh.');
+      const admin=member.role==='admin';
+      const prompt=admin
+        ? 'Kirim seluruh snapshot organisasi sebagai Admin? Ini mengganti keadaan cloud, bukan menggabungkan perubahan. Buat backup dan periksa data sebelum lanjut.'
+        : `Simpan hanya perubahan pada OPD ${member.scope?.opd_ids?.join(', ')} dan tahun ${member.scope?.years?.join(', ')} yang ditugaskan? Data di luar scope akan dipertahankan oleh server.`;
+      if(!confirm(prompt))return;
+      status(admin?'Mengirim snapshot organisasi dengan pemeriksaan versi…':'Menyimpan perubahan pada scope OPD/tahun yang ditugaskan…');
+      const payload=currentPayload();
+      const rpcName=admin?'satria_save_state':'satria_save_scoped_state';
+      const {data,error}=await client.rpc(rpcName,{p_organization_id:orgId,p_expected_version:version,p_payload:payload});
+      if(error)throw error;
+      version=Number(data)||version+1;S.dirty=false;cloudStateReady=true;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;
+      status(admin?'Snapshot organisasi tersimpan. Versi '+version+'.':'Perubahan pada scope OPD/tahun tersimpan. Data di luar scope tidak diganti. Versi '+version+'.','ok');
       if(typeof render==='function')render();applyUserLock();
     }catch(e){showError(e)}
   }
   async function signOut(){
-    try{if(client)await client.auth.signOut();member=null;version=0;orgId=$id('scOrg').value.trim();
-      if(localUsersBackup){S.users=localUsersBackup;localUsersBackup=null;S.ui.user=S.users[0]?.id||'';if(typeof render==='function')render()}
-      setButtons();applyUserLock();status('Keluar dari Supabase. Data lokal browser tidak dihapus.','ok');
+    try{
+      if(S.dirty&&!confirm('Ada perubahan lokal yang belum dikirim ke Supabase. Keluar akan mengosongkan cache data aktif pada browser ini. Unduh backup sesuai kewenangan Anda atau simpan perubahan terlebih dahulu. Tetap keluar?'))return;
+      if(client)await client.auth.signOut();
+      member=null;version=0;cloudStateReady=false;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;orgId=$id('scOrg').value.trim();window.SATRIA_CLOUD_ROLE=null;
+      resetCloudScopedView();
+      try{if(DB&&DB.kv)await DB.kv.delete('main')}catch(e){console.warn('Cache SATRIA tidak dapat dihapus setelah logout',e)}
+      localUsersBackup=null;
+      if(typeof render==='function')render();
+      setButtons();applyUserLock();status('Keluar dari Supabase. Cache bisnis lokal telah dikosongkan pada browser ini.','ok');
     }catch(e){showError(e)}
   }
   function downloadConfiguredHtml(){
@@ -1927,6 +2040,12 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
           <p class="satria-opd-help">Pilih 1–100 OPD. Daftar berasal dari katalog organisasi di Supabase, bukan dari input bebas di browser.</p>
         </fieldset>
 
+        <fieldset class="satria-opd-fieldset" id="satriaCreateUserYearFieldset">
+          <legend>Tahun anggaran yang dapat diakses</legend>
+          <div class="satria-opd-choices" id="satriaCreateUserYearChoices"><p class="satria-opd-empty">Memuat daftar tahun anggaran…</p></div>
+          <p class="satria-opd-help">Pilih minimal satu tahun. Akses data paket ditentukan oleh kombinasi OPD dan tahun, bukan hanya filter tampilan.</p>
+        </fieldset>
+
         <label class="satria-user-check"><input id="satriaPasswordShareConfirm" type="checkbox" required><span>Saya akan menyampaikan password awal secara terpisah dan aman, lalu meminta operator menggantinya setelah login.</span></label>
         <div id="satriaCreateUserMessage" class="satria-user-msg" role="status" aria-live="polite"></div>
         <div class="satria-user-actions">
@@ -1946,7 +2065,9 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
   const emailInput = root.querySelector('#satriaNewUserEmail');
   const roleInput = root.querySelector('#satriaNewUserRole');
   const opdChoices = root.querySelector('#satriaCreateUserOpdChoices');
+  const yearChoices = root.querySelector('#satriaCreateUserYearChoices');
   let availableOpds = [];
+  let availableYears = [];
   let busy = false;
 
   root.querySelectorAll('[data-satria-password-toggle]').forEach((button) => {
@@ -2008,6 +2129,39 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     return Array.from(form.querySelectorAll('input[name="satria_create_opd_ids"]:checked')).map((input) => input.value);
   }
 
+  function renderCreateYearOptions(years, defaults = []) {
+    const selectedBeforeRefresh = new Set(Array.from(yearChoices.querySelectorAll('input[name="satria_create_year_ids"]:checked')).map((input) => Number(input.value)));
+    const source = Array.isArray(years) ? years : [];
+    availableYears = [...new Set(source.map(Number).filter((year) => Number.isInteger(year) && year >= 2000 && year <= 2200))].sort((a,b) => a-b);
+    yearChoices.replaceChildren();
+    if (!availableYears.length) {
+      const empty = document.createElement('p');
+      empty.className = 'satria-opd-empty';
+      empty.textContent = 'Daftar tahun belum tersedia. Admin harus menarik snapshot cloud terbaru sebelum membuat akun Operator.';
+      yearChoices.appendChild(empty);
+      return;
+    }
+    const selected = selectedBeforeRefresh.size ? selectedBeforeRefresh : new Set(defaults.map(Number));
+    for (const year of availableYears) {
+      const label = document.createElement('label');
+      label.className = 'satria-opd-choice';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.name = 'satria_create_year_ids';
+      input.value = String(year);
+      input.checked = selected.has(year);
+      input.setAttribute('aria-label', `Izinkan akses Tahun Anggaran ${year}`);
+      const text = document.createElement('span');
+      text.textContent = `Tahun Anggaran ${year}`;
+      label.append(input, text);
+      yearChoices.appendChild(label);
+    }
+  }
+
+  function selectedCreateYears() {
+    return Array.from(form.querySelectorAll('input[name="satria_create_year_ids"]:checked')).map((input) => Number(input.value));
+  }
+
   window.addEventListener('satria:opds-loaded', (event) => {
     renderCreateOpdOptions(event.detail?.opds || []);
   });
@@ -2034,6 +2188,9 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     roleInput.value = 'operator';
     setMessage('');
     renderCreateOpdOptions(window.SATRIA_ADMIN_USERS?.getOpds?.() || availableOpds);
+    const yearSource = Array.isArray(S?.tahun) ? S.tahun : [];
+    const currentYear = Number(S?.ui?.tahun);
+    renderCreateYearOptions(yearSource, [yearSource.includes(currentYear) ? currentYear : yearSource[0]].filter(Number.isFinite));
     root.hidden = false;
     window.dispatchEvent(new CustomEvent('satria:load-opd-catalog'));
     nameInput.focus();
@@ -2098,6 +2255,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
       return;
     }
     const opdIds = selectedCreateOpds();
+    const yearIds = selectedCreateYears();
     if (!availableOpds.length) {
       setMessage('Katalog OPD belum tersedia. Muat ulang daftar pengguna dan pastikan snapshot OPD sudah ada di Supabase.', 'error');
       window.dispatchEvent(new CustomEvent('satria:load-opd-catalog'));
@@ -2106,6 +2264,11 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     if (!opdIds.length || opdIds.length > 100) {
       setMessage('Pilih minimal satu dan maksimal 100 OPD untuk user Operator.', 'error');
       root.querySelector('#satriaCreateUserOpdFieldset')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (!yearIds.length || yearIds.length > 40 || yearIds.some((year) => !Number.isInteger(year) || year < 2000 || year > 2200)) {
+      setMessage('Pilih minimal satu dan maksimal 40 tahun anggaran yang valid.', 'error');
+      root.querySelector('#satriaCreateUserYearFieldset')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
@@ -2128,6 +2291,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
           initial_password: initialPassword,
           display_name: displayName,
           opd_ids: opdIds,
+          year_ids: yearIds,
         },
       });
       if (error) throw new Error(await readableFunctionError(error));
@@ -2138,7 +2302,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
       roleInput.value = 'operator';
       window.dispatchEvent(new CustomEvent('satria:user-created'));
       const auditWarning = data.audit_recorded === false ? ' Catatan audit gagal disimpan; periksa log Edge Function.' : '';
-      setMessage(`Akun berhasil dibuat. UID: ${data.user.id}. Email ditandai terkonfirmasi dan tidak ada email yang dikirim. Sampaikan password awal secara aman kepada operator.${auditWarning}`, auditWarning ? 'error' : 'ok');
+      setMessage(`Akun berhasil dibuat. UID: ${data.user.id}. Scope OPD: ${opdIds.length}; tahun: ${yearIds.join(', ')}. Email ditandai terkonfirmasi dan tidak ada email yang dikirim. Sampaikan password awal secara aman kepada operator.${auditWarning}`, auditWarning ? 'error' : 'ok');
     } catch (error) {
       const safeMessage = error instanceof Error ? error.message : 'Gagal membuat akun.';
       setMessage(safeMessage, 'error');
@@ -2252,21 +2416,32 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
       const opdCell = addCell(row, opdLabel);
       opdCell.style.minWidth = '190px';
       opdCell.style.maxWidth = '340px';
-      opdCell.style.whiteSpace = 'normal';
+      const years = Array.isArray(user.year_ids) ? user.year_ids.map(Number).filter(Number.isInteger).sort((a,b) => a-b) : [];
+      opdCell.textContent = `${opdLabel}\nTA: ${years.length ? years.join(', ') : (user.role === 'admin' ? 'Semua tahun (admin)' : 'Belum ditetapkan')}`;
+      opdCell.style.whiteSpace = 'pre-line';
+      opdCell.style.minWidth = '220px';
 
       addCell(row, user.active ? 'Aktif' : 'Nonaktif');
       addCell(row, dateLabel(user.membership_created_at));
       const actionCell = document.createElement('td');
-      if (user.role === 'operator') {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.textContent = (Array.isArray(user.opd_ids) && user.opd_ids.length) ? 'Ubah OPD' : 'Atur OPD';
-        button.dataset.satriaEditOpd = user.id;
-        button.disabled = !user.active;
-        button.title = !user.active ? 'Akun Operator nonaktif; aktifkan membership lebih dahulu.' : (!opds.length ? 'Katalog OPD belum tersedia; buka untuk melihat petunjuk.' : 'Atur OPD yang dapat diakses user ini.');
-        actionCell.appendChild(button);
+      if (user.role === 'operator' || user.role === 'viewer') {
+        const opdButton = document.createElement('button');
+        opdButton.type = 'button';
+        opdButton.textContent = (Array.isArray(user.opd_ids) && user.opd_ids.length) ? 'Ubah OPD' : 'Atur OPD';
+        opdButton.dataset.satriaEditOpd = user.id;
+        opdButton.disabled = !user.active;
+        opdButton.title = !user.active ? 'Akun nonaktif; aktifkan membership lebih dahulu.' : (!opds.length ? 'Katalog OPD belum tersedia; buka untuk melihat petunjuk.' : 'Atur OPD yang dapat diakses user ini.');
+        actionCell.appendChild(opdButton);
+        const yearButton = document.createElement('button');
+        yearButton.type = 'button';
+        yearButton.textContent = (years.length ? 'Ubah TA' : 'Atur TA');
+        yearButton.dataset.satriaEditYears = user.id;
+        yearButton.disabled = !user.active;
+        yearButton.style.marginTop = '5px';
+        yearButton.title = !user.active ? 'Akun nonaktif; aktifkan membership lebih dahulu.' : 'Atur tahun anggaran yang boleh diakses user ini.';
+        actionCell.appendChild(yearButton);
       } else {
-        actionCell.textContent = '—';
+        actionCell.textContent = 'Semua OPD/tahun';
       }
       row.appendChild(actionCell);
       body.appendChild(row);
@@ -2392,7 +2567,16 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
         .order('user_id', { ascending: true })
         .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
       if (fallback.error) throw new Error('Daftar membership tidak dapat dibaca melalui RLS: ' + fallback.error.message);
-      const catalogResult = await loadCatalogFromCloudSnapshot(requestedOrg);
+      const [catalogResult, yearsResult] = await Promise.all([
+        loadCatalogFromCloudSnapshot(requestedOrg),
+        client.from('satria_membership_years').select('user_id,fiscal_year').eq('organization_id', requestedOrg)
+          .in('user_id', (fallback.data || []).map((row) => row.user_id)),
+      ]);
+      const yearsByUser = new Map();
+      if (!yearsResult.error) for (const row of yearsResult.data || []) {
+        const values = yearsByUser.get(row.user_id) || [];
+        values.push(Number(row.fiscal_year)); yearsByUser.set(row.user_id, values);
+      }
       const users = (fallback.data || []).map((row) => ({
         id: row.user_id,
         email: '',
@@ -2400,20 +2584,31 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
         role: row.role,
         active: row.active === true,
         membership_created_at: row.created_at,
-        opd_ids: [], opd_names: [],
+        opd_ids: [], opd_names: [], year_ids: (yearsByUser.get(row.user_id) || []).sort((a,b) => a-b),
       }));
       return { ok: true, organization_id: requestedOrg, page, page_size: PAGE_SIZE, total: fallback.count || 0, users, opds: catalogResult.opds, catalog_note: catalogResult.note, profile_note: 'Kolom profil login belum tersedia; terapkan migrasi 20261024053100_satria_catalog_and_assignment_repair.sql untuk menampilkan nama/email.' };
     }
 
     const userIds = (rows || []).map((row) => row.user_id);
-    const [assignmentResult, catalogResult] = await Promise.all([
+    const [assignmentResult, yearsResult, catalogResult] = await Promise.all([
       userIds.length ? client.from('satria_membership_opds').select('user_id,opd_id').eq('organization_id', requestedOrg).in('user_id', userIds)
+        : Promise.resolve({ data: [], error: null }),
+      userIds.length ? client.from('satria_membership_years').select('user_id,fiscal_year').eq('organization_id', requestedOrg).in('user_id', userIds)
         : Promise.resolve({ data: [], error: null }),
       loadCatalogFromCloudSnapshot(requestedOrg),
     ]);
     const assignmentNote = assignmentResult.error
       ? 'Assignment OPD belum dapat dibaca. Terapkan migrasi satria_membership_opds: ' + assignmentResult.error.message
       : '';
+    const yearNote = yearsResult.error
+      ? 'Assignment tahun belum dapat dibaca. Terapkan migrasi satria_membership_years: ' + yearsResult.error.message
+      : '';
+    const yearsByUser = new Map();
+    for (const assignment of yearsResult.data || []) {
+      const values = yearsByUser.get(assignment.user_id) || [];
+      values.push(Number(assignment.fiscal_year));
+      yearsByUser.set(assignment.user_id, values);
+    }
     const opds = catalogResult.opds;
     const opdNameById = new Map(opds.map((item) => [item.id, item.name]));
     const idsByUser = new Map();
@@ -2434,14 +2629,15 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
         membership_created_at: row.created_at,
         opd_ids: ids,
         opd_names: ids.map((id) => opdNameById.get(id)).filter(Boolean),
+        year_ids: (yearsByUser.get(row.user_id) || []).sort((a,b) => a-b),
       };
     });
     return {
       ok: true, organization_id: requestedOrg, page, page_size: PAGE_SIZE,
       total: count || 0, users, opds,
       catalog_note: catalogResult.note,
-      assignment_note: assignmentNote,
-      profile_note: '',
+      assignment_note: [assignmentNote, yearNote].filter(Boolean).join(' '),
+      profile_note: '', 
     };
   }
 
@@ -2613,7 +2809,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
         #satriaEditUserOpdMessage{min-height:20px;white-space:pre-wrap;font-size:13px}#satriaEditUserOpdMessage[data-kind=error]{color:#b42318}#satriaEditUserOpdMessage[data-kind=ok]{color:#067647}
       </style>
       <section class="satria-edit-opd-dialog" role="dialog" aria-modal="true" aria-labelledby="satriaEditUserOpdTitle">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div><h2 id="satriaEditUserOpdTitle">Atur OPD Operator</h2><p id="satriaEditUserOpdName"></p></div><button type="button" data-satria-edit-opd-close>Tutup</button></div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div><h2 id="satriaEditUserOpdTitle">Atur OPD Pengguna</h2><p id="satriaEditUserOpdName"></p></div><button type="button" data-satria-edit-opd-close>Tutup</button></div>
         <p>Pilih OPD yang dapat diakses oleh Operator ini. Perubahan akan divalidasi dan disimpan oleh server.</p>
         <div id="satriaEditUserOpdChoices" class="satria-edit-opd-choices"></div>
         <p id="satriaEditUserOpdMessage" role="status" aria-live="polite"></p>
@@ -2643,7 +2839,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
   }
 
   function openAssignmentModal(user) {
-    if (!user || user.role !== 'operator' || !user.active) return;
+    if (!user || !['operator', 'viewer'].includes(user.role) || !user.active) return;
     if (!isAuthorizedInUi()) {
       setStatus('Sesi admin aktif diperlukan untuk mengubah assignment OPD.', 'error');
       return;
@@ -2743,6 +2939,135 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     }
   }
 
+  let editingYearUser = null;
+  let yearAssignmentBusy = false;
+
+  function ensureYearAssignmentModal() {
+    let modal = byId('satriaEditUserYearModal');
+    if (modal) return modal;
+    modal = document.createElement('div');
+    modal.id = 'satriaEditUserYearModal';
+    modal.hidden = true;
+    modal.innerHTML = `
+      <style>
+        #satriaEditUserYearModal{position:fixed;inset:0;z-index:10026;background:rgba(15,23,42,.64);display:grid;place-items:center;padding:18px}
+        #satriaEditUserYearModal[hidden]{display:none}
+        .satria-edit-year-dialog{width:min(620px,100%);max-height:92vh;overflow:auto;background:#fff;border:1px solid #dbe3ea;border-radius:16px;box-shadow:0 24px 70px rgba(15,23,42,.28);padding:22px;color:#17212b;font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+        .satria-edit-year-dialog h2{margin:0;font-size:20px}.satria-edit-year-dialog p{color:#52616f}
+        .satria-edit-year-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 12px;max-height:48vh;overflow:auto;border:1px solid #cbd5df;border-radius:10px;padding:12px}
+        .satria-edit-year-choice{display:flex;gap:8px;align-items:flex-start;cursor:pointer}.satria-edit-year-choice input{margin-top:4px}
+        .satria-edit-year-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}
+        .satria-edit-year-actions button{border:1px solid #cbd5df;border-radius:9px;padding:9px 14px;font:inherit;font-weight:650;cursor:pointer;background:#fff;color:#1f2937}
+        .satria-edit-year-actions button.primary{background:#0f766e;color:#fff;border-color:#0f766e}
+        .satria-edit-year-actions button:disabled{opacity:.55;cursor:not-allowed}
+        #satriaEditUserYearMessage{min-height:20px;white-space:pre-wrap;font-size:13px}#satriaEditUserYearMessage[data-kind=error]{color:#b42318}#satriaEditUserYearMessage[data-kind=ok]{color:#067647}
+      </style>
+      <section class="satria-edit-year-dialog" role="dialog" aria-modal="true" aria-labelledby="satriaEditUserYearTitle">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div><h2 id="satriaEditUserYearTitle">Atur Tahun Anggaran</h2><p id="satriaEditUserYearName"></p></div><button type="button" data-satria-edit-year-close>Tutup</button></div>
+        <p>Pilih tahun anggaran yang boleh diakses. Akses data ditentukan oleh assignment tahun dan OPD secara bersamaan.</p>
+        <div id="satriaEditUserYearChoices" class="satria-edit-year-choices"></div>
+        <p id="satriaEditUserYearMessage" role="status" aria-live="polite"></p>
+        <div class="satria-edit-year-actions"><button type="button" data-satria-edit-year-close>Batal</button><button id="satriaEditUserYearSave" class="primary" type="button">Simpan tahun</button></div>
+      </section>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal || (event.target instanceof Element && event.target.closest('[data-satria-edit-year-close]'))) closeYearAssignmentModal();
+    });
+    byId('satriaEditUserYearSave').addEventListener('click', () => { void saveYearAssignment(); });
+    return modal;
+  }
+
+  function yearAssignmentMessage(message, kind = '') {
+    const element = byId('satriaEditUserYearMessage');
+    if (!element) return;
+    element.textContent = message;
+    element.dataset.kind = kind;
+  }
+
+  function closeYearAssignmentModal() {
+    if (yearAssignmentBusy) return;
+    const modal = byId('satriaEditUserYearModal');
+    if (modal) modal.hidden = true;
+    editingYearUser = null;
+    yearAssignmentMessage('');
+  }
+
+  function openYearAssignmentModal(user) {
+    if (!user || !['operator','viewer'].includes(user.role) || !user.active) return;
+    if (!isAuthorizedInUi()) {
+      setStatus('Sesi admin aktif diperlukan untuk mengubah assignment tahun.', 'error');
+      return;
+    }
+    const modal = ensureYearAssignmentModal();
+    editingYearUser = user;
+    byId('satriaEditUserYearName').textContent = `${user.display_name || user.email} · ${user.email || ''}`;
+    const choices = byId('satriaEditUserYearChoices');
+    choices.replaceChildren();
+    const assigned = new Set((Array.isArray(user.year_ids) ? user.year_ids : []).map(Number));
+    const years = [...new Set([...(Array.isArray(S?.tahun) ? S.tahun : []), ...assigned])]
+      .map(Number).filter((year) => Number.isInteger(year) && year >= 2000 && year <= 2200).sort((a,b)=>a-b);
+    if (!years.length) {
+      const empty = document.createElement('p');
+      empty.textContent = 'Belum ada daftar tahun. Admin harus memuat snapshot cloud yang memuat S.tahun terlebih dahulu.';
+      choices.appendChild(empty);
+    } else {
+      for (const year of years) {
+        const label = document.createElement('label');
+        label.className = 'satria-edit-year-choice';
+        const input = document.createElement('input');
+        input.type = 'checkbox'; input.name = 'satria_edit_year_ids'; input.value = String(year); input.checked = assigned.has(year);
+        const text = document.createElement('span'); text.textContent = `Tahun Anggaran ${year}`;
+        label.append(input, text); choices.appendChild(label);
+      }
+    }
+    yearAssignmentMessage('');
+    byId('satriaEditUserYearSave').disabled = !years.length;
+    modal.hidden = false;
+    byId('satriaEditUserYearSave').focus();
+  }
+
+  async function saveYearAssignment() {
+    if (yearAssignmentBusy) return;
+    if (!editingYearUser || !isAuthorizedInUi()) {
+      yearAssignmentMessage('Sesi admin tidak aktif. Masuk kembali dan ulangi.', 'error');
+      return;
+    }
+    const years = Array.from(document.querySelectorAll('#satriaEditUserYearChoices input[name="satria_edit_year_ids"]:checked'))
+      .map((input) => Number(input.value));
+    if (!years.length || years.length > 40 || years.some((year) => !Number.isInteger(year) || year < 2000 || year > 2200)) {
+      yearAssignmentMessage('Pilih minimal satu dan maksimal 40 tahun anggaran valid.', 'error');
+      return;
+    }
+    const saveButton = byId('satriaEditUserYearSave');
+    yearAssignmentBusy = true; saveButton.disabled = true; saveButton.textContent = 'Menyimpan…';
+    yearAssignmentMessage('Memvalidasi dan menyimpan assignment tahun…');
+    try {
+      const requestedOrg = orgId;
+      const { data: savedCount, error } = await client.rpc('satria_admin_assign_my_membership_years', {
+        p_organization_id: requestedOrg, p_target_user_id: editingYearUser.id, p_years: years,
+      });
+      if (error) {
+        const message = await readableError(error, 'Assignment tahun gagal disimpan.');
+        if (/satria_admin_assign_my_membership_years.*not found|could not find the function|PGRST202|42883/i.test(message + ' ' + String(error.code || ''))) {
+          throw new Error('RPC assignment tahun belum tersedia. Terapkan migrasi 20261024053200_satria_scoped_access_and_years.sql lalu muat ulang.');
+        }
+        throw new Error(message);
+      }
+      if (!Number.isInteger(Number(savedCount)) || Number(savedCount) !== years.length) throw new Error('Database tidak mengonfirmasi jumlah tahun yang tersimpan. Muat ulang untuk memeriksa hasil.');
+      if (requestedOrg !== orgId || !isAuthorizedInUi()) throw new Error('Organisasi atau sesi berubah selama proses penyimpanan. Muat ulang daftar.');
+      yearAssignmentMessage(`Assignment tahun tersimpan: ${years.join(', ')}.`, 'ok');
+      await loadUsers(true);
+      setStatus('Assignment tahun berhasil diperbarui dan dicatat dalam audit trail.', 'ok');
+      yearAssignmentBusy = false;
+      closeYearAssignmentModal();
+    } catch (error) {
+      yearAssignmentMessage(error instanceof Error ? error.message : 'Assignment tahun gagal disimpan.', 'error');
+    } finally {
+      yearAssignmentBusy = false;
+      if (saveButton) { saveButton.disabled = false; saveButton.textContent = 'Simpan tahun'; }
+    }
+  }
+
   document.addEventListener('click', (event) => {
     const target = event.target;
     if (!(target instanceof Element)) return;
@@ -2761,6 +3086,13 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
       event.preventDefault();
       void syncLocalOpdCatalog();
     } else {
+      const yearButton = target.closest('[data-satria-edit-years]');
+      if (yearButton) {
+        event.preventDefault();
+        const user = (cachedPayload?.users || []).find((item) => item.id === yearButton.dataset.satriaEditYears);
+        if (user) openYearAssignmentModal(user);
+        return;
+      }
       const editButton = target.closest('[data-satria-edit-opd]');
       if (editButton) {
         event.preventDefault();
