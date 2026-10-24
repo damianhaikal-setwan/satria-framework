@@ -1,50 +1,87 @@
-# SATRIA — daftar pengguna admin (`admin-list-users`)
+# SATRIA — Pengguna, Hak Akses, dan Assignment OPD
 
-Paket ini menambahkan daftar anggota Supabase Auth pada halaman **Pengguna dan Hak Akses**. Cocokkan dengan bootstrap SATRIA yang menyediakan `public.satria_memberships(organization_id, user_id, role, active, created_at)` dan nilai role `admin`, `operator`, `viewer`.
+Repo ini menyediakan modul pengguna Supabase Auth dan assignment OPD untuk aplikasi SATRIA Framework 3.0.
 
-## File
+## Fitur
 
-- `supabase/functions/admin-list-users/index.ts` — Edge Function. Letakkan di path yang sama pada repo Supabase.
-- `frontend/admin-list-users.js` — kode frontend mandiri untuk ditempel di dalam Supabase bridge IIFE, sesudah modal tambah user dan sebelum penutup bridge `})();`.
-- `SATRIA-Framework-3.0-Admin-Users.html` — salinan HTML tugas sebelumnya dengan panel daftar dan JavaScript sudah terintegrasi.
-- `supabase/config.toml` — setelan lokal agar gateway tetap memvalidasi JWT.
+- Daftar membership/Auth yang hanya dapat dibaca oleh admin aktif pada organisasi terkait; paginasi 50 akun/halaman.
+- Saat membuat Operator, admin wajib memilih minimal satu OPD dari katalog server.
+- Kolom **OPD yang dapat diakses** menampilkan assignment setiap Operator.
+- Tombol **Atur OPD / Ubah OPD** mengubah assignment akun operator aktif.
+- Server memvalidasi organisasi, role admin, status target, dan keberadaan setiap OPD. Penggantian assignment dilakukan secara atomic melalui PostgreSQL RPC.
+- Audit action dicatat ke `satria_admin_audit_logs`; secret/service-role key tidak pernah ditanam di HTML.
 
-## Keamanan
+## Komponen utama
 
-Gateway memvalidasi JWT (`verify_jwt = true`), kemudian fungsi memvalidasi token lagi terhadap Auth. Sebelum membaca data, fungsi memeriksa bahwa pemanggil memiliki membership `admin` **aktif** pada `organization_id` yang dikirim. Role, status aktif, dan organisasi tidak dipercaya dari frontend. Service/secret key hanya digunakan di Edge Function; tidak pernah ditanam di HTML.
+- `index.html` — UI terintegrasi untuk form tambah Operator, daftar akun, dan edit assignment.
+- `supabase/functions/admin-list-users/index.ts`
+- `supabase/functions/admin-create-user/index.ts`
+- `supabase/functions/admin-update-user/index.ts`
+- `supabase/migrations/20261024052900_satria_opd_assignments_rls.sql`
+- `supabase/migrations/20261024053000_satria_user_opd_assignment_api.sql`
+- `supabase/migrations/20261024053100_satria_catalog_and_assignment_repair.sql`
+- `supabase/migrations/20261024_satria_user_creation_security.sql`
+- `supabase/satria-supabase-staging-bootstrap.sql`
 
-Query pertama mengambil hanya membership organisasi tersebut; data Auth yang dikembalikan hanya untuk user ID di hasil tersebut. Respons tidak mengembalikan `user_metadata` secara keseluruhan, hanya nama tampilan, email, role, status membership, serta tanggal. Respons diberi `no-store`. CORS memakai allowlist origin persis dan bukan pengganti otorisasi.
+## Urutan setup/deploy
 
-Daftar mencakup semua membership organisasi, termasuk yang nonaktif, sehingga admin dapat melihat statusnya. Data diurutkan berdasarkan waktu membership terbaru dan dipaginasi 50 baris/halaman. Frontend menyembunyikan panel dari non-admin demi UX, tetapi pemeriksaan server tetap menjadi kontrol keamanan yang menentukan.
-
-## Deploy
-
-1. Salin folder `supabase/functions/admin-list-users` ke proyek Supabase.
-2. Gabungkan bagian dari `supabase/config.toml` dengan `config.toml` proyek (jangan menimpa konfigurasi fungsi lain).
-3. Isi allowlist dengan origin Pages/aplikasi yang benar, tanpa path atau wildcard. Runtime Supabase menyediakan URL dan key secara otomatis.
+1. Terapkan `supabase/satria-supabase-staging-bootstrap.sql` pada database baru (atau pastikan skema yang sesuai sudah ada).
+2. Terapkan `supabase/migrations/20261024_satria_user_creation_security.sql`.
+3. Terapkan `supabase/migrations/20261024052900_satria_opd_assignments_rls.sql`.
+4. Terapkan `supabase/migrations/20261024053000_satria_user_opd_assignment_api.sql`.
+5. Terapkan `supabase/migrations/20261024053100_satria_catalog_and_assignment_repair.sql`.
+6. Gabungkan konfigurasi `supabase/config.toml` dengan konfigurasi project yang sudah ada; jangan menimpa fungsi lain.
+7. Set `ALLOWED_ORIGINS` ke origin aplikasi yang tepat. Pastikan Supabase runtime menyediakan `SUPABASE_URL`, publishable key, dan secret/service-role key.
+8. Deploy Edge Function:
 
 ```bash
-supabase secrets set ALLOWED_ORIGINS="https://nama-situs.pages.dev,https://domain-anda.go.id"
 supabase functions deploy admin-list-users
+supabase functions deploy admin-create-user
+supabase functions deploy admin-update-user
 ```
 
-Pastikan Supabase project telah menjalankan bootstrap SATRIA dan tabel membership memiliki kolom `created_at`. Fungsi tidak memerlukan migrasi tambahan.
+Semua fungsi memakai `verify_jwt = true` dan tetap memeriksa token serta membership admin aktif di dalam fungsi. Jangan menaruh secret/service-role key dalam `index.html`.
 
-## Frontend
+## Cara kerja katalog OPD
 
-HTML terintegrasi sudah memanggil function menggunakan sesi admin aktif:
+`admin-list-users` membaca `satria_state.payload.opd` dari snapshot cloud dan menyinkronkan master tersebut ke `satria_opds`. OPD harus sudah terkirim ke snapshot cloud sebelum dapat dipilih sebagai assignment. Katalog browser saja tidak dianggap otoritatif oleh backend.
 
-```js
-const { data, error } = await client.functions.invoke('admin-list-users', {
-  body: { organization_id: orgId, page: 1, page_size: 50 }
-});
-```
+Lihat `frontend/OPD-Frontend-Integration.md` untuk alur penggunaan, pengujian, dan batas keamanan saat ini.
 
-Untuk penerapan pada HTML lain, tambahkan juga wadah dengan ID yang digunakan di `vUser()` (`satriaCloudUserListCard`, `satriaAdminUsersRows`, tombol pagination/status). Kode JavaScript harus berada **di dalam** bridge IIFE yang memiliki closure `client`, `member`, dan `orgId`; memasangnya sebagai file script eksternal di luar closure tidak akan memiliki akses ke sesi tersebut. Setelah pembuatan user sukses, dispatch event `window.dispatchEvent(new CustomEvent('satria:user-created'))` agar daftar dimuat ulang.
+## Batas keamanan penting
 
-## Pengujian setelah deploy
+SATRIA masih menyimpan data bisnis sebagai satu snapshot JSON organisasi. Assignment OPD tersimpan dengan benar dan tersedia bagi kebijakan RLS pada tabel terstruktur, tetapi belum otomatis menyaring isi `satria_state.payload` per OPD. Isolasi data penuh membutuhkan migrasi data bisnis ke tabel terstruktur atau API server yang menerapkan scope OPD sebelum mengirim respons. Jangan menganggap assignment ini sebagai pengamanan penuh terhadap pembacaan payload JSON organisasi.
 
-- Admin aktif pada organisasi yang dikirim harus menerima `200` berisi anggota organisasi itu saja.
-- Operator, viewer, admin nonaktif, user tanpa sesi, dan admin dari organisasi lain harus ditolak (`401` atau `403`).
-- Uji halaman berikutnya saat jumlah membership melebihi 50.
-- Periksa Network browser: request membawa sesi terautentikasi; tidak ada service/secret key; response memiliki `Cache-Control: no-store`.
+## Persistensi konfigurasi koneksi
+
+- Buka menu **☁ Supabase** dan isi Project URL, publishable/anon key, serta Organization UUID satu kali.
+- Klik **Simpan konfigurasi** untuk menyimpan tiga nilai tersebut di `localStorage` browser. Login berikutnya pada browser/profil yang sama akan mengisi otomatis konfigurasi.
+- Klik **Masuk ke SATRIA** untuk login. Sesi Supabase Auth tetap menggunakan `persistSession` dan token refresh otomatis.
+- Kata sandi tidak pernah disimpan oleh fitur konfigurasi.
+- Jika menggunakan browser/profil lain atau browser mengisolasi penyimpanan untuk file lokal (`file://`), klik **Unduh HTML dengan konfigurasi** lalu gunakan file hasilnya. File tersebut menanam URL, anon/publishable key, dan Organization UUID, tetapi tidak menanam kata sandi. Jangan pernah memasukkan `service_role` atau `sb_secret_`.
+- Jika konfigurasi tersimpan di browser dan juga tertanam di HTML, konfigurasi browser menjadi prioritas sehingga perubahan dapat disimpan tanpa mengunduh ulang file.
+
+## Troubleshooting login: `Invalid login credentials`
+
+This message is returned by Supabase Auth when the email/password pair cannot be authenticated. It is not caused by the Organization UUID. Check the following:
+
+1. In Supabase Dashboard, open **Authentication → Users** for the project configured in `index.html` and verify the intended email (for example, `admin@satria.go.id`) exists. An HTML file or organization UUID does not create an Auth account.
+2. If the account exists but the password is unknown, use **Lupa kata sandi?** in the SATRIA Supabase panel. Supabase email delivery must be configured, and the live SATRIA page URL must be allowed under **Authentication → URL Configuration → Redirect URLs**. Open the email link in the same application deployment and save a new password.
+3. If no Auth user exists, create it in Supabase Dashboard → Authentication → Users first, then bootstrap an active `admin` row in `public.satria_memberships` tied to the existing organization UUID and the new Auth user's UUID. Do not insert or fabricate a fake Auth user ID.
+4. If sign-in succeeds but SATRIA reports that membership is inactive/missing, that is a separate authorization/setup issue; repair the membership, not the password.
+
+The client has a friendly diagnostic for `Invalid login credentials`, a password-reset request, and a recovery form for setting the new password. A successful browser-side reset still depends on the Auth user existing and Supabase email/redirect configuration being correct. No password or Supabase secret/service-role key is embedded in the HTML.
+
+## Perbaikan formulir pengguna dan assignment OPD (24 Oktober 2026)
+
+- Password awal dan konfirmasi ditempatkan langsung setelah email, sebelum pemilihan role/katalog OPD agar tidak tersembunyi jauh di bawah pada layar ponsel. Kedua field memiliki tombol Tampilkan/Sembunyikan.
+- Roster pengguna Supabase dipisah dari kartu pembuatan akun supaya visibilitas daftar/aksi OPD tidak bergantung pada kartu form tambah akun.
+- Tombol Atur OPD tetap tampil untuk Operator aktif walau katalog kosong; dialog memberi instruksi mengisi master OPD, mengirim snapshot, dan menjalankan migrasi.
+- UI assignment tetap membutuhkan Edge Functions dan migrasi terbaru pada project Supabase; file HTML saja tidak dapat mengubah assignment server.
+
+
+## Perbaikan katalog OPD dan respons Edge Function (24 Oktober 2026)
+
+Jika antarmuka menampilkan `Respons Edge Function tidak valid`, fungsi `admin-list-users` yang aktif belum memakai kontrak respons terbaru. HTML baru tetap mencoba jalur fallback yang dibatasi RLS: membaca membership dan assignment dari tabel organisasi, serta menyinkronkan katalog OPD dari `satria_state.payload.opd` menjadi `satria_opds`. Jalur ini hanya menampilkan data apabila sesi admin aktif dan policy database mengizinkan akses.
+
+Urutan pemulihan yang diperlukan: (1) pastikan snapshot cloud organisasi memuat array `opd` yang benar; (2) jalankan migrasi `20261024053100_satria_catalog_and_assignment_repair.sql`; (3) deploy ulang `admin-list-users` dan `admin-create-user` dari paket ini. Tombol simpan assignment menggunakan RPC baru `satria_admin_assign_my_membership_opds` yang memverifikasi `auth.uid()` sebagai admin aktif, menyimpan perubahan secara atomic, dan menulis audit dalam transaksi yang sama. Jangan memberi izin eksekusi ke fungsi lama yang menerima actor ID arbitrer untuk role `authenticated`.

@@ -1977,7 +1977,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     if (!availableOpds.length) {
       const empty = document.createElement('p');
       empty.className = 'satria-opd-empty';
-      empty.textContent = 'Katalog OPD belum tersedia. Tarik snapshot cloud yang valid dan pastikan migrasi assignment OPD sudah dijalankan.';
+      empty.textContent = 'Memuat katalog OPD dari snapshot Supabase. Jika tetap kosong, klik Muat ulang; pastikan snapshot cloud memuat master OPD dan migrasi OPD telah diterapkan.';
       opdChoices.appendChild(empty);
       return;
     }
@@ -2124,7 +2124,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
         },
       });
       if (error) throw new Error(await readableFunctionError(error));
-      if (!data?.ok || !data?.user?.id) throw new Error('Function tidak mengembalikan hasil pembuatan akun yang valid.');
+      if (!data?.ok || !data?.user?.id) throw new Error('Respons admin-create-user tidak sesuai versi SATRIA terbaru. Deploy ulang Edge Function admin-create-user dari paket ini, lalu coba kembali.');
 
       form.reset();
       clearPasswords();
@@ -2231,7 +2231,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
 
     for (const user of users) {
       const row = document.createElement('tr');
-      addCell(row, user.display_name || user.email || '—');
+      addCell(row, user.display_name || user.email || ('Pengguna ' + String(user.id || '').slice(0, 8)));
       addCell(row, user.email || '—');
       addCell(row, ({ admin: 'Admin', operator: 'Operator', viewer: 'Viewer' })[user.role] || user.role || '—');
 
@@ -2293,6 +2293,151 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     return fallback;
   }
 
+  function normalizeCatalogRows(rawOpds, requestedOrg) {
+    if (!Array.isArray(rawOpds)) return [];
+    const parsed = rawOpds.map((source) => {
+      if (!source || typeof source !== 'object' || Array.isArray(source)) return null;
+      const idValue = source.id ?? source.opd_id;
+      const id = (typeof idValue === 'string' || typeof idValue === 'number') ? String(idValue).trim() : '';
+      const shortName = String(source.singkat ?? source.code ?? '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 80);
+      const rawName = source.nama ?? source.name ?? shortName;
+      const name = typeof rawName === 'string' ? rawName.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 200) : '';
+      if (!id || id.length > 128 || !name) return null;
+      return { organization_id: requestedOrg, opd_id: id, name, code: shortName || null, active: true };
+    }).filter(Boolean);
+    const ids = new Set();
+    for (const row of parsed) {
+      if (ids.has(row.opd_id)) throw new Error('ID OPD duplikat pada snapshot cloud. Perbaiki Data Master sebelum mengatur hak akses.');
+      ids.add(row.opd_id);
+    }
+    const codeCounts = new Map();
+    for (const row of parsed) if (row.code) codeCounts.set(row.code, (codeCounts.get(row.code) || 0) + 1);
+    return parsed.map((row) => ({ ...row, code: row.code && codeCounts.get(row.code) === 1 ? row.code : null }));
+  }
+
+  async function loadCatalogFromCloudSnapshot(requestedOrg) {
+    if (!client || !requestedOrg) return { opds: [], note: 'Sesi Supabase belum aktif.' };
+    let snapshot;
+    const { data: snapshotRow, error: snapshotError } = await client
+      .from('satria_state').select('payload').eq('organization_id', requestedOrg).maybeSingle();
+    if (snapshotError) {
+      return { opds: [], note: 'Snapshot cloud tidak dapat dibaca. Periksa RLS dan tabel satria_state: ' + snapshotError.message };
+    }
+    snapshot = snapshotRow?.payload;
+    const rawOpds = snapshot && typeof snapshot === 'object' ? snapshot.opd : null;
+    if (Array.isArray(rawOpds) && rawOpds.length) {
+      let normalized;
+      try { normalized = normalizeCatalogRows(rawOpds, requestedOrg); }
+      catch (error) { return { opds: [], note: error instanceof Error ? error.message : 'Data OPD snapshot tidak valid.' }; }
+      if (!normalized.length) return { opds: [], note: 'Snapshot cloud memiliki data OPD, tetapi tidak ada baris dengan ID dan nama yang valid.' };
+
+      // Keep the canonical catalog derived from the organization's current cloud snapshot.
+      // This request is executed with the logged-in admin JWT and is protected by RLS.
+      const activeIds = new Set(normalized.map((row) => row.opd_id));
+      const { data: existing, error: existingError } = await client
+        .from('satria_opds').select('opd_id,active').eq('organization_id', requestedOrg);
+      if (existingError) {
+        return { opds: [], note: 'Tabel katalog OPD belum siap. Terapkan migrasi assignment OPD: ' + existingError.message };
+      }
+      for (const old of existing || []) {
+        if (old.active && !activeIds.has(old.opd_id)) {
+          const { error: deactivateError } = await client.from('satria_opds')
+            .update({ active: false, code: null }).eq('organization_id', requestedOrg).eq('opd_id', old.opd_id);
+          if (deactivateError) return { opds: [], note: 'OPD lama tidak dapat dinonaktifkan: ' + deactivateError.message };
+        }
+      }
+      const { error: upsertError } = await client.from('satria_opds')
+        .upsert(normalized, { onConflict: 'organization_id,opd_id' });
+      if (upsertError) {
+        return { opds: [], note: 'Sinkronisasi master OPD gagal. Pastikan migrasi satria_opds sudah diterapkan: ' + upsertError.message };
+      }
+    }
+
+    const { data: catalog, error: catalogError } = await client.from('satria_opds')
+      .select('opd_id,name,code').eq('organization_id', requestedOrg).eq('active', true).order('name', { ascending: true });
+    if (catalogError) return { opds: [], note: 'Katalog OPD tidak dapat dibaca. Jalankan migrasi OPD terbaru: ' + catalogError.message };
+    const opds = (catalog || []).map((item) => ({ id: String(item.opd_id), name: item.name, code: item.code || null }));
+    if (!opds.length) {
+      const hasSnapshotOpds = Array.isArray(rawOpds) && rawOpds.length > 0;
+      return { opds, note: hasSnapshotOpds
+        ? 'Data master OPD ada, tetapi katalog assignment belum berhasil dibuat. Periksa migrasi satria_opds dan policy admin.'
+        : 'Snapshot cloud belum berisi master OPD. Buka Data Master, pastikan OPD tersimpan, lalu gunakan Kirim snapshot lokal sebagai admin. Setelah itu klik Muat ulang.' };
+    }
+    return { opds, note: '' };
+  }
+
+  async function loadUsersDirectlyFromMemberships(requestedOrg) {
+    // Compatibility path for an older admin-list-users deployment. RLS still limits
+    // this query to the current active admin; emails/names are read only from the
+    // profile columns added by the companion migration, never from arbitrary input.
+    const { data: rows, error: rowsError, count } = await client.from('satria_memberships')
+      .select('user_id,role,active,created_at,login_email,display_name', { count: 'exact' })
+      .eq('organization_id', requestedOrg)
+      .order('created_at', { ascending: false })
+      .order('user_id', { ascending: true })
+      .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+    if (rowsError) {
+      // Permit older schemas to render a limited roster, but keep the diagnostic visible.
+      const fallback = await client.from('satria_memberships')
+        .select('user_id,role,active,created_at', { count: 'exact' })
+        .eq('organization_id', requestedOrg)
+        .order('created_at', { ascending: false })
+        .order('user_id', { ascending: true })
+        .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+      if (fallback.error) throw new Error('Daftar membership tidak dapat dibaca melalui RLS: ' + fallback.error.message);
+      const catalogResult = await loadCatalogFromCloudSnapshot(requestedOrg);
+      const users = (fallback.data || []).map((row) => ({
+        id: row.user_id,
+        email: '',
+        display_name: 'Pengguna ' + String(row.user_id).slice(0, 8),
+        role: row.role,
+        active: row.active === true,
+        membership_created_at: row.created_at,
+        opd_ids: [], opd_names: [],
+      }));
+      return { ok: true, organization_id: requestedOrg, page, page_size: PAGE_SIZE, total: fallback.count || 0, users, opds: catalogResult.opds, catalog_note: catalogResult.note, profile_note: 'Kolom profil login belum tersedia; terapkan migrasi 20261024053100_satria_catalog_and_assignment_repair.sql untuk menampilkan nama/email.' };
+    }
+
+    const userIds = (rows || []).map((row) => row.user_id);
+    const [assignmentResult, catalogResult] = await Promise.all([
+      userIds.length ? client.from('satria_membership_opds').select('user_id,opd_id').eq('organization_id', requestedOrg).in('user_id', userIds)
+        : Promise.resolve({ data: [], error: null }),
+      loadCatalogFromCloudSnapshot(requestedOrg),
+    ]);
+    const assignmentNote = assignmentResult.error
+      ? 'Assignment OPD belum dapat dibaca. Terapkan migrasi satria_membership_opds: ' + assignmentResult.error.message
+      : '';
+    const opds = catalogResult.opds;
+    const opdNameById = new Map(opds.map((item) => [item.id, item.name]));
+    const idsByUser = new Map();
+    for (const assignment of assignmentResult.data || []) {
+      const ids = idsByUser.get(assignment.user_id) || [];
+      ids.push(String(assignment.opd_id));
+      idsByUser.set(assignment.user_id, ids);
+    }
+    const users = (rows || []).map((row) => {
+      const ids = (idsByUser.get(row.user_id) || []).sort();
+      const email = typeof row.login_email === 'string' ? row.login_email : '';
+      return {
+        id: row.user_id,
+        email,
+        display_name: row.display_name || email || ('Pengguna ' + String(row.user_id).slice(0, 8)),
+        role: row.role,
+        active: row.active === true,
+        membership_created_at: row.created_at,
+        opd_ids: ids,
+        opd_names: ids.map((id) => opdNameById.get(id)).filter(Boolean),
+      };
+    });
+    return {
+      ok: true, organization_id: requestedOrg, page, page_size: PAGE_SIZE,
+      total: count || 0, users, opds,
+      catalog_note: catalogResult.note,
+      assignment_note: assignmentNote,
+      profile_note: '',
+    };
+  }
+
   async function loadUsers(force = false) {
     if (!updateVisibility()) return null;
     const requestedOrg = orgId;
@@ -2314,33 +2459,55 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     renderPagination(cachedPayload || { total: 0, page_size: PAGE_SIZE });
 
     loadingPromise = (async () => {
+      let deploymentNote = '';
       try {
-        const { data, error } = await client.functions.invoke('admin-list-users', {
-          body: { organization_id: requestedOrg, page, page_size: PAGE_SIZE },
-        });
-        if (error) throw new Error(await readableError(error, 'Daftar pengguna dan OPD tidak dapat dimuat.'));
-        if (!data?.ok || !Array.isArray(data.users) || !Array.isArray(data.opds)) {
-          throw new Error('Respons Edge Function tidak valid. Pastikan deployment fungsi sudah diperbarui.');
+        let payload = null;
+        try {
+          const { data, error } = await client.functions.invoke('admin-list-users', {
+            body: { organization_id: requestedOrg, page, page_size: PAGE_SIZE },
+          });
+          if (error) throw new Error(await readableError(error, 'Daftar pengguna dan OPD tidak dapat dimuat.'));
+          if (data?.ok === true && Array.isArray(data.users) && Array.isArray(data.opds)) {
+            payload = data;
+          } else {
+            deploymentNote = 'Edge Function admin-list-users masih mengirim format respons lama. Daftar dicoba dimuat melalui fallback RLS; deploy ulang fungsi dari paket perbaikan.';
+          }
+        } catch (functionError) {
+          deploymentNote = (functionError instanceof Error ? functionError.message : 'Edge Function admin-list-users tidak dapat dipanggil.') + ' Dicoba jalur fallback RLS.';
+        }
+
+        if (requestedOrg !== orgId || !isAuthorizedInUi()) return null;
+        if (!payload) payload = await loadUsersDirectlyFromMemberships(requestedOrg);
+        else if (!payload.opds.length) {
+          // Older snapshot may not yet have been synced into the normalized catalog.
+          const catalogResult = await loadCatalogFromCloudSnapshot(requestedOrg);
+          if (catalogResult.opds.length) payload = { ...payload, opds: catalogResult.opds };
+          else payload = { ...payload, catalog_note: catalogResult.note };
         }
         if (requestedOrg !== orgId || !isAuthorizedInUi()) return null;
 
-        cachedPayload = data;
+        cachedPayload = payload;
         lastFetchedAt = Date.now();
         lastFetchedOrg = requestedOrg;
-        setCatalog(data.opds);
-        renderRows(data.users);
-        renderPagination(data);
-        if (!opds.length) {
-          setStatus('Daftar pengguna sudah dimuat, tetapi katalog OPD aktif masih kosong. Klik Atur OPD pada baris Operator untuk petunjuk; pastikan master OPD sudah diisi, snapshot OPD organisasi sudah dikirim ke Supabase, dan migrasi OPD sudah diterapkan.', 'error');
+        setCatalog(payload.opds);
+        renderRows(payload.users);
+        renderPagination(payload);
+        const catalogNote = payload.catalog_note || '';
+        const profileNote = payload.profile_note || '';
+        const assignmentNote = payload.assignment_note || '';
+        if (deploymentNote) {
+          setStatus(`Roster dimuat dengan fallback yang dibatasi RLS. ${deploymentNote}${opds.length ? ` Katalog OPD aktif: ${opds.length}.` : ` ${catalogNote || 'Katalog OPD belum tersedia.'}`} ${profileNote} ${assignmentNote}`.trim(), 'error');
+        } else if (!opds.length || assignmentNote) {
+          setStatus(`Daftar pengguna dimuat. ${!opds.length ? (catalogNote || 'Katalog OPD aktif belum tersedia.') : `Katalog OPD aktif: ${opds.length}.`} ${profileNote} ${assignmentNote}`.trim(), 'error');
         } else {
-          setStatus(`Daftar pengguna berhasil dimuat. Katalog OPD aktif: ${opds.length}.`, 'ok');
+          setStatus(`Daftar pengguna berhasil dimuat. Katalog OPD aktif: ${opds.length}.${profileNote ? ' ' + profileNote : ''}`, profileNote ? 'error' : 'ok');
         }
-        return data;
+        return payload;
       } catch (error) {
         const safeMessage = error instanceof Error ? error.message : 'Daftar pengguna tidak dapat dimuat.';
         setCatalog([]);
         renderRows([]);
-        setStatus(safeMessage, 'error');
+        setStatus(`${safeMessage} Pastikan migrasi 20261024053100_satria_catalog_and_assignment_repair.sql telah diterapkan dan akun admin aktif.`, 'error');
         return null;
       } finally {
         busy = false;
@@ -2416,7 +2583,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     const selected = new Set(Array.isArray(user.opd_ids) ? user.opd_ids : []);
     if (!opds.length) {
       const empty = document.createElement('p');
-      empty.textContent = 'Pilihan OPD belum muncul karena katalog OPD aktif kosong. Buka Data Master untuk melengkapi OPD, kirim snapshot lokal ke Supabase sebagai admin, lalu klik Muat ulang. Pastikan migrasi satria_opds dan satria_membership_opds sudah diterapkan.';
+      empty.textContent = 'Pilihan OPD belum tersedia. Buka Data Master, pastikan master OPD sudah tersimpan pada snapshot cloud, lalu klik Muat ulang. Katalog akan disinkronkan otomatis dari snapshot; jika migrasi belum diterapkan, jalankan 20261024052900_satria_opd_assignments_rls.sql dan 20261024053100_satria_catalog_and_assignment_repair.sql.';
       choices.appendChild(empty);
     } else {
       for (const opd of opds) {
@@ -2464,17 +2631,25 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     assignmentMessage('Memvalidasi dan menyimpan assignment OPD…');
     try {
       const requestedOrg = orgId;
-      const { data, error } = await client.functions.invoke('admin-update-user', {
-        body: { organization_id: requestedOrg, user_id: editingUser.id, opd_ids: opdIds },
+      // New RPC binds the actor to auth.uid() and performs replacement + audit atomically.
+      const { data: savedCount, error: rpcError } = await client.rpc('satria_admin_assign_my_membership_opds', {
+        p_organization_id: requestedOrg,
+        p_target_user_id: editingUser.id,
+        p_opd_ids: opdIds,
       });
-      if (error) throw new Error(await readableError(error, 'Assignment OPD gagal disimpan.'));
-      if (!data?.ok || data.user_id !== editingUser.id) throw new Error('Respons server tidak valid. Pastikan admin-update-user sudah di-deploy.');
+      if (rpcError) {
+        const message = await readableError(rpcError, 'Assignment OPD gagal disimpan.');
+        if (/function .*satria_admin_assign_my_membership_opds.*not found|could not find the function|PGRST202|42883/i.test(message + ' ' + String(rpcError.code || ''))) {
+          throw new Error('RPC assignment terbaru belum tersedia. Terapkan migrasi 20261024053100_satria_catalog_and_assignment_repair.sql lalu Muat ulang.');
+        }
+        throw new Error(message);
+      }
+      if (!Number.isInteger(Number(savedCount)) || Number(savedCount) !== opdIds.length) throw new Error('Database tidak mengonfirmasi jumlah OPD yang tersimpan. Muat ulang untuk memeriksa hasil.');
       if (requestedOrg !== orgId || !isAuthorizedInUi()) throw new Error('Organisasi atau sesi berubah selama proses penyimpanan. Muat ulang daftar.');
-      assignmentMessage(`Assignment tersimpan: ${Number(data.assignment_count) || opdIds.length} OPD.`, 'ok');
+      assignmentMessage(`Assignment tersimpan: ${Number(savedCount)} OPD.`, 'ok');
       await loadUsers(true);
       assignmentBusy = false;
-      const auditNote = data.audit_recorded === false ? ' Audit trail gagal disimpan; periksa log Edge Function.' : '';
-      setStatus('Assignment OPD operator berhasil diperbarui.' + auditNote, data.audit_recorded === false ? 'error' : 'ok');
+      setStatus('Assignment OPD operator berhasil diperbarui dan dicatat dalam audit trail.', 'ok');
       closeAssignmentModal();
     } catch (error) {
       assignmentMessage(error instanceof Error ? error.message : 'Assignment OPD gagal disimpan.', 'error');
@@ -2515,7 +2690,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
   window.addEventListener('satria:user-created', () => { page = 1; void loadUsers(true); });
   window.addEventListener('satria:user-updated', () => { void loadUsers(true); });
   window.addEventListener('satria:load-opd-catalog', () => { void loadUsers(true); });
-  window.SATRIA_ADMIN_USERS = Object.freeze({ getOpds: () => opds.map((item) => ({ ...item })), refresh: () => loadUsers(true) });
+  window.SATRIA_ADMIN_USERS = Object.freeze({ version: '2026-10-24-opd-fallback-v2', getOpds: () => opds.map((item) => ({ ...item })), refresh: () => loadUsers(true) });
 
   if (typeof window.render === 'function') {
     const originalRender = window.render;
