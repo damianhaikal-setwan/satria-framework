@@ -1,5 +1,12 @@
 ---
 name: "satria-index-patched"
+title: "index.html — SATRIA 3.0 patched (Ekspor + Cloud UX + Offline Sync + Chatbot v2 + Fix Dashboard & Pulihkan Cache Lokal)"
+type: "code"
+language: "html"
+---
+
+---
+name: "satria-index-patched"
 title: "index.html — SATRIA 3.0 patched (Ekspor + Cloud UX + Offline Sync + Chatbot v2 + Fix Dashboard)"
 type: "code"
 language: "html"
@@ -2961,8 +2968,23 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
   }
   async function connect(){
     try{status('Memeriksa konfigurasi dan menghubungkan…');await initClient();bindRecoveryListener(client);
-      const email=$id('scEmail').value.trim(),password=$id('scPassword').value;
-      if(email&&password){const {error}=await client.auth.signInWithPassword({email,password});if(error)throw error;$id('scPassword').value='';await loadMembership()}
+      const emailEl=$id('scEmail'),passwordEl=$id('scPassword');
+      let email=(emailEl?emailEl.value:'').trim().toLowerCase();
+      if(emailEl&&email)emailEl.value=email;
+      const password=passwordEl?passwordEl.value:'';
+      if(email&&password){
+        if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))throw new Error('Format email tidak valid: "'+(email||'(kosong)')+'". Periksa kembali kolom email.');
+        try{const h=await fetch((config().url||'').replace(/\/+$/,'')+'/auth/v1/health',{cache:'no-store'});if(!h.ok)throw new Error('health '+h.status)}
+        catch(_){throw new Error('Project Supabase pada '+(config().url||'(URL kosong)')+' tidak dapat dihubungi. Periksa Project URL pada kolom konfigurasi — login hanya akan berhasil pada project tempat akun dibuat.')}
+        const {error}=await client.auth.signInWithPassword({email,password});
+        if(error){
+          if(/invalid login credentials/i.test(String(error.message||error))){
+            throw new Error('Email atau kata sandi ditolak oleh project '+(config().url||'').replace(/^https?:\/\//,'')+'. Pastikan: (1) akun dengan email ini sudah ada di Dashboard Supabase → Authentication → Users pada project yang sama persis dengan Project URL di kolom konfigurasi; (2) kata sandi benar — gunakan "Lupa kata sandi?" bila lupa; (3) email diketik tanpa spasi dan sudah dinormalisasi ke huruf kecil: '+email);
+          }
+          throw error;
+        }
+        if(passwordEl)passwordEl.value='';await loadMembership()
+      }
       else {const {data,error}=await client.auth.getSession();if(error)throw error;if(data.session)await loadMembership();else status('Konfigurasi tersimpan. Masukkan email dan kata sandi akun Auth untuk masuk.')}
     }catch(e){showError(e)}
   }
