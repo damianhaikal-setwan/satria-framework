@@ -882,77 +882,160 @@ main{overflow-anchor:none}
   </style>
 
 <style>
-/* FIX: Header tertutup - dari screenshot 23.36.15 */
+/* ===== FINAL ZOOM 80% & 100% FIX - 25 Okt 2026 ===== */
+/* Header: make it truly responsive for 80% and 100% zoom */
 header{
   position: sticky !important;
   top: 0 !important;
   z-index: 100 !important;
   height: auto !important;
-  min-height: 72px !important;
-  padding: 10px 18px !important;
-  flex-wrap: nowrap !important;
-  overflow: visible !important;
+  min-height: 56px !important;
+  padding: 8px 16px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
   align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  overflow: visible !important;
 }
 .header-left{
   display: flex !important;
   align-items: center !important;
   gap: 12px !important;
+  flex: 0 0 auto !important;
   min-width: 0 !important;
-  overflow: visible !important;
+  max-width: 320px;
 }
-#bLogoRow{
+.header-right{
   display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+  flex: 1 1 auto !important;
+  justify-content: flex-end !important;
   min-width: 0 !important;
-  overflow: visible !important;
 }
-#hPemda, #hSub{
+/* Control groups - shrink to fit at 100% zoom */
+.header-right .control-group{
+  height: 34px !important;
+  padding: 0 6px 0 10px !important;
+  border-radius: 9999px !important;
+  font-size: 11px !important;
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+}
+.header-right .control-group label{ font-size: 9px !important; gap: 4px !important; }
+.header-right .control-group select{
+  height: 26px !important;
+  font-size: 11px !important;
+  min-width: 70px !important;
+  max-width: 150px !important;
+  padding: 0 6px !important;
+}
+#selUser{ min-width: 120px !important; max-width: 160px !important; }
+#selTahun{ min-width: 60px !important; max-width: 80px !important; }
+#selOpd{ min-width: 90px !important; max-width: 140px !important; }
+#selEngine{ min-width: 90px !important; max-width: 130px !important; }
+#dirty{
+  height: 28px !important;
+  font-size: 9px !important;
+  padding: 0 8px !important;
+  max-width: 150px !important;
+  flex: 0 1 auto !important;
+}
+.satria-cloud-btn{
+  height: 34px !important;
+  padding: 0 10px !important;
+  font-size: 11px !important;
+  flex: 0 0 auto !important;
+}
+.satria-sync-indicator{
+  font-size: 9px !important;
+  padding: 4px 8px !important;
+  max-width: 130px !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  max-width: 280px;
-  line-height: 1.2 !important;
-  display: block !important;
+  flex: 0 1 auto !important;
 }
-#hPemda{
-  font-size: 13px !important;
-  font-weight: 800 !important;
-}
-#hSub{
-  font-size: 10px !important;
-  opacity: .7 !important;
-}
-.header-right{
-  flex-wrap: nowrap !important;
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  scrollbar-width: none !important;
-}
-.header-right::-webkit-scrollbar{ display:none !important; }
-.satria-sync-badge{
-  top: 76px !important; /* di bawah header 72px + 4px gap */
-  right: 12px !important;
-  z-index: 99 !important; /* di bawah header */
+header button[data-act="export"]{
+  height: 34px !important;
+  padding: 0 12px !important;
+  font-size: 11px !important;
+  flex: 0 0 auto !important;
 }
 #nav{
   position: sticky !important;
-  top: 72px !important;
+  top: 0 !important;
   z-index: 90 !important;
-  background: var(--card-solid) !important;
-  backdrop-filter: blur(12px) !important;
+  padding: 6px 12px !important;
+  min-height: 44px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  overflow-x: auto !important;
 }
-@media(max-width: 768px){
-  header{
-    min-height: 64px !important;
-    padding: 8px 12px !important;
-    gap: 8px !important;
-  }
-  #hPemda{ max-width: 160px !important; font-size: 12px !important; }
-  #hSub{ max-width: 160px !important; font-size: 9px !important; }
-  .satria-sync-badge{ top: 68px !important; }
-  #nav{ top: 64px !important; }
+#nav a{ height: 30px !important; padding: 0 10px !important; font-size: 11px !important; flex: 0 0 auto !important; }
+
+/* === KPI GRID FIX - This is the main fix for vertical stack === */
+.grid{
+  display: grid !important;
+  grid-template-columns: repeat(12, 1fr) !important;
+  gap: 16px !important;
+}
+.grid .kpi{
+  grid-column: span 3 !important;
+}
+.grid .kpi.satria-kpi{
+  grid-column: span 3 !important;
+  min-width: 0 !important;
+}
+/* Override inline style for vDash grid */
+.grid[style]{
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+}
+#main{
+  padding: 20px !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+}
+.satria-command-header{
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+}
+.satria-command-meta{
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+/* Responsive breakpoints for zoom */
+@media(max-width: 1400px){
+  .grid .kpi, .grid .kpi.satria-kpi{ grid-column: span 4 !important; }
+  #selUser{ max-width: 140px !important; }
+  #selOpd{ max-width: 120px !important; }
+}
+@media(max-width: 1100px){
+  .grid .kpi, .grid .kpi.satria-kpi{ grid-column: span 6 !important; }
+  header{ gap: 8px !important; padding: 6px 12px !important; }
+  .header-left{ max-width: 240px; }
+}
+@media(max-width: 900px){
+  header{ flex-direction: column !important; align-items: stretch !important; }
+  .header-left{ max-width: 100% !important; }
+  .header-right{ justify-content: flex-start !important; }
+  .grid .kpi, .grid .kpi.satria-kpi{ grid-column: span 6 !important; }
+  .grid[style]{ grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media(max-width: 640px){
+  .grid .kpi, .grid .kpi.satria-kpi{ grid-column: span 12 !important; }
+  .grid[style]{ grid-template-columns: 1fr !important; }
+  #main{ padding: 12px !important; }
+  .header-right{ display: grid !important; grid-template-columns: 1fr 1fr !important; }
+  .header-right .control-group, .satria-cloud-btn, header button[data-act="export"]{ width: 100% !important; }
+  #dirty, .satria-sync-indicator{ grid-column: 1/-1 !important; max-width: 100% !important; }
 }
 </style>
 </head>
@@ -1952,7 +2035,12 @@ async function boot(){
   }
   if(hasCloudConfig){
     // Do not render a cached admin snapshot before the authenticated principal/scope is known.
-    S.paket=[];S.opd=[];S.unit=[];S.pejabat=[];S.penyedia=[];S.akun=[];S.kode=[];S.tahun=[new Date().getFullYear()];
+    const seedOpd = (SEED.opd||[]).map(o=>({...o}));
+    const seedTahun = (SEED.tahun||[new Date().getFullYear()]).slice();
+    const seedPemda = {...SEED.pemda};
+    const seedPenomoran = {...SEED.penomoran};
+    S.paket=[];S.opd=seedOpd;S.unit=(SEED.unit||[]).slice();S.pejabat=(SEED.pejabat||[]).slice();S.penyedia=(SEED.penyedia||[]).slice();S.akun=(SEED.akun||[]).slice();S.kode=(SEED.kode||[]).slice();S.tahun=seedTahun;
+    S.pemda=seedPemda;S.meta={...SEED.meta};S.penomoran=seedPenomoran;
     S.pemda={nama:'',kota:'',provinsi:'',sumber:''};S.meta={};S.penomoran={};
     S.users=[{id:'cloud-login-required',nama:'Login Supabase diperlukan',username:'',role:'Viewer',opd:'all',aktif:false}];
     S.ui.user=S.users[0].id;S.ui.tahun=S.tahun[0];S.dirty=false;
