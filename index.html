@@ -1,3 +1,10 @@
+---
+name: "satria-index-patched"
+title: "index.html — SATRIA 3.0 patched (Ekspor PDF/Excel + Badge Cloud + Offline Sync)"
+type: "code"
+language: "html"
+---
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -1150,7 +1157,7 @@ kode:[{id:'KODE-DEMO-001',kode:'KODE-DEMO-001',nama:'Kegiatan Simulasi'}],
 paket:[{id:'k1',tahun:2026,opd:'o1',unit:'unit-demo',seq:1,nama:'PAKET DEMO — JANGAN DIGUNAKAN UNTUK TRANSAKSI',rup:'DEMO-RUP-0001',pagu:1000000,sumber:'Dana Simulasi',sub:'KODE-DEMO-001',ppk:'p1',pp:'p2',kabid:'p3',masaHk:7,tglNodis:'',tglDpp:'',tglBahp:'',tglSppbj:'',batas:'',pemenangId:null,lokasiPengiriman:'Lokasi Contoh',jenisPengadaan:'Barang (Simulasi)',metodePemilihan:'Metode Simulasi',tglSurvei:'',tglNego:'',tglPenetapan:'',tglEvaluasi:'',items:[{id:'i1',nama:'Barang Contoh',spesifikasi:'Spesifikasi simulasi',merek:'Contoh',pdn:'Perlu verifikasi',linkProduk:'',vol:1,satuan:'Unit',hs:100000}],penawaran:[]}]
 };
 let S;
-function init(){S=JSON.parse(JSON.stringify(SEED));normalizeData();S.ui={page:'dash',tahun:S.tahun[0],opd:'all',pid:null,dpid:'k1',dok:'nodis',ptab:'data',mtab:'ppk'};S.log=[];S.dirty=false;S.chat=[];S.chatCtx=null;S.ui.user=S.users[0].id}
+function init(){S=JSON.parse(JSON.stringify(SEED));normalizeData();S.ui={page:'dash',tahun:S.tahun[0],opd:'all',pid:null,dpid:'k1',dok:'nodis',ptab:'data',mtab:'ppk'};S.log=[];S.dirty=false;S.chat=[];S.chatCtx=null;loadChat();S.ui.user=S.users[0].id}
 
 /* ===== FILTER & SINKRONISASI ANTAR MENU ===== */
 function activeCloudScope(){
@@ -1841,6 +1848,46 @@ const HOW=[[['backup','simpan','hilang'],'Klik Backup di header untuk mengunduh 
  [['tahun anggaran','tahun baru','tambah tahun'],'Tambah tahun di Pengaturan Instansi → Tahun Anggaran. Pilih tahun aktif di header.'],
  [['nonaktif','aktifkan'],'PPK yang dinonaktifkan tidak dipilih untuk paket baru, tetapi dokumen lama tetap menampilkannya. Atur di Data Master → PPK / KPA.']];
 const CAPS='Saya bisa membantu dengan:\n• Ringkasan pagu, HPS, kontrak, dan efisiensi per tahun atau per OPD\n• Detail paket berdasarkan Kode RUP atau nama\n• Penawaran, pemenang, dan kelengkapan paket\n• Kesiapan setiap dokumen (Nota Dinas, DPP, SPPBJ, BA, dan lainnya)\n• Kinerja penyedia, pejabat, akun anggaran, dan user\n• Cara memakai aplikasi (ketik "cara ...")\nSaya mengingat paket terakhir yang dibahas, jadi Anda bisa bertanya lanjutan seperti "pemenangnya siapa?".';
+/* ===== SATRIA Chat v2 — fuzzy NLU + multi-intent + konteks berlapis + chat-aksi ===== */
+const lev=(a,b)=>{const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let prev=Array.from({length:n+1},(_,i)=>i);for(let i=1;i<=m;i++){const cur=[i];for(let j=1;j<=n;j++)cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));prev=cur}return prev[n]};
+const CHAT_KW=['pagu','hps','kontrak','efisiensi','pemenang','penawaran','penyedia','paket','dokumen','lengkap','tertinggi','terbesar','termahal','terendah','pejabat','pengadaan','komitmen','anggaran','tahun','bandingkan','ringkasan','efisien','kelengkapan','penomoran','pemenangnya'];
+function fzFix(raw){return nrm(raw).split(' ').map(w=>{if(w.length>=4&&!CHAT_KW.includes(w)){const hit=CHAT_KW.find(k=>k.length>=4&&lev(w,k)<=Math.max(1,Math.floor(Math.min(w.length,k.length)/4)));if(hit)return hit}return w}).join(' ')}
+function findOpdFuzzy(s){const q=nrm(s);if(!q)return null;return S.opd.find(o=>nrm(o.singkat)===q)||S.opd.find(o=>nrm(o.nama).includes(q))||S.opd.find(o=>nrm(o.singkat).includes(q))||null}
+function chatAct(raw){
+ const q=nrm(raw);let m;
+ m=q.match(/(?:pindah|ganti|set|tampilkan|tunjukkan)?\s*(?:ke\s+)?tahun\s+(20\d{2})/);
+ if(m&&S.tahun.includes(+m[1])){S.ui.tahun=+m[1];render();return 'Tahun aktif diubah ke **TA '+m[1]+'**.'}
+ if(m)return 'TA '+m[1]+' belum ada di daftar Tahun Anggaran. Tambahkan dulu di Pengaturan Instansi → Tahun Anggaran.';
+ m=q.match(/^(filter|fokus|tampilkan|tunjukkan)\s+(?:di\s+|opd\s+)?(.+)$/);
+ if(m&&m[2]&&!/paket/.test(m[2])&&m[2].split(' ').length<=4){const o=findOpdFuzzy(m[2]);if(o){S.ui.opd=o.id;render();return 'Filter OPD diubah ke **'+o.singkat+'** ('+o.nama+'). Dashboard dan laporan sekarang terfokus ke OPD tersebut.'}}
+ m=q.match(/^(buka|bukak|lihat|cek)\s+(?:paket\s+)?(.+)$/);
+ if(m){const p=findPaket(m[2]);if(p&&p.id){location.hash='#paket/'+p.id;return 'Membuka paket **'+(p.rup||p.nama.slice(0,30))+'** — '+p.nama+'.'}}
+ m=q.match(/^(siapkan|cetak|buka|buat)\s+(nodis|dpp|sppbj|bahp|ba\s*hp|survei|nego|penetapan|evaluasi|nota dinas|ba hasil)/);
+ if(m){location.hash='#dok';return 'Membuka menu **Dokumen Pengadaan**. Pilih Kode RUP dan jenis dokumen '+(m[2]||'')+', lalu klik Cetak / Simpan PDF.'}
+ return null;
+}
+function botAnswerFull(raw){
+ const parts=String(raw||'').split(/\s+dan\s+|\s+serta\s+|;\s*/i).map(s=>s.trim()).filter(Boolean);
+ if(parts.length>1&&parts.every(p=>p.split(' ').length>=2)){
+  return parts.map((p,i)=>'**'+(i+1)+'. '+p+'**\n'+(chatAct(p)||botAnswer(fzFix(p)))).join('\n\n');
+ }
+ return chatAct(raw)||botAnswer(fzFix(raw));
+}
+function chatFmt(s){return esc(String(s==null?'':s)).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')}
+function saveChat(){try{localStorage.setItem('satria-chat-v1',JSON.stringify((S.chat||[]).slice(-60)))}catch(_){}}
+function loadChat(){try{const c=JSON.parse(localStorage.getItem('satria-chat-v1')||'[]');if(Array.isArray(c)&&c.length&&(c[c.length-1]||{}).typing)c.pop();if(Array.isArray(c)&&c.length)S.chat=c.slice(-60)}catch(_){}}
+function chatSend(q){
+ if(!q||!q.trim())return;const t=q.trim();
+ S.chat=(S.chat||[]).concat([{f:'u',t},{f:'b',t:'…',typing:true}]).slice(-60);
+ render();const el0=document.getElementById('chatBody');if(el0)el0.scrollTop=el0.scrollHeight;
+ setTimeout(function(){
+  const ans=botAnswerFull(t);
+  if(S.chat.length&&S.chat[S.chat.length-1].typing)S.chat[S.chat.length-1]={f:'b',t:ans};
+  else S.chat=S.chat.concat([{f:'b',t:ans}]).slice(-60);
+  saveChat();
+  if(S.ui.page==='chat'){render();const el=document.getElementById('chatBody');if(el)el.scrollTop=el.scrollHeight}
+ },380);
+}
 function botAnswer(raw){
  const q=nrm(raw),sc=scopeOf(q),ctxP=S.chatCtx?P(S.chatCtx):null;
  if(!q)return 'Silakan tulis pertanyaan Anda.';
@@ -1851,8 +1898,8 @@ function botAnswer(raw){
  let p=findPaket(q);if(!p&&/(\bitu\b|\bini\b|\btersebut\b|\btadi\b|nya\b)/.test(q)&&ctxP)p=ctxP;
  if(p&&p.none)return `Tidak ada paket dengan Kode RUP ${p.none}.`;
  if(p){S.chatCtx=p.id;return detailText(p,q)}
- const pen=findPenyedia(q);
- if(pen){const rows=listPaket(sc).flatMap(x=>x.penawaran.filter(w=>w.pen===pen.id).map(w=>({x,t:totPw(x,w,true),st:evalPw(x).find(e=>e.w.id===w.id).st})));
+ let pen=findPenyedia(q);if(!pen&&S.chatCtxPen&&/penawaran|penyedia|ikut/.test(q)){pen=S.penyedia.find(x=>x.id===S.chatCtxPen)||null}
+ if(pen){S.chatCtxPen=pen.id;const rows=listPaket(sc).flatMap(x=>x.penawaran.filter(w=>w.pen===pen.id).map(w=>({x,t:totPw(x,w,true),st:evalPw(x).find(e=>e.w.id===w.id).st})));
   return `${pen.nama} · ${sc.label}\n`+(rows.length?rows.map(r=>`• ${r.x.rup||'-'} ${r.x.nama.slice(0,40)}: ${rp(r.t)} — ${r.st}`).join('\n')+`\n${rows.filter(r=>r.st==='Menang').length} penawaran memenuhi HPS, ${rows.filter(r=>{const w=pemenang(r.x);return w&&w.w.pen===pen.id}).length} sebagai pemenang.`:'Penyedia ini belum punya penawaran di cakupan tersebut.')}
  const d=docOf(q);
  if(d){const L=listPaket(sc),ready=L.filter(x=>!docMiss(x,d.k).length).length;return `${d.n} · ${sc.label}\nSiap cetak: ${ready} dari ${L.length} paket.\n${d.code?'Format nomor: '+d.code+'/{Kode RUP}/{singkatan OPD}/{kode unit}':''}\nTanya dengan Kode RUP untuk detail satu paket.`}
@@ -1870,10 +1917,10 @@ function botAnswer(raw){
  return 'Saya belum yakin maksudnya. Coba salah satu:\n• total pagu dan HPS\n• status paket dengan Kode RUP (mis. 67122699)\n• paket yang belum lengkap\n• pemenang tiap paket\n• bandingkan semua tahun\n• penyedia contoh\n• siap cetak DPP\n• cara salin paket ke tahun baru';
 }
 const SUG=['Ringkasan TA ini','Paket yang belum lengkap','Pemenang tiap paket','Bandingkan semua tahun','Efisiensi tertinggi','Siap cetak DPP','Cara backup','Bisa apa saja?'];
-function chatSend(q){if(!q||!q.trim())return;S.chat=(S.chat||[]).concat([{f:'u',t:q.trim()},{f:'b',t:botAnswer(q)}]).slice(-60);render()}
 function vChat(){const L=S.chat||[];
  return `<div class=card><div style="display:flex;align-items:center;gap:12px;margin-bottom:8px"><div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff;font-weight:800">SA</div><div><h3 style="margin:0">Asisten SATRIA</h3><div style="font-size:12px;opacity:.7">Integrated Government Intelligence Platform • Framework Version 3.0</div></div></div><p class=mut>Selamat datang di Asisten SATRIA. Saya siap membantu analisis data, monitoring kinerja, pelaporan, dan navigasi sistem SATRIA Framework. Menjawab berdasarkan data tata kelola di aplikasi ini (anggaran, kinerja, kepatuhan, dan dokumen).</p>
- <div style="min-height:240px;max-height:420px;overflow:auto;border:1px solid var(--bd);border-radius:8px;padding:10px;background:#fbfcfe">${L.length?L.map(m=>`<div style="margin:8px 0;text-align:${m.f==='u'?'right':'left'}"><span style="display:inline-block;max-width:80%;padding:8px 10px;border-radius:10px;background:${m.f==='u'?'#dbe7f7':'#fff'};border:1px solid var(--bd);white-space:pre-line;text-align:left">${esc(m.t)}</span></div>`).join(''):'<span class=mut>Tanyakan sesuatu, misalnya "total pagu" atau "status RUP 67122699". Atau pilih saran di bawah.</span>'}</div>
+ <div id=chatBody style="min-height:240px;max-height:420px;overflow:auto;border:1px solid var(--bd);border-radius:8px;padding:10px;background:#fbfcfe">${L.length?L.map(m=>`<div style="margin:8px 0;text-align:${m.f==='u'?'right':'left'}"><span style="display:inline-block;max-width:80%;padding:8px 10px;border-radius:10px;background:${m.f==='u'?'#dbe7f7':'#fff'};border:1px solid var(--bd);white-space:pre-line;text-align:left${m.typing?';opacity:.55;font-style:italic;animation:satriaTypingDot 1s infinite':''}">${m.typing?'…':chatFmt(m.t)}</span></div>`).join(''):'<span class=mut>Tanyakan sesuatu, misalnya "total pagu" atau "status RUP 67122699". Atau pilih saran di bawah.</span>'}</div>
+ <style>@keyframes satriaTypingDot{50%{opacity:.25}}</style>
  <div class=row style="margin-top:10px"><input id=chatIn placeholder="Tulis pertanyaan..." style="flex:1;min-width:260px"><button data-act="chatsend">Kirim</button><button class=g data-act="chatclear">Bersihkan</button></div>
  <div class=row style="margin-top:8px">${SUG.map(q=>`<button class=g data-act="chatq" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div></div>`}
 
@@ -2002,7 +2049,7 @@ document.addEventListener('click',e=>{
  }
  if(a==='chatsend'){return chatSend($('#chatIn').value)}
  if(a==='chatq'){return chatSend(d.q)}
- if(a==='chatclear'){S.chat=[];return render()}
+ if(a==='chatclear'){S.chat=[];try{localStorage.removeItem('satria-chat-v1')}catch(_){}return render()}
  if(a==='newpaket'){
    const scope=activeCloudScope();
    if(!S.opd.length){toast('Master OPD belum tersedia. Muat ulang data cloud atau minta admin memeriksa master OPD.');return}
