@@ -709,7 +709,7 @@ const filt=(t=S.ui.tahun)=>{
   return (S.paket||[]).filter(p=>Number(p.tahun)===year&&(S.ui.opd==='all'||String(p.opd)===String(S.ui.opd))&&(!scope||scope.opdIds.includes(String(p.opd))));
 };
 const MOD={paket:['Ringkasan Utama','Dokumen terkait'],pagu:['Ringkasan Utama','Dokumen Pengadaan','Nota Dinas','Laporan dan Analisis'],items:['Ringkasan Utama','Nota Dinas','DPP','SPPBJ','BA Hasil'],nego:['Ringkasan Utama','BA Hasil','Laporan dan Analisis'],pemenang:['Ringkasan Utama','SPPBJ','BA Hasil','Laporan dan Analisis'],settings:['Kop semua dokumen'],master:['Form Paket Pengadaan','Dokumen Pengadaan']};
-function sync(k,label){S.dirty=true;persistRevision++;S.persistError='';S.log.unshift({t:new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}),label,mods:MOD[k]||['Data aplikasi']});S.log=S.log.slice(0,25);toast('Perubahan dicatat: '+((MOD[k]||['Data aplikasi']).join(', ')))}
+function sync(k,label){S.dirty=true;persistRevision++;S.persistError='';S.log.unshift({t:new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}),label,mods:MOD[k]||['Data aplikasi']});S.log=S.log.slice(0,25);toast('Perubahan dicatat: '+((MOD[k]||['Data aplikasi']).join(', ')));if(typeof window.SATRIA_AUTO_SYNC_REQUEST==='function')window.SATRIA_AUTO_SYNC_REQUEST(k,label)}
 function toast(m){const e=$('#toast');e.textContent=m;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2600)}
 
 /* ===== TAMPILAN ===== */
@@ -1085,7 +1085,7 @@ function vMaster(){const m=MTAB.some(t=>t[0]===S.ui.mtab)?S.ui.mtab:'ppk';
  const kpi=[['PPK / KPA aktif',S.pejabat.filter(x=>x.peran==='PPK'&&x.aktif!==false).length],['Pejabat Pengadaan aktif',S.pejabat.filter(x=>x.peran==='PP'&&x.aktif!==false).length],['Kepala Bidang aktif',S.pejabat.filter(x=>x.peran==='Kabid'&&x.aktif!==false).length],['Unit/Bagian aktif',S.unit.filter(x=>x.aktif!==false).length],['Penyedia aktif',S.penyedia.filter(x=>x.aktif!==false).length],['Akun anggaran aktif',S.akun.filter(x=>x.aktif!==false).length]];
  const body=PERAN[m]?tPejabat(PERAN[m]):tGen(m,COLS[m]);
  const masterScope=activeCloudScope();
- const scopeNote=window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE==='admin'?'<div class="card"><b>Hak admin penuh.</b> Anda dapat mengelola master semua OPD. Setiap perubahan Operator pada master OPD akan muncul di sini setelah sinkronisasi cloud.</div>':(masterScope?`<div class="card"><b>Scope Operator:</b> master PPK/KPA, Pejabat Pengadaan, Kepala Bidang, dan Unit/Bagian hanya untuk OPD yang ditugaskan. Penyedia dan Akun Anggaran adalah katalog bersama organisasi. Data baru tersinkron ke admin setelah dikirim ke Supabase.</div>`:'');
+ const scopeNote=window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE==='admin'?'<div class="card"><b>Hak admin penuh.</b> Anda dapat mengelola master semua OPD. Setiap perubahan Operator pada master OPD akan muncul di sini setelah sinkronisasi cloud.</div>':(masterScope?`<div class="card"><b>Scope Operator:</b> master PPK/KPA, Pejabat Pengadaan, Kepala Bidang, dan Unit/Bagian hanya untuk OPD yang ditugaskan. Penyedia dan Akun Anggaran adalah katalog bersama organisasi. Setiap perubahan disimpan otomatis sebagai delta per-record ke Supabase setelah jeda singkat; pengguna lain diberi notifikasi melalui Supabase Realtime.</div>`:'');
  return `${scopeNote}<div class="grid">${kpi.map(([l,v])=>`<div class="card kpi"><span>${l}</span><b>${v}</b></div>`).join('')}</div>
  <div class=card><div class=row>${MTAB.map(([k,t])=>`<button class="${k===m?'':'g'}" data-act="mtab" data-tab="${k}">${t}</button>`).join('')}</div><br>
  <input id=mSearch placeholder="Cari nama, NIP, atau kode..." value="${esc(S.ui.ms||'')}" style="width:360px"></div>
@@ -1806,7 +1806,7 @@ function drawKhCharts(){
 <div id="satriaCloudModal" hidden aria-hidden="true">
   <section class="sc-dialog" role="dialog" aria-modal="true" aria-labelledby="scTitle">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:start">
-      <div><h2 id="scTitle">Koneksi Supabase</h2><div class="mut">Jembatan migrasi untuk SATRIA Framework 3.0</div></div>
+      <div><h2 id="scTitle">Koneksi Supabase</h2><div class="mut">Sinkronisasi delta otomatis dan Supabase Realtime untuk SATRIA Framework 3.0</div></div>
       <button type="button" id="scClose" aria-label="Tutup">Tutup</button>
     </div>
     <div class="sc-note sc-warning"><b>Penting — kontrol scope baru:</b> Admin dapat membaca/mengganti snapshot organisasi penuh. Operator dan Viewer wajib memakai RPC server yang mengembalikan proyeksi allowlist berdasarkan assignment OPD dan tahun; akses langsung ke snapshot ditolak RLS. Operator hanya dapat menyimpan record dalam scope-nya. Terapkan semua migrasi keamanan dan deploy fungsi terkait sebelum mengandalkan pembatasan ini. JSON snapshot masih merupakan jembatan kompatibilitas; migrasi ke tabel bisnis terstruktur dengan RLS per record tetap menjadi sasaran arsitektur jangka panjang.</div>
@@ -1824,7 +1824,7 @@ function drawKhCharts(){
       <button type="button" class="primary" id="scConnect">Masuk ke SATRIA</button>
       <button type="button" id="scResetPassword">Lupa kata sandi?</button>
       <button type="button" id="scPull" disabled>Tarik dari Supabase</button>
-      <button type="button" id="scPush" disabled>Kirim snapshot lokal</button>
+      <button type="button" id="scPush" disabled>Sinkronkan perubahan</button>
       <button type="button" class="danger" id="scSignOut" disabled>Keluar</button>
     </div>
     <div id="scRecoveryPanel" class="sc-recovery" hidden>
@@ -1836,8 +1836,8 @@ function drawKhCharts(){
     </div>
     <p id="scStatus" class="sc-status" role="status" aria-live="polite">Belum terhubung.</p>
     <div class="sc-note sc-warning"><b>Jika muncul “Invalid login credentials”:</b> pastikan akun email ada di Supabase Dashboard → Authentication → Users pada project yang tertanam di file ini, lalu cek kata sandinya. Organization UUID tidak menentukan validitas email/kata sandi. Jika akun belum ada, buat akun Auth terlebih dahulu; setelah login berhasil, akun juga harus memiliki membership aktif pada organisasi ini.</div>
-    <div class="sc-note"><b>Prosedur:</b> siapkan project staging → jalankan file SQL pendamping <code>satria-supabase-staging-bootstrap.sql</code> setelah ditinjau → buat akun Auth → bootstrap organisasi dan membership admin melalui SQL Editor → masukkan URL, publishable/anon key, dan UUID organisasi → login → tarik atau kirim snapshot. Ekspor backup lokal terlebih dahulu. Konflik versi harus diselesaikan dengan menarik versi terbaru; sistem tidak menggabungkan perubahan otomatis.</div>
-    <h3>Persiapan database</h3><p class="mut">Untuk pemulihan kata sandi, alamat halaman SATRIA harus diizinkan di Supabase Dashboard → Authentication → URL Configuration → Redirect URLs. SQL bootstrap disediakan sebagai file terpisah dari HTML. Konfigurasi juga dapat disimpan di browser melalui tombol Simpan konfigurasi. Saat file yang sama dibuka kembali pada browser/profil yang sama, URL, publishable/anon key, dan Organization UUID akan diisi otomatis. Kata sandi tidak disimpan. Gunakan Unduh HTML dengan konfigurasi bila ingin membawa konfigurasi bersama file ke browser/perangkat lain; file tersebut memuat publishable/anon key sehingga bagikan dengan bijak.</p>
+    <div class="sc-note"><b>Prosedur:</b> siapkan project staging → jalankan file SQL pendamping <code>satria-supabase-staging-bootstrap.sql</code> setelah ditinjau → buat akun Auth → bootstrap organisasi dan membership admin melalui SQL Editor → masukkan URL, publishable/anon key, dan UUID organisasi → login → tarik atau kirim snapshot. Ekspor backup lokal terlebih dahulu. Konflik versi tidak ditimpa otomatis. Simpan/unduh backup lokal, tarik versi cloud terbaru, lalu terapkan kembali perubahan yang memang diperlukan.</div>
+    <h3>Persiapan database</h3><p class="mut">Untuk pemulihan kata sandi, alamat halaman SATRIA harus diizinkan di Supabase Dashboard → Authentication → URL Configuration → Redirect URLs. SQL bootstrap disediakan sebagai file terpisah dari HTML. Perubahan disimpan otomatis sebagai delta per record setelah Anda menyimpan data. Supabase Realtime memberi tahu pengguna lain tentang versi baru; data yang diterima tetap dibatasi scope server. Tombol Sinkronkan perubahan menjalankan sinkronisasi perubahan yang tertunda. Full snapshot hanya untuk bootstrap/pemulihan Admin yang dilakukan secara eksplisit. Konfigurasi juga dapat disimpan di browser melalui tombol Simpan konfigurasi. Saat file yang sama dibuka kembali pada browser/profil yang sama, URL, publishable/anon key, dan Organization UUID akan diisi otomatis. Kata sandi tidak disimpan. Gunakan Unduh HTML dengan konfigurasi bila ingin membawa konfigurasi bersama file ke browser/perangkat lain; file tersebut memuat publishable/anon key sehingga bagikan dengan bijak.</p>
   </section>
 </div>
 
@@ -1850,9 +1850,68 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
   'use strict';
   const CONFIG_KEY='satria-supabase-bridge-config-v1';
   let client=null, member=null, orgId='', version=0, localUsersBackup=null, recoveryListenerClient=null, cloudStateReady=false;
+  let lastSyncedPayload=null, autoSaveTimer=null, autoSaveInFlight=false, autosyncRequested=false, realtimeChannel=null, remoteNoticePending=false, remoteNoticeVersion=0, conflictActive=false, realtimeRefreshTimer=null, autoRetryTimer=null, autoRetryAttempt=0;
   const $id=id=>document.getElementById(id);
   const modal=$id('satriaCloudModal');
-  const status=(msg,kind='')=>{const e=$id('scStatus');e.textContent=msg;e.dataset.kind=kind};
+  const status=(msg,kind='')=>{const e=$id('scStatus');if(e){e.textContent=msg;e.dataset.kind=kind}};
+  function syncIndicator(message, kind=''){
+    let e=$id('satriaCloudSyncIndicator');
+    if(!e){e=document.createElement('span');e.id='satriaCloudSyncIndicator';e.className='satria-sync-indicator';e.setAttribute('role','status');e.setAttribute('aria-live','polite');
+      const style=document.createElement('style');style.textContent='.satria-sync-indicator{display:inline-flex;align-items:center;gap:6px;max-width:250px;padding:7px 10px;border:1px solid #cbdedb;border-radius:999px;background:#f0fdfa;color:#0f766e;font:600 11px/1.25 system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.satria-sync-indicator[data-kind=wait]{background:#fff7ed;border-color:#fed7aa;color:#9a3412}.satria-sync-indicator[data-kind=error]{background:#fef2f2;border-color:#fecaca;color:#b91c1c}.satria-sync-indicator[data-kind=muted]{background:#f8fafc;border-color:#e2e8f0;color:#64748b}@media(max-width:1100px){.satria-sync-indicator{max-width:155px;padding:6px 8px;font-size:10px}}@media(max-width:680px){.satria-sync-indicator{max-width:122px}}';document.head.appendChild(style);
+      const b=$id('satriaCloudOpen');if(b)b.insertAdjacentElement('afterend',e);else document.body.appendChild(e);
+    }
+    e.textContent=message;e.title=message;e.dataset.kind=kind;
+  }
+  function cloneJson(value){return value==null?value:JSON.parse(JSON.stringify(value))}
+  function payloadEqual(a,b){return JSON.stringify(a)===JSON.stringify(b)}
+  const ARRAY_DELTAS=['paket','opd','unit','pejabat','penyedia','akun','kode'];
+  const SETTING_DELTAS=['pemda','meta','penomoran','tahun'];
+  function rowKey(collection,row){return String(row?.id??row?.kode??'')}
+  function makeDelta(base,target){
+    const changes=[];
+    for(const collection of ARRAY_DELTAS){
+      const before=Array.isArray(base?.[collection])?base[collection]:[];
+      const after=Array.isArray(target?.[collection])?target[collection]:[];
+      const bm=new Map(),am=new Map();
+      for(const row of before){const id=rowKey(collection,row);if(id)bm.set(id,row)}
+      for(const row of after){const id=rowKey(collection,row);if(!id)throw new Error('Data '+collection+' memiliki baris tanpa ID. Sinkronisasi dihentikan agar integritas data tidak rusak.');if(am.has(id))throw new Error('ID duplikat pada master '+collection+': '+id);am.set(id,row)}
+      for(const [id,row] of bm){if(!am.has(id))changes.push({collection,op:'delete',id})}
+      for(const [id,row] of am){if(!bm.has(id)||!payloadEqual(bm.get(id),row))changes.push({collection,op:'upsert',id,row:cloneJson(row)})}
+    }
+    for(const key of SETTING_DELTAS){if(!payloadEqual(base?.[key],target?.[key]))changes.push({collection:key,op:'replace',value:cloneJson(target?.[key])})}
+    // Apply dependency-aware ordering across 50-row batches: remove packages first, create/update masters before packages, and remove masters last.
+    const deltaRank=c=>c.op==='delete'&&c.collection==='paket'?0
+      :c.op==='upsert'&&c.collection!=='paket'?1
+      :c.op==='replace'&&c.collection==='tahun'?2
+      :c.op==='replace'?3
+      :c.op==='upsert'&&c.collection==='paket'?4
+      :c.op==='delete'&&c.collection==='opd'?6
+      :5;
+    changes.sort((a,b)=>deltaRank(a)-deltaRank(b));
+    return changes;
+  }
+  function applyDeltaToPayload(base,changes){
+    const out=cloneJson(base||{});
+    for(const change of changes){
+      if(change.op==='replace'){out[change.collection]=cloneJson(change.value);continue}
+      const rows=Array.isArray(out[change.collection])?out[change.collection].slice():[];
+      const key=row=>rowKey(change.collection,row);
+      const index=rows.findIndex(row=>key(row)===String(change.id));
+      if(change.op==='delete'){if(index>=0)rows.splice(index,1)}
+      else if(index>=0)rows[index]=cloneJson(change.row);else rows.push(cloneJson(change.row));
+      out[change.collection]=rows;
+    }
+    return out;
+  }
+  function cancelAutosaveTimer(){if(autoSaveTimer){clearTimeout(autoSaveTimer);autoSaveTimer=null}}
+  function requestAutosave(reason=''){
+    if(!member||member.role==='viewer'||!client||!cloudStateReady||!lastSyncedPayload)return;
+    if(conflictActive){syncIndicator('Konflik cloud — periksa perubahan','error');return}
+    cancelAutosaveTimer();syncIndicator('Perubahan lokal · menunggu sinkronisasi','wait');
+    autoSaveTimer=setTimeout(()=>{autoSaveTimer=null;saveDeltaChanges(false).catch(showError)},850);
+  }
+  window.SATRIA_AUTO_SYNC_REQUEST=requestAutosave;
+
   const roleName=r=>({admin:'Admin',operator:'Operator',viewer:'Viewer'}[r]||'Viewer');
   const config=()=>{let local={};try{local=JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}')}catch(_){}const embedded=window.SATRIA_EMBEDDED_SUPABASE_CONFIG||{};return {url:local.url||embedded.url||'',key:local.key||embedded.key||'',org:local.org||embedded.org||''}};
   window.SATRIA_CLOUD_CONFIGURED=!!(config().url&&config().key&&config().org);
@@ -1900,6 +1959,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     setButtons();
     applyUserLock();
     await pull();
+    if(cloudStateReady)startRealtime();
     return member;
   }
   function resetCloudScopedView(){
@@ -1984,7 +2044,60 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
     o.users=member?[{id:'auth-'+member.id,nama:member.email,username:member.email,role:roleName(member.role),opd:'all',aktif:true}]:[];
     return o;
   }
-  async function pull(){
+
+  function startRealtime(){
+    if(!client||!member||!orgId)return;
+    stopRealtime();
+    const channelName='satria-sync-'+orgId;
+    realtimeChannel=client.channel(channelName).on('postgres_changes',{
+      event:'*',schema:'public',table:'satria_sync_events',filter:'organization_id=eq.'+orgId
+    },payload=>handleRealtimeNotice(payload?.new||payload?.old||{})).subscribe(async state=>{
+      if(state==='SUBSCRIBED'){
+        syncIndicator('Cloud terhubung · realtime aktif','');
+        await checkRemoteVersion();
+      }else if(state==='CHANNEL_ERROR'||state==='TIMED_OUT'||state==='CLOSED'){
+        syncIndicator('Realtime terputus · autosave tetap aktif','wait');
+      }
+    });
+  }
+  function stopRealtime(){
+    if(realtimeRefreshTimer){clearTimeout(realtimeRefreshTimer);realtimeRefreshTimer=null}
+    if(realtimeChannel&&client){try{client.removeChannel(realtimeChannel)}catch(_){} }
+    realtimeChannel=null;remoteNoticePending=false;remoteNoticeVersion=0;
+  }
+  async function checkRemoteVersion(){
+    if(!client||!member||!cloudStateReady)return;
+    try{
+      const {data,error}=await client.from('satria_sync_events').select('version,actor_user_id,updated_at').eq('organization_id',orgId).maybeSingle();
+      if(error)throw error;
+      if(data&&Number(data.version)>version)handleRealtimeNotice(data);
+    }catch(e){console.warn('SATRIA Realtime version check:',e?.message||e)}
+  }
+  function handleRealtimeNotice(eventRow){
+    if(!member||!eventRow)return;
+    const remoteVersion=Number(eventRow.version)||0;
+    if(!remoteVersion||remoteVersion<=version)return;
+    if(autoSaveInFlight){remoteNoticePending=true;remoteNoticeVersion=Math.max(remoteNoticeVersion,remoteVersion);return}
+    if(S.dirty){
+      conflictActive=true;cancelAutosaveTimer();
+      syncIndicator('Versi cloud baru · konflik perlu ditinjau','error');
+      status('Pengguna lain menyimpan versi '+remoteVersion+' saat Anda memiliki perubahan lokal. Sistem tidak menimpa perubahan. Unduh backup lokal bila perlu, lalu tarik versi terbaru dan terapkan kembali perubahan yang diperlukan.','error');
+      toast('Data cloud berubah. Perubahan lokal ditahan untuk mencegah konflik.');
+      return;
+    }
+    if(realtimeRefreshTimer)clearTimeout(realtimeRefreshTimer);
+    realtimeRefreshTimer=setTimeout(async()=>{
+      realtimeRefreshTimer=null;
+      if(!member||S.dirty||autoSaveInFlight)return;
+      try{await pull({source:'realtime',silent:true})}catch(e){showError(e)}
+    },220);
+  }
+  async function pull(options={}){
+    const opts=(options&&typeof options==='object'&&('source' in options||'silent' in options||'discardConfirmed' in options))?options:{};
+    if(member&&S.dirty&&!opts.discardConfirmed&&(cloudStateReady||member.role==='admin')){
+      if(opts.source==='realtime'){handleRealtimeNotice({version:version+1,updated_by:null});return false}
+      if(!confirm('Ada perubahan lokal yang belum tersinkron. Menarik data cloud akan mengganti perubahan lokal ini. Unduh Backup JSON terlebih dahulu jika ingin menyimpannya. Lanjutkan tarik data?'))return false;
+    }
     cloudStateReady=false;setButtons();
     try{
       if(!client||!member)throw new Error('Hubungkan dan masuk terlebih dahulu.');
@@ -2037,48 +2150,121 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
 
       }
       if(typeof route==='function')route();applyUserLock();
+      lastSyncedPayload=currentPayload();conflictActive=false;S.dirty=false;
       const scopeText=member.role==='admin'?'seluruh organisasi':`${member.scope.opd_ids.length} OPD · TA ${member.scope.years.join(', ')}`;
-      status('Snapshot dimuat sesuai scope '+scopeText+'. Versi '+version+' · diperbarui '+(data.updated_at||'waktu tidak tersedia')+'.','ok');
+      status('Data cloud dimuat sesuai scope '+scopeText+'. Versi '+version+' · diperbarui '+(data.updated_at||'waktu tidak tersedia')+'.','ok');
+      syncIndicator('Tersinkron · versi '+version,'');
     }catch(e){
       // Fail closed for every role: a failed cloud pull must never leave seed/stale data pushable.
       resetCloudScopedView();
-      cloudStateReady=false;version=0;
+      cloudStateReady=false;version=0;lastSyncedPayload=null;conflictActive=false;
+      syncIndicator('Cloud belum tersinkron','error');
       if(member&&member.role!=='admin'){try{if(DB&&DB.kv)await DB.kv.delete('main')}catch(_){}}
       if(typeof route==='function')route();
       applyUserLock();
       showError(e);
     }
   }
+  async function saveDeltaChanges(manual=false){
+    if(!client||!member)throw new Error('Hubungkan dan masuk terlebih dahulu.');
+    if(member.role==='viewer')throw new Error('Viewer hanya dapat membaca data sesuai scope OPD dan tahun.');
+    if(!cloudStateReady||!lastSyncedPayload)throw new Error('Baseline cloud belum tersedia. Tarik data Supabase terlebih dahulu.');
+    if(conflictActive)throw new Error('Terdapat konflik versi. Buat backup lokal, tarik versi terbaru, lalu terapkan kembali perubahan yang diperlukan.');
+    if(autoSaveInFlight){autosyncRequested=true;return}
+    autoSaveInFlight=true;autosyncRequested=false;
+    try{
+      const targetPayload=currentPayload();
+      const changes=makeDelta(lastSyncedPayload,targetPayload);
+      if(!changes.length){
+        if(payloadEqual(currentPayload(),lastSyncedPayload)){S.dirty=false;syncIndicator('Tersinkron · versi '+version,'');if(manual)status('Tidak ada perubahan yang perlu disinkronkan. Versi '+version+'.','ok')}
+        return;
+      }
+      syncIndicator('Menyinkronkan '+changes.length+' perubahan…','wait');
+      status('Mengirim perubahan per record dengan pemeriksaan versi…');
+      // Batches are bounded; every transaction validates the expected version and applies only changed rows/fields.
+      for(let i=0;i<changes.length;i+=50){
+        const batch=changes.slice(i,i+50);
+        const {data,error}=await client.rpc('satria_apply_state_delta',{
+          p_organization_id:orgId,p_expected_version:version,p_changes:batch
+        });
+        if(error)throw error;
+        const returnedVersion=Number(data?.version??data);
+        if(!Number.isFinite(returnedVersion)||returnedVersion<=version)throw new Error('Respons delta sync tidak menyertakan versi baru yang valid. Periksa migrasi 20261024053400_satria_autosync_delta_realtime.sql.');
+        version=returnedVersion;
+        lastSyncedPayload=applyDeltaToPayload(lastSyncedPayload,batch);
+      }
+      window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;autoRetryAttempt=0;if(autoRetryTimer){clearTimeout(autoRetryTimer);autoRetryTimer=null}
+      const latestLocal=currentPayload();
+      const clean=payloadEqual(latestLocal,lastSyncedPayload);
+      S.dirty=!clean;
+      if(clean){
+        conflictActive=false;
+        status('Perubahan tersimpan otomatis ke cloud. '+changes.length+' delta · versi '+version+'.','ok');
+        syncIndicator('Tersinkron · versi '+version,'');
+      }else{
+        status('Perubahan yang tertangkap sudah tersimpan; ada perubahan baru selama proses berlangsung. Melanjutkan sinkronisasi…','ok');
+        syncIndicator('Perubahan baru · antrean','wait');
+        autosyncRequested=true;
+      }
+      applyUserLock();
+    }catch(e){
+      const msg=String(e?.message||e||'Sinkronisasi gagal.');
+      if(/version conflict|40001|newer data|pull latest/i.test(msg)){
+        conflictActive=true;cancelAutosaveTimer();
+        syncIndicator('Konflik versi · perlu tinjau','error');
+        status('Sinkronisasi dihentikan karena versi cloud berubah. Perubahan lokal tidak ditimpa. Unduh backup bila perlu, lalu tarik versi terbaru dan terapkan kembali perubahan yang diperlukan. Detail: '+msg,'error');
+        toast('Konflik versi terdeteksi; tidak ada overwrite otomatis.');
+      }else{
+        syncIndicator('Gagal sinkron · data lokal tertahan','error');
+        status('Perubahan masih tersimpan lokal tetapi belum terkonfirmasi di cloud. Periksa koneksi/migrasi lalu pilih Sinkronkan perubahan. Detail: '+msg,'error');
+        console.error('SATRIA delta autosync:',e);
+        if(!manual&&!conflictActive&&/(failed to fetch|network|timeout|temporar|\b(429|500|502|503|504)\b|connection)/i.test(msg)&&S.dirty){
+          if(autoRetryTimer)clearTimeout(autoRetryTimer);
+          const delay=Math.min(30000,1000*(2**Math.min(autoRetryAttempt,5)));autoRetryAttempt++;
+          autoRetryTimer=setTimeout(()=>{autoRetryTimer=null;if(member&&!conflictActive&&S.dirty)requestAutosave('network-retry')},delay);
+          syncIndicator('Koneksi bermasalah · coba ulang otomatis','wait');
+        }
+      }
+      if(manual)throw e;
+    }finally{
+      autoSaveInFlight=false;
+      if(remoteNoticePending){
+        const pendingVersion=remoteNoticeVersion;remoteNoticePending=false;remoteNoticeVersion=0;
+        if(pendingVersion>version){
+          if(S.dirty){conflictActive=true;syncIndicator('Versi cloud baru · konflik perlu ditinjau','error');status('Versi cloud berubah saat sinkronisasi. Simpan backup lokal, tarik versi terbaru, lalu rekonsiliasi perubahan.','error')}
+          else await pull({source:'realtime',silent:true});
+        }
+      }
+      if(autosyncRequested&&!conflictActive&&S.dirty){autosyncRequested=false;cancelAutosaveTimer();autoSaveTimer=setTimeout(()=>{autoSaveTimer=null;saveDeltaChanges(false).catch(showError)},100)}
+    }
+  }
   async function push(){
     try{
       if(!client||!member)throw new Error('Hubungkan dan masuk terlebih dahulu.');
       if(member.role==='viewer')throw new Error('Viewer hanya dapat membaca data sesuai scope OPD dan tahun.');
-      if(!cloudStateReady && !(member.role==='admin'&&window.SATRIA_CLOUD_ADMIN_IMPORT_READY===true)) throw new Error('Snapshot cloud belum berhasil dimuat. Tekan Tarik dari Supabase dan selesaikan error terlebih dahulu. Untuk bootstrap pertama, admin harus mengimpor backup JSON yang telah diverifikasi, lalu mengirimkannya dengan konfirmasi penuh.');
-      const admin=member.role==='admin';
-      const prompt=admin
-        ? 'Kirim seluruh snapshot organisasi sebagai Admin? Ini mengganti keadaan cloud, bukan menggabungkan perubahan. Buat backup dan periksa data sebelum lanjut.'
-        : `Simpan hanya perubahan pada OPD ${member.scope?.opd_ids?.join(', ')} dan tahun ${member.scope?.years?.join(', ')} yang ditugaskan? Data di luar scope akan dipertahankan oleh server.`;
-      if(!confirm(prompt))return;
-      status(admin?'Mengirim snapshot organisasi dengan pemeriksaan versi…':'Menyimpan perubahan pada scope OPD/tahun yang ditugaskan…');
-      const payload=currentPayload();
-      const rpcName=admin?'satria_save_state':'satria_save_scoped_state';
-      const {data,error}=await client.rpc(rpcName,{p_organization_id:orgId,p_expected_version:version,p_payload:payload});
-      if(error)throw error;
-      version=Number(data)||version+1;S.dirty=false;cloudStateReady=true;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;
-      status(admin?'Snapshot organisasi tersimpan. Versi '+version+'.':'Perubahan pada scope OPD/tahun tersimpan. Data di luar scope tidak diganti. Versi '+version+'.','ok');
-      if(typeof render==='function')render();applyUserLock();
+      // Full snapshot replacement remains available only for an explicit administrator bootstrap/restore after importing a verified backup.
+      if(member.role==='admin'&&!cloudStateReady&&window.SATRIA_CLOUD_ADMIN_IMPORT_READY===true){
+        const payload=currentPayload();
+        if(!confirm('Pemulihan Admin: kirim seluruh snapshot dari backup yang baru diimpor untuk menginisialisasi/memulihkan organisasi? Tindakan ini mengganti snapshot cloud. Lanjutkan hanya setelah memeriksa backup.'))return;
+        status('Mengirim snapshot Admin secara eksplisit untuk bootstrap/pemulihan…');
+        const {data,error}=await client.rpc('satria_save_state',{p_organization_id:orgId,p_expected_version:version,p_payload:payload});
+        if(error)throw error;
+        version=Number(data)||version+1;lastSyncedPayload=cloneJson(payload);S.dirty=false;cloudStateReady=true;conflictActive=false;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;
+        status('Snapshot pemulihan tersimpan. Versi '+version+'.','ok');syncIndicator('Tersinkron · versi '+version,'');applyUserLock();return;
+      }
+      await saveDeltaChanges(true);
     }catch(e){showError(e)}
   }
   async function signOut(){
     try{
       if(S.dirty&&!confirm('Ada perubahan lokal yang belum dikirim ke Supabase. Keluar akan mengosongkan cache data aktif pada browser ini. Unduh backup sesuai kewenangan Anda atau simpan perubahan terlebih dahulu. Tetap keluar?'))return;
-      if(client)await client.auth.signOut();
-      member=null;version=0;cloudStateReady=false;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;orgId=$id('scOrg').value.trim();window.SATRIA_CLOUD_ROLE=null;
+      cancelAutosaveTimer();if(autoRetryTimer){clearTimeout(autoRetryTimer);autoRetryTimer=null}stopRealtime();if(client)await client.auth.signOut();
+      member=null;version=0;cloudStateReady=false;lastSyncedPayload=null;conflictActive=false;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;orgId=$id('scOrg').value.trim();window.SATRIA_CLOUD_ROLE=null;
       resetCloudScopedView();
       try{if(DB&&DB.kv)await DB.kv.delete('main')}catch(e){console.warn('Cache SATRIA tidak dapat dihapus setelah logout',e)}
       localUsersBackup=null;
       if(typeof render==='function')render();
-      setButtons();applyUserLock();status('Keluar dari Supabase. Cache bisnis lokal telah dikosongkan pada browser ini.','ok');
+      setButtons();applyUserLock();status('Keluar dari Supabase. Cache bisnis lokal telah dikosongkan pada browser ini.','ok');syncIndicator('Belum login ke cloud','muted');
     }catch(e){showError(e)}
   }
   function downloadConfiguredHtml(){
@@ -2098,7 +2284,10 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
   document.addEventListener('DOMContentLoaded',()=>{});
   const openBtn=document.createElement('button');openBtn.type='button';openBtn.className='satria-cloud-btn';openBtn.id='satriaCloudOpen';openBtn.textContent='☁ Supabase';openBtn.title='Konfigurasi autentikasi dan sinkronisasi Supabase';
   const headerRight=document.querySelector('header .header-right');if(headerRight)headerRight.insertBefore(openBtn,headerRight.firstChild);
-  openBtn.addEventListener('click',open);$id('scClose').addEventListener('click',close);
+  openBtn.addEventListener('click',open);syncIndicator('Belum login ke cloud','muted');
+  window.addEventListener('online',()=>{if(member&&S.dirty&&!conflictActive)requestAutosave('browser-online');if(member)checkRemoteVersion()});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&member){checkRemoteVersion();if(S.dirty&&!conflictActive)requestAutosave('tab-visible')}});
+  $id('scClose').addEventListener('click',close);
   modal.addEventListener('click',e=>{if(e.target===modal)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
   $id('scEmbedConfig').addEventListener('click',downloadConfiguredHtml);$id('scSaveConfig').addEventListener('click',()=>{try{saveConfig();}catch(e){showError(e)}});$id('scConnect').addEventListener('click',connect);$id('scResetPassword').addEventListener('click',requestPasswordReset);$id('scSaveNewPassword').addEventListener('click',saveRecoveredPassword);$id('scCancelRecovery').addEventListener('click',()=>{$id('scRecoveryPanel').hidden=true;$id('scNewPassword').value='';$id('scConfirmNewPassword').value='';});$id('scPull').addEventListener('click',pull);$id('scPush').addEventListener('click',push);$id('scSignOut').addEventListener('click',signOut);
   const saved=config();if(saved.url)$id('scUrl').value=saved.url;if(saved.key)$id('scKey').value=saved.key;if(saved.org)$id('scOrg').value=saved.org;
