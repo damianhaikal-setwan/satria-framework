@@ -782,14 +782,14 @@ function fData(p){
  const SEL=(f,o)=>`<select data-col="paket" data-id="${p.id}" data-f="${f}">${o.map(([v,t])=>`<option value="${v}" ${v===p[f]?'selected':''}>${esc(t)}</option>`).join('')}</select>`;
  const TA=(f,v)=>`<textarea rows=3 data-col="paket" data-id="${p.id}" data-f="${f}" style="width:100%">${esc(v)}</textarea>`;
  const F2=(l,h)=>`<div class=fg style="grid-column:1/-1"><label>${l}</label>${h}</div>`;
- const pj=peran=>S.pejabat.filter(x=>x.opd===p.opd&&x.peran===peran).map(x=>[x.id,x.nama+(x.aktif===false?' (nonaktif)':'')]);
+ const pj=peran=>S.pejabat.filter(x=>x.opd===p.opd&&x.peran===peran&&(x.aktif!==false||[p.ppk,p.pp,p.kabid].includes(x.id))).map(x=>[x.id,x.nama+(x.aktif===false?' (nonaktif)':'')]);
  return `<div class=grid style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
  ${F('Nama paket',I('nama'))}${F('Kode RUP',I('rup'))}${F('Pagu (Rp)',`<div style="display:flex;align-items:center;gap:8px"><span style="font-weight:700;color:var(--mut)">Rp</span><input data-cur="1" data-col="paket" data-id="${p.id}" data-f="pagu" inputmode="numeric" value="${nf(p.pagu)}" style="flex:1;text-align:right;font-variant-numeric:tabular-nums"></div>`)}${F('Sumber dana',SEL('sumber',[...new Set(['APBD','APBN','DAK','DAU','DBH','PAD','Lainnya',p.sumber].filter(Boolean))].map(x=>[x,x])))}
- ${F('OPD',SEL('opd',S.opd.map(o=>[o.id,o.singkat])))}${F('Unit/Bagian',SEL('unit',S.unit.filter(u=>u.opd===p.opd).map(u=>[u.id,u.kode+' — '+u.bidang])))}${F('Nomor urut (otomatis)',`<input value="${esc(p.seq||nextSeq(p.tahun,p.opd))}" readonly aria-readonly="true" title="Dikelola otomatis oleh sistem">`)}
+ ${F('OPD',SEL('opd',S.opd.map(o=>[o.id,o.singkat])))}${F('Unit/Bagian',SEL('unit',S.unit.filter(u=>u.opd===p.opd&&(u.aktif!==false||String(u.id)===String(p.unit))).map(u=>[u.id,u.kode+' — '+u.bidang+(u.aktif===false?' (nonaktif)':'')])))}${F('Nomor urut (otomatis)',`<input value="${esc(p.seq||nextSeq(p.tahun,p.opd))}" readonly aria-readonly="true" title="Dikelola otomatis oleh sistem">`)}
  ${F2('Program (bisa diisi manual)',TA('program',progOf(p)))}${F2('Kegiatan (bisa diisi manual)',TA('kegiatan',kegOf(p)))}${F2('Uraian sub kegiatan (bisa diisi manual)',TA('subKeg',subOf(p)))}
  
  
- ${F('Rekening anggaran (dari Data Master)',`<select data-col="paket" data-id="${p.id}" data-f="akunId"><option value="">— pilih akun anggaran —</option>${S.akun.map(a=>`<option value="${a.id}" ${a.id===p.akunId?'selected':''}>${esc(a.kode+' - '+a.nama)}</option>`).join('')}</select>${S.akun.length?'':'<p class=mut>Belum ada akun anggaran. Tambahkan di Data Master → Akun Anggaran.</p>'}`)}${F2('Output (bisa diisi manual)',TA('output',outOf(p)))}
+ ${F('Rekening anggaran (dari Data Master)',`<select data-col="paket" data-id="${p.id}" data-f="akunId"><option value="">— pilih akun anggaran —</option>${S.akun.filter(a=>a.aktif!==false||String(a.id)===String(p.akunId)).map(a=>`<option value="${a.id}" ${a.id===p.akunId?'selected':''}>${esc(a.kode+' - '+a.nama+(a.aktif===false?' (nonaktif)':''))}</option>`).join('')}</select>${S.akun.length?'':'<p class=mut>Belum ada akun anggaran. Tambahkan di Data Master → Akun Anggaran.</p>'}`)}${F2('Output (bisa diisi manual)',TA('output',outOf(p)))}
  ${F('PPK',SEL('ppk',pj('PPK')))}${F('Pejabat Pengadaan',SEL('pp',pj('PP')))}${F('Kepala Bidang',SEL('kabid',pj('Kabid')))}
  ${F('Jenis pengadaan',SEL('jenisPengadaan',[['Barang','Barang'],['Jasa Lainnya','Jasa Lainnya'],['Jasa Konsultansi','Jasa Konsultansi'],['Pekerjaan Konstruksi','Pekerjaan Konstruksi']]))}${F('Metode pemilihan',SEL('metodePemilihan',[...new Set(['E-Purchasing','E-Purchasing dengan Negosiasi Harga','Tender','Tender Cepat','Seleksi','Pengadaan Langsung','Penunjukan Langsung','Metode lainnya',p.metodePemilihan].filter(Boolean))].map(x=>[x,x])))}${F2('Lokasi/alamat penyerahan',TA('lokasiPengiriman',p.lokasiPengiriman||O(p.opd).tempat||O(p.opd).alamat||''))}
  ${F('Masa pelaksanaan (hari kerja)',I('masaHk','number'))}${F('Batas akhir pekerjaan',I('batas','date'))}${F('Tanggal survei harga',I('tglSurvei','date'))}${F('Tanggal evaluasi penyedia',I('tglEvaluasi','date'))}${F('Tanggal negosiasi',I('tglNego','date'))}${F('Tanggal penetapan',I('tglPenetapan','date'))}
@@ -807,7 +807,7 @@ function fItems(p){
 }
 function fNego(p){
  const used=p.penawaran.map(w=>w.pen);
- const opts=S.penyedia.filter(y=>!used.includes(y.id)).map(y=>`<option value="${y.id}">${esc(y.nama)}</option>`).join('');
+ const opts=S.penyedia.filter(y=>!used.includes(y.id)&&y.aktif!==false).map(y=>`<option value="${y.id}">${esc(y.nama)}</option>`).join('');
  const W=pemenang(p),C=kandidat(p);
  let s=`<div class=row><div class=fg style="max-width:420px"><label>Tambah penyedia ke survei</label><select data-addpw="${p.id}"><option value="">— pilih penyedia —</option>${opts}</select></div></div><br>`;
  s+=W?`<p><b>Pemenang ditetapkan:</b> ${esc(PY(W.w.pen).nama)} · nilai kontrak <b>${rp(W.t)}</b> <button class=g data-act="autowin" data-pid="${p.id}">Batalkan penetapan</button></p>`:C?`<p class=warn><b>Kandidat otomatis (belum ditetapkan):</b> ${esc(PY(C.w.pen).nama)} · ${rp(C.negoLengkap?C.t:C.tayang)}. Isi tanggal negosiasi dan harga nego untuk setiap item, lalu tetapkan pemenang.</p>`:'<p class=warn>Belum ada kandidat yang memenuhi kelengkapan dan batas HPS.</p>';if(!W&&p.pemenangId)s+=`<p class=bad>Penetapan sebelumnya tidak lagi valid karena data harga berubah. <button class=g data-act="autowin" data-pid="${p.id}">Batalkan penetapan yang tidak valid</button></p>`;
@@ -1042,23 +1042,32 @@ const JAB={PPK:'Pejabat Pembuat Komitmen',PP:'Pejabat Pengadaan',Kabid:'Kepala B
 const PERAN={ppk:'PPK',pp:'PP',kabid:'Kabid'};
 const MTAB=[['ppk','PPK / KPA'],['pp','Pejabat Pengadaan'],['kabid','Kepala Bidang'],['unit','Unit/Bagian'],['penyedia','Penyedia'],['akun','Akun Anggaran']];
 const ED=id=>S.ui.me===id;
-const hit=r=>{const q=(S.ui.ms||'').toLowerCase();return !q||Object.entries(r).filter(([k])=>k!=='ttd'&&k!=='cap').map(([,v])=>v).join(' ').toLowerCase().includes(q)};
+const hit=r=>{const q=(S.ui.ms||'').toLocaleLowerCase('id-ID').trim();if(!q)return true;const values=Object.entries(r).filter(([k])=>k!=='ttd'&&k!=='cap').map(([,v])=>v);if(r&&r.opd){const o=O(r.opd);values.push(o.nama,o.singkat)}return values.join(' ').toLocaleLowerCase('id-ID').includes(q)};
+const masterOpdLabel=id=>{const o=O(id);return [o.singkat,o.nama].filter((v,i,a)=>v&&a.indexOf(v)===i).join(' — ')||String(id||'-')};
 const thumb=src=>src?`<img src="${src}" style="height:40px;max-width:110px;vertical-align:middle">`:'<span class=mut>-</span>';
 function canDel(c,id){if(c==='pejabat')return !S.paket.some(p=>[p.ppk,p.pp,p.kabid].includes(id));if(c==='penyedia')return !S.paket.some(p=>p.penawaran.some(w=>w.pen===id));if(c==='kode')return !S.paket.some(p=>p.sub===id);if(c==='akun')return !S.paket.some(p=>p.akunId===id);if(c==='opd')return !S.paket.some(p=>p.opd===id)&&!S.pejabat.some(x=>x.opd===id)&&!S.unit.some(x=>x.opd===id);if(c==='unit')return !S.paket.some(p=>p.unit===id);return true}
-function tPejabat(peran){const sign=peran==='PPK';const L=S.pejabat.filter(x=>x.peran===peran&&hit(x));
+function tPejabat(peran){
+ const sign=peran==='PPK';
+ const L=S.pejabat.filter(x=>x.peran===peran&&hit(x));
  const b=L.map((r,i)=>{const ed=ED(r.id),off=r.aktif===false,jab=r.jabatan||JAB[r.peran];
   const up=f=>`<input type=file accept="image/*" data-up="${f}" data-id="${r.id}" style="width:150px">`;
+  const opdCell=`<span title="${esc(O(r.opd).nama)}"><b>${esc(O(r.opd).singkat||'-')}</b><br><small>${esc(O(r.opd).nama||'Nama OPD belum diisi')}</small></span>`;
   return `<tr><td>${i+1}</td><td>${ed?`<input style="width:100%" value="${esc(r.nama)}" data-col="pejabat" data-id="${r.id}" data-f="nama">`:`<b>${esc(r.nama)}</b>`}</td>
-  <td>${ed?`<input style="width:100%" value="${esc(r.nip)}" data-col="pejabat" data-id="${r.id}" data-f="nip">`:esc(r.nip)}</td>
+  <td>${ed?`<input style="width:100%" value="${esc(r.nip||'')}" data-col="pejabat" data-id="${r.id}" data-f="nip">`:esc(r.nip||'-')}</td>
   <td>${ed?`<input style="width:100%" value="${esc(jab)}" data-col="pejabat" data-id="${r.id}" data-f="jabatan">`:esc(jab)}</td>
-  <td>${ed?`<select data-col="pejabat" data-id="${r.id}" data-f="opd">${S.opd.map(o=>`<option value="${o.id}" ${o.id===r.opd?'selected':''}>${esc(o.singkat)}</option>`).join('')}</select>`:esc(OP(r).singkat)}</td>
-  ${sign?`<td>${ed?up('ttd'):thumb(r.ttd)}</td><td>${ed?up('cap'):thumb(r.cap)}</td><td><span class=pill style="background:${off?'#fde3e0':'#dff5e8'}">${off?'Nonaktif':'Aktif'}</span></td>`:''}
-  <td style="white-space:nowrap"><button class=g data-act="medit" data-id="${r.id}">${ed?'Selesai':'Edit'}</button>${sign?`<button class="${off?'':'g'}" data-act="mtoggle" data-id="${r.id}">${off?'Aktifkan':'Nonaktifkan'}</button>`:''}<button class=d data-act="delrow" data-c="pejabat" data-id="${r.id}">Hapus</button></td></tr>`}).join('');
- return `<table><tr><th>No</th><th>Nama Lengkap</th><th>NIP</th><th>Jabatan</th><th>OPD</th>${sign?'<th>TTD</th><th>Cap / Stempel</th><th>Status</th>':''}<th>Aksi</th></tr>${b||`<tr><td colspan=${sign?9:6} class=mut>Belum ada data.</td></tr>`}</table>`}
-function tGen(c,cols){const L=S[c].filter(hit);
- const b=L.map((r,i)=>`<tr><td>${i+1}</td>${cols.map(([f,l,ro])=>`<td>${ED(r.id)&&!ro?((c==='unit'&&f==='opd')?`<select data-col="${c}" data-id="${r.id}" data-f="${f}">${S.opd.map(o=>`<option value="${o.id}" ${o.id===r.opd?'selected':''}>${esc(o.singkat)}</option>`).join('')}</select>`:(c==='penyedia'&&['tipe','pdn','statusKatalog','status','kbliSesuai','daftarHitam'].includes(f)?`<select data-col="${c}" data-id="${r.id}" data-f="${f}">${(f==='tipe'?['Perlu verifikasi','UMKM','Non-UMKM','Koperasi','Perorangan']:f==='pdn'?['Perlu verifikasi','PDN','Impor','Tidak relevan']:f==='kbliSesuai'?['Perlu verifikasi','Ya','Tidak']:f==='daftarHitam'?['Perlu verifikasi','Tidak','Ya']:['Perlu verifikasi','Aktif','Nonaktif']).map(v=>`<option value="${v}" ${v===(r[f]||'Perlu verifikasi')?'selected':''}>${v}</option>`).join('')}</select>`:`<input style="width:100%" value="${esc(r[f])}" data-col="${c}" data-id="${r.id}" data-f="${f}">`)):(c==='unit'&&f==='opd'?esc(O(r.opd).singkat):(f==='link'&&r[f]?`<a href="${esc(r[f])}" target=_blank>Buka katalog</a>`:esc(r[f])))}</td>`).join('')}
- <td style="white-space:nowrap"><button class=g data-act="medit" data-id="${r.id}">${ED(r.id)?'Selesai':'Edit'}</button><button class=d data-act="delrow" data-c="${c}" data-id="${r.id}">Hapus</button></td></tr>`).join('');
- return `<table><tr><th>No</th>${cols.map(([f,l])=>`<th>${l}</th>`).join('')}<th>Aksi</th></tr>${b||`<tr><td colspan=${cols.length+2} class=mut>Belum ada data.</td></tr>`}</table>`}
+  <td>${ed?`<select data-col="pejabat" data-id="${r.id}" data-f="opd">${S.opd.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===String(r.opd)?'selected':''}>${esc(masterOpdLabel(o.id))}</option>`).join('')}</select>`:opdCell}</td>
+  ${sign?`<td>${ed?up('ttd'):thumb(r.ttd)}</td><td>${ed?up('cap'):thumb(r.cap)}</td>`:''}
+  <td><span class="pill" style="background:${off?'#fde3e0':'#dff5e8'};color:${off?'#991b1b':'#166534'}">${off?'Nonaktif':'Aktif'}</span></td>
+  <td style="white-space:nowrap"><button class="g" data-act="medit" data-id="${r.id}">${ed?'Selesai':'Edit'}</button><button class="${off?'':'g'}" data-act="mtoggle" data-c="pejabat" data-id="${r.id}">${off?'Aktifkan':'Nonaktifkan'}</button><button class="d" data-act="delrow" data-c="pejabat" data-id="${r.id}">Hapus</button></td></tr>`}).join('');
+ return `<div class="table-wrap"><table><thead><tr><th>No</th><th>Nama Lengkap</th><th>NIP</th><th>Jabatan</th><th>OPD penugasan</th>${sign?'<th>TTD</th><th>Cap / Stempel</th>':''}<th>Status</th><th>Aksi</th></tr></thead><tbody>${b||`<tr><td colspan="${sign?9:7}" class="mut">Belum ada data.</td></tr>`}</tbody></table></div>`
+}
+function tGen(c,cols){
+ const L=(S[c]||[]).filter(hit);
+ const b=L.map((r,i)=>`<tr><td>${i+1}</td>${cols.map(([f,l,ro])=>`<td>${ED(r.id)&&!ro?((c==='unit'&&f==='opd')?`<select data-col="${c}" data-id="${r.id}" data-f="${f}">${S.opd.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===String(r.opd)?'selected':''}>${esc(masterOpdLabel(o.id))}</option>`).join('')}</select>`:(c==='penyedia'&&['tipe','pdn','statusKatalog','status','kbliSesuai','daftarHitam'].includes(f)?`<select data-col="${c}" data-id="${r.id}" data-f="${f}">${(f==='tipe'?['Perlu verifikasi','UMKM','Non-UMKM','Koperasi','Perorangan']:f==='pdn'?['Perlu verifikasi','PDN','Impor','Tidak relevan']:f==='kbliSesuai'?['Perlu verifikasi','Ya','Tidak']:f==='daftarHitam'?['Perlu verifikasi','Tidak','Ya']:['Perlu verifikasi','Aktif','Nonaktif']).map(v=>`<option value="${v}" ${v===(r[f]||'Perlu verifikasi')?'selected':''}>${v}</option>`).join('')}</select>`:`<input style="width:100%" value="${esc(r[f]??'')}" data-col="${c}" data-id="${r.id}" data-f="${f}">`)):(c==='unit'&&f==='opd'?`<span title="${esc(O(r.opd).nama)}"><b>${esc(O(r.opd).singkat||'-')}</b><br><small>${esc(O(r.opd).nama||'Nama OPD belum diisi')}</small></span>`:(f==='link'&&r[f]?`<a href="${esc(r[f])}" target="_blank" rel="noopener noreferrer">Buka katalog</a>`:esc(r[f]??'')))}</td>`).join('')}
+ <td><span class="pill" style="background:${r.aktif===false?'#fde3e0':'#dff5e8'};color:${r.aktif===false?'#991b1b':'#166534'}">${r.aktif===false?'Nonaktif':'Aktif'}</span></td>
+ <td style="white-space:nowrap"><button class="g" data-act="medit" data-c="${c}" data-id="${r.id}">${ED(r.id)?'Selesai':'Edit'}</button><button class="${r.aktif===false?'':'g'}" data-act="mtoggle" data-c="${c}" data-id="${r.id}">${r.aktif===false?'Aktifkan':'Nonaktifkan'}</button><button class="d" data-act="delrow" data-c="${c}" data-id="${r.id}">Hapus</button></td></tr>`).join('');
+ return `<div class="table-wrap"><table><thead><tr><th>No</th>${cols.map(([f,l])=>`<th>${l}</th>`).join('')}<th>Status</th><th>Aksi</th></tr></thead><tbody>${b||`<tr><td colspan="${cols.length+3}" class="mut">Belum ada data.</td></tr>`}</tbody></table></div>`
+}
 const FORMS={ppk:{t:'Tambah PPK / KPA Baru',f:[['nama','Nama Lengkap'],['nip','NIP'],['jabatan','Jabatan',JAB.PPK]],opd:1},
  pp:{t:'Tambah Pejabat Pengadaan Baru',f:[['nama','Nama Lengkap'],['nip','NIP'],['jabatan','Jabatan',JAB.PP]],opd:1},
  kabid:{t:'Tambah Kepala Bidang Baru',f:[['nama','Nama Lengkap'],['nip','NIP'],['jabatan','Jabatan',JAB.Kabid]],opd:1},
@@ -1068,12 +1077,16 @@ const FORMS={ppk:{t:'Tambah PPK / KPA Baru',f:[['nama','Nama Lengkap'],['nip','N
 };
 const COLS={unit:[['kode','Kode Unit'],['bidang','Nama Unit/Bagian'],['opd','OPD']],penyedia:[['nama','Nama'],['alamat','Alamat'],['telepon','Telepon'],['email','Email'],['npwp','NPWP'],['nib','NIB/OSS'],['kbli','Kode KBLI'],['kbliSesuai','KBLI sesuai jenis usaha'],['daftarHitam','Status daftar hitam'],['bentuk','Bentuk Usaha'],['tipe','Kategori usaha'],['pdn','PDN'],['statusKatalog','Status katalog'],['kabupaten','Kabupaten/Kota'],['status','Status data'],['link','Link Katalog']],akun:[['kode','Kode Rekening'],['nama','Nama Akun / Uraian'],['link','Link E-Katalog']]};
 function fAdd(m){const F=FORMS[m];
+ const preferred=String(S.ui.opd||'all')!=='all'&&S.opd.some(o=>String(o.id)===String(S.ui.opd))?String(S.ui.opd):String(S.opd[0]?.id||'');
  const inp=([f,l,dv])=>{if(m==='penyedia'&&['tipe','pdn','statusKatalog','status','kbliSesuai','daftarHitam'].includes(f)){const opts=f==='tipe'?['Perlu verifikasi','UMKM','Non-UMKM','Koperasi','Perorangan']:f==='pdn'?['Perlu verifikasi','PDN','Impor','Tidak relevan']:f==='kbliSesuai'?['Perlu verifikasi','Ya','Tidak']:f==='daftarHitam'?['Perlu verifikasi','Tidak','Ya']:['Perlu verifikasi','Aktif','Nonaktif'];return `<div class=fg><label>${l}</label><select data-new="${f}">${opts.map(v=>`<option value="${v}" ${v===(dv||opts[0])?'selected':''}>${v}</option>`).join('')}</select></div>`}return `<div class=fg><label>${l}</label><input data-new="${f}" value="${esc(dv||'')}"></div>`};
- return `<div class=card><h3>${F.t}</h3><div class=row>${F.f.map(inp).join('')}${F.opd?`<div class=fg><label>Penempatan OPD</label><select data-new="opd">${S.opd.map(o=>`<option value="${o.id}">${esc(o.singkat)}</option>`).join('')}</select></div>`:''}<button data-act="madd" data-m="${m}">Simpan</button></div></div>`}
+ const shared=['penyedia','akun'].includes(m)?`<div class=mut style="margin:8px 0"><b>Katalog bersama:</b> data ini tersedia untuk seluruh akun Operator/Admin pada organisasi ini, bukan milik satu OPD tertentu.</div>`:'';
+ return `<div class=card><h3>${F.t}</h3>${shared}<div class=grid>${F.f.map(inp).join('')}${F.opd?`<div class=fg><label>Penempatan OPD</label><select data-new="opd">${S.opd.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===preferred?'selected':''}>${esc(masterOpdLabel(o.id))}</option>`).join('')}</select></div>`:''}</div><div class=row style="justify-content:flex-end;margin-top:12px"><button data-act="madd" data-m="${m}">Simpan</button></div></div>`}
 function vMaster(){const m=MTAB.some(t=>t[0]===S.ui.mtab)?S.ui.mtab:'ppk';
- const kpi=[['PPK / KPA aktif',S.pejabat.filter(x=>x.peran==='PPK'&&x.aktif!==false).length],['Pejabat Pengadaan',S.pejabat.filter(x=>x.peran==='PP').length],['Kepala Bidang',S.pejabat.filter(x=>x.peran==='Kabid').length],['Unit/Bagian',S.unit.length],['Penyedia',S.penyedia.length],['Akun anggaran',S.akun.length]];
+ const kpi=[['PPK / KPA aktif',S.pejabat.filter(x=>x.peran==='PPK'&&x.aktif!==false).length],['Pejabat Pengadaan aktif',S.pejabat.filter(x=>x.peran==='PP'&&x.aktif!==false).length],['Kepala Bidang aktif',S.pejabat.filter(x=>x.peran==='Kabid'&&x.aktif!==false).length],['Unit/Bagian aktif',S.unit.filter(x=>x.aktif!==false).length],['Penyedia aktif',S.penyedia.filter(x=>x.aktif!==false).length],['Akun anggaran aktif',S.akun.filter(x=>x.aktif!==false).length]];
  const body=PERAN[m]?tPejabat(PERAN[m]):tGen(m,COLS[m]);
- return `<div class=grid>${kpi.map(([l,v])=>`<div class="card kpi"><span>${l}</span><b>${v}</b></div>`).join('')}</div>
+ const masterScope=activeCloudScope();
+ const scopeNote=window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE==='admin'?'<div class="card"><b>Hak admin penuh.</b> Anda dapat mengelola master semua OPD. Setiap perubahan Operator pada master OPD akan muncul di sini setelah sinkronisasi cloud.</div>':(masterScope?`<div class="card"><b>Scope Operator:</b> master PPK/KPA, Pejabat Pengadaan, Kepala Bidang, dan Unit/Bagian hanya untuk OPD yang ditugaskan. Penyedia dan Akun Anggaran adalah katalog bersama organisasi. Data baru tersinkron ke admin setelah dikirim ke Supabase.</div>`:'');
+ return `${scopeNote}<div class="grid">${kpi.map(([l,v])=>`<div class="card kpi"><span>${l}</span><b>${v}</b></div>`).join('')}</div>
  <div class=card><div class=row>${MTAB.map(([k,t])=>`<button class="${k===m?'':'g'}" data-act="mtab" data-tab="${k}">${t}</button>`).join('')}</div><br>
  <input id=mSearch placeholder="Cari nama, NIP, atau kode..." value="${esc(S.ui.ms||'')}" style="width:360px"></div>
  ${fAdd(m)}<div class=card>${body}</div>
@@ -1263,7 +1276,7 @@ function vPanduan(){const sec=(t,items)=>`<div class=card><h3>${t}</h3><ol style
  return sec('1. Alur kerja pengadaan',['Pilih tahun dan OPD di header.','Buat paket di menu Paket Pengadaan dengan Kode RUP yang unik.','Isi rincian barang dan volume. HPS dihitung otomatis.','Isi penawaran penyedia di tab Penawaran dan Negosiasi. Kandidat dihitung otomatis dari penawaran lengkap; pemenang baru sah di dalam aplikasi setelah tanggal dan harga negosiasi setiap item lengkap serta total tidak melebihi HPS.','Isi tanggal Nota Dinas, DPP, dan BA Hasil di tab Data Paket.','Cetak dokumen dari menu Dokumen Pengadaan. Semua dokumen mengambil data yang sama, sehingga cukup diisi sekali.'])
  + sec('2. Menyiapkan aplikasi',['Pengaturan Sistem: identitas pemda, logo, tahun anggaran, OPD, kop surat per OPD (gambar), dan format penomoran.','Master Data: pejabat PPK/KPA, Pejabat Pengadaan, Kepala Bidang (lengkap dengan TTD dan cap), penyedia, dan akun anggaran.',])
  + sec('3. Nomor dokumen',['Format: {kode}/{Kode RUP}/{singkatan OPD}/{kode unit}.','Jika Kode RUP belum diisi, nomor akan menampilkan [KODE RUP] sebagai pengingat.'])
- + sec('4. Hak akses',['Admin: akses penuh, termasuk Pengaturan Instansi dan Manajemen User.','Operator: mengelola paket, master, dan dokumen, tetapi tidak mengubah pengaturan atau user.','Viewer: hanya melihat, mencetak, dan memakai chatbot.','Tidak bisa menonaktifkan atau menghapus user yang sedang dipakai, atau Admin aktif terakhir.'])
+ + sec('4. Hak akses',['Admin: akses penuh, termasuk Pengaturan Instansi dan Manajemen User.','Operator: mengelola paket dan master PPK/KPA, Pejabat Pengadaan, Kepala Bidang, serta Unit/Bagian pada OPD assignment; katalog Penyedia dan Akun Anggaran dikelola bersama seluruh Operator/Admin. Operator tidak mengubah pengaturan organisasi atau user.','Viewer: hanya melihat, mencetak, dan memakai chatbot.','Tidak bisa menonaktifkan atau menghapus user yang sedang dipakai, atau Admin aktif terakhir.'])
  + sec('5. Backup dan penyimpanan',['Dengan penyimpanan IndexedDB (Dexie), data tersimpan otomatis di browser ini. Tetap klik Backup di header secara berkala.','Muat lagi backup lewat Pengaturan Sistem → Backup & Pemulihan.','Pilih engine penyimpanan di header: IndexedDB (Dexie) atau memori sesi.']);}
 
 /* ===== RENDER & ROUTING ===== */
@@ -1330,16 +1343,16 @@ document.addEventListener('click',e=>{
    if(['addopd','addyear','delyear','rmlogo','reset','clearsample','uadd','utoggle','udel'].includes(a)){
      toast('Pengaturan organisasi, daftar OPD/tahun, dan reset penuh hanya dapat dilakukan admin.');return;
    }
-   if(a==='madd'&&['opd','akun','kode'].includes(d.m)){
+   if(a==='madd'&&['opd','kode'].includes(d.m)){
      toast('Master OPD dan referensi akun/kode bersifat organisasi; hanya admin yang dapat mengubahnya.');return;
    }
-   if(a==='addrow'&&['opd','akun','kode','users'].includes(d.c)){
+   if(a==='addrow'&&['opd','kode','users'].includes(d.c)){
      toast('Master organisasi ini hanya dapat diubah oleh admin.');return;
    }
-   if(a==='delrow'&&['opd','akun','kode','users'].includes(d.c)){
+   if(a==='delrow'&&['opd','kode','users'].includes(d.c)){
      toast('Master organisasi ini hanya dapat diubah oleh admin.');return;
    }
-   if(a==='medit'&&['opd','akun','kode'].includes(S.ui.mtab)){
+   if(a==='medit'&&['opd','kode'].includes(S.ui.mtab)){
      toast('Master organisasi ini hanya dapat diubah oleh admin.');return;
    }
  }
@@ -1360,12 +1373,15 @@ document.addEventListener('click',e=>{
  if(a==='ptab'){S.ui.ptab=d.tab;return render()}
  if(a==='mtab'){S.ui.mtab=d.tab;S.ui.me=null;S.ui.ms='';return render()}
  if(a==='medit'){S.ui.me=S.ui.me===id?null:id;return render()}
- if(a==='mtoggle'){const r=S.pejabat.find(x=>x.id===id);r.aktif=r.aktif===false;sync('master',(r.aktif?'Diaktifkan: ':'Dinonaktifkan: ')+r.nama);return render()}
- if(a==='madd'){const row={id:uid('x')};document.querySelectorAll('[data-new]').forEach(i=>{row[i.dataset.new]=i.value.trim()});
-  const need=d.m==='akun'||d.m==='kode'||d.m==='unit'?'kode':'nama';if(!row[need]){toast('Kolom utama wajib diisi');return}
-  if(d.m==='kode'){if(S.kode.some(k=>k.kode===row.kode)){toast('Kode sudah ada');return}row.id=row.kode}
+ if(a==='mtoggle'){const c=d.c||'pejabat',list=c==='pejabat'?S.pejabat:S[c];const r=Array.isArray(list)?list.find(x=>String(x.id)===String(id)):null;if(!r){toast('Data master tidak ditemukan. Muat ulang data bila diperlukan.');return render()}r.aktif=r.aktif===false;sync('master',(r.aktif?'Diaktifkan: ':'Dinonaktifkan: ')+(r.nama||r.bidang||r.kode||r.id));return render()}
+ if(a==='madd'){const row={id:uid('x'),aktif:true};document.querySelectorAll('[data-new]').forEach(i=>{row[i.dataset.new]=i.value.trim()});
+  const need=d.m==='kode'||d.m==='unit'||d.m==='akun'?'kode':'nama';if(!String(row[need]||'').trim()){toast('Kolom utama wajib diisi');return}
+  if(['ppk','pp','kabid'].includes(d.m)&&!String(row.opd||'').trim()){toast('Penempatan OPD wajib dipilih');return}
+  if(d.m==='unit'&&!String(row.bidang||'').trim()){toast('Nama Unit/Bagian wajib diisi');return}
+  if(d.m==='akun'&&!String(row.nama||'').trim()){toast('Nama Akun / Uraian wajib diisi');return}
+  if(d.m==='kode'){if(S.kode.some(k=>String(k.kode||'').trim().toLowerCase()===String(row.kode||'').trim().toLowerCase())){toast('Kode sudah ada');return}row.id=row.kode}
   if(d.m==='unit'){if(!row.kode||!row.opd){toast('Kode unit dan OPD wajib diisi');return}if(S.unit.some(u=>u.opd===row.opd&&String(u.kode||'').toLowerCase()===String(row.kode).toLowerCase())){toast('Kode unit sudah dipakai pada OPD tersebut');return}row.id=uid('u')}
-  if(d.m==='akun'&&S.akun.some(a=>String(a.kode||'').trim()===String(row.kode||'').trim())){toast('Kode rekening sudah ada');return}
+  if(d.m==='akun'&&S.akun.some(a=>String(a.kode||'').trim().toLowerCase()===String(row.kode||'').trim().toLowerCase())){toast('Kode rekening sudah ada (pemeriksaan tidak membedakan huruf besar/kecil)');return}
   if(d.m==='penyedia'){row.status='Aktif';row.statusKatalog=row.statusKatalog||'Perlu verifikasi';row.pdn=row.pdn||'Perlu verifikasi';row.tipe=row.tipe||'Perlu verifikasi';row.bentuk=row.bentuk||'Perorangan'}
   if(PERAN[d.m]){const pr=PERAN[d.m];row.peran=pr;row.aktif=true;row.jabatan=row.jabatan||JAB[pr];row.opd=row.opd||S.opd[0].id;S.pejabat.push(row);sync('master','Pejabat ditambahkan: '+row.nama);return render()}
   S[d.m].push(row);sync('master','Data master ditambahkan');return render()}
@@ -1427,7 +1443,7 @@ document.addEventListener('change',e=>{
  if(t.id==='selUser'){S.ui.user=t.value;if(!allowed(S.ui.page))S.ui.page='dash';return render()}
  if(!canWrite()&&(d.col||d.up||d.kopup||d.new!==undefined||d.addpw||t.id==='imp'||t.id==='logoFile')){toast('Akun Viewer hanya dapat melihat data');return render()}
  if(window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE&&window.SATRIA_CLOUD_ROLE!=='admin'){
-   if(['pemda','penomoran'].includes(d.col)||d.col==='opd'||d.col==='akun'||d.col==='kode'||t.id==='logoFile'){
+   if(['pemda','penomoran'].includes(d.col)||d.col==='opd'||d.col==='kode'||t.id==='logoFile'){
      toast('Pengaturan dan master organisasi hanya dapat diubah admin.');return render();
    }
  }
@@ -1462,7 +1478,7 @@ function dbInit(){if(typeof Dexie==='undefined')return false;try{DB=new Dexie('s
 function normalizeData(){S.pemda={...SEED.pemda,...(S.pemda||{})};S.penomoran={...SEED.penomoran,...(S.penomoran||{})};S.opd=S.opd||[];S.paket=(S.paket||[]).map(p=>({...p,seq:(Number.isInteger(+p.seq)&&+p.seq>0)?+p.seq:0,items:(p.items||[]).map(i=>({spesifikasi:'',merek:'',pdn:'Perlu verifikasi',linkProduk:'',...i})),penawaran:(p.penawaran||[]).map(w=>({sumberHarga:'',tanggalHarga:'',ongkir:0,catatan:'',...w,harga:w.harga||{},nego:w.nego||{}})),jenisPengadaan:p.jenisPengadaan||'Barang',metodePemilihan:p.metodePemilihan||'E-Purchasing dengan Negosiasi Harga',lokasiPengiriman:p.lokasiPengiriman||O(p.opd).tempat||O(p.opd).alamat||'',tglSurvei:p.tglSurvei||'',tglEvaluasi:p.tglEvaluasi||'',tglNego:p.tglNego||'',tglPenetapan:p.tglPenetapan||''}));
  const maxSeqByScope=new Map();for(const p of S.paket){const key=String(p.tahun)+'|'+String(p.opd);if(Number.isInteger(+p.seq)&&+p.seq>0)maxSeqByScope.set(key,Math.max(maxSeqByScope.get(key)||0,+p.seq));}
  for(const p of S.paket){if(!p.seq){const key=String(p.tahun)+'|'+String(p.opd);const next=(maxSeqByScope.get(key)||0)+1;p.seq=next;maxSeqByScope.set(key,next)}}
- S.penyedia=(S.penyedia||[]).map(y=>({statusKatalog:'Perlu verifikasi',pdn:'Perlu verifikasi',tipe:'Perlu verifikasi',kbliSesuai:'Perlu verifikasi',daftarHitam:'Perlu verifikasi',...y}));S.akun=S.akun||[];S.unit=S.unit||[];S.pejabat=S.pejabat||[];S.kode=S.kode||[];S.tahun=[...new Set([...(S.tahun||[]).map(Number),...S.paket.map(p=>+p.tahun).filter(Number.isFinite)])].filter(Number.isInteger).sort((a,b)=>a-b);if(!S.tahun.length)S.tahun=[new Date().getFullYear()];}
+ S.penyedia=(S.penyedia||[]).map(y=>({statusKatalog:'Perlu verifikasi',pdn:'Perlu verifikasi',tipe:'Perlu verifikasi',kbliSesuai:'Perlu verifikasi',daftarHitam:'Perlu verifikasi',...y,aktif:y.aktif!==false}));S.akun=(S.akun||[]).map(x=>({...x,aktif:x.aktif!==false}));S.unit=(S.unit||[]).map(x=>({...x,aktif:x.aktif!==false}));S.pejabat=(S.pejabat||[]).map(x=>({...x,aktif:x.aktif!==false}));S.kode=S.kode||[];S.tahun=[...new Set([...(S.tahun||[]).map(Number),...S.paket.map(p=>+p.tahun).filter(Number.isFinite)])].filter(Number.isInteger).sort((a,b)=>a-b);if(!S.tahun.length)S.tahun=[new Date().getFullYear()];}
 const persistable=()=>{const o={...S};['ui','log','dirty','chat','chatCtx'].forEach(k=>delete o[k]);return o};
 async function persistNow(){if(ENGINE!=='dexie'||!DB)return false;const writingRevision=persistRevision;try{await DB.kv.put({k:'main',v:persistable(),at:Date.now()});lastPersistedRevision=Math.max(lastPersistedRevision,writingRevision);if(S.persistError){S.persistError='';const el=$('#dirty');if(el)el.title='Data tersimpan di browser. Backup JSON tetap perlu diunduh berkala.'}return true}catch(e){S.persistError='Data gagal disimpan ke IndexedDB. Jangan tutup halaman; unduh backup JSON dan periksa ruang penyimpanan browser.';console.error('Gagal menyimpan ke IndexedDB',e);const el=$('#dirty');if(el){el.textContent='⚠ Gagal menyimpan';el.title=S.persistError;el.style.background='#FEE2E2';el.style.color='#991B1B'}toast('GAGAL MENYIMPAN. Unduh backup JSON sekarang.');return false}}
 function schedulePersist(){if(ENGINE!=='dexie'||!DB||!S?.dirty||persistRevision<=lastPersistedRevision)return;clearTimeout(pTimer);pTimer=setTimeout(()=>{void persistNow()},350)}
