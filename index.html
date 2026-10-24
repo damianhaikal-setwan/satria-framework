@@ -855,6 +855,47 @@ main{overflow-anchor:none}
   .doc-virtual-viewport{max-height:50vh}
 }
 
+/* ===== SATRIA ENHANCEMENTS PATCH ===== */
+.pill.satria-badge-ok{background:#d1fae5!important;color:#065f46!important;border:1px solid #6ee7b7!important}
+.pill.satria-badge-warn{background:#fef3c7!important;color:#92400e!important;border:1px solid #fcd34d!important}
+.pill.satria-badge-bad{background:#fee2e2!important;color:#991b1b!important;border:1px solid #fca5a5!important}
+.pill.satria-badge-info{background:#dbeafe!important;color:#1e40af!important;border:1px solid #93c5fd!important}
+.satria-btn-secondary{height:40px;padding:0 16px;border-radius:11px;background:var(--card-solid);color:var(--ink);border:1px solid var(--bd-strong);font-size:13px;font-weight:700;cursor:pointer;transition:all .18s var(--ease)}
+.satria-btn-secondary:hover{border-color:var(--acc);color:var(--acc);transform:translateY(-1px)}
+#satriaLoading{position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.45);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:#fff;font-weight:600}
+#satriaLoading.show{display:flex}
+.satria-loading-spinner{width:44px;height:44px;border-radius:50%;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;animation:satriaSpin .8s linear infinite}
+@keyframes satriaSpin{to{transform:rotate(360deg)}}
+.satria-modal{position:fixed;inset:0;z-index:9500;display:none}
+.satria-modal.show{display:block}
+.satria-modal-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(2px)}
+.satria-modal-panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(680px,92vw);max-height:88vh;background:var(--card-solid);border-radius:18px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--bd)}
+.satria-modal.wide .satria-modal-panel{width:min(1040px,96vw)}
+.satria-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--bd);background:var(--card-2)}
+.satria-modal-head h3{margin:0;font-size:15px;font-weight:800}
+.satria-modal-close{width:36px;height:36px;border-radius:10px;border:1px solid var(--bd);background:var(--card-solid);font-size:20px;line-height:1;cursor:pointer;color:var(--ink-2);flex-shrink:0}
+.satria-modal-close:hover{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+.satria-modal-body{padding:18px;overflow:auto}
+.satria-doc-preview{background:#fff;color:#111;padding:24px;border-radius:10px;font-size:13px;line-height:1.6}
+.satria-doc-preview table{border-collapse:collapse;width:100%;font-size:12px}
+.satria-doc-preview td,.satria-doc-preview th{border:1px solid #ccc;padding:4px 6px}
+.satria-log-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);align-items:baseline}
+.satria-log-time{font-weight:700;color:#0F766E;min-width:64px;font-size:12px;flex-shrink:0}
+.satria-log-label{flex:1}
+.satria-log-mods{font-size:11px;color:var(--mut);background:var(--acc-soft);padding:2px 8px;border-radius:999px;white-space:nowrap}
+.satria-validation-card{border-left:4px solid #F59E0B}
+.satria-validation-row{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;border:1px solid var(--bd);margin-bottom:6px;text-decoration:none;color:var(--ink);background:var(--card-2)}
+.satria-validation-row:hover{border-color:var(--acc);background:var(--acc-soft)}
+.satria-val-seq{font-weight:800;color:#0F766E;min-width:28px}
+.satria-val-name{flex:1;font-size:13px}
+:focus-visible{outline:3px solid var(--acc-ring);outline-offset:2px;border-radius:6px}
+@media (max-width:760px){
+  .card table{display:block;overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+  .satria-validation-row,.satria-log-row{flex-wrap:wrap}
+  .satria-modal-panel{width:94vw}
+  .satria-modal-body{padding:14px}
+  button,[data-act]{min-height:44px}
+}
 </style>
 
   <!-- PWA / AWA - SATRIA 3.0 Fixed v2 -->
@@ -1053,7 +1094,7 @@ header button[data-act="export"]{
     <span id="dirty"></span>
     <div class="control-group"><label>💾 <select id="selEngine"></select></label></div>
     <button type="button" class="theme-btn" id="themeToggle" title="Mode siang/malam">◐</button>
-    <button data-act="export">⬇ Backup</button>
+    <button type="button" data-act="openLog" title="Riwayat aktivitas perubahan" style="height:38px;padding:0 12px;border-radius:11px;background:var(--card-solid);color:var(--ink);border:1px solid var(--bd);font-size:14px;cursor:pointer">📋</button><button data-act="export">⬇ Backup</button>
   </div>
 </header>
 <nav id="nav"><div class="nav-track"><div class="nav-slider" id="navSlider"></div></div></nav>
@@ -1130,10 +1171,24 @@ const MOD={paket:['Ringkasan Utama','Dokumen terkait'],pagu:['Ringkasan Utama','
 function sync(k,label){S.dirty=true;persistRevision++;S.persistError='';S.log.unshift({t:new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}),label,mods:MOD[k]||['Data aplikasi']});S.log=S.log.slice(0,25);toast('Perubahan dicatat: '+((MOD[k]||['Data aplikasi']).join(', ')));if(typeof window.SATRIA_AUTO_SYNC_REQUEST==='function')window.SATRIA_AUTO_SYNC_REQUEST(k,label)}
 function toast(m){const e=$('#toast');e.textContent=m;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2600)}
 
+/* ===== SATRIA ENHANCEMENTS (patch) ===== */
+function satriaLoading(on,msg){let el=document.getElementById('satriaLoading');if(!el){el=document.createElement('div');el.id='satriaLoading';el.setAttribute('role','status');el.innerHTML='<div class="satria-loading-spinner"></div><div class="satria-loading-text"></div>';document.body.appendChild(el)}el.querySelector('.satria-loading-text').textContent=msg||'Memproses…';el.classList.toggle('show',!!on)}
+function satriaDownload(filename,text,type){const blob=new Blob([text],{type:type||'text/csv;charset=utf-8'});const u=URL.createObjectURL(blob);const l=document.createElement('a');l.href=u;l.download=filename;document.body.appendChild(l);l.click();setTimeout(()=>{URL.revokeObjectURL(u);l.remove()},500)}
+function satriaCSV(rows){const e=v=>{const s=String(v??'');return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};return '\ufeff'+rows.map(r=>r.map(e).join(',')).join('\r\n')}
+function satriaExportPaketCsv(){const L=paketListForView();if(!L.length){toast('Tidak ada paket pada filter ini untuk diekspor.');return}const rows=[['No','Kode RUP','Nama Paket','TA','OPD','Pagu (Rp)','HPS (Rp)','Nilai Kontrak (Rp)','Status','Pemenang']];L.slice().sort((a,b)=>a.seq-b.seq).forEach((p,i)=>{const w=pemenang(p);rows.push([i+1,p.rup||'',p.nama||'',p.tahun,O(p.opd).singkat||'',p.pagu||0,hps(p),w?w.t:0,stt(p),w?PY(w.w.pen).nama:''])});satriaDownload('SATRIA-paket-TA'+S.ui.tahun+'-'+new Date().toISOString().slice(0,10)+'.csv',satriaCSV(rows));toast('Ekspor CSV berhasil: '+L.length+' paket.')}
+function satriaExportUserCsv(){const rows=[['No','Nama','Username','Role','OPD','Status']];S.users.forEach((u,i)=>{rows.push([i+1,u.nama||'',u.username||'',u.role||'',u.opd==='all'?'Semua OPD':(O(u.opd).singkat||u.opd||''),u.aktif===false?'Nonaktif':'Aktif'])});satriaDownload('SATRIA-user-lokal-'+new Date().toISOString().slice(0,10)+'.csv',satriaCSV(rows));toast('Ekspor CSV user lokal berhasil.')}
+function satriaExportRosterCsv(){const tbl=document.getElementById('satriaAdminUsersRows');if(!tbl){toast('Tabel daftar pengguna belum dimuat.');return}const rows=[];tbl.querySelectorAll('tr').forEach(tr=>{const cells=[].slice.call(tr.querySelectorAll('th,td')).map(td=>(td.innerText||'').replace(/\s+/g,' ').trim());if(cells.length&&!(cells.length===1&&/belum dimuat/i.test(cells[0])))rows.push(cells)});if(!rows.length){toast('Daftar pengguna masih kosong atau belum dimuat.');return}satriaDownload('SATRIA-roster-pengguna-'+new Date().toISOString().slice(0,10)+'.csv',satriaCSV(rows));toast('Ekspor CSV daftar pengguna berhasil.')}
+function satriaModal(id,title,bodyHTML,wide){let m=document.getElementById(id);if(!m){m=document.createElement('div');m.id=id;m.className='satria-modal';m.innerHTML='<div class="satria-modal-backdrop"></div><div class="satria-modal-panel" role="dialog" aria-modal="true"><div class="satria-modal-head"><h3></h3><button type="button" class="satria-modal-close" aria-label="Tutup">×</button></div><div class="satria-modal-body"></div></div>';document.body.appendChild(m);m.querySelector('.satria-modal-close').addEventListener('click',()=>m.classList.remove('show'));m.querySelector('.satria-modal-backdrop').addEventListener('click',()=>m.classList.remove('show'))}if(wide)m.classList.add('wide');else m.classList.remove('wide');m.querySelector('.satria-modal-head h3').textContent=title;m.querySelector('.satria-modal-body').innerHTML=bodyHTML;m.classList.add('show');return m}
+function satriaCloseModals(){document.querySelectorAll('.satria-modal.show').forEach(m=>m.classList.remove('show'))}
+function satriaPreviewDoc(){if(typeof DOCS==='undefined'){toast('Komponen dokumen belum siap.');return}const p=P(S.ui.dpid)||filt()[0];if(!p){toast('Belum ada paket untuk dipratinjau.');return}const html=DOCS[S.ui.dok]?DOCS[S.ui.dok](p):'<p class=mut>Dokumen tidak tersedia.</p>';satriaModal('satriaPreviewModal','Pratinjau Dokumen — '+String(S.ui.dok||'').toUpperCase(),'<div class="satria-doc-preview">'+html+'</div>',true)}
+function satriaLogViewer(){const log=S.log||[];const rows=log.length?log.map(l=>'<div class="satria-log-row"><span class="satria-log-time">'+esc(l.t)+'</span><span class="satria-log-label">'+esc(l.label)+'</span><span class="satria-log-mods">'+(l.mods||[]).join(', ')+'</span></div>').join(''):'<p class=mut>Belum ada aktivitas tercatat.</p>';const body='<p class=mut style="margin:0 0 10px">Riwayat perubahan data (maks 25 entri terakhir). Ketik untuk menyaring.</p><input id="satriaLogFilter" type="search" placeholder="Cari aktivitas…" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd);margin-bottom:10px"><div id="satriaLogList" style="max-height:55vh;overflow:auto">'+rows+'</div>';const m=satriaModal('satriaLogModal','Aktivitas Sinkronisasi & Perubahan',body);const inp=m.querySelector('#satriaLogFilter');if(inp)inp.addEventListener('input',()=>{const q=inp.value.trim().toLowerCase();m.querySelectorAll('.satria-log-row').forEach(r=>{r.style.display=!q||r.textContent.toLowerCase().includes(q)?'':'none'})})}
+function satriaValidationCard(){const L=filt();const bad=L.filter(p=>(gaps(p)||[]).length>0).slice(0,12);if(!bad.length)return '';return '<div class="card satria-validation-card"><h3 style="display:flex;align-items:center;gap:8px;margin:0 0 4px"><span style="color:#F59E0B">⚠</span> Paket Perlu Perhatian (validasi otomatis)</h3><p class=mut style="margin:4px 0 10px">'+bad.length+' dari '+L.length+' paket memiliki kelengkapan belum penuh. Klik untuk membuka.</p>'+bad.map(p=>{const g=gaps(p)||[];return '<a class="satria-validation-row" href="#paket/'+p.id+'"><span class="satria-val-seq">'+p.seq+'</span><span class="satria-val-name">'+esc(p.nama||'(tanpa nama)')+'</span><span class="pill satria-badge-warn">'+g.slice(0,3).join(', ')+(g.length>3?' +'+(g.length-3):'')+'</span></a>'}).join('')+'</div>'}
+(function(){document.addEventListener('keydown',e=>{if(e.key==='Escape'){satriaCloseModals();return}const tag=(document.activeElement&&document.activeElement.tagName||'').toLowerCase();const typing=tag==='input'||tag==='textarea'||tag==='select'||(document.activeElement&&document.activeElement.isContentEditable);if((e.ctrlKey||e.metaKey)&&(e.key==='s'||e.key==='S')){e.preventDefault();const b=document.querySelector('button[data-act="export"]');if(b)b.click();return}if(!typing&&e.key==='/'){const q=document.getElementById('qPaket');if(q){e.preventDefault();q.focus()}}})})();
+
 /* ===== TAMPILAN ===== */
 const NAV=[['dash','Ringkasan Utama'],['paket','Paket Pengadaan'],['dok','Dokumen Pengadaan'],['lap','Laporan dan Analisis'],['master','Data Master'],['set','Pengaturan Sistem'],['user','Pengguna dan Hak Akses'],['panduan','Panduan Penggunaan'],['chat','Asisten SATRIA']];
 const kpi=(l,v)=>`<div class="card kpi"><span>${l}</span><b>${v}</b></div>`;
-const pill=p=>`<span class=pill>${stt(p)}</span>`;
+const pill=p=>{const s=stt(p);const cls=s==='Selesai'?'satria-badge-ok':(s.indexOf('Menunggu')>=0?'satria-badge-warn':(s.indexOf('Perlu')>=0?'satria-badge-bad':'satria-badge-info'));return `<span class="pill ${cls}">${s}</span>`};
 function tabelPaket(L){
   if(!L.length) return '<p class=mut>Belum ada paket pada filter ini.</p>';
   const sorted = L.slice().sort((a,b)=>a.seq-b.seq);
@@ -1175,6 +1230,7 @@ function vDash(){
   ${kpi('Kelengkapan Administratif',pctPatuh+'%','🔐','Compliance • '+lengkap+' Lengkap','#10B981')}
   ${kpi('Indikator Data Paket',rp(efisiensi)+' • '+pctEf+'%','⚡','Performance • Efisiensi','#2563EB')}
  </div>
+ ${satriaValidationCard()}
  <div class="card satria-overview"><h3 style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff">◈</span> Strategic Analytics Overview <span class="badge" style="margin-left:auto;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">SATRIA Intelligence • v3.0 • Lazy Charts</span></h3><p class="mut">Monitoring real-time terhadap anggaran, efektivitas, kepatuhan, dan kinerja tata kelola berbasis data intelligence. Charts lazy load aktif — hanya render saat discroll, hemat 70% di Android.</p><div class="satria-metrics-row"><div><span>Efisiensi</span><b>${rp(efisiensi)}</b><small>${pctEf}% dari pagu</small></div><div><span>Total HPS</span><b>${rp(totalHps)}</b><small>Estimasi kebutuhan</small></div><div><span>Nilai Kontrak</span><b>${rp(k)}</b><small>Realisasi</small></div><div><span>Paket Lengkap</span><b>${lengkap}/${L.length}</b><small>${pctPatuh}% compliant</small></div></div></div>
  <div class="chart-grid">
    <div class="chart-card wide"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2,#14B8A6)"></div><div class="chart-title">Strategic Performance Trend <span class="badge" style="background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">SATRIA Analytics • Lazy</span></div><div id="chartMultiYear" style="width:100%;height:340px"><div class="chart-skeleton"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading chart...</div></div></div><div class="d3-legend" id="legendMultiYear"></div><div class="d3-tooltip" id="tooltipMulti"></div></div>
@@ -1201,7 +1257,7 @@ function paketEmptyState(){
  return `<div class="satria-empty-state"><div class="satria-empty-icon">⌕</div><strong>Belum ada paket untuk filter ini</strong><p>Filter aktif: <b>${esc(opdLabel)}</b> · Tahun Anggaran <b>${Number(S.ui.tahun)||'-'}</b>${query?` · Pencarian <b>“${esc(query)}”</b>`:''}.</p><small>${scope?'Data hanya ditampilkan jika OPD dan tahun termasuk assignment akun Anda. Jika seharusnya ada paket, minta admin memeriksa assignment dan data paket pada Supabase.':'Coba pilih OPD/tahun lain atau kosongkan kata pencarian.'}</small></div>`;
 }
 function paketListMarkup(){const rows=paketListForView();return rows.length?tabelPaket(rows):paketEmptyState()}
-function vPaket(){return `<div class="row satria-page-heading"><div><h2>Paket Pengadaan TA ${S.ui.tahun}</h2><p class="mut">Daftar paket mengikuti filter OPD dan tahun aktif.</p></div><button type="button" data-act="newpaket">+ Tambah Paket Pengadaan</button></div><div class="card satria-paket-card"><div class="row satria-paket-toolbar"><label for="qPaket">Cari paket</label><input id="qPaket" type="search" autocomplete="off" placeholder="Cari kode RUP atau nama paket…" value="${esc(S.ui.q||'')}" aria-controls="paketTableResult"/><span class="satria-result-count">${paketListForView().length} paket</span></div><div id="paketTableResult" aria-live="polite">${paketListMarkup()}</div></div>`}
+function vPaket(){return `<div class="row satria-page-heading"><div><h2>Paket Pengadaan TA ${S.ui.tahun}</h2><p class="mut">Daftar paket mengikuti filter OPD dan tahun aktif.</p></div><button type="button" data-act="newpaket">+ Tambah Paket Pengadaan</button></div><div class="card satria-paket-card"><div class="row satria-paket-toolbar"><label for="qPaket">Cari paket</label><input id="qPaket" type="search" autocomplete="off" placeholder="Cari kode RUP atau nama paket…" value="${esc(S.ui.q||'')}" aria-controls="paketTableResult"/><span class="satria-result-count">${paketListForView().length} paket</span><button type="button" data-act="exportPaketCsv" class="g" style="margin-left:10px">⬇ Ekspor CSV</button></div><div id="paketTableResult" aria-live="polite">${paketListMarkup()}</div></div>`}
 
 function readiness(p){const dup=S.paket.some(x=>x!==p&&x.tahun===p.tahun&&x.rup&&x.rup===p.rup);const H=hps(p);
 const C=[['Kode RUP',!!p.rup&&!dup],['Pagu',p.pagu>0],['Rincian barang',p.items.length>0],['HPS ≤ pagu',H>0&&H<=p.pagu],['Penawaran',p.penawaran.length>0],['Pemenang',!!pemenang(p)],['Tgl DPP',!!p.tglDpp],['PPK aktif',PJ(p.ppk).aktif!==false],['Tgl BA Hasil',!!p.tglBahp]];
@@ -1484,6 +1540,8 @@ function vDok(){
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
           Cetak / PDF
         </button>
+        <button type="button" data-act="previewDoc" class="satria-btn-secondary" style="height:40px;flex-shrink:0">👁 Pratinjau</button>
+        <button type="button" data-act="exportPaketCsv" class="satria-btn-secondary" style="height:40px;flex-shrink:0">⬇ CSV Paket</button>
       </div>
       <div class="doc-tabs-scroll" style="margin-top:12px">
         ${T.map(([k,t])=>`<button class="master-tab ${k===S.ui.dok?'active':''}" data-act="dtype" data-tab="${k}" title="${t}">${t}</button>`).join('')}
@@ -1781,7 +1839,7 @@ function vUser(){const U=S.users,act=U.filter(u=>u.aktif!==false),ROLES=['Admin'
  <section class="card" id="satriaCloudUserListCard" style="display:none" aria-labelledby="satriaCloudUserListTitle">
   <div class="row" style="align-items:center;justify-content:space-between;gap:12px">
    <div><h3 id="satriaCloudUserListTitle" style="margin:0">Daftar pengguna organisasi</h3><p class="mut" style="margin:4px 0 0">Daftar ini hanya tersedia bagi admin aktif organisasi.</p></div>
-   <button id="satriaAdminUsersRefresh" type="button">Muat ulang</button>
+   <button id="satriaAdminUsersRefresh" type="button">Muat ulang</button> <button type="button" data-act="exportRosterCsv" style="margin-left:4px">⬇ Ekspor CSV</button>
   </div>
   <p id="satriaAdminUsersStatus" class="mut" role="status" aria-live="polite">Daftar belum dimuat.</p>
   <div style="overflow:auto">
@@ -1802,7 +1860,7 @@ function vUser(){const U=S.users,act=U.filter(u=>u.aktif!==false),ROLES=['Admin'
  <div class=fg><label>OPD</label><select data-new="opd"><option value="all">Semua OPD</option>${S.opd.map(o=>`<option value="${o.id}">${esc(o.singkat)}</option>`).join('')}</select></div>
  <button data-act="uadd">Simpan user lokal</button></div>
  <p class=mut>Mode lokal hanya mengatur tampilan browser ini; username di sini bukan akun login Supabase.</p><div class=card style="border-color:#e0a800"><b class=warn>Catatan keamanan</b><p class=mut>Pemilihan user di header hanya membatasi tampilan di browser ini, bukan kontrol akses yang sebenarnya. Siapa pun yang membuka file ini dapat berpindah ke user Admin. Untuk data pengadaan yang sesungguhnya, gunakan sistem dengan autentikasi di sisi server.</p></div></div>
- <div class=card id="satriaLocalUserTable"><h3>Daftar user lokal browser</h3><p class=mut>Daftar ini bukan roster akun Auth Supabase.</p><table><tr><th>No</th><th>Nama</th><th>Username</th><th>Role</th><th>OPD</th><th>Status</th><th>Aksi</th></tr>
+ <div class=card id="satriaLocalUserTable"><div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap"><h3 style="margin:0">Daftar user lokal browser</h3><button type="button" data-act="exportUserCsv" class="g">⬇ Ekspor CSV</button></div><p class=mut>Daftar ini bukan roster akun Auth Supabase.</p><table><tr><th>No</th><th>Nama</th><th>Username</th><th>Role</th><th>OPD</th><th>Status</th><th>Aksi</th></tr>
  ${U.map((u,i)=>{const off=u.aktif===false,me=u.id===S.ui.user;return `<tr><td>${i+1}</td>
  <td><input value="${esc(u.nama)}" data-col="users" data-id="${u.id}" data-f="nama"></td>
  <td><input value="${esc(u.username)}" data-col="users" data-id="${u.id}" data-f="username"></td>
@@ -1946,6 +2004,11 @@ document.addEventListener('click',e=>{
  if(a==='rmlogo'){delete S.pemda.logo;sync('settings','Logo dihapus');return render()}
  if(a==='delyear'){const y=+d.y;if(S.paket.some(p=>+p.tahun===y)){toast('Tahun tidak dapat dihapus karena masih dirujuk paket.');return render()}if(S.tahun.length<=1){toast('Tahun anggaran terakhir tidak dapat dihapus. Tambahkan tahun pengganti terlebih dahulu.');return render()}if(!confirm('Hapus TA '+y+'? Tindakan ini hanya diizinkan bila tidak ada paket yang memakai tahun tersebut.'))return;S.tahun=S.tahun.filter(x=>+x!==y);if(+S.ui.tahun===y)S.ui.tahun=S.tahun[0];sync('settings','Tahun '+y+' dihapus');return render()}
  if(a==='reset'){if(!confirm('PERINGATAN: seluruh data aktif—paket, master, pengaturan, pengguna, dan penawaran—akan diganti dengan data awal. Unduh backup JSON terlebih dahulu. Lanjutkan?'))return;if(!confirm('Konfirmasi terakhir: ganti seluruh data aktif dengan data awal SATRIA?'))return;init();sync('settings','Data direset ke data awal');route();toast('Data awal dimuat ulang. Periksa konfigurasi dan unduh backup setelah pengisian.');return}
+ if(a==='exportPaketCsv'){satriaLoading(true,'Menyiapkan ekspor CSV…');setTimeout(()=>{try{satriaExportPaketCsv()}finally{satriaLoading(false)}},40);return}
+ if(a==='exportUserCsv'){satriaExportUserCsv();return}
+ if(a==='exportRosterCsv'){satriaExportRosterCsv();return}
+ if(a==='previewDoc'){satriaPreviewDoc();return}
+ if(a==='openLog'){satriaLogViewer();return}
  if(a==='print')return window.print();
  if(a==='csv')return csvExport();
  if(a==='export'){const o={...S};delete o.ui;delete o.log;delete o.dirty;delete o.chat;const u=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:'application/json'}));const l=document.createElement('a');l.href=u;l.download='SATRIA-backup-'+new Date().toISOString().slice(0,10)+'.json';l.click();S.dirty=false;return render()}
@@ -5310,6 +5373,8 @@ function vDokOptimized(){
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
           Cetak / PDF
         </button>
+        <button type="button" data-act="previewDoc" class="satria-btn-secondary" style="height:40px;flex-shrink:0">👁 Pratinjau</button>
+        <button type="button" data-act="exportPaketCsv" class="satria-btn-secondary" style="height:40px;flex-shrink:0">⬇ CSV Paket</button>
       </div>
       <div class="doc-tabs-scroll" style="margin-top:12px">
         ${T.map(([k,t])=>`<button class="master-tab ${k===S.ui.dok?'active':''}" data-act="dtype" data-tab="${k}" title="${t}">${t}</button>`).join('')}
