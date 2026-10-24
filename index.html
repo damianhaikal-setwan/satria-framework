@@ -1,5 +1,12 @@
 ---
 name: "satria-index-patched"
+title: "index.html — SATRIA 3.0 patched (Ekspor PDF/Excel + Badge Cloud + Offline Sync + Chatbot v2)"
+type: "code"
+language: "html"
+---
+
+---
+name: "satria-index-patched"
 title: "index.html — SATRIA 3.0 patched (Ekspor PDF/Excel + Badge Cloud + Offline Sync)"
 type: "code"
 language: "html"
@@ -1237,6 +1244,8 @@ function vDash(){
   ${kpi('Kelengkapan Administratif',pctPatuh+'%','🔐','Compliance • '+lengkap+' Lengkap','#10B981')}
   ${kpi('Indikator Data Paket',rp(efisiensi)+' • '+pctEf+'%','⚡','Performance • Efisiensi','#2563EB')}
  </div>
+ ${window.SATRIA_CLOUD_CONFIGURED&&!window.SATRIA_CLOUD_ROLE?`<div class="card" style="border:1px solid #f59e0b;background:#fffbeb"><h3 style="margin:0 0 4px;color:#92400e">⚠️ Login Supabase diperlukan</h3><p class="mut" style="margin:0">Mode cloud aktif — data lokal tidak dimuat sebelum login. Klik tombol <b>☁ Supabase</b> di kanan atas untuk login, lalu <b>Tarik data</b>. Angka di bawah ini hanyalah data contoh.</p></div>`:''}
+ ${window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE&&!S.paket.length?`<div class="card" style="border:1px solid #f59e0b;background:#fffbeb"><h3 style="margin:0 0 4px;color:#92400e">⚠️ Snapshot cloud masih kosong</h3><p class="mut" style="margin:0">Anda terhubung ke cloud tetapi belum ada paket pada cakupan ini. Admin dapat mengisi data lalu <b>Kirim perubahan</b>; Operator/Viewer pastikan admin sudah memberi assignment OPD &amp; Tahun Anggaran.</p></div>`:''}
  ${satriaValidationCard()}
  <div class="card satria-overview"><h3 style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff">◈</span> Strategic Analytics Overview <span class="badge" style="margin-left:auto;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">SATRIA Intelligence • v3.0 • Lazy Charts</span></h3><p class="mut">Monitoring real-time terhadap anggaran, efektivitas, kepatuhan, dan kinerja tata kelola berbasis data intelligence. Charts lazy load aktif — hanya render saat discroll, hemat 70% di Android.</p><div class="satria-metrics-row"><div><span>Efisiensi</span><b>${rp(efisiensi)}</b><small>${pctEf}% dari pagu</small></div><div><span>Total HPS</span><b>${rp(totalHps)}</b><small>Estimasi kebutuhan</small></div><div><span>Nilai Kontrak</span><b>${rp(k)}</b><small>Realisasi</small></div><div><span>Paket Lengkap</span><b>${lengkap}/${L.length}</b><small>${pctPatuh}% compliant</small></div></div></div>
  <div class="chart-grid">
@@ -2344,11 +2353,18 @@ function initChartLazyLoad(){
 }
 
 function drawKhChartsSingle(targetId){
-  if(typeof d3==='undefined') return;
   const el = document.getElementById(targetId);
   if(!el) return;
+  if(typeof d3==='undefined'){
+    el.innerHTML='<div style="display:grid;place-items:center;height:100%;min-height:160px;color:var(--mut);font:600 12px system-ui,sans-serif;text-align:center;padding:16px">Grafik tidak dapat dirender: pustaka D3 belum termuat.<br>Periksa koneksi internet, lalu muat ulang halaman.</div>';
+    return;
+  }
   const isMobile = window.innerWidth <= 768;
   const L = (typeof filt==='function') ? filt() : [];
+  if(targetId!=='chartMultiYear'&&!L.length){
+    el.innerHTML='<div style="display:grid;place-items:center;height:100%;min-height:160px;color:var(--mut);font:600 12px system-ui,sans-serif;text-align:center;padding:16px">Tidak ada data pada cakupan ini (TA '+S.ui.tahun+').<br>Tambahkan paket atau ubah filter OPD/Tahun di header.</div>';
+    return;
+  }
   const isDark = document.documentElement.getAttribute('data-theme')==='dark';
   const colMut = getComputedStyle(document.documentElement).getPropertyValue('--mut').trim() || '#64748b';
   const colBd = getComputedStyle(document.documentElement).getPropertyValue('--bd').trim() || '#e2e8f0';
