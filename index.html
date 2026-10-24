@@ -1,5 +1,12 @@
 ---
 name: "satria-index-patched"
+title: "index.html — SATRIA 3.0 patched (Ekspor + Cloud UX + Offline Sync + Chatbot v2 + Fix Dashboard)"
+type: "code"
+language: "html"
+---
+
+---
+name: "satria-index-patched"
 title: "index.html — SATRIA 3.0 patched (Ekspor PDF/Excel + Badge Cloud + Offline Sync + Chatbot v2)"
 type: "code"
 language: "html"
@@ -1245,7 +1252,7 @@ function vDash(){
   ${kpi('Indikator Data Paket',rp(efisiensi)+' • '+pctEf+'%','⚡','Performance • Efisiensi','#2563EB')}
  </div>
  ${window.SATRIA_CLOUD_CONFIGURED&&!window.SATRIA_CLOUD_ROLE?`<div class="card" style="border:1px solid #f59e0b;background:#fffbeb"><h3 style="margin:0 0 4px;color:#92400e">⚠️ Login Supabase diperlukan</h3><p class="mut" style="margin:0">Mode cloud aktif — data lokal tidak dimuat sebelum login. Klik tombol <b>☁ Supabase</b> di kanan atas untuk login, lalu <b>Tarik data</b>. Angka di bawah ini hanyalah data contoh.</p></div>`:''}
- ${window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE&&!S.paket.length?`<div class="card" style="border:1px solid #f59e0b;background:#fffbeb"><h3 style="margin:0 0 4px;color:#92400e">⚠️ Snapshot cloud masih kosong</h3><p class="mut" style="margin:0">Anda terhubung ke cloud tetapi belum ada paket pada cakupan ini. Admin dapat mengisi data lalu <b>Kirim perubahan</b>; Operator/Viewer pastikan admin sudah memberi assignment OPD &amp; Tahun Anggaran.</p></div>`:''}
+ ${window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE&&!S.paket.filter(p=>String(p.id)!=='k1').length?`<div class="card" style="border:1px solid #f59e0b;background:#fffbeb"><h3 style="margin:0 0 4px;color:#92400e">⚠️ Snapshot cloud belum berisi data asli</h3><p class="mut" style="margin:0">Cloud tersambung tetapi snapshot hanya memuat <b>data demo</b>. Klik <b>☁ Supabase</b> di kanan atas → <b>Pulihkan dari cache lokal</b> (bila data pernah tersimpan di browser ini), lalu <b>Sinkronkan perubahan</b>. Alternatif: <b>Pengaturan Sistem → Impor backup JSON</b>, lalu Sinkronkan perubahan.</p></div>`:''}
  ${satriaValidationCard()}
  <div class="card satria-overview"><h3 style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff">◈</span> Strategic Analytics Overview <span class="badge" style="margin-left:auto;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">SATRIA Intelligence • v3.0 • Lazy Charts</span></h3><p class="mut">Monitoring real-time terhadap anggaran, efektivitas, kepatuhan, dan kinerja tata kelola berbasis data intelligence. Charts lazy load aktif — hanya render saat discroll, hemat 70% di Android.</p><div class="satria-metrics-row"><div><span>Efisiensi</span><b>${rp(efisiensi)}</b><small>${pctEf}% dari pagu</small></div><div><span>Total HPS</span><b>${rp(totalHps)}</b><small>Estimasi kebutuhan</small></div><div><span>Nilai Kontrak</span><b>${rp(k)}</b><small>Realisasi</small></div><div><span>Paket Lengkap</span><b>${lengkap}/${L.length}</b><small>${pctPatuh}% compliant</small></div></div></div>
  <div class="chart-grid">
@@ -2190,6 +2197,9 @@ const persistable=()=>{const o={...S};['ui','log','dirty','chat','chatCtx'].forE
 async function persistNow(){if(ENGINE!=='dexie'||!DB)return false;const writingRevision=persistRevision;try{await DB.kv.put({k:'main',v:persistable(),at:Date.now()});lastPersistedRevision=Math.max(lastPersistedRevision,writingRevision);if(S.persistError){S.persistError='';const el=$('#dirty');if(el)el.title='Data tersimpan di browser. Backup JSON tetap perlu diunduh berkala.'}return true}catch(e){S.persistError='Data gagal disimpan ke IndexedDB. Jangan tutup halaman; unduh backup JSON dan periksa ruang penyimpanan browser.';console.error('Gagal menyimpan ke IndexedDB',e);const el=$('#dirty');if(el){el.textContent='⚠ Gagal menyimpan';el.title=S.persistError;el.style.background='#FEE2E2';el.style.color='#991B1B'}toast('GAGAL MENYIMPAN. Unduh backup JSON sekarang.');return false}}
 function schedulePersist(){if(ENGINE!=='dexie'||!DB||!S?.dirty||persistRevision<=lastPersistedRevision)return;clearTimeout(pTimer);pTimer=setTimeout(()=>{void persistNow()},350)}
 async function loadSaved(){try{const r=await DB.kv.get('main');if(r&&r.v&&r.v.paket&&r.v.opd){const ui=S.ui;Object.assign(S,r.v,{ui,log:[],dirty:false,chat:[],chatCtx:null});normalizeData();if(!S.users.some(u=>u.id===ui.user))ui.user=S.users[0].id;if(!S.tahun.includes(ui.tahun))ui.tahun=S.tahun[0]}}catch(e){console.warn('Gagal memuat dari IndexedDB',e)}}
+window.SATRIA_LOCAL_CACHE={
+  async read(){ if(ENGINE!=='dexie'||!DB)return null; try{ const r=await DB.kv.get('main'); if(r&&r.v&&Array.isArray(r.v.paket))return r.v; }catch(e){console.warn('Gagal membaca cache lokal',e)} return null; }
+};
 function setEngineSelect(){const s=$('#selEngine');s.innerHTML=(DB?'<option value="dexie">IndexedDB (Dexie)</option>':'')+'<option value="memory">Memori sesi</option>';s.value=ENGINE;if(!DB){s.disabled=true;s.title='Dexie.js tidak termuat, memakai memori sesi'}}
 async function boot(){
   init();
@@ -2743,6 +2753,7 @@ main{overflow-anchor:none}
       <button type="button" id="scResetPassword">Lupa kata sandi?</button>
       <button type="button" id="scPull" disabled>Tarik dari Supabase</button>
       <button type="button" id="scPush" disabled>Sinkronkan perubahan</button>
+      <button type="button" id="scRecoverLocal" disabled title="Khusus admin: pulihkan data dari cache lokal browser ini lalu kirim sebagai snapshot ke cloud">Pulihkan dari cache lokal</button>
       <button type="button" class="danger" id="scSignOut" disabled>Keluar</button>
     </div>
     <div id="scRecoveryPanel" class="sc-recovery" hidden>
@@ -2834,7 +2845,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
   const config=()=>{let local={};try{local=JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}')}catch(_){}const embedded=window.SATRIA_EMBEDDED_SUPABASE_CONFIG||{};return {url:local.url||embedded.url||'',key:local.key||embedded.key||'',org:local.org||embedded.org||''}};
   window.SATRIA_CLOUD_CONFIGURED=!!(config().url&&config().key&&config().org);
   function fillConfig(){const c=config(); const a=$id('scUrl'), b=$id('scKey'), cc=$id('scOrg'); if(a) a.value=c.url||''; if(b) b.value=c.key||''; if(cc) cc.value=c.org||''; }
-  function setButtons(){const ok=!!(client&&member); const p=$id('scPull'), pu=$id('scPush'), so=$id('scSignOut'); if(p) p.disabled=!ok; if(pu) pu.disabled=!ok||member?.role==='viewer'||(!cloudStateReady&&!(member?.role==='admin'&&window.SATRIA_CLOUD_ADMIN_IMPORT_READY===true)); if(so) so.disabled=!ok; }
+  function setButtons(){const ok=!!(client&&member); const p=$id('scPull'), pu=$id('scPush'), so=$id('scSignOut'), rc=$id('scRecoverLocal'); if(p) p.disabled=!ok; if(pu) pu.disabled=!ok||member?.role==='viewer'||(!cloudStateReady&&!(member?.role==='admin'&&window.SATRIA_CLOUD_ADMIN_IMPORT_READY===true)); if(so) so.disabled=!ok; if(rc) rc.disabled=!ok||member?.role!=='admin'; }
   function open(){fillConfig(); if(!modal){ console.warn('Modal not found'); return; } modal.hidden=false;modal.setAttribute('aria-hidden','false'); const c=$id('scClose'); if(c) c.focus(); setButtons(); if(member)status('Terhubung sebagai '+member.email+' · role '+member.role+' · versi lokal '+version,'ok')}
   function close(){ if(modal){ modal.hidden=true; modal.setAttribute('aria-hidden','true'); } }
   function readConfigFields(){
@@ -3009,6 +3020,25 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
       if(!member||S.dirty||autoSaveInFlight)return;
       try{await pull({source:'realtime',silent:true})}catch(e){showError(e)}
     },220);
+  }
+  async function recoverLocal(){
+    try{
+      if(!client||!member)throw new Error('Hubungkan dan masuk terlebih dahulu.');
+      if(member.role!=='admin')throw new Error('Pemulihan cache lokal hanya tersedia bagi admin.');
+      if(!window.SATRIA_LOCAL_CACHE||typeof window.SATRIA_LOCAL_CACHE.read!=='function')throw new Error('Penyimpanan lokal tidak tersedia di sesi ini.');
+      const cached=await window.SATRIA_LOCAL_CACHE.read();
+      if(!cached||!Array.isArray(cached.paket)||!cached.paket.length)throw new Error('Tidak ada data lokal tersimpan yang dapat dipulihkan. Gunakan Impor backup JSON bila Anda memiliki file backup.');
+      const nPaket=cached.paket.length,nOpd=(cached.opd||[]).length;
+      if(!confirm('Ditemukan data cache lokal: '+nPaket+' paket, '+nOpd+' OPD.\n\nMemulihkan akan menampilkan data tersebut dan menandainya untuk dikirim ke cloud lewat "Sinkronkan perubahan". Lanjutkan?'))return;
+      const ui={...(S.ui||{})};
+      Object.assign(S,cached,{ui,log:[],dirty:true,chat:[],chatCtx:null});
+      if(typeof normalizeData==='function')normalizeData();
+      window.SATRIA_CLOUD_ADMIN_IMPORT_READY=true;
+      status('Data lokal dipulihkan ('+nPaket+' paket, '+nOpd+' OPD). Klik "Sinkronkan perubahan" untuk mengirim snapshot awal ke cloud.','ok');
+      syncIndicator(nPaket+' paket siap dikirim','wait');
+      if(typeof window.render==='function')window.render();
+      setButtons();
+    }catch(e){showError(e)}
   }
   async function pull(options={}){
     const opts=(options&&typeof options==='object'&&('source' in options||'silent' in options||'discardConfirmed' in options))?options:{};
@@ -3207,7 +3237,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&member){checkRemoteVersion();if(S.dirty&&!conflictActive)requestAutosave('tab-visible')}});
   { const e=$id('scClose'); if(e) e.addEventListener('click',close); }
   if(modal) modal.addEventListener('click',e=>{if(e.target===modal)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
-  { const _el=$id('scEmbedConfig'); if(_el) _el.addEventListener('click',downloadConfiguredHtml);$id('scSaveConfig').addEventListener('click',()=>{try{saveConfig();}catch(e){showError(e)}});$id('scConnect').addEventListener('click',connect);$id('scResetPassword').addEventListener('click',requestPasswordReset);$id('scSaveNewPassword').addEventListener('click',saveRecoveredPassword);$id('scCancelRecovery').addEventListener('click',()=>{$id('scRecoveryPanel').hidden=true;$id('scNewPassword').value='';$id('scConfirmNewPassword').value='';});$id('scPull').addEventListener('click',pull);$id('scPush').addEventListener('click',push);$id('scSignOut').addEventListener('click',signOut); }
+  { const _el=$id('scEmbedConfig'); if(_el) _el.addEventListener('click',downloadConfiguredHtml);$id('scSaveConfig').addEventListener('click',()=>{try{saveConfig();}catch(e){showError(e)}});$id('scConnect').addEventListener('click',connect);$id('scResetPassword').addEventListener('click',requestPasswordReset);$id('scSaveNewPassword').addEventListener('click',saveRecoveredPassword);$id('scCancelRecovery').addEventListener('click',()=>{$id('scRecoveryPanel').hidden=true;$id('scNewPassword').value='';$id('scConfirmNewPassword').value='';});$id('scPull').addEventListener('click',pull);$id('scPush').addEventListener('click',push);{const rc=$id('scRecoverLocal');if(rc)rc.addEventListener('click',recoverLocal)}$id('scSignOut').addEventListener('click',signOut); }
   const saved=config(); { const a=$id('scUrl'), b=$id('scKey'), c=$id('scOrg'); if(saved.url && a) a.value=saved.url; if(saved.key && b) b.value=saved.key; if(saved.org && c) c.value=saved.org; }
   if(window.render){const originalRender=window.render;window.render=function(){originalRender();applyUserLock()}}
   // Restore an existing Supabase session after the static app has booted.
