@@ -570,6 +570,55 @@ nav a.on::before{filter:brightness(0) invert(1)}
   }
 }
 
+
+/* SATRIA precision/performance patch — less compositor work, clearer controls */
+.blob,.noise{display:none!important}
+header,nav,.card,.chart-card,.control-group{
+  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+}
+header{background:var(--card-solid)!important;gap:12px}
+header::after,.kh-accent,.satria-command-badge .dot,#hSub::before{animation:none!important}
+.card,.chart-card{transition:border-color .14s ease,box-shadow .14s ease!important}
+.card:hover,.chart-card:hover,.card.kpi.satria-kpi:hover{transform:none!important}
+.bar,.arc{transition:none!important}
+.satria-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;min-height:150px;padding:24px;border:1px dashed var(--bd-strong);border-radius:12px;background:var(--card-2);color:var(--ink-2)}
+.satria-empty-state strong{font-size:15px;color:var(--ink)}
+.satria-empty-state p,.satria-empty-state small{margin:0;max-width:680px;color:var(--mut)}
+.satria-empty-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:var(--acc-soft);color:var(--acc);font-size:22px;font-weight:800}
+.satria-page-heading{align-items:center!important;margin-bottom:14px!important;gap:16px!important}
+.satria-page-heading .mut{margin:5px 0 0;font-size:12px}
+.satria-paket-card{padding:18px 20px!important}
+.satria-paket-toolbar{display:flex;align-items:center;gap:10px;margin:0 0 14px!important;flex-wrap:wrap}
+.satria-paket-toolbar label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)}
+.satria-paket-toolbar input{width:min(460px,100%)!important;min-width:220px;flex:1 1 300px;min-height:40px}
+.satria-result-count{margin-left:auto;color:var(--mut);font-size:11px;font-weight:700;white-space:nowrap}
+#selUser{min-width:205px;max-width:290px}
+#selTahun{min-width:88px;max-width:110px}
+#selOpd{min-width:145px;max-width:230px}
+#selEngine{min-width:148px;max-width:190px}
+#dirty{font-size:11px;white-space:nowrap;max-width:205px;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:1200px){
+  header{height:auto!important;min-height:0!important;flex-wrap:wrap!important;align-items:flex-start!important;padding:10px 16px 12px!important;gap:8px!important}
+  .header-left{flex:1 1 100%!important;width:100%;min-height:48px}
+  .header-right{width:100%;flex:1 1 100%;display:flex;flex-wrap:wrap!important;justify-content:flex-start!important;gap:8px!important;overflow:visible!important;padding:0 0 2px!important}
+  .header-right .control-group{flex:0 1 auto;max-width:100%}
+  .header-right .control-group label{gap:5px}
+  .header-right .control-group select{max-width:clamp(100px,22vw,230px)}
+  #selUser{min-width:190px}
+  #dirty{max-width:100%;}
+}
+@media (max-width:600px){
+  .header-right{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+  .header-right .control-group{width:100%;min-width:0;padding:0 6px 0 8px}
+  .header-right .control-group label{width:100%;justify-content:space-between;min-width:0}
+  .header-right .control-group select{flex:1;min-width:0!important;width:100%;max-width:none!important}
+  #dirty{grid-column:1/-1;justify-self:start;max-width:100%}
+  #selEngine{min-width:0}
+  .satria-page-heading{align-items:flex-start!important;flex-direction:column}
+  .satria-paket-card{padding:12px!important}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
 </style>
 </head>
 <body>
@@ -645,9 +694,22 @@ let S;
 function init(){S=JSON.parse(JSON.stringify(SEED));normalizeData();S.ui={page:'dash',tahun:S.tahun[0],opd:'all',pid:null,dpid:'k1',dok:'nodis',ptab:'data',mtab:'ppk'};S.log=[];S.dirty=false;S.chat=[];S.chatCtx=null;S.ui.user=S.users[0].id}
 
 /* ===== FILTER & SINKRONISASI ANTAR MENU ===== */
-const filt=(t=S.ui.tahun)=>S.paket.filter(p=>p.tahun==t&&(S.ui.opd==='all'||p.opd===S.ui.opd));
+function activeCloudScope(){
+  if(!window.SATRIA_CLOUD_CONFIGURED||!window.SATRIA_CLOUD_ROLE||window.SATRIA_CLOUD_ROLE==='admin') return null;
+  const user=(S?.users||[]).find(x=>x.id===S?.ui?.user)||(S?.users||[])[0];
+  return {
+    opdIds:Array.isArray(user?.opd)?user.opd.map(String):[],
+    years:Array.isArray(user?.years)?user.years.map(Number).filter(Number.isFinite):[]
+  };
+}
+const filt=(t=S.ui.tahun)=>{
+  const year=Number(t),scope=activeCloudScope();
+  if(!Number.isFinite(year)) return [];
+  if(scope&&(!scope.years.includes(year)||!scope.opdIds.length)) return [];
+  return (S.paket||[]).filter(p=>Number(p.tahun)===year&&(S.ui.opd==='all'||String(p.opd)===String(S.ui.opd))&&(!scope||scope.opdIds.includes(String(p.opd))));
+};
 const MOD={paket:['Ringkasan Utama','Dokumen terkait'],pagu:['Ringkasan Utama','Dokumen Pengadaan','Nota Dinas','Laporan dan Analisis'],items:['Ringkasan Utama','Nota Dinas','DPP','SPPBJ','BA Hasil'],nego:['Ringkasan Utama','BA Hasil','Laporan dan Analisis'],pemenang:['Ringkasan Utama','SPPBJ','BA Hasil','Laporan dan Analisis'],settings:['Kop semua dokumen'],master:['Form Paket Pengadaan','Dokumen Pengadaan']};
-function sync(k,label){S.dirty=true;S.persistError='';S.log.unshift({t:new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}),label,mods:MOD[k]||['Data aplikasi']});S.log=S.log.slice(0,25);toast('Perubahan dicatat: '+((MOD[k]||['Data aplikasi']).join(', ')))}
+function sync(k,label){S.dirty=true;persistRevision++;S.persistError='';S.log.unshift({t:new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}),label,mods:MOD[k]||['Data aplikasi']});S.log=S.log.slice(0,25);toast('Perubahan dicatat: '+((MOD[k]||['Data aplikasi']).join(', ')))}
 function toast(m){const e=$('#toast');e.textContent=m;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2600)}
 
 /* ===== TAMPILAN ===== */
@@ -688,7 +750,18 @@ function vDash(){
  <div class="card"><h3>Governance Intelligence • Aktivitas Sinkronisasi</h3>${S.log.length?S.log.map(l=>`<div style="padding:8px 0;border-bottom:1px solid var(--bd);display:flex;gap:12px"><span style="font-weight:700;color:#0F766E;min-width:120px">${l.t}</span><span>${esc(l.label)}</span><span class=pill style="margin-left:auto;background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">${l.mods.join(', ')}</span></div>`).join(''):'<span class=mut>Belum ada perubahan. Ubah data program, rincian, atau penawaran untuk melihat sinkronisasi governance intelligence.</span>'}</div>`;
 }
 
-function vPaket(){return `<div class=row style="justify-content:space-between"><h2>Paket Pengadaan TA ${S.ui.tahun}</h2><button onclick="" data-act="newpaket">+ Tambah Paket Pengadaan</button></div>${`<div class=card><div class=row style="margin-bottom:8px"><input id=qPaket placeholder="Cari Kode RUP / nama paket..." value="${esc(S.ui.q||'')}" style="width:320px"></div>${tabelPaket(filt().filter(p=>!S.ui.q||(p.rup+' '+p.nama).toLowerCase().includes(S.ui.q.toLowerCase())))}</div>`}`}
+function paketListForView(){
+ const q=String(S.ui.q||'').trim().toLocaleLowerCase('id-ID');
+ return filt().filter(p=>!q||`${p.rup||''} ${p.nama||''}`.toLocaleLowerCase('id-ID').includes(q));
+}
+function paketEmptyState(){
+ const scope=activeCloudScope();
+ const opdLabel=S.ui.opd==='all'?'OPD yang ditugaskan':(O(S.ui.opd).singkat||'OPD terpilih');
+ const query=String(S.ui.q||'').trim();
+ return `<div class="satria-empty-state"><div class="satria-empty-icon">⌕</div><strong>Belum ada paket untuk filter ini</strong><p>Filter aktif: <b>${esc(opdLabel)}</b> · Tahun Anggaran <b>${Number(S.ui.tahun)||'-'}</b>${query?` · Pencarian <b>“${esc(query)}”</b>`:''}.</p><small>${scope?'Data hanya ditampilkan jika OPD dan tahun termasuk assignment akun Anda. Jika seharusnya ada paket, minta admin memeriksa assignment dan data paket pada Supabase.':'Coba pilih OPD/tahun lain atau kosongkan kata pencarian.'}</small></div>`;
+}
+function paketListMarkup(){const rows=paketListForView();return rows.length?tabelPaket(rows):paketEmptyState()}
+function vPaket(){return `<div class="row satria-page-heading"><div><h2>Paket Pengadaan TA ${S.ui.tahun}</h2><p class="mut">Daftar paket mengikuti filter OPD dan tahun aktif.</p></div><button type="button" data-act="newpaket">+ Tambah Paket Pengadaan</button></div><div class="card satria-paket-card"><div class="row satria-paket-toolbar"><label for="qPaket">Cari paket</label><input id="qPaket" type="search" autocomplete="off" placeholder="Cari kode RUP atau nama paket…" value="${esc(S.ui.q||'')}" aria-controls="paketTableResult"/><span class="satria-result-count">${paketListForView().length} paket</span></div><div id="paketTableResult" aria-live="polite">${paketListMarkup()}</div></div>`}
 
 function readiness(p){const dup=S.paket.some(x=>x!==p&&x.tahun===p.tahun&&x.rup&&x.rup===p.rup);const H=hps(p);
 const C=[['Kode RUP',!!p.rup&&!dup],['Pagu',p.pagu>0],['Rincian barang',p.items.length>0],['HPS ≤ pagu',H>0&&H<=p.pagu],['Penawaran',p.penawaran.length>0],['Pemenang',!!pemenang(p)],['Tgl DPP',!!p.tglDpp],['PPK aktif',PJ(p.ppk).aktif!==false],['Tgl BA Hasil',!!p.tglBahp]];
@@ -1195,13 +1268,23 @@ function vPanduan(){const sec=(t,items)=>`<div class=card><h3>${t}</h3><ol style
 
 /* ===== RENDER & ROUTING ===== */
 function render(){
- schedulePersist();
  const u=S.ui;
  $('#hPemda').innerHTML='SATRIA Framework <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">Framework Version 3.0</span>';
  $('#hSub').innerHTML='<span style="font-weight:600;letter-spacing:-0.01em">Integrated Government Intelligence Platform</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px;opacity:.8">Smart • Adaptive • Transparent • Responsive • Integrated • Accountable</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px">'+(u.opd==='all'?'Multi OPD • Multi Tahun':esc(O(u.opd).nama))+'</span>';
  $('#dirty').textContent=S.persistError?'⚠ Gagal menyimpan':(S.dirty?'● Perubahan belum di-backup':'✔ Tidak ada perubahan baru');$('#dirty').title=S.persistError||'Penyimpanan lokal dan backup file adalah dua hal berbeda';$('#dirty').style.background=S.persistError?'#FEE2E2':(S.dirty?'#F59E0B':'rgba(15,118,110,.14)'); $('#dirty').style.color=S.persistError?'#991B1B':(S.dirty?'#78350f':'#0F766E');
- $('#selTahun').innerHTML=S.tahun.map(t=>`<option ${t==u.tahun?'selected':''}>${t}</option>`).join('');
- $('#selOpd').innerHTML='<option value="all">Semua OPD</option>'+S.opd.map(o=>`<option value="${o.id}" ${o.id===u.opd?'selected':''}>${esc(o.singkat)}</option>`).join('');
+ $('#selTahun').innerHTML=S.tahun.map(t=>`<option value="${Number(t)}" ${Number(t)===Number(u.tahun)?'selected':''}>${Number(t)}</option>`).join('');
+ const cloudScope=activeCloudScope();
+ const visibleOpds=cloudScope?(S.opd||[]).filter(o=>cloudScope.opdIds.includes(String(o.id))):(S.opd||[]);
+ if(cloudScope){
+   if(visibleOpds.length===1) u.opd=String(visibleOpds[0].id);
+   else if(u.opd!=='all'&&!visibleOpds.some(o=>String(o.id)===String(u.opd))) u.opd='all';
+ }
+ const showAllOpds=!cloudScope||visibleOpds.length>1;
+ const opdOptions=(showAllOpds?`<option value="all" ${u.opd==='all'?'selected':''}>${cloudScope?'Semua OPD ditugaskan':'Semua OPD'}</option>`:'')
+   +(visibleOpds.length?visibleOpds.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===String(u.opd)?'selected':''}>${esc(o.singkat||o.nama||o.id)}</option>`).join(''):`<option value="" selected disabled>OPD belum tersedia</option>`);
+ $('#selOpd').innerHTML=opdOptions;
+ $('#selOpd').disabled=!!cloudScope&&!visibleOpds.length;
+ $('#selOpd').title=cloudScope?(visibleOpds.length===1?'OPD otomatis mengikuti assignment akun Anda.':`Hanya ${visibleOpds.length} OPD yang ditugaskan kepada akun ini.`):'Pilih OPD untuk memfilter data aplikasi.';
  if(!allowed(u.page))u.page='dash';$('#selUser').innerHTML=S.users.filter(x=>x.aktif!==false).map(x=>`<option value="${x.id}" ${x.id===S.ui.user?'selected':''}>${esc(x.nama)} (${x.role})</option>`).join('');
  $('#nav').innerHTML=NAV.filter(([k])=>allowed(k)).map(([k,t])=>`<a href="#${k}" class="${u.page===k?'on':''}">${t}</a>`).join('');
  const V={dash:vDash,paket:()=>u.pid?vDetail(P(u.pid)):vPaket(),dok:vDok,lap:vLap,master:vMaster,set:vSet,user:vUser,panduan:vPanduan,chat:vChat};
@@ -1231,6 +1314,13 @@ function validateBackup(o){
  return true;
 }
 
+function resetDetailIfOutsideFilter(){
+ const active=P(S.ui.pid);if(!active)return;
+ if(Number(active.tahun)!==Number(S.ui.tahun)||(S.ui.opd!=='all'&&String(active.opd)!==String(S.ui.opd))){
+   S.ui.pid=null;S.ui.page='paket';
+   try{history.replaceState(null,'',location.pathname+location.search+'#paket')}catch(_){location.hash='#paket'}
+ }
+}
 /* ===== EVENT ===== */
 document.addEventListener('click',e=>{
  const t=e.target.closest('[data-act]');if(!t)return;
@@ -1256,9 +1346,17 @@ document.addEventListener('click',e=>{
  if(a==='chatsend'){return chatSend($('#chatIn').value)}
  if(a==='chatq'){return chatSend(d.q)}
  if(a==='chatclear'){S.chat=[];return render()}
- if(a==='newpaket'){const opd=S.ui.opd==='all'?S.opd[0].id:S.ui.opd;const p={id:uid('k'),tahun:S.ui.tahun,opd,unit:(S.unit.find(u=>u.opd===opd)||{}).id,seq:nextSeq(S.ui.tahun,opd),nama:'Paket baru',rup:'',pagu:0,sumber:S.pemda.sumber,sub:S.kode[0].kode,ppk:pjId(opd,'PPK'),pp:pjId(opd,'PP'),kabid:pjId(opd,'Kabid'),masaHk:7,jenisPengadaan:'Barang',metodePemilihan:'E-Purchasing dengan Negosiasi Harga',lokasiPengiriman:O(opd).tempat||O(opd).alamat||'',tglSurvei:'',tglEvaluasi:'',tglNego:'',tglPenetapan:'',tglNodis:'',tglDpp:'',tglSppbj:'',tglBahp:'',batas:'',pemenangId:null,items:[],penawaran:[]};S.paket.push(p);S.ui.ptab='data';location.hash='#paket/'+p.id;sync('paket','Paket baru dibuat');return render()}
+ if(a==='newpaket'){
+   const scope=activeCloudScope();
+   if(!S.opd.length){toast('Master OPD belum tersedia. Muat ulang data cloud atau minta admin memeriksa master OPD.');return}
+   if(scope&&S.ui.opd==='all'&&S.opd.length>1){toast('Pilih satu OPD tertentu terlebih dahulu sebelum membuat paket baru.');return}
+   const opd=S.ui.opd==='all'?S.opd[0].id:S.ui.opd;
+   if(scope&&(!scope.opdIds.includes(String(opd))||!scope.years.includes(Number(S.ui.tahun)))){toast('OPD atau tahun belum termasuk assignment akun. Minta admin memperbarui akses.');return}
+   const p={id:uid('k'),tahun:S.ui.tahun,opd,unit:(S.unit.find(u=>String(u.opd)===String(opd))||{}).id,seq:nextSeq(S.ui.tahun,opd),nama:'Paket baru',rup:'',pagu:0,sumber:S.pemda.sumber,sub:S.kode[0]?.kode||'',ppk:pjId(opd,'PPK'),pp:pjId(opd,'PP'),kabid:pjId(opd,'Kabid'),masaHk:7,jenisPengadaan:'Barang',metodePemilihan:'E-Purchasing dengan Negosiasi Harga',lokasiPengiriman:O(opd).tempat||O(opd).alamat||'',tglSurvei:'',tglEvaluasi:'',tglNego:'',tglPenetapan:'',tglNodis:'',tglDpp:'',tglSppbj:'',tglBahp:'',batas:'',pemenangId:null,items:[],penawaran:[]};
+   S.paket.push(p);S.ui.ptab='data';location.hash='#paket/'+p.id;sync('paket','Paket baru dibuat');return render()
+ }
  if(a==='copy'){const s=P(id);if(window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE&&window.SATRIA_CLOUD_ROLE!=='admin'&&!S.tahun.includes(s.tahun+1)){toast('Tidak dapat menyalin ke tahun yang belum ditetapkan. Minta admin menambahkan assignment tahun lebih dahulu.');return}if(!S.tahun.includes(s.tahun+1)){S.tahun.push(s.tahun+1);S.tahun.sort()}const n=JSON.parse(JSON.stringify(s));Object.assign(n,{id:uid('k'),tahun:s.tahun+1,seq:nextSeq(s.tahun+1,s.opd),rup:'',pemenangId:null,penawaran:[],tglNodis:'',tglSurvei:'',tglEvaluasi:'',tglNego:'',tglPenetapan:'',tglDpp:'',tglSppbj:'',tglBahp:''});S.paket.push(n);S.ui.tahun=n.tahun;location.hash='#paket/'+n.id;sync('paket','Paket disalin ke TA '+n.tahun);return render()}
- if(a==='delpaket'){if(!confirm('Hapus paket ini?'))return;S.paket=S.paket.filter(p=>p.id!==id);location.hash='#paket';return}
+ if(a==='delpaket'){if(!confirm('Hapus paket ini?'))return;S.paket=S.paket.filter(p=>p.id!==id);sync('paket','Paket dihapus');location.hash='#paket';return}
  if(a==='ptab'){S.ui.ptab=d.tab;return render()}
  if(a==='mtab'){S.ui.mtab=d.tab;S.ui.me=null;S.ui.ms='';return render()}
  if(a==='medit'){S.ui.me=S.ui.me===id?null:id;return render()}
@@ -1277,8 +1375,8 @@ document.addEventListener('click',e=>{
  if(a==='delpw'){if(!confirm('Hapus penawaran penyedia ini?'))return;const p=P(pid);p.penawaran=p.penawaran.filter(w=>w.id!==id);if(p.pemenangId===id)p.pemenangId=null;sync('nego','Penawaran dihapus');return render()}
  if(a==='winner'){const p=P(pid),e=evalPw(p).find(x=>x.w.id===id);if(!p.tglNego){toast('Isi tanggal negosiasi pada Data Paket sebelum menetapkan pemenang.');return}if(!e||!e.lengkap||!e.negoLengkap||!(e.t>0)||e.t>hps(p)){toast('Pemenang tidak dapat ditetapkan: harga penawaran dan negosiasi harus lengkap untuk setiap item, serta total negosiasi tidak boleh melebihi HPS.');return}if(!e.w.sumberHarga||!e.w.tanggalHarga){toast('Lengkapi sumber/bukti dan tanggal harga penyedia sebelum penetapan.');return}if(+e.w.ongkir>0){toast('Ongkir tercatat terpisah dan belum masuk model HPS. Rekonsiliasi ongkir dengan HPS sebelum menetapkan pemenang.');return}p.pemenangId=id;sync('pemenang','Pemenang ditetapkan setelah validasi');return render()}
  if(a==='autowin'){P(pid).pemenangId=null;sync('pemenang','Penetapan pemenang dibatalkan; kandidat tetap dihitung otomatis');return render()}
- if(a==='addrow'){if(typeof MBLANK==='undefined'||!MBLANK[d.c]){toast('Gunakan formulir tambah pada tab ini.');return}S[d.c].push(MBLANK[d.c]());return render()}
- if(a==='delrow'){if(!confirm('Hapus data ini?'))return;if(!canDel(d.c,id)){toast('Data masih dipakai paket. Nonaktifkan atau ganti dulu.');return}if(d.c==='opd')S.unit=S.unit.filter(u=>u.opd!==id);S[d.c]=S[d.c].filter(x=>x.id!==id);return render()}
+ if(a==='addrow'){if(typeof MBLANK==='undefined'||!MBLANK[d.c]){toast('Gunakan formulir tambah pada tab ini.');return}S[d.c].push(MBLANK[d.c]());sync('master','Baris master ditambahkan: '+d.c);return render()}
+ if(a==='delrow'){if(!confirm('Hapus data ini?'))return;if(!canDel(d.c,id)){toast('Data masih dipakai paket. Nonaktifkan atau ganti dulu.');return}if(d.c==='opd')S.unit=S.unit.filter(u=>u.opd!==id);S[d.c]=S[d.c].filter(x=>x.id!==id);sync('master','Baris master dihapus: '+d.c);return render()}
  if(a==='addopd'){S.opd.push({id:uid('o'),nama:'',singkat:'',unit:'',bidang:'',alamat:''});sync('settings','OPD ditambahkan');return render()}
  if(a==='addyear'){const raw=$('#newYear').value,v=Number(raw);if(!raw||!Number.isInteger(v)||v<2000||v>2200){toast('Masukkan tahun anggaran berupa bilangan bulat 2000–2200.');return}if(S.tahun.includes(v)){toast('Tahun anggaran sudah terdaftar.');return}S.tahun.push(v);S.tahun.sort((a,b)=>a-b);sync('settings','Tahun '+v+' ditambahkan');return render()}
   if(a==='uadd'){const row={id:uid('u'),aktif:true};document.querySelectorAll('[data-new]').forEach(i=>{row[i.dataset.new]=i.value.trim()});
@@ -1287,7 +1385,7 @@ document.addEventListener('click',e=>{
  S.users.push(row);sync('master','User ditambahkan: '+row.nama);return render()}
  if(a==='utoggle'){const u=S.users.find(x=>x.id===id);if(!u)return;if(u.aktif!==false){if(u.id===S.ui.user){toast('Tidak bisa menonaktifkan user yang sedang dipakai');return}if(isLastAdmin(id)){toast('Harus ada minimal satu Admin aktif');return}u.aktif=false}else u.aktif=true;sync('master',(u.aktif?'Diaktifkan: ':'Dinonaktifkan: ')+u.nama);return render()}
  if(a==='udel'){const u=S.users.find(x=>x.id===id);if(!u)return;if(u.id===S.ui.user){toast('Tidak bisa menghapus user yang sedang dipakai');return}if(isLastAdmin(id)){toast('Harus ada minimal satu Admin aktif');return}if(!confirm('Hapus user '+u.nama+'?'))return;S.users=S.users.filter(x=>x.id!==id);sync('master','User dihapus');return render()}
- if(a==='clearsample'){if(!confirm('PERINGATAN: tindakan ini menghapus semua paket, data pejabat, dan penyedia dari data aktif. Pastikan Anda sudah mengunduh backup JSON. Lanjutkan?'))return;if(!confirm('Konfirmasi terakhir: hapus paket, pejabat, dan penyedia sekarang?'))return;S.paket=[];S.pejabat=[];S.penyedia=[];S.dirty=true;toast('Paket, pejabat, dan penyedia dikosongkan. Unduh backup baru setelah perubahan bila diperlukan.');return render()}
+ if(a==='clearsample'){if(!confirm('PERINGATAN: tindakan ini menghapus semua paket, data pejabat, dan penyedia dari data aktif. Pastikan Anda sudah mengunduh backup JSON. Lanjutkan?'))return;if(!confirm('Konfirmasi terakhir: hapus paket, pejabat, dan penyedia sekarang?'))return;S.paket=[];S.pejabat=[];S.penyedia=[];sync('master','Paket, pejabat, dan penyedia dikosongkan');toast('Paket, pejabat, dan penyedia dikosongkan. Unduh backup baru setelah perubahan bila diperlukan.');return render()}
  if(a==='rmkop'){const o=S.opd.find(x=>x.id===id);if(o){delete o.kop;sync('settings','Kop '+o.singkat+' dihapus')}return render()}
  if(a==='rmlogo'){delete S.pemda.logo;sync('settings','Logo dihapus');return render()}
  if(a==='delyear'){const y=+d.y;if(S.paket.some(p=>+p.tahun===y)){toast('Tahun tidak dapat dihapus karena masih dirujuk paket.');return render()}if(S.tahun.length<=1){toast('Tahun anggaran terakhir tidak dapat dihapus. Tambahkan tahun pengganti terlebih dahulu.');return render()}if(!confirm('Hapus TA '+y+'? Tindakan ini hanya diizinkan bila tidak ada paket yang memakai tahun tersebut.'))return;S.tahun=S.tahun.filter(x=>+x!==y);if(+S.ui.tahun===y)S.ui.tahun=S.tahun[0];sync('settings','Tahun '+y+' dihapus');return render()}
@@ -1296,13 +1394,36 @@ document.addEventListener('click',e=>{
  if(a==='csv')return csvExport();
  if(a==='export'){const o={...S};delete o.ui;delete o.log;delete o.dirty;delete o.chat;const u=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:'application/json'}));const l=document.createElement('a');l.href=u;l.download='SATRIA-backup-'+new Date().toISOString().slice(0,10)+'.json';l.click();S.dirty=false;return render()}
 });
+let paketSearchTimer=null;
+document.addEventListener('input',event=>{
+ const input=event.target;
+ if(!input||input.id!=='qPaket')return;
+ S.ui.q=input.value;
+ clearTimeout(paketSearchTimer);
+ paketSearchTimer=setTimeout(()=>{
+   const rows=paketListForView();
+   const host=document.getElementById('paketTableResult');
+   if(host)host.innerHTML=rows.length?tabelPaket(rows):paketEmptyState();
+   const count=document.querySelector('.satria-result-count');
+   if(count)count.textContent=`${rows.length} paket`;
+ },90);
+});
 document.addEventListener('change',e=>{
  const t=e.target,d=t.dataset;
  if(t.id==='selEngine'){ENGINE=t.value==='dexie'&&DB?'dexie':'memory';clearTimeout(pTimer);if(ENGINE==='dexie')persistNow();toast(ENGINE==='dexie'?'Penyimpanan: IndexedDB (Dexie)':'Penyimpanan: memori sesi (hilang saat halaman ditutup)');return}
-if(t.id==='selTahun'){S.ui.tahun=+t.value;return render()}
- if(t.id==='selOpd'){S.ui.opd=t.value;return render()}
+ if(t.id==='selTahun'){
+   const scope=activeCloudScope(),year=Number(t.value);
+   if(scope&&!scope.years.includes(year)){toast('Tahun tidak termasuk assignment akun Anda.');return render()}
+   S.ui.tahun=year;resetDetailIfOutsideFilter();return render();
+ }
+ if(t.id==='selOpd'){
+   const scope=activeCloudScope(),value=String(t.value||'');
+   if(scope&&value!=='all'&&!scope.opdIds.includes(value)){toast('OPD tidak termasuk assignment akun Anda.');return render()}
+   if(scope&&scope.opdIds.length===1)S.ui.opd=scope.opdIds[0];
+   else S.ui.opd=value||'all';
+   resetDetailIfOutsideFilter();return render();
+ }
  if(t.id==='selPaket'){S.ui.dpid=t.value;return render()}
- if(t.id==='qPaket'){S.ui.q=t.value;return render()}
  if(t.id==='selUser'){S.ui.user=t.value;if(!allowed(S.ui.page))S.ui.page='dash';return render()}
  if(!canWrite()&&(d.col||d.up||d.kopup||d.new!==undefined||d.addpw||t.id==='imp'||t.id==='logoFile')){toast('Akun Viewer hanya dapat melihat data');return render()}
  if(window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE&&window.SATRIA_CLOUD_ROLE!=='admin'){
@@ -1328,7 +1449,7 @@ if(t.id==='selTahun'){S.ui.tahun=+t.value;return render()}
  const v=NUMF.includes(d.f)?(+t.value||0):t.value;
  if(d.col==='item'){const it=P(d.pid).items.find(x=>x.id===d.id);it[d.f]=v;sync('items','Rincian: '+it.nama)}
  else if(d.col==='harga'||d.col==='nego'){const w=P(d.pid).penawaran.find(x=>x.id===d.pw);if(d.col==='harga')w.harga[d.id]=+t.value||0;else if(t.value==='')delete w.nego[d.id];else w.nego[d.id]=+t.value||0;sync('nego','Harga penawaran')}
- else if(d.col==='paket'){const pg=P(d.id);if(!pg)return;if(d.f==='rup'){const val=String(v||'').trim();if(val&&S.paket.some(x=>x.id!==pg.id&&x.tahun===pg.tahun&&String(x.rup||'').trim()===val)){toast('Kode RUP sudah digunakan oleh paket lain pada tahun yang sama.');return render()}pg.rup=val}else{pg[d.f]=v;if(d.f==='sub')delete pg.subKeg}if(d.f==='opd'){const unit=S.unit.find(u=>u.opd===pg.opd);pg.unit=unit?unit.id:'';pg.ppk=pjId(pg.opd,'PPK')||'';pg.pp=pjId(pg.opd,'PP')||'';pg.kabid=pjId(pg.opd,'Kabid')||'';if(!pg.lokasiPengiriman)pg.lokasiPengiriman=O(pg.opd).tempat||O(pg.opd).alamat||''}if(['tglNodis','tglSurvei','tglEvaluasi','tglDpp','tglNego','tglPenetapan','tglBahp','tglSppbj','batas'].includes(d.f)){const dates=['tglNodis','tglSurvei','tglEvaluasi','tglDpp','tglNego','tglPenetapan','tglBahp','tglSppbj'].map(k=>pg[k]).filter(Boolean);if(dates.some((x,i)=>dates.some((y,j)=>i<j&&x>y))){toast('Peringatan: urutan tanggal proses tidak kronologis. Periksa kembali tanggal dokumen.')}}sync(d.f==='pagu'?'pagu':'paket','Data paket: '+d.f)}
+ else if(d.col==='paket'){const pg=P(d.id);if(!pg)return;if(d.f==='rup'){const val=String(v||'').trim();if(val&&S.paket.some(x=>x.id!==pg.id&&x.tahun===pg.tahun&&String(x.rup||'').trim()===val)){toast('Kode RUP sudah digunakan oleh paket lain pada tahun yang sama.');return render()}pg.rup=val}else{pg[d.f]=v;if(d.f==='sub')delete pg.subKeg}if(d.f==='opd'){S.ui.opd=String(pg.opd);const unit=S.unit.find(u=>String(u.opd)===String(pg.opd));pg.unit=unit?unit.id:'';pg.ppk=pjId(pg.opd,'PPK')||'';pg.pp=pjId(pg.opd,'PP')||'';pg.kabid=pjId(pg.opd,'Kabid')||'';if(!pg.lokasiPengiriman)pg.lokasiPengiriman=O(pg.opd).tempat||O(pg.opd).alamat||''}if(['tglNodis','tglSurvei','tglEvaluasi','tglDpp','tglNego','tglPenetapan','tglBahp','tglSppbj','batas'].includes(d.f)){const dates=['tglNodis','tglSurvei','tglEvaluasi','tglDpp','tglNego','tglPenetapan','tglBahp','tglSppbj'].map(k=>pg[k]).filter(Boolean);if(dates.some((x,i)=>dates.some((y,j)=>i<j&&x>y))){toast('Peringatan: urutan tanggal proses tidak kronologis. Periksa kembali tanggal dokumen.')}}sync(d.f==='pagu'?'pagu':'paket','Data paket: '+d.f)}
  else if(d.col==='pemda'){S.pemda[d.f]=t.value;sync('settings','Identitas pemda')}
  else if(d.col==='penomoran'){S.penomoran[d.f]=t.value;sync('settings','Penomoran '+d.f)}
  else if(d.col){const r=S[d.col].find(x=>x.id===d.id);if(r){r[d.f]=t.value;sync(d.col==='opd'?'settings':'master','Master: '+d.col)}}
@@ -1336,12 +1457,15 @@ if(t.id==='selTahun'){S.ui.tahun=+t.value;return render()}
 });
 window.addEventListener('hashchange',route);window.addEventListener('beforeunload',e=>{if(S.dirty){e.preventDefault();e.returnValue=''}});
 /* ===== PENYIMPANAN: Dexie.js (IndexedDB) atau memori sesi ===== */
-let DB=null,ENGINE='memory',pTimer=null;
+let DB=null,ENGINE='memory',pTimer=null,persistRevision=0,lastPersistedRevision=0;
 function dbInit(){if(typeof Dexie==='undefined')return false;try{DB=new Dexie('satria-framework-db');DB.version(1).stores({kv:'k'});ENGINE='dexie';return true}catch(e){console.warn('Dexie gagal dibuka',e);return false}}
-function normalizeData(){S.pemda={...SEED.pemda,...(S.pemda||{})};S.penomoran={...SEED.penomoran,...(S.penomoran||{})};S.opd=S.opd||[];S.paket=(S.paket||[]).map(p=>({...p,seq:(Number.isInteger(+p.seq)&&+p.seq>0)?+p.seq:0,items:(p.items||[]).map(i=>({spesifikasi:'',merek:'',pdn:'Perlu verifikasi',linkProduk:'',...i})),penawaran:(p.penawaran||[]).map(w=>({sumberHarga:'',tanggalHarga:'',ongkir:0,catatan:'',...w,harga:w.harga||{},nego:w.nego||{}})),jenisPengadaan:p.jenisPengadaan||'Barang',metodePemilihan:p.metodePemilihan||'E-Purchasing dengan Negosiasi Harga',lokasiPengiriman:p.lokasiPengiriman||O(p.opd).tempat||O(p.opd).alamat||'',tglSurvei:p.tglSurvei||'',tglEvaluasi:p.tglEvaluasi||'',tglNego:p.tglNego||'',tglPenetapan:p.tglPenetapan||''}));S.paket.forEach(p=>{if(!p.seq)p.seq=Math.max(0,...S.paket.filter(x=>x!==p&&x.tahun===p.tahun&&x.opd===p.opd&&x.seq>0).map(x=>x.seq))+1});S.penyedia=(S.penyedia||[]).map(y=>({statusKatalog:'Perlu verifikasi',pdn:'Perlu verifikasi',tipe:'Perlu verifikasi',kbliSesuai:'Perlu verifikasi',daftarHitam:'Perlu verifikasi',...y}));S.akun=S.akun||[];S.unit=S.unit||[];S.pejabat=S.pejabat||[];S.kode=S.kode||[];S.tahun=[...new Set([...(S.tahun||[]).map(Number),...S.paket.map(p=>+p.tahun).filter(Number.isFinite)])].filter(Number.isInteger).sort((a,b)=>a-b);if(!S.tahun.length)S.tahun=[new Date().getFullYear()];}
+function normalizeData(){S.pemda={...SEED.pemda,...(S.pemda||{})};S.penomoran={...SEED.penomoran,...(S.penomoran||{})};S.opd=S.opd||[];S.paket=(S.paket||[]).map(p=>({...p,seq:(Number.isInteger(+p.seq)&&+p.seq>0)?+p.seq:0,items:(p.items||[]).map(i=>({spesifikasi:'',merek:'',pdn:'Perlu verifikasi',linkProduk:'',...i})),penawaran:(p.penawaran||[]).map(w=>({sumberHarga:'',tanggalHarga:'',ongkir:0,catatan:'',...w,harga:w.harga||{},nego:w.nego||{}})),jenisPengadaan:p.jenisPengadaan||'Barang',metodePemilihan:p.metodePemilihan||'E-Purchasing dengan Negosiasi Harga',lokasiPengiriman:p.lokasiPengiriman||O(p.opd).tempat||O(p.opd).alamat||'',tglSurvei:p.tglSurvei||'',tglEvaluasi:p.tglEvaluasi||'',tglNego:p.tglNego||'',tglPenetapan:p.tglPenetapan||''}));
+ const maxSeqByScope=new Map();for(const p of S.paket){const key=String(p.tahun)+'|'+String(p.opd);if(Number.isInteger(+p.seq)&&+p.seq>0)maxSeqByScope.set(key,Math.max(maxSeqByScope.get(key)||0,+p.seq));}
+ for(const p of S.paket){if(!p.seq){const key=String(p.tahun)+'|'+String(p.opd);const next=(maxSeqByScope.get(key)||0)+1;p.seq=next;maxSeqByScope.set(key,next)}}
+ S.penyedia=(S.penyedia||[]).map(y=>({statusKatalog:'Perlu verifikasi',pdn:'Perlu verifikasi',tipe:'Perlu verifikasi',kbliSesuai:'Perlu verifikasi',daftarHitam:'Perlu verifikasi',...y}));S.akun=S.akun||[];S.unit=S.unit||[];S.pejabat=S.pejabat||[];S.kode=S.kode||[];S.tahun=[...new Set([...(S.tahun||[]).map(Number),...S.paket.map(p=>+p.tahun).filter(Number.isFinite)])].filter(Number.isInteger).sort((a,b)=>a-b);if(!S.tahun.length)S.tahun=[new Date().getFullYear()];}
 const persistable=()=>{const o={...S};['ui','log','dirty','chat','chatCtx'].forEach(k=>delete o[k]);return o};
-async function persistNow(){if(ENGINE!=='dexie'||!DB)return false;try{await DB.kv.put({k:'main',v:persistable(),at:Date.now()});if(S.persistError){S.persistError='';const el=$('#dirty');if(el)el.title='Data tersimpan di browser. Backup JSON tetap perlu diunduh berkala.'}return true}catch(e){S.persistError='Data gagal disimpan ke IndexedDB. Jangan tutup halaman; unduh backup JSON dan periksa ruang penyimpanan browser.';console.error('Gagal menyimpan ke IndexedDB',e);const el=$('#dirty');if(el){el.textContent='⚠ Gagal menyimpan';el.title=S.persistError;el.style.background='#FEE2E2';el.style.color='#991B1B'}toast('GAGAL MENYIMPAN. Unduh backup JSON sekarang.');return false}}
-function schedulePersist(){if(ENGINE!=='dexie')return;clearTimeout(pTimer);pTimer=setTimeout(()=>{persistNow()},500)}
+async function persistNow(){if(ENGINE!=='dexie'||!DB)return false;const writingRevision=persistRevision;try{await DB.kv.put({k:'main',v:persistable(),at:Date.now()});lastPersistedRevision=Math.max(lastPersistedRevision,writingRevision);if(S.persistError){S.persistError='';const el=$('#dirty');if(el)el.title='Data tersimpan di browser. Backup JSON tetap perlu diunduh berkala.'}return true}catch(e){S.persistError='Data gagal disimpan ke IndexedDB. Jangan tutup halaman; unduh backup JSON dan periksa ruang penyimpanan browser.';console.error('Gagal menyimpan ke IndexedDB',e);const el=$('#dirty');if(el){el.textContent='⚠ Gagal menyimpan';el.title=S.persistError;el.style.background='#FEE2E2';el.style.color='#991B1B'}toast('GAGAL MENYIMPAN. Unduh backup JSON sekarang.');return false}}
+function schedulePersist(){if(ENGINE!=='dexie'||!DB||!S?.dirty||persistRevision<=lastPersistedRevision)return;clearTimeout(pTimer);pTimer=setTimeout(()=>{void persistNow()},350)}
 async function loadSaved(){try{const r=await DB.kv.get('main');if(r&&r.v&&r.v.paket&&r.v.opd){const ui=S.ui;Object.assign(S,r.v,{ui,log:[],dirty:false,chat:[],chatCtx:null});normalizeData();if(!S.users.some(u=>u.id===ui.user))ui.user=S.users[0].id;if(!S.tahun.includes(ui.tahun))ui.tahun=S.tahun[0]}}catch(e){console.warn('Gagal memuat dari IndexedDB',e)}}
 function setEngineSelect(){const s=$('#selEngine');s.innerHTML=(DB?'<option value="dexie">IndexedDB (Dexie)</option>':'')+'<option value="memory">Memori sesi</option>';s.value=ENGINE;if(!DB){s.disabled=true;s.title='Dexie.js tidak termuat, memakai memori sesi'}}
 async function boot(){
@@ -1455,6 +1579,7 @@ window.addEventListener('DOMContentLoaded',()=>{void boot()},{once:true});
 // ===== D3.JS CHARTS - KAPUAS HULU GREEN VARIANT #16a34a =====
 function drawKhCharts(){
   if(typeof d3==='undefined') return;
+  if(!['chartMultiYear','chartDonut','chartBarPaket','chartStatus','chartHpsPagu','chartOpd'].some(id=>document.getElementById(id))) return;
   const L = filt();
   const isDark = document.documentElement.getAttribute('data-theme')==='dark';
   const colMut = getComputedStyle(document.documentElement).getPropertyValue('--mut').trim() || '#64748b';
@@ -1507,7 +1632,7 @@ function drawKhCharts(){
     // line efisiensi
     const line = d3.line().x(d=>x(d.tahun)+x.bandwidth()/2).y(d=>y(d.efisiensi)).curve(d3.curveMonotoneX);
     svg.append('path').datum(data).attr('fill','none').attr('stroke',COLORS.efisiensi).attr('stroke-width',3)
-      .attr('stroke-linecap','round').attr('d',line).attr('stroke-dasharray','0').style('filter','drop-shadow(0 2px 6px rgba(6,182,214,.4))');
+      .attr('stroke-linecap','round').attr('d',line).attr('stroke-dasharray','0');
 
     svg.selectAll('.dot-eff').data(data).join('circle').attr('cx',d=>x(d.tahun)+x.bandwidth()/2).attr('cy',d=>y(d.efisiensi)).attr('r',5)
       .attr('fill',COLORS.efisiensi).attr('stroke','#fff').attr('stroke-width',2);
@@ -1581,7 +1706,7 @@ function drawKhCharts(){
     // diagonal ideal
     svg.append('line').attr('x1',x(0)).attr('y1',y(0)).attr('x2',x(mx)).attr('y2',y(mx)).attr('stroke',colBd).attr('stroke-dasharray','4 4');
     svg.selectAll('circle').data(data).join('circle').attr('cx',d=>x(d.pagu)).attr('cy',d=>y(d.hps)).attr('r',6)
-      .attr('fill',COLORS.kontrak).attr('stroke','#fff').attr('stroke-width',2).style('filter','drop-shadow(0 2px 4px rgba(0,0,0,.15))')
+      .attr('fill',COLORS.kontrak).attr('stroke','#fff').attr('stroke-width',2)
       .on('mousemove',(e,d)=>showTip(`${d.nama}<br>Pagu ${rp(d.pagu)} • HPS ${rp(d.hps)}`, e)).on('mouseleave',hideTip);
   })();
 
@@ -1619,7 +1744,7 @@ function drawKhCharts(){
     const orig=window.render;
     window.render=function(){
       orig();
-      requestAnimationFrame(()=>{ setTimeout(drawKhCharts, 80); });
+      requestAnimationFrame(drawKhCharts);
     };
   }
   window.addEventListener('resize', ()=>{ clearTimeout(window._khResize); window._khResize=setTimeout(drawKhCharts, 250); });
@@ -1867,15 +1992,27 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.su
       if(!data.payload||typeof data.payload!=='object'||!Array.isArray(data.payload.paket)||!Array.isArray(data.payload.opd))throw new Error('Respons snapshot tidak memiliki struktur SATRIA yang valid.');
       const ui={...(S.ui||{})};
       Object.assign(S,data.payload,{ui,log:[],dirty:false,chat:[],chatCtx:null});
-      S.users=[{id:'auth-'+member.id,nama:member.email,username:member.email,role:roleName(member.role),opd:member.role==='admin'?'all':(member.scope?.opd_ids||[]),aktif:true}];S.ui.user=S.users[0].id;
+      const assignedOpds=member.role==='admin'?'all':(Array.isArray(member.scope?.opd_ids)?member.scope.opd_ids.map(String):[]);
+      const assignedYears=member.role==='admin'?null:(Array.isArray(member.scope?.years)?member.scope.years.map(Number).filter(Number.isFinite):[]);
+      S.users=[{id:'auth-'+member.id,nama:member.email,username:member.email,role:roleName(member.role),opd:assignedOpds,years:assignedYears,aktif:true}];S.ui.user=S.users[0].id;
       if(typeof normalizeData==='function')normalizeData();
       version=Number(data.version)||0;S.dirty=false;cloudStateReady=true;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;
       if(member.role!=='admin'){
-        const allowedOpds=Array.isArray(member.scope?.opd_ids)?member.scope.opd_ids.map(String):[];
-        const allowedYears=Array.isArray(member.scope?.years)?member.scope.years.map(Number):[];
+        const allowedOpds=assignedOpds;
+        const allowedYears=assignedYears||[];
         if(!allowedOpds.length||!allowedYears.length)throw new Error('Akses akun belum memiliki assignment OPD dan tahun yang lengkap. Minta admin menetapkan keduanya.');
-        if(S.ui.opd!=='all'&&!allowedOpds.includes(String(S.ui.opd)))S.ui.opd='all';
-        if(!allowedYears.includes(Number(S.ui.tahun)))S.ui.tahun=allowedYears[0];
+        const allowedOpdSet=new Set(allowedOpds),allowedYearSet=new Set(allowedYears);
+        const missingOpds=allowedOpds.filter(id=>!(S.opd||[]).some(o=>String(o.id)===id));
+        if(missingOpds.length)throw new Error('Master OPD untuk assignment akun tidak ditemukan pada snapshot cloud. Minta admin sinkronkan Data Master OPD, lalu tekan Tarik dari Supabase.');
+        S.opd=(S.opd||[]).filter(o=>allowedOpdSet.has(String(o.id)));
+        S.unit=(S.unit||[]).filter(x=>allowedOpdSet.has(String(x.opd)));
+        S.pejabat=(S.pejabat||[]).filter(x=>allowedOpdSet.has(String(x.opd)));
+        S.paket=(S.paket||[]).filter(p=>allowedOpdSet.has(String(p.opd))&&allowedYearSet.has(Number(p.tahun)));
+        S.tahun=(S.tahun||[]).map(Number).filter(y=>allowedYearSet.has(y)).sort((a,b)=>a-b);
+        if(!S.tahun.length)throw new Error('Tahun assignment tidak ditemukan pada snapshot saat ini. Minta admin sinkronkan daftar tahun dan data cloud.');
+        if(allowedOpds.length===1)S.ui.opd=allowedOpds[0];
+        else if(S.ui.opd!=='all'&&!allowedOpdSet.has(String(S.ui.opd)))S.ui.opd='all';
+        if(!S.tahun.includes(Number(S.ui.tahun)))S.ui.tahun=S.tahun[0];
         // Persist only the scoped projection. In memory mode, remove the old full-snapshot cache instead of leaving it available to a later offline startup.
         if(ENGINE==='dexie'&&typeof persistNow==='function'){
           const persisted=await persistNow();
