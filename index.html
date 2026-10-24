@@ -1563,7 +1563,7 @@ function vLap(){
   const pg=sum(x,p=>p.pagu),k=sum(x,kontrak);
   rows+=`<tr><td>${t}</td><td>${esc(o.singkat)}</td><td class=n>${x.length}</td><td class=n>${rp(pg)}</td><td class=n>${rp(sum(x,hps))}</td><td class=n>${rp(k)}</td><td class=n>${rp(pg-k)}</td><td class=n>${pg?((pg-k)/pg*100).toFixed(2):0}%</td></tr>`}));
  const rowCount = (rows.match(/<tr>/g)||[]).length;
- return `<div class=card><div class=row style="justify-content:space-between;flex-wrap:wrap;gap:12px"><h3>Laporan dan Analisis • Multi OPD dan Multi Tahun</h3><div style="display:flex;gap:8px"><span class="count-badge">${rowCount} baris • ${rowCount>30?'virtual scroll aktif':''}</span><button class=g data-act="csv">Ekspor Laporan (CSV)</button></div></div>
+ return `<div class=card><div class=row style="justify-content:space-between;flex-wrap:wrap;gap:12px"><h3>Laporan dan Analisis • Multi OPD dan Multi Tahun</h3><div style="display:flex;gap:8px"><span class="count-badge">${rowCount} baris • ${rowCount>30?'virtual scroll aktif':''}</span><button class=g data-act="csv">Ekspor Laporan (CSV)</button><button class=g data-act="xlsx">Ekspor Excel</button><button class=g data-act="pdf">Ekspor PDF</button></div></div>
  <div class="table-wrap" id="lapTableWrap" style="max-height:${rowCount>30?'min(68vh, 640px)':'none'};overflow:auto;contain:layout;-webkit-overflow-scrolling:touch">
  <table id="lapTable"><thead style="position:sticky;top:0;z-index:1;background:var(--bg-2)"><tr><th>TA</th><th>OPD</th><th class=n>Paket</th><th class=n>Pagu</th><th class=n>HPS</th><th class=n>Kontrak</th><th class=n>Efisiensi</th><th class=n>%</th></tr></thead><tbody>${rows||'<tr><td colspan=8 class=mut>Belum ada data.</td></tr>'}</tbody></table>
  </div>
@@ -1575,6 +1575,52 @@ function csvExport(){
  const head=['TA','OPD','No','Nama paket','Sub kegiatan','Pagu','HPS','Kontrak','Status'];
  const body=S.paket.map(p=>[p.tahun,O(p.opd).singkat,p.seq,p.nama,p.sub,p.pagu,hps(p),kontrak(p),stt(p)].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([[head.join(','),...body].join('\n')],{type:'text/csv'}));a.download='satria-business-intelligence.csv';a.click();
+}
+
+/* ===== Ekspor Excel (SpreadsheetML .xls, tanpa library tambahan) ===== */
+function lapRows(){
+ const head=['TA','OPD','No','Nama paket','Sub kegiatan','Pagu','HPS','Kontrak','Efisiensi','Status'];
+ const body=S.paket.map(p=>[p.tahun,O(p.opd).singkat,p.seq,p.nama,p.sub,p.pagu,hps(p),kontrak(p),p.pagu-kontrak(p),stt(p)]);
+ return [head,...body];
+}
+function xmlEsc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function excelExport(){
+ const rows=lapRows();
+ const tbl='<table border="1">'+rows.map((r,i)=>'<tr>'+r.map(c=>`<td${i===0?" style='font-weight:bold;background:#ccfbf1'":''}>${xmlEsc(c)}</td>`).join('')+'</tr>').join('')+'</table>';
+ const xml=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Laporan SATRIA</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></head><body>${tbl}</body></html>`;
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([xml],{type:'application/vnd.ms-excel'}));a.download='satria-laporan-opd.xls';a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+
+/* ===== Ekspor PDF (print window A4 landscape + ringkasan per OPD) ===== */
+function pdfExport(){
+ const rows=lapRows();
+ const perOpd={};
+ S.paket.forEach(p=>{const o=O(p.opd).singkat||'-';const d=perOpd[o]=perOpd[o]||{n:0,pagu:0,k:0};d.n++;d.pagu+=+p.pagu||0;d.k+=kontrak(p)});
+ const opdRows=Object.entries(perOpd).sort((a,b)=>b[1].pagu-a[1].pagu);
+ const rp0=v=>'Rp '+(Number(v)||0).toLocaleString('id-ID');
+ const totPagu=S.paket.reduce((a,p)=>a+(+p.pagu||0),0), totK=S.paket.reduce((a,p)=>a+kontrak(p),0);
+ const w=window.open('','_blank');
+ if(!w){toast('Izinkan popup untuk ekspor PDF.');return}
+ w.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><title>Laporan SATRIA — Analisis per OPD/Tahun</title><style>
+ body{font-family:Arial,sans-serif;color:#000;padding:24px} h1{font-size:17px;margin:0 0 3px}
+ .sub{color:#444;font-size:11px;margin:0 0 14px} .kpi{display:inline-block;border:1px solid #0F766E;border-radius:8px;padding:8px 14px;margin:0 8px 8px 0;font-size:11px;background:#f0fdfa} .kpi b{display:block;font-size:14px}
+ table{width:100%;border-collapse:collapse;font-size:10px} th{background:#0F766E;color:#fff;padding:6px;text-align:left} td{padding:5px 6px;border-bottom:1px solid #ccc}
+ h2{font-size:13px;margin:18px 0 6px}
+ @media print{@page{size:A4 landscape;margin:10mm}}
+ </style></head><body>
+ <h1>Laporan dan Analisis per OPD — SATRIA Framework 3.0</h1>
+ <p class="sub">Dicetak: ${new Date().toLocaleString('id-ID')} • ${S.paket.length} paket</p>
+ <span class="kpi">Total Pagu<b>${rp0(totPagu)}</b></span><span class="kpi">Total Kontrak<b>${rp0(totK)}</b></span><span class="kpi">Efisiensi<b>${rp0(totPagu-totK)}</b></span><span class="kpi">Jumlah OPD<b>${opdRows.length}</b></span>
+ <h2>Ringkasan per OPD</h2>
+ <table><tr><th>OPD</th><th>Jumlah Paket</th><th>Total Pagu</th><th>Total Kontrak</th><th>Efisiensi</th></tr>
+ ${opdRows.map(([o,d])=>`<tr><td>${xmlEsc(o)}</td><td>${d.n}</td><td>${rp0(d.pagu)}</td><td>${rp0(d.k)}</td><td>${rp0(d.pagu-d.k)}</td></tr>`).join('')}
+ </table>
+ <h2>Rincian Paket</h2>
+ <table>${rows.map((r,i)=>i===0?`<tr>${r.map(c=>`<th>${xmlEsc(c)}</th>`).join('')}</tr>`:`<tr>${r.map(c=>`<td>${xmlEsc(c)}</td>`).join('')}</tr>`).join('')}</table>
+ <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script>
+ </body></html>`);
+ w.document.close();
 }
 
 /* ===== MASTER & PENGATURAN ===== */
@@ -2011,6 +2057,8 @@ document.addEventListener('click',e=>{
  if(a==='openLog'){satriaLogViewer();return}
  if(a==='print')return window.print();
  if(a==='csv')return csvExport();
+ if(a==='xlsx')return excelExport();
+ if(a==='pdf')return pdfExport();
  if(a==='export'){const o={...S};delete o.ui;delete o.log;delete o.dirty;delete o.chat;const u=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:'application/json'}));const l=document.createElement('a');l.href=u;l.download='SATRIA-backup-'+new Date().toISOString().slice(0,10)+'.json';l.click();S.dirty=false;return render()}
 });
 let paketSearchTimer=null;
@@ -5470,6 +5518,82 @@ console.log('[SATRIA] Dokumen Pengadaan lazy load + virtual scroll active');
 })();
 </script>
 <script>window.SATRIA_EMBEDDED_SUPABASE_CONFIG = window.SATRIA_EMBEDDED_SUPABASE_CONFIG || {};</script>
+<script>
+/* ============================================================
+ * SATRIA 3.0 — Patch UX Cloud Mode + Offline Sync Wiring
+ * 1. Badge "Atur Supabase / Login" saat config tersimpan tapi belum login
+ *    (perbaikan isu FIX_ERROR #5: user bingung kenapa OPD kosong di cloud mode).
+ * 2. Integrasi Background Sync dengan SW v3: saat offline + ada perubahan,
+ *    page mendaftarkan sync tag; SW memicu flush saat koneksi kembali.
+ * ============================================================ */
+(function(){
+  'use strict';
+  /* ---------- 1. Badge cloud ---------- */
+  var badge=null, styleInjected=false;
+  function ensureStyle(){
+    if(styleInjected)return; styleInjected=true;
+    var s=document.createElement('style');s.textContent=
+      '#satriaCloudBadge{position:fixed;right:16px;bottom:16px;z-index:2147483000;display:none;'+
+      'align-items:center;gap:9px;padding:10px 16px;border-radius:12px;cursor:pointer;'+
+      'background:rgba(255,255,255,.97);border:1px solid #b2d1cc;box-shadow:0 8px 24px rgba(15,118,110,.2);'+
+      "font:700 12px 'Inter',system-ui,sans-serif;color:#0f172a}"+
+      '#satriaCloudBadge .dot{width:10px;height:10px;border-radius:50%;background:#F59E0B;'+
+      'box-shadow:0 0 0 4px rgba(245,158,11,.25);animation:satriaBadgePulse 1.6s infinite}'+
+      '#satriaCloudBadge:hover{border-color:#0F766E;color:#0F766E;transform:translateY(-1px)}'+
+      ':root[data-theme="dark"] #satriaCloudBadge{background:rgba(14,40,38,.97);border-color:#2a7a71;color:#e6f4f2}'+
+      '@keyframes satriaBadgePulse{50%{transform:scale(1.25)}}';
+    document.head.appendChild(s);
+  }
+  function refreshBadge(){
+    ensureStyle();
+    if(!badge){
+      badge=document.createElement('div');badge.id='satriaCloudBadge';
+      badge.innerHTML='<span class="dot"></span>\u2601\ufe0f Supabase tersimpan \u2014 <b>Atur / Login</b>';
+      badge.title='Konfigurasi cloud ditemukan tetapi belum login. Data OPD/paket akan kosong sampai login berhasil.';
+      badge.addEventListener('click',function(){
+        var btn=document.getElementById('satriaCloudOpen');
+        if(btn)btn.click();
+        badge.style.display='none';
+      });
+      document.body.appendChild(badge);
+    }
+    var configured=!!window.SATRIA_CLOUD_CONFIGURED;
+    var loggedIn=!!window.SATRIA_CLOUD_ROLE;
+    var mustLogin=document.getElementById('satriaCloudModal')&&document.getElementById('satriaCloudModal').hidden!==false;
+    badge.style.display=(configured&&!loggedIn)?'flex':'none';
+  }
+  /* ---------- 2. Wiring Background Sync (SW v3) ---------- */
+  function registerBgSync(){
+    try{
+      if(navigator.serviceWorker&&navigator.serviceWorker.controller){
+        navigator.serviceWorker.controller.postMessage({type:'REGISTER_SYNC'});
+      }
+    }catch(_){}
+  }
+  if(navigator.serviceWorker){
+    navigator.serviceWorker.addEventListener('message',function(e){
+      if(e.data&&e.data.type==='satria:flush-sync-queue'){
+        if(navigator.onLine&&typeof window.SATRIA_AUTO_SYNC_REQUEST==='function'){
+          try{window.SATRIA_AUTO_SYNC_REQUEST('sw-background-sync')}catch(_){}
+        }
+      }
+    });
+  }
+  window.addEventListener('offline',function(){
+    try{if(typeof S!=='undefined'&&S&&S.dirty)registerBgSync()}catch(_){}
+  });
+  window.addEventListener('online',function(){
+    if(typeof window.SATRIA_AUTO_SYNC_REQUEST==='function'){
+      try{window.SATRIA_AUTO_SYNC_REQUEST('browser-online-reconnect')}catch(_){}
+    }
+  });
+  /* Poll ringan untuk status login (bridge tidak mengekspos event perubahan role). */
+  var bTimer=setInterval(function(){try{refreshBadge()}catch(_){}},2000);
+  document.addEventListener('DOMContentLoaded',function(){try{refreshBadge()}catch(_){}});
+  setTimeout(function(){try{refreshBadge()}catch(_){}},800);
+  window.SATRIA_CLOUD_BADGE={refresh:refreshBadge,stop:function(){clearInterval(bTimer)}};
+})();
+</script>
 
 </body>
 </html>
