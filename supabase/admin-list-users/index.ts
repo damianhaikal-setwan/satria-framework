@@ -2,8 +2,11 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 type ListUsersBody = {
   organization_id: string;
-  page: number;
-  page_size: number;
+  page?: number;
+  page_size?: number;
+  action?: "list" | "sync_local_catalog";
+  expected_version?: number;
+  opds?: unknown;
 };
 
 type MembershipRow = {
@@ -14,7 +17,7 @@ type MembershipRow = {
 };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const MAX_BODY_BYTES = 8_192;
+const MAX_BODY_BYTES = 1_000_000;
 const MAX_PAGE_SIZE = 50;
 const MAX_PAGE = 2_000;
 const AUTH_LOOKUP_CONCURRENCY = 8;
@@ -152,7 +155,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
     const parsed: unknown = JSON.parse(rawBody);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("body must be an object");
     const candidate = parsed as Record<string, unknown>;
-    const allowedFields = new Set(["organization_id", "page", "page_size"]);
+    const allowedFields = new Set(["organization_id", "page", "page_size", "action", "expected_version", "opds"]);
     if (Object.keys(candidate).some((key) => !allowedFields.has(key))) throw new Error("unexpected field");
     body = candidate as ListUsersBody;
   } catch {
@@ -160,16 +163,28 @@ Deno.serve(async (request: Request): Promise<Response> => {
   }
 
   const organizationId = typeof body.organization_id === "string" ? body.organization_id.trim() : "";
-  const page = body.page;
-  const pageSize = body.page_size;
+  const action = body.action ?? "list";
+  const page = body.page ?? 1;
+  const pageSize = body.page_size ?? MAX_PAGE_SIZE;
   if (!UUID_RE.test(organizationId)) {
     return errorResponse(request, 400, "Organization UUID tidak valid.", requestId, config.allowedOrigins);
   }
-  if (!Number.isInteger(page) || page < 1 || page > MAX_PAGE) {
+  if (action !== "list" && action !== "sync_local_catalog") {
+    return errorResponse(request, 400, "Action tidak didukung.", requestId, config.allowedOrigins);
+  }
+  if (action === "list" && (!Number.isInteger(page) || page < 1 || page > MAX_PAGE)) {
     return errorResponse(request, 400, `Nomor halaman harus bilangan bulat 1–${MAX_PAGE}.`, requestId, config.allowedOrigins);
   }
-  if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > MAX_PAGE_SIZE) {
+  if (action === "list" && (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > MAX_PAGE_SIZE)) {
     return errorResponse(request, 400, `Ukuran halaman harus bilangan bulat 1–${MAX_PAGE_SIZE}.`, requestId, config.allowedOrigins);
+  }
+  if (action === "sync_local_catalog") {
+    if (!Number.isInteger(body.expected_version) || (body.expected_version ?? -1) < 1) {
+      return errorResponse(request, 400, "Versi snapshot tidak valid. Klik Muat ulang sebelum sinkronisasi.", requestId, config.allowedOrigins);
+    }
+    if (!Array.isArray(body.opds) || body.opds.length < 1 || body.opds.length > 1_000) {
+      return errorResponse(request, 400, "Kirim 1–1.000 baris OPD dari Data Master.", requestId, config.allowedOrigins);
+    }
   }
 
   const authorization = request.headers.get("Authorization") ?? "";
@@ -205,12 +220,113 @@ Deno.serve(async (request: Request): Promise<Response> => {
     return errorResponse(request, 403, "Hanya admin aktif pada organisasi ini yang dapat melihat daftar pengguna.", requestId, config.allowedOrigins);
   }
 
-  // The current SATRIA app still stores its OPD master in the organization
-  // snapshot. Mirror that trusted server-side snapshot into the canonical
-  // assignment catalog; never accept browser-provided OPD names as authority.
+  // Explicitly sync only the OPD master from the authenticated admin's current Data Master.
+  // All other snapshot fields remain untouched; optimistic version check prevents overwriting a newer cloud state.
+  let catalogSyncCount = 0;
+  if (action === "sync_local_catalog") {
+    const { data: currentState, error: currentStateError } = await adminClient
+      .from("satria_state")
+      .select("payload,version")
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+    if (currentStateError) {
+      console.error(JSON.stringify({ event: "local_opd_sync_state_read_error", requestId, actorId: actor.id, organizationId }));
+      return errorResponse(request, 500, "Snapshot cloud tidak dapat dibaca untuk sinkronisasi OPD.", requestId, config.allowedOrigins);
+    }
+    if (!currentState || !currentState.payload || typeof currentState.payload !== "object" || Array.isArray(currentState.payload)) {
+      return errorResponse(request, 409, "Snapshot cloud belum tersedia. Kirim snapshot awal SATRIA terlebih dahulu setelah membuat backup.", requestId, config.allowedOrigins);
+    }
+    const currentVersion = Number(currentState.version);
+    if (!Number.isInteger(currentVersion) || currentVersion !== body.expected_version) {
+      return errorResponse(request, 409, "Versi snapshot cloud sudah berubah. Tarik snapshot terbaru dan periksa perbedaan sebelum sinkronisasi.", requestId, config.allowedOrigins);
+    }
+
+    const incoming = body.opds as unknown[];
+    const oldPayload = currentState.payload as Record<string, unknown>;
+    const priorRows = Array.isArray(oldPayload.opd) ? oldPayload.opd : [];
+    const priorById = new Map<string, Record<string, unknown>>();
+    for (const item of priorRows) {
+      if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+      const row = item as Record<string, unknown>;
+      const id = typeof row.id === "string" || typeof row.id === "number" ? String(row.id).trim() : "";
+      if (id) priorById.set(id, row);
+    }
+
+    const seenIds = new Set<string>();
+    const normalizedLocal: Record<string, unknown>[] = [];
+    for (const item of incoming) {
+      if (!item || typeof item !== "object" || Array.isArray(item)) {
+        return errorResponse(request, 400, "Data OPD berisi baris yang tidak valid.", requestId, config.allowedOrigins);
+      }
+      const row = item as Record<string, unknown>;
+      const idValue = row.id ?? row.opd_id;
+      const id = typeof idValue === "string" || typeof idValue === "number" ? String(idValue).trim() : "";
+      const nameValue = row.nama ?? row.name;
+      const name = typeof nameValue === "string" ? nameValue.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 200) : "";
+      const shortValue = row.singkat ?? row.code;
+      const shortName = typeof shortValue === "string" ? shortValue.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 80) : "";
+      if (!id || id.length > 128 || !name) {
+        return errorResponse(request, 400, "Setiap OPD harus memiliki ID dan nama yang valid. Perbaiki Data Master dahulu.", requestId, config.allowedOrigins);
+      }
+      if (seenIds.has(id)) {
+        return errorResponse(request, 409, "ID OPD duplikat pada Data Master. Perbaiki sebelum sinkronisasi.", requestId, config.allowedOrigins);
+      }
+      seenIds.add(id);
+      const prior = priorById.get(id) ?? {};
+      const textField = (field: string, previous: unknown) => {
+        const value = row[field];
+        return typeof value === "string" ? value.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 500) : (typeof previous === "string" ? previous : "");
+      };
+      normalizedLocal.push({
+        ...prior,
+        id,
+        nama: name,
+        singkat: shortName || (typeof prior.singkat === "string" ? prior.singkat : ""),
+        alamat: textField("alamat", prior.alamat),
+        kontak: textField("kontak", prior.kontak),
+        tempat: textField("tempat", prior.tempat),
+      });
+    }
+
+    // Retain valid cloud OPDs omitted from the local list during this catalog-only action.
+    // This prevents an incomplete local view from deleting an OPD referenced by existing records.
+    const retainedCloudRows: Record<string, unknown>[] = [];
+    for (const item of priorRows) {
+      if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+      const row = item as Record<string, unknown>;
+      const idValue = row.id ?? row.opd_id;
+      const id = typeof idValue === "string" || typeof idValue === "number" ? String(idValue).trim() : "";
+      const nameValue = row.nama ?? row.name ?? row.singkat ?? row.code;
+      const name = typeof nameValue === "string" ? nameValue.trim() : "";
+      if (id && name && !seenIds.has(id)) {
+        retainedCloudRows.push(row);
+        seenIds.add(id);
+      }
+    }
+    const nextPayload = { ...oldPayload, opd: [...normalizedLocal, ...retainedCloudRows] };
+    const { data: updatedState, error: updateStateError } = await adminClient
+      .from("satria_state")
+      .update({ payload: nextPayload, version: currentVersion + 1, updated_at: new Date().toISOString(), updated_by: actor.id })
+      .eq("organization_id", organizationId)
+      .eq("version", currentVersion)
+      .select("version")
+      .maybeSingle();
+    if (updateStateError) {
+      console.error(JSON.stringify({ event: "local_opd_sync_state_update_error", requestId, actorId: actor.id, organizationId }));
+      return errorResponse(request, 500, "Master OPD tidak dapat disimpan ke snapshot cloud.", requestId, config.allowedOrigins);
+    }
+    if (!updatedState) {
+      return errorResponse(request, 409, "Snapshot cloud berubah selama sinkronisasi. Muat ulang lalu coba lagi.", requestId, config.allowedOrigins);
+    }
+    catalogSyncCount = normalizedLocal.length;
+  }
+
+  // The normal list path derives its OPD catalog from the organization snapshot.
+  // Browser-supplied OPD labels are accepted only in the explicit sync_local_catalog action
+  // above, after verifying an active admin, input bounds, unique IDs, and snapshot version.
   const { data: stateRow, error: stateError } = await adminClient
     .from("satria_state")
-    .select("payload")
+    .select("payload,version")
     .eq("organization_id", organizationId)
     .maybeSingle();
   if (stateError) {
@@ -357,6 +473,8 @@ Deno.serve(async (request: Request): Promise<Response> => {
       total: count ?? 0,
       users,
       opds: (opds ?? []).map((opd) => ({ id: opd.opd_id, name: opd.name, code: opd.code })),
+      snapshot_version: Number(stateRow?.version) || null,
+      ...(action === "sync_local_catalog" ? { catalog_sync: { synced: true, count: catalogSyncCount } } : {}),
       request_id: requestId,
     }, config.allowedOrigins);
   } catch {
