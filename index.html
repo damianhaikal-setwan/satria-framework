@@ -855,47 +855,6 @@ main{overflow-anchor:none}
   .doc-virtual-viewport{max-height:50vh}
 }
 
-/* ===== SATRIA ENHANCEMENTS PATCH ===== */
-.pill.satria-badge-ok{background:#d1fae5!important;color:#065f46!important;border:1px solid #6ee7b7!important}
-.pill.satria-badge-warn{background:#fef3c7!important;color:#92400e!important;border:1px solid #fcd34d!important}
-.pill.satria-badge-bad{background:#fee2e2!important;color:#991b1b!important;border:1px solid #fca5a5!important}
-.pill.satria-badge-info{background:#dbeafe!important;color:#1e40af!important;border:1px solid #93c5fd!important}
-.satria-btn-secondary{height:40px;padding:0 16px;border-radius:11px;background:var(--card-solid);color:var(--ink);border:1px solid var(--bd-strong);font-size:13px;font-weight:700;cursor:pointer;transition:all .18s var(--ease)}
-.satria-btn-secondary:hover{border-color:var(--acc);color:var(--acc);transform:translateY(-1px)}
-#satriaLoading{position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.45);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:#fff;font-weight:600}
-#satriaLoading.show{display:flex}
-.satria-loading-spinner{width:44px;height:44px;border-radius:50%;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;animation:satriaSpin .8s linear infinite}
-@keyframes satriaSpin{to{transform:rotate(360deg)}}
-.satria-modal{position:fixed;inset:0;z-index:9500;display:none}
-.satria-modal.show{display:block}
-.satria-modal-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(2px)}
-.satria-modal-panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(680px,92vw);max-height:88vh;background:var(--card-solid);border-radius:18px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--bd)}
-.satria-modal.wide .satria-modal-panel{width:min(1040px,96vw)}
-.satria-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--bd);background:var(--card-2)}
-.satria-modal-head h3{margin:0;font-size:15px;font-weight:800}
-.satria-modal-close{width:36px;height:36px;border-radius:10px;border:1px solid var(--bd);background:var(--card-solid);font-size:20px;line-height:1;cursor:pointer;color:var(--ink-2);flex-shrink:0}
-.satria-modal-close:hover{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
-.satria-modal-body{padding:18px;overflow:auto}
-.satria-doc-preview{background:#fff;color:#111;padding:24px;border-radius:10px;font-size:13px;line-height:1.6}
-.satria-doc-preview table{border-collapse:collapse;width:100%;font-size:12px}
-.satria-doc-preview td,.satria-doc-preview th{border:1px solid #ccc;padding:4px 6px}
-.satria-log-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);align-items:baseline}
-.satria-log-time{font-weight:700;color:#0F766E;min-width:64px;font-size:12px;flex-shrink:0}
-.satria-log-label{flex:1}
-.satria-log-mods{font-size:11px;color:var(--mut);background:var(--acc-soft);padding:2px 8px;border-radius:999px;white-space:nowrap}
-.satria-validation-card{border-left:4px solid #F59E0B}
-.satria-validation-row{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;border:1px solid var(--bd);margin-bottom:6px;text-decoration:none;color:var(--ink);background:var(--card-2)}
-.satria-validation-row:hover{border-color:var(--acc);background:var(--acc-soft)}
-.satria-val-seq{font-weight:800;color:#0F766E;min-width:28px}
-.satria-val-name{flex:1;font-size:13px}
-:focus-visible{outline:3px solid var(--acc-ring);outline-offset:2px;border-radius:6px}
-@media (max-width:760px){
-  .card table{display:block;overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
-  .satria-validation-row,.satria-log-row{flex-wrap:wrap}
-  .satria-modal-panel{width:94vw}
-  .satria-modal-body{padding:14px}
-  button,[data-act]{min-height:44px}
-}
 </style>
 
   <!-- PWA / AWA - SATRIA 3.0 Fixed v2 -->
@@ -1094,7 +1053,7 @@ header button[data-act="export"]{
     <span id="dirty"></span>
     <div class="control-group"><label>💾 <select id="selEngine"></select></label></div>
     <button type="button" class="theme-btn" id="themeToggle" title="Mode siang/malam">◐</button>
-    <button type="button" data-act="openLog" title="Riwayat aktivitas perubahan" style="height:38px;padding:0 12px;border-radius:11px;background:var(--card-solid);color:var(--ink);border:1px solid var(--bd);font-size:14px;cursor:pointer">📋</button><button data-act="export">⬇ Backup</button>
+    <button data-act="export">⬇ Backup</button>
   </div>
 </header>
 <nav id="nav"><div class="nav-track"><div class="nav-slider" id="navSlider"></div></div></nav>
@@ -1150,7 +1109,7 @@ kode:[{id:'KODE-DEMO-001',kode:'KODE-DEMO-001',nama:'Kegiatan Simulasi'}],
 paket:[{id:'k1',tahun:2026,opd:'o1',unit:'unit-demo',seq:1,nama:'PAKET DEMO — JANGAN DIGUNAKAN UNTUK TRANSAKSI',rup:'DEMO-RUP-0001',pagu:1000000,sumber:'Dana Simulasi',sub:'KODE-DEMO-001',ppk:'p1',pp:'p2',kabid:'p3',masaHk:7,tglNodis:'',tglDpp:'',tglBahp:'',tglSppbj:'',batas:'',pemenangId:null,lokasiPengiriman:'Lokasi Contoh',jenisPengadaan:'Barang (Simulasi)',metodePemilihan:'Metode Simulasi',tglSurvei:'',tglNego:'',tglPenetapan:'',tglEvaluasi:'',items:[{id:'i1',nama:'Barang Contoh',spesifikasi:'Spesifikasi simulasi',merek:'Contoh',pdn:'Perlu verifikasi',linkProduk:'',vol:1,satuan:'Unit',hs:100000}],penawaran:[]}]
 };
 let S;
-function init(){S=JSON.parse(JSON.stringify(SEED));normalizeData();S.ui={page:'dash',tahun:S.tahun[0],opd:'all',pid:null,dpid:'k1',dok:'nodis',ptab:'data',mtab:'ppk'};S.log=[];S.dirty=false;S.chat=[];S.chatCtx=null;loadChat();S.ui.user=S.users[0].id}
+function init(){S=JSON.parse(JSON.stringify(SEED));normalizeData();S.ui={page:'dash',tahun:S.tahun[0],opd:'all',pid:null,dpid:'k1',dok:'nodis',ptab:'data',mtab:'ppk'};S.log=[];S.dirty=false;S.chat=[];S.chatCtx=null;S.ui.user=S.users[0].id}
 
 /* ===== FILTER & SINKRONISASI ANTAR MENU ===== */
 function activeCloudScope(){
@@ -1171,24 +1130,10 @@ const MOD={paket:['Ringkasan Utama','Dokumen terkait'],pagu:['Ringkasan Utama','
 function sync(k,label){S.dirty=true;persistRevision++;S.persistError='';S.log.unshift({t:new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}),label,mods:MOD[k]||['Data aplikasi']});S.log=S.log.slice(0,25);toast('Perubahan dicatat: '+((MOD[k]||['Data aplikasi']).join(', ')));if(typeof window.SATRIA_AUTO_SYNC_REQUEST==='function')window.SATRIA_AUTO_SYNC_REQUEST(k,label)}
 function toast(m){const e=$('#toast');e.textContent=m;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2600)}
 
-/* ===== SATRIA ENHANCEMENTS (patch) ===== */
-function satriaLoading(on,msg){let el=document.getElementById('satriaLoading');if(!el){el=document.createElement('div');el.id='satriaLoading';el.setAttribute('role','status');el.innerHTML='<div class="satria-loading-spinner"></div><div class="satria-loading-text"></div>';document.body.appendChild(el)}el.querySelector('.satria-loading-text').textContent=msg||'Memproses…';el.classList.toggle('show',!!on)}
-function satriaDownload(filename,text,type){const blob=new Blob([text],{type:type||'text/csv;charset=utf-8'});const u=URL.createObjectURL(blob);const l=document.createElement('a');l.href=u;l.download=filename;document.body.appendChild(l);l.click();setTimeout(()=>{URL.revokeObjectURL(u);l.remove()},500)}
-function satriaCSV(rows){const e=v=>{const s=String(v??'');return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};return '\ufeff'+rows.map(r=>r.map(e).join(',')).join('\r\n')}
-function satriaExportPaketCsv(){const L=paketListForView();if(!L.length){toast('Tidak ada paket pada filter ini untuk diekspor.');return}const rows=[['No','Kode RUP','Nama Paket','TA','OPD','Pagu (Rp)','HPS (Rp)','Nilai Kontrak (Rp)','Status','Pemenang']];L.slice().sort((a,b)=>a.seq-b.seq).forEach((p,i)=>{const w=pemenang(p);rows.push([i+1,p.rup||'',p.nama||'',p.tahun,O(p.opd).singkat||'',p.pagu||0,hps(p),w?w.t:0,stt(p),w?PY(w.w.pen).nama:''])});satriaDownload('SATRIA-paket-TA'+S.ui.tahun+'-'+new Date().toISOString().slice(0,10)+'.csv',satriaCSV(rows));toast('Ekspor CSV berhasil: '+L.length+' paket.')}
-function satriaExportUserCsv(){const rows=[['No','Nama','Username','Role','OPD','Status']];S.users.forEach((u,i)=>{rows.push([i+1,u.nama||'',u.username||'',u.role||'',u.opd==='all'?'Semua OPD':(O(u.opd).singkat||u.opd||''),u.aktif===false?'Nonaktif':'Aktif'])});satriaDownload('SATRIA-user-lokal-'+new Date().toISOString().slice(0,10)+'.csv',satriaCSV(rows));toast('Ekspor CSV user lokal berhasil.')}
-function satriaExportRosterCsv(){const tbl=document.getElementById('satriaAdminUsersRows');if(!tbl){toast('Tabel daftar pengguna belum dimuat.');return}const rows=[];tbl.querySelectorAll('tr').forEach(tr=>{const cells=[].slice.call(tr.querySelectorAll('th,td')).map(td=>(td.innerText||'').replace(/\s+/g,' ').trim());if(cells.length&&!(cells.length===1&&/belum dimuat/i.test(cells[0])))rows.push(cells)});if(!rows.length){toast('Daftar pengguna masih kosong atau belum dimuat.');return}satriaDownload('SATRIA-roster-pengguna-'+new Date().toISOString().slice(0,10)+'.csv',satriaCSV(rows));toast('Ekspor CSV daftar pengguna berhasil.')}
-function satriaModal(id,title,bodyHTML,wide){let m=document.getElementById(id);if(!m){m=document.createElement('div');m.id=id;m.className='satria-modal';m.innerHTML='<div class="satria-modal-backdrop"></div><div class="satria-modal-panel" role="dialog" aria-modal="true"><div class="satria-modal-head"><h3></h3><button type="button" class="satria-modal-close" aria-label="Tutup">×</button></div><div class="satria-modal-body"></div></div>';document.body.appendChild(m);m.querySelector('.satria-modal-close').addEventListener('click',()=>m.classList.remove('show'));m.querySelector('.satria-modal-backdrop').addEventListener('click',()=>m.classList.remove('show'))}if(wide)m.classList.add('wide');else m.classList.remove('wide');m.querySelector('.satria-modal-head h3').textContent=title;m.querySelector('.satria-modal-body').innerHTML=bodyHTML;m.classList.add('show');return m}
-function satriaCloseModals(){document.querySelectorAll('.satria-modal.show').forEach(m=>m.classList.remove('show'))}
-function satriaPreviewDoc(){if(typeof DOCS==='undefined'){toast('Komponen dokumen belum siap.');return}const p=P(S.ui.dpid)||filt()[0];if(!p){toast('Belum ada paket untuk dipratinjau.');return}const html=DOCS[S.ui.dok]?DOCS[S.ui.dok](p):'<p class=mut>Dokumen tidak tersedia.</p>';satriaModal('satriaPreviewModal','Pratinjau Dokumen — '+String(S.ui.dok||'').toUpperCase(),'<div class="satria-doc-preview">'+html+'</div>',true)}
-function satriaLogViewer(){const log=S.log||[];const rows=log.length?log.map(l=>'<div class="satria-log-row"><span class="satria-log-time">'+esc(l.t)+'</span><span class="satria-log-label">'+esc(l.label)+'</span><span class="satria-log-mods">'+(l.mods||[]).join(', ')+'</span></div>').join(''):'<p class=mut>Belum ada aktivitas tercatat.</p>';const body='<p class=mut style="margin:0 0 10px">Riwayat perubahan data (maks 25 entri terakhir). Ketik untuk menyaring.</p><input id="satriaLogFilter" type="search" placeholder="Cari aktivitas…" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd);margin-bottom:10px"><div id="satriaLogList" style="max-height:55vh;overflow:auto">'+rows+'</div>';const m=satriaModal('satriaLogModal','Aktivitas Sinkronisasi & Perubahan',body);const inp=m.querySelector('#satriaLogFilter');if(inp)inp.addEventListener('input',()=>{const q=inp.value.trim().toLowerCase();m.querySelectorAll('.satria-log-row').forEach(r=>{r.style.display=!q||r.textContent.toLowerCase().includes(q)?'':'none'})})}
-function satriaValidationCard(){const L=filt();const bad=L.filter(p=>(gaps(p)||[]).length>0).slice(0,12);if(!bad.length)return '';return '<div class="card satria-validation-card"><h3 style="display:flex;align-items:center;gap:8px;margin:0 0 4px"><span style="color:#F59E0B">⚠</span> Paket Perlu Perhatian (validasi otomatis)</h3><p class=mut style="margin:4px 0 10px">'+bad.length+' dari '+L.length+' paket memiliki kelengkapan belum penuh. Klik untuk membuka.</p>'+bad.map(p=>{const g=gaps(p)||[];return '<a class="satria-validation-row" href="#paket/'+p.id+'"><span class="satria-val-seq">'+p.seq+'</span><span class="satria-val-name">'+esc(p.nama||'(tanpa nama)')+'</span><span class="pill satria-badge-warn">'+g.slice(0,3).join(', ')+(g.length>3?' +'+(g.length-3):'')+'</span></a>'}).join('')+'</div>'}
-(function(){document.addEventListener('keydown',e=>{if(e.key==='Escape'){satriaCloseModals();return}const tag=(document.activeElement&&document.activeElement.tagName||'').toLowerCase();const typing=tag==='input'||tag==='textarea'||tag==='select'||(document.activeElement&&document.activeElement.isContentEditable);if((e.ctrlKey||e.metaKey)&&(e.key==='s'||e.key==='S')){e.preventDefault();const b=document.querySelector('button[data-act="export"]');if(b)b.click();return}if(!typing&&e.key==='/'){const q=document.getElementById('qPaket');if(q){e.preventDefault();q.focus()}}})})();
-
 /* ===== TAMPILAN ===== */
 const NAV=[['dash','Ringkasan Utama'],['paket','Paket Pengadaan'],['dok','Dokumen Pengadaan'],['lap','Laporan dan Analisis'],['master','Data Master'],['set','Pengaturan Sistem'],['user','Pengguna dan Hak Akses'],['panduan','Panduan Penggunaan'],['chat','Asisten SATRIA']];
 const kpi=(l,v)=>`<div class="card kpi"><span>${l}</span><b>${v}</b></div>`;
-const pill=p=>{const s=stt(p);const cls=s==='Selesai'?'satria-badge-ok':(s.indexOf('Menunggu')>=0?'satria-badge-warn':(s.indexOf('Perlu')>=0?'satria-badge-bad':'satria-badge-info'));return `<span class="pill ${cls}">${s}</span>`};
+const pill=p=>`<span class=pill>${stt(p)}</span>`;
 function tabelPaket(L){
   if(!L.length) return '<p class=mut>Belum ada paket pada filter ini.</p>';
   const sorted = L.slice().sort((a,b)=>a.seq-b.seq);
@@ -1230,9 +1175,6 @@ function vDash(){
   ${kpi('Kelengkapan Administratif',pctPatuh+'%','🔐','Compliance • '+lengkap+' Lengkap','#10B981')}
   ${kpi('Indikator Data Paket',rp(efisiensi)+' • '+pctEf+'%','⚡','Performance • Efisiensi','#2563EB')}
  </div>
- ${window.SATRIA_CLOUD_CONFIGURED&&!window.SATRIA_CLOUD_ROLE?`<div class="card" style="border:1px solid #f59e0b;background:#fffbeb"><h3 style="margin:0 0 4px;color:#92400e">⚠️ Login Supabase diperlukan</h3><p class="mut" style="margin:0">Mode cloud aktif — data lokal tidak dimuat sebelum login. Klik tombol <b>☁ Supabase</b> di kanan atas untuk login, lalu <b>Tarik data</b>. Angka di bawah ini hanyalah data contoh.</p></div>`:''}
- ${window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE&&!S.paket.filter(p=>String(p.id)!=='k1').length?`<div class="card" style="border:1px solid #f59e0b;background:#fffbeb"><h3 style="margin:0 0 4px;color:#92400e">⚠️ Snapshot cloud belum berisi data asli</h3><p class="mut" style="margin:0">Cloud tersambung tetapi snapshot hanya memuat <b>data demo</b>. Klik <b>☁ Supabase</b> di kanan atas → <b>Pulihkan dari cache lokal</b> (bila data pernah tersimpan di browser ini), lalu <b>Sinkronkan perubahan</b>. Alternatif: <b>Pengaturan Sistem → Impor backup JSON</b>, lalu Sinkronkan perubahan.</p></div>`:''}
- ${satriaValidationCard()}
  <div class="card satria-overview"><h3 style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff">◈</span> Strategic Analytics Overview <span class="badge" style="margin-left:auto;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">SATRIA Intelligence • v3.0 • Lazy Charts</span></h3><p class="mut">Monitoring real-time terhadap anggaran, efektivitas, kepatuhan, dan kinerja tata kelola berbasis data intelligence. Charts lazy load aktif — hanya render saat discroll, hemat 70% di Android.</p><div class="satria-metrics-row"><div><span>Efisiensi</span><b>${rp(efisiensi)}</b><small>${pctEf}% dari pagu</small></div><div><span>Total HPS</span><b>${rp(totalHps)}</b><small>Estimasi kebutuhan</small></div><div><span>Nilai Kontrak</span><b>${rp(k)}</b><small>Realisasi</small></div><div><span>Paket Lengkap</span><b>${lengkap}/${L.length}</b><small>${pctPatuh}% compliant</small></div></div></div>
  <div class="chart-grid">
    <div class="chart-card wide"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2,#14B8A6)"></div><div class="chart-title">Strategic Performance Trend <span class="badge" style="background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">SATRIA Analytics • Lazy</span></div><div id="chartMultiYear" style="width:100%;height:340px"><div class="chart-skeleton"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading chart...</div></div></div><div class="d3-legend" id="legendMultiYear"></div><div class="d3-tooltip" id="tooltipMulti"></div></div>
@@ -1259,7 +1201,7 @@ function paketEmptyState(){
  return `<div class="satria-empty-state"><div class="satria-empty-icon">⌕</div><strong>Belum ada paket untuk filter ini</strong><p>Filter aktif: <b>${esc(opdLabel)}</b> · Tahun Anggaran <b>${Number(S.ui.tahun)||'-'}</b>${query?` · Pencarian <b>“${esc(query)}”</b>`:''}.</p><small>${scope?'Data hanya ditampilkan jika OPD dan tahun termasuk assignment akun Anda. Jika seharusnya ada paket, minta admin memeriksa assignment dan data paket pada Supabase.':'Coba pilih OPD/tahun lain atau kosongkan kata pencarian.'}</small></div>`;
 }
 function paketListMarkup(){const rows=paketListForView();return rows.length?tabelPaket(rows):paketEmptyState()}
-function vPaket(){return `<div class="row satria-page-heading"><div><h2>Paket Pengadaan TA ${S.ui.tahun}</h2><p class="mut">Daftar paket mengikuti filter OPD dan tahun aktif.</p></div><button type="button" data-act="newpaket">+ Tambah Paket Pengadaan</button></div><div class="card satria-paket-card"><div class="row satria-paket-toolbar"><label for="qPaket">Cari paket</label><input id="qPaket" type="search" autocomplete="off" placeholder="Cari kode RUP atau nama paket…" value="${esc(S.ui.q||'')}" aria-controls="paketTableResult"/><span class="satria-result-count">${paketListForView().length} paket</span><button type="button" data-act="exportPaketCsv" class="g" style="margin-left:10px">⬇ Ekspor CSV</button></div><div id="paketTableResult" aria-live="polite">${paketListMarkup()}</div></div>`}
+function vPaket(){return `<div class="row satria-page-heading"><div><h2>Paket Pengadaan TA ${S.ui.tahun}</h2><p class="mut">Daftar paket mengikuti filter OPD dan tahun aktif.</p></div><button type="button" data-act="newpaket">+ Tambah Paket Pengadaan</button></div><div class="card satria-paket-card"><div class="row satria-paket-toolbar"><label for="qPaket">Cari paket</label><input id="qPaket" type="search" autocomplete="off" placeholder="Cari kode RUP atau nama paket…" value="${esc(S.ui.q||'')}" aria-controls="paketTableResult"/><span class="satria-result-count">${paketListForView().length} paket</span></div><div id="paketTableResult" aria-live="polite">${paketListMarkup()}</div></div>`}
 
 function readiness(p){const dup=S.paket.some(x=>x!==p&&x.tahun===p.tahun&&x.rup&&x.rup===p.rup);const H=hps(p);
 const C=[['Kode RUP',!!p.rup&&!dup],['Pagu',p.pagu>0],['Rincian barang',p.items.length>0],['HPS ≤ pagu',H>0&&H<=p.pagu],['Penawaran',p.penawaran.length>0],['Pemenang',!!pemenang(p)],['Tgl DPP',!!p.tglDpp],['PPK aktif',PJ(p.ppk).aktif!==false],['Tgl BA Hasil',!!p.tglBahp]];
@@ -1542,8 +1484,6 @@ function vDok(){
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
           Cetak / PDF
         </button>
-        <button type="button" data-act="previewDoc" class="satria-btn-secondary" style="height:40px;flex-shrink:0">👁 Pratinjau</button>
-        <button type="button" data-act="exportPaketCsv" class="satria-btn-secondary" style="height:40px;flex-shrink:0">⬇ CSV Paket</button>
       </div>
       <div class="doc-tabs-scroll" style="margin-top:12px">
         ${T.map(([k,t])=>`<button class="master-tab ${k===S.ui.dok?'active':''}" data-act="dtype" data-tab="${k}" title="${t}">${t}</button>`).join('')}
@@ -1565,7 +1505,7 @@ function vLap(){
   const pg=sum(x,p=>p.pagu),k=sum(x,kontrak);
   rows+=`<tr><td>${t}</td><td>${esc(o.singkat)}</td><td class=n>${x.length}</td><td class=n>${rp(pg)}</td><td class=n>${rp(sum(x,hps))}</td><td class=n>${rp(k)}</td><td class=n>${rp(pg-k)}</td><td class=n>${pg?((pg-k)/pg*100).toFixed(2):0}%</td></tr>`}));
  const rowCount = (rows.match(/<tr>/g)||[]).length;
- return `<div class=card><div class=row style="justify-content:space-between;flex-wrap:wrap;gap:12px"><h3>Laporan dan Analisis • Multi OPD dan Multi Tahun</h3><div style="display:flex;gap:8px"><span class="count-badge">${rowCount} baris • ${rowCount>30?'virtual scroll aktif':''}</span><button class=g data-act="csv">Ekspor Laporan (CSV)</button><button class=g data-act="xlsx">Ekspor Excel</button><button class=g data-act="pdf">Ekspor PDF</button></div></div>
+ return `<div class=card><div class=row style="justify-content:space-between;flex-wrap:wrap;gap:12px"><h3>Laporan dan Analisis • Multi OPD dan Multi Tahun</h3><div style="display:flex;gap:8px"><span class="count-badge">${rowCount} baris • ${rowCount>30?'virtual scroll aktif':''}</span><button class=g data-act="csv">Ekspor Laporan (CSV)</button></div></div>
  <div class="table-wrap" id="lapTableWrap" style="max-height:${rowCount>30?'min(68vh, 640px)':'none'};overflow:auto;contain:layout;-webkit-overflow-scrolling:touch">
  <table id="lapTable"><thead style="position:sticky;top:0;z-index:1;background:var(--bg-2)"><tr><th>TA</th><th>OPD</th><th class=n>Paket</th><th class=n>Pagu</th><th class=n>HPS</th><th class=n>Kontrak</th><th class=n>Efisiensi</th><th class=n>%</th></tr></thead><tbody>${rows||'<tr><td colspan=8 class=mut>Belum ada data.</td></tr>'}</tbody></table>
  </div>
@@ -1577,52 +1517,6 @@ function csvExport(){
  const head=['TA','OPD','No','Nama paket','Sub kegiatan','Pagu','HPS','Kontrak','Status'];
  const body=S.paket.map(p=>[p.tahun,O(p.opd).singkat,p.seq,p.nama,p.sub,p.pagu,hps(p),kontrak(p),stt(p)].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([[head.join(','),...body].join('\n')],{type:'text/csv'}));a.download='satria-business-intelligence.csv';a.click();
-}
-
-/* ===== Ekspor Excel (SpreadsheetML .xls, tanpa library tambahan) ===== */
-function lapRows(){
- const head=['TA','OPD','No','Nama paket','Sub kegiatan','Pagu','HPS','Kontrak','Efisiensi','Status'];
- const body=S.paket.map(p=>[p.tahun,O(p.opd).singkat,p.seq,p.nama,p.sub,p.pagu,hps(p),kontrak(p),p.pagu-kontrak(p),stt(p)]);
- return [head,...body];
-}
-function xmlEsc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function excelExport(){
- const rows=lapRows();
- const tbl='<table border="1">'+rows.map((r,i)=>'<tr>'+r.map(c=>`<td${i===0?" style='font-weight:bold;background:#ccfbf1'":''}>${xmlEsc(c)}</td>`).join('')+'</tr>').join('')+'</table>';
- const xml=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Laporan SATRIA</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></head><body>${tbl}</body></html>`;
- const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([xml],{type:'application/vnd.ms-excel'}));a.download='satria-laporan-opd.xls';a.click();
- setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-}
-
-/* ===== Ekspor PDF (print window A4 landscape + ringkasan per OPD) ===== */
-function pdfExport(){
- const rows=lapRows();
- const perOpd={};
- S.paket.forEach(p=>{const o=O(p.opd).singkat||'-';const d=perOpd[o]=perOpd[o]||{n:0,pagu:0,k:0};d.n++;d.pagu+=+p.pagu||0;d.k+=kontrak(p)});
- const opdRows=Object.entries(perOpd).sort((a,b)=>b[1].pagu-a[1].pagu);
- const rp0=v=>'Rp '+(Number(v)||0).toLocaleString('id-ID');
- const totPagu=S.paket.reduce((a,p)=>a+(+p.pagu||0),0), totK=S.paket.reduce((a,p)=>a+kontrak(p),0);
- const w=window.open('','_blank');
- if(!w){toast('Izinkan popup untuk ekspor PDF.');return}
- w.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><title>Laporan SATRIA — Analisis per OPD/Tahun</title><style>
- body{font-family:Arial,sans-serif;color:#000;padding:24px} h1{font-size:17px;margin:0 0 3px}
- .sub{color:#444;font-size:11px;margin:0 0 14px} .kpi{display:inline-block;border:1px solid #0F766E;border-radius:8px;padding:8px 14px;margin:0 8px 8px 0;font-size:11px;background:#f0fdfa} .kpi b{display:block;font-size:14px}
- table{width:100%;border-collapse:collapse;font-size:10px} th{background:#0F766E;color:#fff;padding:6px;text-align:left} td{padding:5px 6px;border-bottom:1px solid #ccc}
- h2{font-size:13px;margin:18px 0 6px}
- @media print{@page{size:A4 landscape;margin:10mm}}
- </style></head><body>
- <h1>Laporan dan Analisis per OPD — SATRIA Framework 3.0</h1>
- <p class="sub">Dicetak: ${new Date().toLocaleString('id-ID')} • ${S.paket.length} paket</p>
- <span class="kpi">Total Pagu<b>${rp0(totPagu)}</b></span><span class="kpi">Total Kontrak<b>${rp0(totK)}</b></span><span class="kpi">Efisiensi<b>${rp0(totPagu-totK)}</b></span><span class="kpi">Jumlah OPD<b>${opdRows.length}</b></span>
- <h2>Ringkasan per OPD</h2>
- <table><tr><th>OPD</th><th>Jumlah Paket</th><th>Total Pagu</th><th>Total Kontrak</th><th>Efisiensi</th></tr>
- ${opdRows.map(([o,d])=>`<tr><td>${xmlEsc(o)}</td><td>${d.n}</td><td>${rp0(d.pagu)}</td><td>${rp0(d.k)}</td><td>${rp0(d.pagu-d.k)}</td></tr>`).join('')}
- </table>
- <h2>Rincian Paket</h2>
- <table>${rows.map((r,i)=>i===0?`<tr>${r.map(c=>`<th>${xmlEsc(c)}</th>`).join('')}</tr>`:`<tr>${r.map(c=>`<td>${xmlEsc(c)}</td>`).join('')}</tr>`).join('')}</table>
- <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script>
- </body></html>`);
- w.document.close();
 }
 
 /* ===== MASTER & PENGATURAN ===== */
@@ -1843,46 +1737,6 @@ const HOW=[[['backup','simpan','hilang'],'Klik Backup di header untuk mengunduh 
  [['tahun anggaran','tahun baru','tambah tahun'],'Tambah tahun di Pengaturan Instansi → Tahun Anggaran. Pilih tahun aktif di header.'],
  [['nonaktif','aktifkan'],'PPK yang dinonaktifkan tidak dipilih untuk paket baru, tetapi dokumen lama tetap menampilkannya. Atur di Data Master → PPK / KPA.']];
 const CAPS='Saya bisa membantu dengan:\n• Ringkasan pagu, HPS, kontrak, dan efisiensi per tahun atau per OPD\n• Detail paket berdasarkan Kode RUP atau nama\n• Penawaran, pemenang, dan kelengkapan paket\n• Kesiapan setiap dokumen (Nota Dinas, DPP, SPPBJ, BA, dan lainnya)\n• Kinerja penyedia, pejabat, akun anggaran, dan user\n• Cara memakai aplikasi (ketik "cara ...")\nSaya mengingat paket terakhir yang dibahas, jadi Anda bisa bertanya lanjutan seperti "pemenangnya siapa?".';
-/* ===== SATRIA Chat v2 — fuzzy NLU + multi-intent + konteks berlapis + chat-aksi ===== */
-const lev=(a,b)=>{const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let prev=Array.from({length:n+1},(_,i)=>i);for(let i=1;i<=m;i++){const cur=[i];for(let j=1;j<=n;j++)cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));prev=cur}return prev[n]};
-const CHAT_KW=['pagu','hps','kontrak','efisiensi','pemenang','penawaran','penyedia','paket','dokumen','lengkap','tertinggi','terbesar','termahal','terendah','pejabat','pengadaan','komitmen','anggaran','tahun','bandingkan','ringkasan','efisien','kelengkapan','penomoran','pemenangnya'];
-function fzFix(raw){return nrm(raw).split(' ').map(w=>{if(w.length>=4&&!CHAT_KW.includes(w)){const hit=CHAT_KW.find(k=>k.length>=4&&lev(w,k)<=Math.max(1,Math.floor(Math.min(w.length,k.length)/4)));if(hit)return hit}return w}).join(' ')}
-function findOpdFuzzy(s){const q=nrm(s);if(!q)return null;return S.opd.find(o=>nrm(o.singkat)===q)||S.opd.find(o=>nrm(o.nama).includes(q))||S.opd.find(o=>nrm(o.singkat).includes(q))||null}
-function chatAct(raw){
- const q=nrm(raw);let m;
- m=q.match(/(?:pindah|ganti|set|tampilkan|tunjukkan)?\s*(?:ke\s+)?tahun\s+(20\d{2})/);
- if(m&&S.tahun.includes(+m[1])){S.ui.tahun=+m[1];render();return 'Tahun aktif diubah ke **TA '+m[1]+'**.'}
- if(m)return 'TA '+m[1]+' belum ada di daftar Tahun Anggaran. Tambahkan dulu di Pengaturan Instansi → Tahun Anggaran.';
- m=q.match(/^(filter|fokus|tampilkan|tunjukkan)\s+(?:di\s+|opd\s+)?(.+)$/);
- if(m&&m[2]&&!/paket/.test(m[2])&&m[2].split(' ').length<=4){const o=findOpdFuzzy(m[2]);if(o){S.ui.opd=o.id;render();return 'Filter OPD diubah ke **'+o.singkat+'** ('+o.nama+'). Dashboard dan laporan sekarang terfokus ke OPD tersebut.'}}
- m=q.match(/^(buka|bukak|lihat|cek)\s+(?:paket\s+)?(.+)$/);
- if(m){const p=findPaket(m[2]);if(p&&p.id){location.hash='#paket/'+p.id;return 'Membuka paket **'+(p.rup||p.nama.slice(0,30))+'** — '+p.nama+'.'}}
- m=q.match(/^(siapkan|cetak|buka|buat)\s+(nodis|dpp|sppbj|bahp|ba\s*hp|survei|nego|penetapan|evaluasi|nota dinas|ba hasil)/);
- if(m){location.hash='#dok';return 'Membuka menu **Dokumen Pengadaan**. Pilih Kode RUP dan jenis dokumen '+(m[2]||'')+', lalu klik Cetak / Simpan PDF.'}
- return null;
-}
-function botAnswerFull(raw){
- const parts=String(raw||'').split(/\s+dan\s+|\s+serta\s+|;\s*/i).map(s=>s.trim()).filter(Boolean);
- if(parts.length>1&&parts.every(p=>p.split(' ').length>=2)){
-  return parts.map((p,i)=>'**'+(i+1)+'. '+p+'**\n'+(chatAct(p)||botAnswer(fzFix(p)))).join('\n\n');
- }
- return chatAct(raw)||botAnswer(fzFix(raw));
-}
-function chatFmt(s){return esc(String(s==null?'':s)).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')}
-function saveChat(){try{localStorage.setItem('satria-chat-v1',JSON.stringify((S.chat||[]).slice(-60)))}catch(_){}}
-function loadChat(){try{const c=JSON.parse(localStorage.getItem('satria-chat-v1')||'[]');if(Array.isArray(c)&&c.length&&(c[c.length-1]||{}).typing)c.pop();if(Array.isArray(c)&&c.length)S.chat=c.slice(-60)}catch(_){}}
-function chatSend(q){
- if(!q||!q.trim())return;const t=q.trim();
- S.chat=(S.chat||[]).concat([{f:'u',t},{f:'b',t:'…',typing:true}]).slice(-60);
- render();const el0=document.getElementById('chatBody');if(el0)el0.scrollTop=el0.scrollHeight;
- setTimeout(function(){
-  const ans=botAnswerFull(t);
-  if(S.chat.length&&S.chat[S.chat.length-1].typing)S.chat[S.chat.length-1]={f:'b',t:ans};
-  else S.chat=S.chat.concat([{f:'b',t:ans}]).slice(-60);
-  saveChat();
-  if(S.ui.page==='chat'){render();const el=document.getElementById('chatBody');if(el)el.scrollTop=el.scrollHeight}
- },380);
-}
 function botAnswer(raw){
  const q=nrm(raw),sc=scopeOf(q),ctxP=S.chatCtx?P(S.chatCtx):null;
  if(!q)return 'Silakan tulis pertanyaan Anda.';
@@ -1893,8 +1747,8 @@ function botAnswer(raw){
  let p=findPaket(q);if(!p&&/(\bitu\b|\bini\b|\btersebut\b|\btadi\b|nya\b)/.test(q)&&ctxP)p=ctxP;
  if(p&&p.none)return `Tidak ada paket dengan Kode RUP ${p.none}.`;
  if(p){S.chatCtx=p.id;return detailText(p,q)}
- let pen=findPenyedia(q);if(!pen&&S.chatCtxPen&&/penawaran|penyedia|ikut/.test(q)){pen=S.penyedia.find(x=>x.id===S.chatCtxPen)||null}
- if(pen){S.chatCtxPen=pen.id;const rows=listPaket(sc).flatMap(x=>x.penawaran.filter(w=>w.pen===pen.id).map(w=>({x,t:totPw(x,w,true),st:evalPw(x).find(e=>e.w.id===w.id).st})));
+ const pen=findPenyedia(q);
+ if(pen){const rows=listPaket(sc).flatMap(x=>x.penawaran.filter(w=>w.pen===pen.id).map(w=>({x,t:totPw(x,w,true),st:evalPw(x).find(e=>e.w.id===w.id).st})));
   return `${pen.nama} · ${sc.label}\n`+(rows.length?rows.map(r=>`• ${r.x.rup||'-'} ${r.x.nama.slice(0,40)}: ${rp(r.t)} — ${r.st}`).join('\n')+`\n${rows.filter(r=>r.st==='Menang').length} penawaran memenuhi HPS, ${rows.filter(r=>{const w=pemenang(r.x);return w&&w.w.pen===pen.id}).length} sebagai pemenang.`:'Penyedia ini belum punya penawaran di cakupan tersebut.')}
  const d=docOf(q);
  if(d){const L=listPaket(sc),ready=L.filter(x=>!docMiss(x,d.k).length).length;return `${d.n} · ${sc.label}\nSiap cetak: ${ready} dari ${L.length} paket.\n${d.code?'Format nomor: '+d.code+'/{Kode RUP}/{singkatan OPD}/{kode unit}':''}\nTanya dengan Kode RUP untuk detail satu paket.`}
@@ -1912,10 +1766,10 @@ function botAnswer(raw){
  return 'Saya belum yakin maksudnya. Coba salah satu:\n• total pagu dan HPS\n• status paket dengan Kode RUP (mis. 67122699)\n• paket yang belum lengkap\n• pemenang tiap paket\n• bandingkan semua tahun\n• penyedia contoh\n• siap cetak DPP\n• cara salin paket ke tahun baru';
 }
 const SUG=['Ringkasan TA ini','Paket yang belum lengkap','Pemenang tiap paket','Bandingkan semua tahun','Efisiensi tertinggi','Siap cetak DPP','Cara backup','Bisa apa saja?'];
+function chatSend(q){if(!q||!q.trim())return;S.chat=(S.chat||[]).concat([{f:'u',t:q.trim()},{f:'b',t:botAnswer(q)}]).slice(-60);render()}
 function vChat(){const L=S.chat||[];
  return `<div class=card><div style="display:flex;align-items:center;gap:12px;margin-bottom:8px"><div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff;font-weight:800">SA</div><div><h3 style="margin:0">Asisten SATRIA</h3><div style="font-size:12px;opacity:.7">Integrated Government Intelligence Platform • Framework Version 3.0</div></div></div><p class=mut>Selamat datang di Asisten SATRIA. Saya siap membantu analisis data, monitoring kinerja, pelaporan, dan navigasi sistem SATRIA Framework. Menjawab berdasarkan data tata kelola di aplikasi ini (anggaran, kinerja, kepatuhan, dan dokumen).</p>
- <div id=chatBody style="min-height:240px;max-height:420px;overflow:auto;border:1px solid var(--bd);border-radius:8px;padding:10px;background:#fbfcfe">${L.length?L.map(m=>`<div style="margin:8px 0;text-align:${m.f==='u'?'right':'left'}"><span style="display:inline-block;max-width:80%;padding:8px 10px;border-radius:10px;background:${m.f==='u'?'#dbe7f7':'#fff'};border:1px solid var(--bd);white-space:pre-line;text-align:left${m.typing?';opacity:.55;font-style:italic;animation:satriaTypingDot 1s infinite':''}">${m.typing?'…':chatFmt(m.t)}</span></div>`).join(''):'<span class=mut>Tanyakan sesuatu, misalnya "total pagu" atau "status RUP 67122699". Atau pilih saran di bawah.</span>'}</div>
- <style>@keyframes satriaTypingDot{50%{opacity:.25}}</style>
+ <div style="min-height:240px;max-height:420px;overflow:auto;border:1px solid var(--bd);border-radius:8px;padding:10px;background:#fbfcfe">${L.length?L.map(m=>`<div style="margin:8px 0;text-align:${m.f==='u'?'right':'left'}"><span style="display:inline-block;max-width:80%;padding:8px 10px;border-radius:10px;background:${m.f==='u'?'#dbe7f7':'#fff'};border:1px solid var(--bd);white-space:pre-line;text-align:left">${esc(m.t)}</span></div>`).join(''):'<span class=mut>Tanyakan sesuatu, misalnya "total pagu" atau "status RUP 67122699". Atau pilih saran di bawah.</span>'}</div>
  <div class=row style="margin-top:10px"><input id=chatIn placeholder="Tulis pertanyaan..." style="flex:1;min-width:260px"><button data-act="chatsend">Kirim</button><button class=g data-act="chatclear">Bersihkan</button></div>
  <div class=row style="margin-top:8px">${SUG.map(q=>`<button class=g data-act="chatq" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div></div>`}
 
@@ -1927,7 +1781,7 @@ function vUser(){const U=S.users,act=U.filter(u=>u.aktif!==false),ROLES=['Admin'
  <section class="card" id="satriaCloudUserListCard" style="display:none" aria-labelledby="satriaCloudUserListTitle">
   <div class="row" style="align-items:center;justify-content:space-between;gap:12px">
    <div><h3 id="satriaCloudUserListTitle" style="margin:0">Daftar pengguna organisasi</h3><p class="mut" style="margin:4px 0 0">Daftar ini hanya tersedia bagi admin aktif organisasi.</p></div>
-   <button id="satriaAdminUsersRefresh" type="button">Muat ulang</button> <button type="button" data-act="exportRosterCsv" style="margin-left:4px">⬇ Ekspor CSV</button>
+   <button id="satriaAdminUsersRefresh" type="button">Muat ulang</button>
   </div>
   <p id="satriaAdminUsersStatus" class="mut" role="status" aria-live="polite">Daftar belum dimuat.</p>
   <div style="overflow:auto">
@@ -1948,7 +1802,7 @@ function vUser(){const U=S.users,act=U.filter(u=>u.aktif!==false),ROLES=['Admin'
  <div class=fg><label>OPD</label><select data-new="opd"><option value="all">Semua OPD</option>${S.opd.map(o=>`<option value="${o.id}">${esc(o.singkat)}</option>`).join('')}</select></div>
  <button data-act="uadd">Simpan user lokal</button></div>
  <p class=mut>Mode lokal hanya mengatur tampilan browser ini; username di sini bukan akun login Supabase.</p><div class=card style="border-color:#e0a800"><b class=warn>Catatan keamanan</b><p class=mut>Pemilihan user di header hanya membatasi tampilan di browser ini, bukan kontrol akses yang sebenarnya. Siapa pun yang membuka file ini dapat berpindah ke user Admin. Untuk data pengadaan yang sesungguhnya, gunakan sistem dengan autentikasi di sisi server.</p></div></div>
- <div class=card id="satriaLocalUserTable"><div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap"><h3 style="margin:0">Daftar user lokal browser</h3><button type="button" data-act="exportUserCsv" class="g">⬇ Ekspor CSV</button></div><p class=mut>Daftar ini bukan roster akun Auth Supabase.</p><table><tr><th>No</th><th>Nama</th><th>Username</th><th>Role</th><th>OPD</th><th>Status</th><th>Aksi</th></tr>
+ <div class=card id="satriaLocalUserTable"><h3>Daftar user lokal browser</h3><p class=mut>Daftar ini bukan roster akun Auth Supabase.</p><table><tr><th>No</th><th>Nama</th><th>Username</th><th>Role</th><th>OPD</th><th>Status</th><th>Aksi</th></tr>
  ${U.map((u,i)=>{const off=u.aktif===false,me=u.id===S.ui.user;return `<tr><td>${i+1}</td>
  <td><input value="${esc(u.nama)}" data-col="users" data-id="${u.id}" data-f="nama"></td>
  <td><input value="${esc(u.username)}" data-col="users" data-id="${u.id}" data-f="username"></td>
@@ -2044,7 +1898,7 @@ document.addEventListener('click',e=>{
  }
  if(a==='chatsend'){return chatSend($('#chatIn').value)}
  if(a==='chatq'){return chatSend(d.q)}
- if(a==='chatclear'){S.chat=[];try{localStorage.removeItem('satria-chat-v1')}catch(_){}return render()}
+ if(a==='chatclear'){S.chat=[];return render()}
  if(a==='newpaket'){
    const scope=activeCloudScope();
    if(!S.opd.length){toast('Master OPD belum tersedia. Muat ulang data cloud atau minta admin memeriksa master OPD.');return}
@@ -2092,15 +1946,8 @@ document.addEventListener('click',e=>{
  if(a==='rmlogo'){delete S.pemda.logo;sync('settings','Logo dihapus');return render()}
  if(a==='delyear'){const y=+d.y;if(S.paket.some(p=>+p.tahun===y)){toast('Tahun tidak dapat dihapus karena masih dirujuk paket.');return render()}if(S.tahun.length<=1){toast('Tahun anggaran terakhir tidak dapat dihapus. Tambahkan tahun pengganti terlebih dahulu.');return render()}if(!confirm('Hapus TA '+y+'? Tindakan ini hanya diizinkan bila tidak ada paket yang memakai tahun tersebut.'))return;S.tahun=S.tahun.filter(x=>+x!==y);if(+S.ui.tahun===y)S.ui.tahun=S.tahun[0];sync('settings','Tahun '+y+' dihapus');return render()}
  if(a==='reset'){if(!confirm('PERINGATAN: seluruh data aktif—paket, master, pengaturan, pengguna, dan penawaran—akan diganti dengan data awal. Unduh backup JSON terlebih dahulu. Lanjutkan?'))return;if(!confirm('Konfirmasi terakhir: ganti seluruh data aktif dengan data awal SATRIA?'))return;init();sync('settings','Data direset ke data awal');route();toast('Data awal dimuat ulang. Periksa konfigurasi dan unduh backup setelah pengisian.');return}
- if(a==='exportPaketCsv'){satriaLoading(true,'Menyiapkan ekspor CSV…');setTimeout(()=>{try{satriaExportPaketCsv()}finally{satriaLoading(false)}},40);return}
- if(a==='exportUserCsv'){satriaExportUserCsv();return}
- if(a==='exportRosterCsv'){satriaExportRosterCsv();return}
- if(a==='previewDoc'){satriaPreviewDoc();return}
- if(a==='openLog'){satriaLogViewer();return}
  if(a==='print')return window.print();
  if(a==='csv')return csvExport();
- if(a==='xlsx')return excelExport();
- if(a==='pdf')return pdfExport();
  if(a==='export'){const o={...S};delete o.ui;delete o.log;delete o.dirty;delete o.chat;const u=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:'application/json'}));const l=document.createElement('a');l.href=u;l.download='SATRIA-backup-'+new Date().toISOString().slice(0,10)+'.json';l.click();S.dirty=false;return render()}
 });
 let paketSearchTimer=null;
@@ -2176,9 +2023,6 @@ const persistable=()=>{const o={...S};['ui','log','dirty','chat','chatCtx'].forE
 async function persistNow(){if(ENGINE!=='dexie'||!DB)return false;const writingRevision=persistRevision;try{await DB.kv.put({k:'main',v:persistable(),at:Date.now()});lastPersistedRevision=Math.max(lastPersistedRevision,writingRevision);if(S.persistError){S.persistError='';const el=$('#dirty');if(el)el.title='Data tersimpan di browser. Backup JSON tetap perlu diunduh berkala.'}return true}catch(e){S.persistError='Data gagal disimpan ke IndexedDB. Jangan tutup halaman; unduh backup JSON dan periksa ruang penyimpanan browser.';console.error('Gagal menyimpan ke IndexedDB',e);const el=$('#dirty');if(el){el.textContent='⚠ Gagal menyimpan';el.title=S.persistError;el.style.background='#FEE2E2';el.style.color='#991B1B'}toast('GAGAL MENYIMPAN. Unduh backup JSON sekarang.');return false}}
 function schedulePersist(){if(ENGINE!=='dexie'||!DB||!S?.dirty||persistRevision<=lastPersistedRevision)return;clearTimeout(pTimer);pTimer=setTimeout(()=>{void persistNow()},350)}
 async function loadSaved(){try{const r=await DB.kv.get('main');if(r&&r.v&&r.v.paket&&r.v.opd){const ui=S.ui;Object.assign(S,r.v,{ui,log:[],dirty:false,chat:[],chatCtx:null});normalizeData();if(!S.users.some(u=>u.id===ui.user))ui.user=S.users[0].id;if(!S.tahun.includes(ui.tahun))ui.tahun=S.tahun[0]}}catch(e){console.warn('Gagal memuat dari IndexedDB',e)}}
-window.SATRIA_LOCAL_CACHE={
-  async read(){ if(ENGINE!=='dexie'||!DB)return null; try{ const r=await DB.kv.get('main'); if(r&&r.v&&Array.isArray(r.v.paket))return r.v; }catch(e){console.warn('Gagal membaca cache lokal',e)} return null; }
-};
 function setEngineSelect(){const s=$('#selEngine');s.innerHTML=(DB?'<option value="dexie">IndexedDB (Dexie)</option>':'')+'<option value="memory">Memori sesi</option>';s.value=ENGINE;if(!DB){s.disabled=true;s.title='Dexie.js tidak termuat, memakai memori sesi'}}
 async function boot(){
   init();
@@ -2342,18 +2186,11 @@ function initChartLazyLoad(){
 }
 
 function drawKhChartsSingle(targetId){
+  if(typeof d3==='undefined') return;
   const el = document.getElementById(targetId);
   if(!el) return;
-  if(typeof d3==='undefined'){
-    el.innerHTML='<div style="display:grid;place-items:center;height:100%;min-height:160px;color:var(--mut);font:600 12px system-ui,sans-serif;text-align:center;padding:16px">Grafik tidak dapat dirender: pustaka D3 belum termuat.<br>Periksa koneksi internet, lalu muat ulang halaman.</div>';
-    return;
-  }
   const isMobile = window.innerWidth <= 768;
   const L = (typeof filt==='function') ? filt() : [];
-  if(targetId!=='chartMultiYear'&&!L.length){
-    el.innerHTML='<div style="display:grid;place-items:center;height:100%;min-height:160px;color:var(--mut);font:600 12px system-ui,sans-serif;text-align:center;padding:16px">Tidak ada data pada cakupan ini (TA '+S.ui.tahun+').<br>Tambahkan paket atau ubah filter OPD/Tahun di header.</div>';
-    return;
-  }
   const isDark = document.documentElement.getAttribute('data-theme')==='dark';
   const colMut = getComputedStyle(document.documentElement).getPropertyValue('--mut').trim() || '#64748b';
   const colBd = getComputedStyle(document.documentElement).getPropertyValue('--bd').trim() || '#e2e8f0';
@@ -2732,7 +2569,6 @@ main{overflow-anchor:none}
       <button type="button" id="scResetPassword">Lupa kata sandi?</button>
       <button type="button" id="scPull" disabled>Tarik dari Supabase</button>
       <button type="button" id="scPush" disabled>Sinkronkan perubahan</button>
-      <button type="button" id="scRecoverLocal" disabled title="Khusus admin: pulihkan data dari cache lokal browser ini lalu kirim sebagai snapshot ke cloud">Pulihkan dari cache lokal</button>
       <button type="button" class="danger" id="scSignOut" disabled>Keluar</button>
     </div>
     <div id="scRecoveryPanel" class="sc-recovery" hidden>
@@ -2751,7 +2587,7 @@ main{overflow-anchor:none}
 
 <script id="satriaEmbeddedSupabaseConfig">
 // Konfigurasi Supabase default tertanam, termasuk Organization UUID.
-window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://umccafupxnqlrlzprqeu.supabase.co","key":"sb_publishable_iLvKT0f0PAfO_Z0lrU9lMg_oV2w2sXJ","org":"64bec4e1-a687-4dce-8935-cc51363171db"};
+window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.supabase.co","key":"sb_publishable_gdDUVrD16HQaVB-nrgdqeg_B2Rk7v9H","org":"64bec4e1-a687-4dce-8935-cc51363171db"};
 </script>
 <script>
 (function(){
@@ -2824,7 +2660,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://umccafupxnqlrlzprqeu.su
   const config=()=>{let local={};try{local=JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}')}catch(_){}const embedded=window.SATRIA_EMBEDDED_SUPABASE_CONFIG||{};return {url:local.url||embedded.url||'',key:local.key||embedded.key||'',org:local.org||embedded.org||''}};
   window.SATRIA_CLOUD_CONFIGURED=!!(config().url&&config().key&&config().org);
   function fillConfig(){const c=config(); const a=$id('scUrl'), b=$id('scKey'), cc=$id('scOrg'); if(a) a.value=c.url||''; if(b) b.value=c.key||''; if(cc) cc.value=c.org||''; }
-  function setButtons(){const ok=!!(client&&member); const p=$id('scPull'), pu=$id('scPush'), so=$id('scSignOut'), rc=$id('scRecoverLocal'); if(p) p.disabled=!ok; if(pu) pu.disabled=!ok||member?.role==='viewer'||(!cloudStateReady&&!(member?.role==='admin'&&window.SATRIA_CLOUD_ADMIN_IMPORT_READY===true)); if(so) so.disabled=!ok; if(rc) rc.disabled=!ok||member?.role!=='admin'; }
+  function setButtons(){const ok=!!(client&&member); const p=$id('scPull'), pu=$id('scPush'), so=$id('scSignOut'); if(p) p.disabled=!ok; if(pu) pu.disabled=!ok||member?.role==='viewer'||(!cloudStateReady&&!(member?.role==='admin'&&window.SATRIA_CLOUD_ADMIN_IMPORT_READY===true)); if(so) so.disabled=!ok; }
   function open(){fillConfig(); if(!modal){ console.warn('Modal not found'); return; } modal.hidden=false;modal.setAttribute('aria-hidden','false'); const c=$id('scClose'); if(c) c.focus(); setButtons(); if(member)status('Terhubung sebagai '+member.email+' · role '+member.role+' · versi lokal '+version,'ok')}
   function close(){ if(modal){ modal.hidden=true; modal.setAttribute('aria-hidden','true'); } }
   function readConfigFields(){
@@ -2842,33 +2678,87 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://umccafupxnqlrlzprqeu.su
     orgId=cfg.org;status('Konfigurasi tersimpan di browser ini. Login berikutnya tidak perlu memasukkan URL, key, atau UUID organisasi lagi.','ok');
     return cfg;
   }
-  let clientCfgSig='';
-  function getSupabaseClient(url,key){
-    const sig=url+'|'+key;
-    if(client&&clientCfgSig===sig)return client;
-    if(client){try{client.auth.stopAutoRefresh()}catch(_){}try{client.removeAllChannels&&client.removeAllChannels()}catch(_){}}
-    clientCfgSig=sig;
-    client=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-    return client;
-  }
   async function initClient(){
-    if(!window.supabase||!window.supabase.createClient)throw new Error('Library Supabase JS tidak termuat. Periksa koneksi internet/CDN.');
-    const {url,key,org}=saveConfig();orgId=org;
-    client=getSupabaseClient(url,key);
+    if(!window.supabase||!window.supabase.createClient) throw new Error('Library Supabase JS tidak termuat. Periksa koneksi internet/CDN.');
+    const {url,key,org}=saveConfig(); orgId=org;
+    if(!url||!key||!org) throw new Error('Konfigurasi Supabase belum lengkap. URL, Key, dan Organization UUID wajib diisi.');
+    if(!url.startsWith('https://')) throw new Error('Supabase URL harus https://...supabase.co');
+    try{
+      client=window.supabase.createClient(url,key,{
+        auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'sb-'+btoa(url).slice(0,16)+'-auth-token'}
+      });
+    }catch(e){
+      throw new Error('Gagal init Supabase client: '+(e.message||e)+'. Pastikan key adalah anon/publishable key, bukan service_role.');
+    }
     return client;
   }
+
   async function loadMembership(){
     const {data:{user},error:userErr}=await client.auth.getUser();
-    if(userErr||!user)throw new Error('Sesi belum masuk. Periksa email/kata sandi atau status akun Auth.');
+    if(userErr||!user) throw new Error('Sesi belum masuk. Periksa email/kata sandi atau status akun Auth. Detail: '+(userErr?.message||'no user'));
+    
     const {data,error}=await client.from('satria_memberships').select('role,active').eq('organization_id',orgId).eq('user_id',user.id).maybeSingle();
-    if(error)throw new Error('Tidak dapat memeriksa membership. Pastikan SQL/RLS telah dijalankan: '+error.message);
-    if(!data||!data.active)throw new Error('Akun ini belum memiliki membership aktif pada organisasi tersebut. Minta admin menambahkannya melalui alur admin.');
-    member={id:user.id,email:user.email||'Pengguna Supabase',role:data.role,scope:null};
+    if(error){
+      if(/does not exist|relation.*not.*exist/i.test(error.message)){
+        throw new Error('Tabel satria_memberships belum ada. Jalankan SQL setup di Supabase SQL Editor dulu. Lihat panduan di tab Panduan -> Cloud.');
+      }
+      throw new Error('Tidak dapat memeriksa membership. Pastikan SQL/RLS telah dijalankan: '+error.message);
+    }
+    
+    let membership=data;
+    if(!membership){
+      console.log('SATRIA: Membership tidak ditemukan untuk user',user.id,'di org',orgId);
+      const {data:existingMembers, error:checkErr}=await client.from('satria_memberships').select('user_id').eq('organization_id',orgId).limit(1);
+      const isFirstOrg = !checkErr && (!existingMembers || existingMembers.length===0);
+      
+      if(isFirstOrg){
+        status('Organisasi kosong - membuat admin pertama...','');
+        try{
+          const {data:inserted, error:insertErr}=await client.from('satria_memberships').insert({
+            organization_id: orgId,
+            user_id: user.id,
+            role: 'admin',
+            active: true
+          }).select('role,active').single();
+          
+          if(insertErr){
+            throw new Error(`Gagal auto-create admin pertama (RLS). Jalankan SQL ini di Supabase SQL Editor:
+
+INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES ('${orgId}', '${user.id}', 'admin', true) ON CONFLICT (organization_id, user_id) DO UPDATE SET role='admin', active=true;
+
+Error: ${insertErr.message}`);
+          }
+          membership=inserted;
+          status('Admin pertama berhasil dibuat!','ok');
+        }catch(insertError){
+          throw insertError;
+        }
+      } else {
+        throw new Error(
+          `Akun ${user.email} (UID ${user.id}) belum memiliki membership di organisasi ${orgId}.
+
+SOLUSI:
+1. Buka Supabase -> Table Editor -> satria_memberships
+2. Insert new row:
+   - organization_id: ${orgId}
+   - user_id: ${user.id}
+   - role: admin
+   - active: true
+
+Atau SQL:
+INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES ('${orgId}', '${user.id}', 'admin', true);`
+        );
+      }
+    }
+    
+    if(!membership||!membership.active) throw new Error('Membership tidak aktif. Hubungi admin untuk aktivasi.');
+    
+    member={id:user.id,email:user.email||'Pengguna Supabase',role:membership.role,scope:null};
     cloudStateReady=false;
     window.SATRIA_CLOUD_ROLE=member.role;
-    if(!['admin','operator','viewer'].includes(member.role))throw new Error('Role membership tidak dikenal.');
-    if(!localUsersBackup)localUsersBackup=JSON.parse(JSON.stringify(S.users||[]));
-    // Never leave an old full snapshot visible when a non-admin authenticates.
+    window.SATRIA_CLOUD_MEMBER=member;
+    if(!['admin','operator','viewer'].includes(member.role)) throw new Error('Role membership tidak dikenal: '+member.role);
+    if(!localUsersBackup) localUsersBackup=JSON.parse(JSON.stringify(S.users||[]));
     if(member.role!=='admin') resetCloudScopedView();
     S.users=[{id:'auth-'+member.id,nama:member.email,username:member.email,role:roleName(member.role),opd:'all',aktif:true}];
     S.ui.user=S.users[0].id;
@@ -2880,6 +2770,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://umccafupxnqlrlzprqeu.su
     return member;
   }
   function resetCloudScopedView(){
+function resetCloudScopedView(){
     const currentYear=new Date().getFullYear();
     const ui={...(S.ui||{}),page:'dash',tahun:currentYear,opd:'all',pid:null,user:'cloud-login-required'};
     Object.assign(S,{
@@ -2903,13 +2794,65 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://umccafupxnqlrlzprqeu.su
   }
   function friendlyError(e){
     const raw=String(e?.message||e||'Terjadi kesalahan.');
-    if(/invalid login credentials/i.test(raw)) return 'Email atau kata sandi ditolak oleh Supabase. Ini bukan masalah Organization UUID. Pastikan email akun benar dan akun tersebut sudah ada di Authentication → Users pada project Supabase yang tertanam. Jika akun sudah ada tetapi kata sandi lupa, gunakan “Lupa kata sandi?”. Jika akun belum ada, buat akun Auth dahulu di Dashboard Supabase, lalu buat membership admin untuk Organization UUID ini.';
-    if(/email not confirmed/i.test(raw)) return 'Email akun belum dikonfirmasi. Periksa Authentication → Users atau konfigurasikan konfirmasi email di Supabase sebelum login.';
-    if(/password should be at least|weak password/i.test(raw)) return 'Kata sandi baru belum memenuhi kebijakan keamanan Supabase. Gunakan kata sandi yang lebih kuat.';
-    if(/redirect.*not allowed|not allowed.*redirect/i.test(raw)) return 'Alamat aplikasi belum diizinkan untuk pemulihan kata sandi. Tambahkan URL halaman SATRIA ke Supabase → Authentication → URL Configuration → Redirect URLs, lalu ulangi.';
+    const rawLower=raw.toLowerCase();
+    // 400 invalid credentials - user not found or wrong password
+    if(/invalid login credentials|invalid_grant|invalid.*password|invalid.*email/i.test(raw)){
+      return `❌ Email atau kata sandi ditolak oleh project gsmrhrgcilzuelrorarr.supabase.co.
+
+`+
+             `SOLUSI:
+`+
+             `1. Buka https://supabase.com/dashboard/project/gsmrhrgcilzuelrorarr → Authentication → Users
+`+
+             `2. Pastikan ada user admin@satria.go.id (email harus persis huruf kecil tanpa spasi)
+`+
+             `3. Jika BELUM ADA: Klik Add user → Create new user → email: admin@satria.go.id → centang Auto Confirm → buat password
+`+
+             `4. Jika SUDAH ADA tapi lupa password: Gunakan "Lupa kata sandi?" atau di Users → ... → Reset password
+`+
+             `5. Setelah user ada, pastikan ada membership di Table Editor → satria_memberships dengan organization_id 64bec4e1-a687-4dce-8935-cc51363171db
+
+`+
+             `Jika ingin lewati cloud dan pakai demo lokal, klik "Mode Lokal Tanpa Cloud" di bawah.`;
+    }
+    if(/email not confirmed|email not confirmed/i.test(rawLower)) return '📧 Email belum dikonfirmasi. Di Supabase Dashboard → Authentication → Users → klik user admin@satria.go.id → Confirm email. Atau matikan Email Confirmations di Authentication → Configuration.';
+    if(/user not found|user.*not.*exist/i.test(rawLower)) return '👤 Akun tidak ditemukan. Buat dulu di Supabase Dashboard → Authentication → Users → Add user → admin@satria.go.id';
+    if(/password should be at least|weak password/i.test(rawLower)) return '🔒 Kata sandi terlalu lemah. Minimal 8 karakter, kombinasi huruf besar, kecil, angka.';
+    if(/redirect.*not allowed|not allowed.*redirect/i.test(rawLower)) return '🔗 Redirect URL belum diizinkan. Tambahkan '+window.location.origin+' ke Supabase → Authentication → URL Configuration → Redirect URLs';
+    if(/failed to fetch|network.*error|fetch.*failed/i.test(rawLower)) return '🌐 Gagal terhubung ke Supabase. Periksa internet, atau Project Supabase mungkin paused. Buka dashboard Supabase untuk restore.';
+    if(/organization.*not.*found|org.*not.*found/i.test(rawLower)) return '🏢 Organization UUID tidak ditemukan. Pastikan SQL setup sudah dijalankan di Supabase SQL Editor.';
+    if(/belum memiliki membership|membership.*tidak aktif|belum.*diinvite|Gagal auto-create admin pertama/i.test(raw)){
+      return raw;
+    }
     return raw;
   }
-  function showError(e){console.error('SATRIA Supabase bridge:',e);status(friendlyError(e),'error');setButtons()}
+  function showError(e){
+    const msg=String(e?.message||e||'');
+    // Jangan spam console untuk error login yang expected (400)
+    if(/invalid login credentials|email not confirmed|user not found/i.test(msg)){
+      console.warn('SATRIA Auth:',msg);
+    } else {
+      console.error('SATRIA Supabase bridge:',e);
+    }
+    status(friendlyError(e),'error');
+    // Tampilkan tombol Mode Lokal jika error auth dan ada embedded config
+    try{
+      const hasEmbedded = !!window.SATRIA_EMBEDDED_SUPABASE_CONFIG?.url;
+      if(hasEmbedded && /invalid login credentials|user not found|email not confirmed/i.test(msg)){
+        const actionsEl=document.querySelector('#satriaCloudModal .sc-actions');
+        if(actionsEl && !document.getElementById('btnLocalMode')){
+          const localBtn=document.createElement('button');
+          localBtn.id='btnLocalMode';
+          localBtn.textContent='🏠 Mode Lokal Tanpa Cloud';
+          localBtn.title='Hapus config cloud dan lanjutkan dengan data demo lokal';
+          localBtn.style.background='#f59e0b'; localBtn.style.color='white'; localBtn.style.borderColor='#f59e0b';
+          localBtn.onclick=()=>{ if(confirm('Hapus config Supabase tertanam dan reload ke mode demo lokal? Data cloud tidak akan terhapus, hanya config di browser ini yang dibersihkan.')){ localStorage.removeItem('satria-supabase-bridge-config-v1'); window.SATRIA_EMBEDDED_SUPABASE_CONFIG={}; location.reload(); } };
+          actionsEl.appendChild(localBtn);
+        }
+      }
+    }catch(_){}
+    setButtons();
+  }
   function bindRecoveryListener(c){
     if(!c||recoveryListenerClient===c)return;
     recoveryListenerClient=c;
@@ -2948,26 +2891,30 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://umccafupxnqlrlzprqeu.su
     }catch(e){showError(e)}
   }
   async function connect(){
-    try{status('Memeriksa konfigurasi dan menghubungkan…');await initClient();bindRecoveryListener(client);
-      const emailEl=$id('scEmail'),passwordEl=$id('scPassword');
-      let email=(emailEl?emailEl.value:'').trim().toLowerCase();
-      if(emailEl&&email)emailEl.value=email;
-      const password=passwordEl?passwordEl.value:'';
+    try{
+      status('Memeriksa konfigurasi dan menghubungkan…');
+      await initClient(); bindRecoveryListener(client);
+      const rawEmail=$id('scEmail').value.trim();
+      const email=rawEmail.toLowerCase().replace(/\s+/g,'');
+      const password=$id('scPassword').value;
+      // Update field jika ada normalisasi
+      if(rawEmail!==email){ $id('scEmail').value=email; }
       if(email&&password){
-        if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))throw new Error('Format email tidak valid: "'+(email||'(kosong)')+'". Periksa kembali kolom email.');
-        try{await fetch((config().url||'').replace(/\/+$/,'')+'/auth/v1/health',{cache:'no-store',headers:{apikey:config().key||''}})}
-        catch(_){throw new Error('Project Supabase pada '+(config().url||'(URL kosong)')+' tidak dapat dihubungi. Periksa Project URL pada kolom konfigurasi — login hanya akan berhasil pada project tempat akun dibuat.')}
+        if(!/^\S+@\S+\.\S+$/.test(email)) throw new Error('Format email tidak valid. Contoh: admin@satria.go.id');
+        if(password.length<6) throw new Error('Kata sandi minimal 6 karakter.');
+        status('Menghubungkan ke '+ (client.supabaseUrl||'Supabase') +'...', '');
         const {error}=await client.auth.signInWithPassword({email,password});
-        if(error){
-          if(/invalid login credentials/i.test(String(error.message||error))){
-            throw new Error('Email atau kata sandi ditolak oleh project '+(config().url||'').replace(/^https?:\/\//,'')+'. Pastikan: (1) akun dengan email ini sudah ada di Dashboard Supabase → Authentication → Users pada project yang sama persis dengan Project URL di kolom konfigurasi; (2) kata sandi benar — gunakan "Lupa kata sandi?" bila lupa; (3) email diketik tanpa spasi dan sudah dinormalisasi ke huruf kecil: '+email);
-          }
-          throw error;
-        }
-        if(passwordEl)passwordEl.value='';await loadMembership()
+        if(error) throw error;
+        $id('scPassword').value='';
+        status('Login berhasil! Memuat membership...','ok');
+        await loadMembership();
+      } else {
+        const {data,error}=await client.auth.getSession();
+        if(error) throw error;
+        if(data.session) await loadMembership();
+        else status('Konfigurasi tersimpan. Masukkan email dan kata sandi akun Auth untuk masuk. Email akan dinormalisasi ke huruf kecil otomatis.')
       }
-      else {const {data,error}=await client.auth.getSession();if(error)throw error;if(data.session)await loadMembership();else status('Konfigurasi tersimpan. Masukkan email dan kata sandi akun Auth untuk masuk.')}
-    }catch(e){showError(e)}
+    }catch(e){ showError(e); }
   }
   function currentPayload(){
     const o=JSON.parse(JSON.stringify(S));
@@ -3023,25 +2970,6 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://umccafupxnqlrlzprqeu.su
       if(!member||S.dirty||autoSaveInFlight)return;
       try{await pull({source:'realtime',silent:true})}catch(e){showError(e)}
     },220);
-  }
-  async function recoverLocal(){
-    try{
-      if(!client||!member)throw new Error('Hubungkan dan masuk terlebih dahulu.');
-      if(member.role!=='admin')throw new Error('Pemulihan cache lokal hanya tersedia bagi admin.');
-      if(!window.SATRIA_LOCAL_CACHE||typeof window.SATRIA_LOCAL_CACHE.read!=='function')throw new Error('Penyimpanan lokal tidak tersedia di sesi ini.');
-      const cached=await window.SATRIA_LOCAL_CACHE.read();
-      if(!cached||!Array.isArray(cached.paket)||!cached.paket.length)throw new Error('Tidak ada data lokal tersimpan yang dapat dipulihkan. Gunakan Impor backup JSON bila Anda memiliki file backup.');
-      const nPaket=cached.paket.length,nOpd=(cached.opd||[]).length;
-      if(!confirm('Ditemukan data cache lokal: '+nPaket+' paket, '+nOpd+' OPD.\n\nMemulihkan akan menampilkan data tersebut dan menandainya untuk dikirim ke cloud lewat "Sinkronkan perubahan". Lanjutkan?'))return;
-      const ui={...(S.ui||{})};
-      Object.assign(S,cached,{ui,log:[],dirty:true,chat:[],chatCtx:null});
-      if(typeof normalizeData==='function')normalizeData();
-      window.SATRIA_CLOUD_ADMIN_IMPORT_READY=true;
-      status('Data lokal dipulihkan ('+nPaket+' paket, '+nOpd+' OPD). Klik "Sinkronkan perubahan" untuk mengirim snapshot awal ke cloud.','ok');
-      syncIndicator(nPaket+' paket siap dikirim','wait');
-      if(typeof window.render==='function')window.render();
-      setButtons();
-    }catch(e){showError(e)}
   }
   async function pull(options={}){
     const opts=(options&&typeof options==='object'&&('source' in options||'silent' in options||'discardConfirmed' in options))?options:{};
@@ -3240,11 +3168,11 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://umccafupxnqlrlzprqeu.su
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&member){checkRemoteVersion();if(S.dirty&&!conflictActive)requestAutosave('tab-visible')}});
   { const e=$id('scClose'); if(e) e.addEventListener('click',close); }
   if(modal) modal.addEventListener('click',e=>{if(e.target===modal)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
-  { const _el=$id('scEmbedConfig'); if(_el) _el.addEventListener('click',downloadConfiguredHtml);$id('scSaveConfig').addEventListener('click',()=>{try{saveConfig();}catch(e){showError(e)}});$id('scConnect').addEventListener('click',connect);$id('scResetPassword').addEventListener('click',requestPasswordReset);$id('scSaveNewPassword').addEventListener('click',saveRecoveredPassword);$id('scCancelRecovery').addEventListener('click',()=>{$id('scRecoveryPanel').hidden=true;$id('scNewPassword').value='';$id('scConfirmNewPassword').value='';});$id('scPull').addEventListener('click',pull);$id('scPush').addEventListener('click',push);{const rc=$id('scRecoverLocal');if(rc)rc.addEventListener('click',recoverLocal)}$id('scSignOut').addEventListener('click',signOut); }
-  const saved=config(); { const a=$id('scUrl'), b=$id('scKey'), c=$id('scOrg'); if(saved.url && a) a.value=saved.url; if(saved.key && b) b.value=saved.key; if(saved.org && c) c.value=saved.org; }
+  { const _el=$id('scEmbedConfig'); if(_el) _el.addEventListener('click',downloadConfiguredHtml);$id('scSaveConfig').addEventListener('click',()=>{try{saveConfig();}catch(e){showError(e)}});$id('scConnect').addEventListener('click',connect);$id('scResetPassword').addEventListener('click',requestPasswordReset);$id('scSaveNewPassword').addEventListener('click',saveRecoveredPassword);$id('scCancelRecovery').addEventListener('click',()=>{$id('scRecoveryPanel').hidden=true;$id('scNewPassword').value='';$id('scConfirmNewPassword').value='';});$id('scPull').addEventListener('click',pull);$id('scPush').addEventListener('click',push);$id('scSignOut').addEventListener('click',signOut); }
+  { const saved=config(); const a=$id('scUrl'), b=$id('scKey'), c=$id('scOrg'); if(saved.url && a) a.value=saved.url; if(saved.key && b) b.value=saved.key; if(saved.org && c) c.value=saved.org; }
   if(window.render){const originalRender=window.render;window.render=function(){originalRender();applyUserLock()}}
   // Restore an existing Supabase session after the static app has booted.
-  if(saved.url&&saved.key&&saved.org&&window.supabase?.createClient){try{client=getSupabaseClient(saved.url,saved.key);bindRecoveryListener(client);orgId=saved.org;client.auth.getSession().then(({data,error})=>{if(error)throw error;if(data.session)loadMembership().catch(showError)}).catch(showError)}catch(e){showError(e)}}
+  if(saved.url&&saved.key&&saved.org&&window.supabase?.createClient){try{client=window.supabase.createClient(saved.url,saved.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});bindRecoveryListener(client);orgId=saved.org;client.auth.getSession().then(({data,error})=>{if(error)throw error;if(data.session)loadMembership().catch(showError)}).catch(showError)}catch(e){showError(e)}}
 
   // Modal tambah akun Auth menggunakan session, member, orgId dari bridge ini.
 /*
@@ -5517,8 +5445,6 @@ function vDokOptimized(){
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
           Cetak / PDF
         </button>
-        <button type="button" data-act="previewDoc" class="satria-btn-secondary" style="height:40px;flex-shrink:0">👁 Pratinjau</button>
-        <button type="button" data-act="exportPaketCsv" class="satria-btn-secondary" style="height:40px;flex-shrink:0">⬇ CSV Paket</button>
       </div>
       <div class="doc-tabs-scroll" style="margin-top:12px">
         ${T.map(([k,t])=>`<button class="master-tab ${k===S.ui.dok?'active':''}" data-act="dtype" data-tab="${k}" title="${t}">${t}</button>`).join('')}
@@ -5614,82 +5540,6 @@ console.log('[SATRIA] Dokumen Pengadaan lazy load + virtual scroll active');
 })();
 </script>
 <script>window.SATRIA_EMBEDDED_SUPABASE_CONFIG = window.SATRIA_EMBEDDED_SUPABASE_CONFIG || {};</script>
-<script>
-/* ============================================================
- * SATRIA 3.0 — Patch UX Cloud Mode + Offline Sync Wiring
- * 1. Badge "Atur Supabase / Login" saat config tersimpan tapi belum login
- *    (perbaikan isu FIX_ERROR #5: user bingung kenapa OPD kosong di cloud mode).
- * 2. Integrasi Background Sync dengan SW v3: saat offline + ada perubahan,
- *    page mendaftarkan sync tag; SW memicu flush saat koneksi kembali.
- * ============================================================ */
-(function(){
-  'use strict';
-  /* ---------- 1. Badge cloud ---------- */
-  var badge=null, styleInjected=false;
-  function ensureStyle(){
-    if(styleInjected)return; styleInjected=true;
-    var s=document.createElement('style');s.textContent=
-      '#satriaCloudBadge{position:fixed;right:16px;bottom:16px;z-index:2147483000;display:none;'+
-      'align-items:center;gap:9px;padding:10px 16px;border-radius:12px;cursor:pointer;'+
-      'background:rgba(255,255,255,.97);border:1px solid #b2d1cc;box-shadow:0 8px 24px rgba(15,118,110,.2);'+
-      "font:700 12px 'Inter',system-ui,sans-serif;color:#0f172a}"+
-      '#satriaCloudBadge .dot{width:10px;height:10px;border-radius:50%;background:#F59E0B;'+
-      'box-shadow:0 0 0 4px rgba(245,158,11,.25);animation:satriaBadgePulse 1.6s infinite}'+
-      '#satriaCloudBadge:hover{border-color:#0F766E;color:#0F766E;transform:translateY(-1px)}'+
-      ':root[data-theme="dark"] #satriaCloudBadge{background:rgba(14,40,38,.97);border-color:#2a7a71;color:#e6f4f2}'+
-      '@keyframes satriaBadgePulse{50%{transform:scale(1.25)}}';
-    document.head.appendChild(s);
-  }
-  function refreshBadge(){
-    ensureStyle();
-    if(!badge){
-      badge=document.createElement('div');badge.id='satriaCloudBadge';
-      badge.innerHTML='<span class="dot"></span>\u2601\ufe0f Supabase tersimpan \u2014 <b>Atur / Login</b>';
-      badge.title='Konfigurasi cloud ditemukan tetapi belum login. Data OPD/paket akan kosong sampai login berhasil.';
-      badge.addEventListener('click',function(){
-        var btn=document.getElementById('satriaCloudOpen');
-        if(btn)btn.click();
-        badge.style.display='none';
-      });
-      document.body.appendChild(badge);
-    }
-    var configured=!!window.SATRIA_CLOUD_CONFIGURED;
-    var loggedIn=!!window.SATRIA_CLOUD_ROLE;
-    var mustLogin=document.getElementById('satriaCloudModal')&&document.getElementById('satriaCloudModal').hidden!==false;
-    badge.style.display=(configured&&!loggedIn)?'flex':'none';
-  }
-  /* ---------- 2. Wiring Background Sync (SW v3) ---------- */
-  function registerBgSync(){
-    try{
-      if(navigator.serviceWorker&&navigator.serviceWorker.controller){
-        navigator.serviceWorker.controller.postMessage({type:'REGISTER_SYNC'});
-      }
-    }catch(_){}
-  }
-  if(navigator.serviceWorker){
-    navigator.serviceWorker.addEventListener('message',function(e){
-      if(e.data&&e.data.type==='satria:flush-sync-queue'){
-        if(navigator.onLine&&typeof window.SATRIA_AUTO_SYNC_REQUEST==='function'){
-          try{window.SATRIA_AUTO_SYNC_REQUEST('sw-background-sync')}catch(_){}
-        }
-      }
-    });
-  }
-  window.addEventListener('offline',function(){
-    try{if(typeof S!=='undefined'&&S&&S.dirty)registerBgSync()}catch(_){}
-  });
-  window.addEventListener('online',function(){
-    if(typeof window.SATRIA_AUTO_SYNC_REQUEST==='function'){
-      try{window.SATRIA_AUTO_SYNC_REQUEST('browser-online-reconnect')}catch(_){}
-    }
-  });
-  /* Poll ringan untuk status login (bridge tidak mengekspos event perubahan role). */
-  var bTimer=setInterval(function(){try{refreshBadge()}catch(_){}},2000);
-  document.addEventListener('DOMContentLoaded',function(){try{refreshBadge()}catch(_){}});
-  setTimeout(function(){try{refreshBadge()}catch(_){}},800);
-  window.SATRIA_CLOUD_BADGE={refresh:refreshBadge,stop:function(){clearInterval(bTimer)}};
-})();
-</script>
 
 </body>
 </html>
