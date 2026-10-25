@@ -1,4 +1,4 @@
-const CACHE_NAME='satria-v3-fixed-final-2026-10-25-v2';
+const CACHE_NAME='satria-v3-macbook-stable-v8-2026-10-25-final';
 self.addEventListener('install', e=>{ e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(['./','./index.html']).catch(()=>{}))); self.skipWaiting(); });
 self.addEventListener('activate', e=>{ e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE_NAME).map(x=>caches.delete(x))))); self.clients.claim(); });
 self.addEventListener('fetch', e=>{
