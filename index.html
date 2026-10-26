@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
+<html lang="id" data-theme="light" style="--header-h: 109px;"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -1048,26 +1047,46 @@ header button[data-act="export"]{
   }
 }
 </style>
-</head>
+<style>.satria-sync-indicator{display:inline-flex;align-items:center;gap:6px;max-width:250px;padding:7px 10px;border:1px solid #cbdedb;border-radius:999px;background:#f0fdfa;color:#0f766e;font:600 11px/1.25 system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.satria-sync-indicator[data-kind=wait]{background:#fff7ed;border-color:#fed7aa;color:#9a3412}.satria-sync-indicator[data-kind=error]{background:#fef2f2;border-color:#fecaca;color:#b91c1c}.satria-sync-indicator[data-kind=muted]{background:#f8fafc;border-color:#e2e8f0;color:#64748b}@media(max-width:1100px){.satria-sync-indicator{max-width:155px;padding:6px 8px;font-size:10px}}@media(max-width:680px){.satria-sync-indicator{max-width:122px}}</style></head>
 <body>
 <div class="bg-blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
 <div class="noise"></div>
 <header>
   <div class="header-left">
-    <div id="bLogoRow"><div><b id="hPemda"></b><div id="hSub"></div></div></div>
+    <div id="bLogoRow"><div><b id="hPemda">SATRIA Framework <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">Framework Version 3.0</span></b><div id="hSub"><span style="font-weight:600;letter-spacing:-0.01em">Integrated Government Intelligence Platform</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px;opacity:.8">Smart • Adaptive • Transparent • Responsive • Integrated • Accountable</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px">Multi OPD • Multi Tahun</span></div></div></div>
   </div>
-  <div class="header-right row">
-    <div class="control-group"><label>User <select id="selUser"></select></label></div>
-    <div class="control-group"><label>Tahun <select id="selTahun"></select></label></div>
-    <div class="control-group"><label>OPD <select id="selOpd"></select></label></div>
-    <span id="dirty"></span>
-    <div class="control-group"><label>💾 <select id="selEngine"></select></label></div>
+  <div class="header-right row"><button type="button" class="satria-cloud-btn" id="satriaCloudOpen" title="Konfigurasi autentikasi dan sinkronisasi Supabase">☁ Supabase</button><span id="satriaCloudSyncIndicator" class="satria-sync-indicator" role="status" aria-live="polite" title="Belum login ke cloud" data-kind="muted">Belum login ke cloud</span>
+    <div class="control-group"><label>User <select id="selUser" title=""></select></label></div>
+    <div class="control-group"><label>Tahun <select id="selTahun"><option value="2026" selected="">2026</option></select></label></div>
+    <div class="control-group"><label>OPD <select id="selOpd" title="Pilih OPD untuk memfilter data aplikasi."><option value="all" selected="">Semua OPD</option><option value="o1">OPD DEMO</option></select></label></div>
+    <span id="dirty" title="Penyimpanan lokal dan backup file adalah dua hal berbeda" style="background: rgba(15, 118, 110, 0.14); color: rgb(15, 118, 110);">✔ Tidak ada perubahan baru</span>
+    <div class="control-group"><label>💾 <select id="selEngine"><option value="dexie">IndexedDB (Dexie)</option><option value="memory">Memori sesi</option></select></label></div>
     <button type="button" class="theme-btn" id="themeToggle" title="Mode siang/malam">◐</button>
     <button data-act="export">⬇ Backup</button>
   </div>
 </header>
-<nav id="nav"><div class="nav-track"><div class="nav-slider" id="navSlider"></div></div></nav>
-<main id="main"></main>
+<nav id="nav"><a href="#dash" class="on" data-icon="dash">Ringkasan Utama</a><a href="#paket" class="" data-icon="paket">Paket Pengadaan</a><a href="#dok" class="" data-icon="dok">Dokumen Pengadaan</a><a href="#lap" class="" data-icon="lap">Laporan dan Analisis</a><a href="#panduan" class="" data-icon="panduan">Panduan Penggunaan</a><a href="#chat" class="" data-icon="chat">Asisten SATRIA</a></nav>
+<main id="main"><div class="satria-command-header"><div class="satria-command-title"><div class="satria-command-badge"><span class="dot"></span> RINGKASAN UTAMA</div><h2>Ringkasan Utama SATRIA</h2><p>Integrated Government Intelligence Platform • Strategic Analytics Overview • Framework Version 3.0</p></div><div class="satria-command-meta"><div class="satria-meta-card"><span>TA Aktif</span><b>2026</b></div><div class="satria-meta-card"><span>Entitas</span><b>0</b></div><div class="satria-meta-card"><span>Kepatuhan</span><b>0%</b></div></div></div>
+ <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+  <div class="card kpi satria-kpi" style="--kpi-accent:#0F766E"><div class="kpi-icon" style="background:linear-gradient(135deg,#0F766E 0%, color-mix(in srgb, #0F766E 70%, white) 100%)">🏛</div><div class="kpi-content"><span class="kpi-label">Jumlah Entitas</span><b class="kpi-value">0</b><span class="kpi-sub">Governance • Total Program</span></div><div class="kpi-glow"></div></div>
+  <div class="card kpi satria-kpi" style="--kpi-accent:#0891B2"><div class="kpi-icon" style="background:linear-gradient(135deg,#0891B2 0%, color-mix(in srgb, #0891B2 70%, white) 100%)">📊</div><div class="kpi-content"><span class="kpi-label">Anggaran Terkelola</span><b class="kpi-value">Rp 0</b><span class="kpi-sub">Analytics • Pagu Terkelola</span></div><div class="kpi-glow"></div></div>
+  <div class="card kpi satria-kpi" style="--kpi-accent:#14B8A6"><div class="kpi-icon" style="background:linear-gradient(135deg,#14B8A6 0%, color-mix(in srgb, #14B8A6 70%, white) 100%)">🧠</div><div class="kpi-content"><span class="kpi-label">Ringkasan Paket</span><b class="kpi-value">0%</b><span class="kpi-sub">Intelligence • Utilisasi Rp 0</span></div><div class="kpi-glow"></div></div>
+  <div class="card kpi satria-kpi" style="--kpi-accent:#10B981"><div class="kpi-icon" style="background:linear-gradient(135deg,#10B981 0%, color-mix(in srgb, #10B981 70%, white) 100%)">🔐</div><div class="kpi-content"><span class="kpi-label">Kelengkapan Administratif</span><b class="kpi-value">0%</b><span class="kpi-sub">Compliance • 0 Lengkap</span></div><div class="kpi-glow"></div></div>
+  <div class="card kpi satria-kpi" style="--kpi-accent:#2563EB"><div class="kpi-icon" style="background:linear-gradient(135deg,#2563EB 0%, color-mix(in srgb, #2563EB 70%, white) 100%)">⚡</div><div class="kpi-content"><span class="kpi-label">Indikator Data Paket</span><b class="kpi-value">Rp 0 • 0%</b><span class="kpi-sub">Performance • Efisiensi</span></div><div class="kpi-glow"></div></div>
+ </div>
+ <div class="card satria-overview"><h3 style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff">◈</span> Strategic Analytics Overview <span class="badge" style="margin-left:auto;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">SATRIA Intelligence • v3.0 • Lazy Charts</span></h3><p class="mut">Monitoring real-time terhadap anggaran, efektivitas, kepatuhan, dan kinerja tata kelola berbasis data intelligence. Charts lazy load aktif — hanya render saat discroll, hemat 70% di Android.</p><div class="satria-metrics-row"><div><span>Efisiensi</span><b>Rp 0</b><small>0% dari pagu</small></div><div><span>Total HPS</span><b>Rp 0</b><small>Estimasi kebutuhan</small></div><div><span>Nilai Kontrak</span><b>Rp 0</b><small>Realisasi</small></div><div><span>Paket Lengkap</span><b>0/0</b><small>0% compliant</small></div></div></div>
+ <div class="chart-grid">
+   <div class="chart-card wide"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2,#14B8A6)"></div><div class="chart-title">Strategic Performance Trend <span class="badge" style="background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">SATRIA Analytics • Lazy</span></div><div id="chartMultiYear" style="width:100%;height:340px"><div class="chart-skeleton"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading chart...</div></div></div><div class="d3-legend" id="legendMultiYear"></div><div class="d3-tooltip" id="tooltipMulti"></div></div>
+   <div class="chart-card half"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2)"></div><div class="chart-title">Budget Utilization</div><div id="chartDonut" style="width:100%;height:280px; display:grid; place-items:center"><div class="chart-skeleton" style="height:240px"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading...</div></div></div><div class="d3-legend" id="legendDonut" style="justify-content:center"></div></div>
+   <div class="chart-card half"><div class="kh-accent" style="background:linear-gradient(90deg,#0891B2,#14B8A6)"></div><div class="chart-title">Efficiency Analytics</div><div id="chartBarPaket" style="width:100%;height:280px"><div class="chart-skeleton"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading...</div></div></div></div>
+   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#10B981,#14B8A6)"></div><div class="chart-title">Governance Status</div><div id="chartStatus" style="width:100%;height:240px; display:grid; place-items:center"><div class="chart-skeleton" style="height:200px"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading...</div></div></div></div>
+   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#2563EB,#0891B2)"></div><div class="chart-title">Performance Matrix</div><div id="chartHpsPagu" style="width:100%;height:240px"><div class="chart-skeleton" style="height:200px"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading...</div></div></div></div>
+   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#14B8A6)"></div><div class="chart-title">Institution Analytics</div><div id="chartOpd" style="width:100%;height:240px"><div class="chart-skeleton" style="height:200px"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading...</div></div></div></div>
+ </div>
+ <div class="card" style="margin-top:14px"><h3>Strategic Analytics Overview • Multi Tahun</h3><div class="table-wrap"><table><tbody><tr><th>Tahun</th><th class="n">Entitas</th><th class="n">Anggaran</th><th class="n">Kontrak</th><th class="n">Efisiensi</th><th class="n">Kinerja</th></tr>
+ <tr><td><b>2026</b></td><td class="n">0</td><td class="n">Rp 0</td><td class="n">Rp 0</td><td class="n">Rp 0</td><td class="n"><span class="pill" style="background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">0%</span></td></tr></tbody></table></div></div>
+ <div class="card"><h3>Paket Pengadaan • TA 2026</h3><p class="mut">Belum ada paket pada filter ini.</p></div>
+ <div class="card"><h3>Governance Intelligence • Aktivitas Sinkronisasi</h3><span class="mut">Belum ada perubahan. Ubah data program, rincian, atau penawaran untuk melihat sinkronisasi governance intelligence.</span></div></main>
 <footer class="satria-global-footer no-print"><div class="foot-brand"><b>SATRIA Framework 3.0</b><span>Integrated Government Intelligence Platform</span><span style="font-size:10px;opacity:.8">Framework Version 3.0</span></div><div class="foot-links"><span>Smart • Adaptive • Transparent • Responsive • Integrated • Accountable</span><span style="opacity:.4">|</span><span>Generated by SATRIA Framework</span></div></footer>
 <div id="toast"></div>
 <script>
@@ -1149,7 +1168,11 @@ function tabelPaket(L){
   const sorted = L.slice().sort((a,b)=>a.seq-b.seq);
   window.__paketVirtualData = sorted;
   // Defer render to after DOM
-  setTimeout(()=>{ attachPaketVirtualScroll(); renderPaketVirtualSlice(); }, 50);
+  setTimeout(function runPaketVirtualInit(tries=0){
+    if(typeof attachPaketVirtualScroll==='function' && typeof renderPaketVirtualSlice==='function'){
+      attachPaketVirtualScroll(); renderPaketVirtualSlice();
+    } else if(tries<40){ setTimeout(()=>runPaketVirtualInit(tries+1), 50); }
+  }, 50);
   return `
     <div class="satria-virtual-table">
       <div class="satria-virtual-header">
@@ -2703,7 +2726,7 @@ main{overflow-anchor:none}
 
 
 
-<div id="satriaCloudModal" hidden aria-hidden="true">
+<div id="satriaCloudModal" aria-hidden="false">
   <section class="sc-dialog" role="dialog" aria-modal="true" aria-labelledby="scTitle">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:start">
       <div><h2 id="scTitle">Koneksi Supabase</h2><div class="mut">Sinkronisasi delta otomatis dan Supabase Realtime untuk SATRIA Framework 3.0</div></div>
@@ -2723,28 +2746,26 @@ main{overflow-anchor:none}
       <button type="button" id="scSaveConfig">Simpan konfigurasi</button>
       <button type="button" class="primary" id="scConnect">Masuk ke SATRIA</button>
       <button type="button" id="scResetPassword">Lupa kata sandi?</button>
-      <button type="button" id="scPull" disabled>Tarik dari Supabase</button>
-      <button type="button" id="scPush" disabled>Sinkronkan perubahan</button>
-      <button type="button" class="danger" id="scSignOut" disabled>Keluar</button>
+      <button type="button" id="scPull" disabled="">Tarik dari Supabase</button>
+      <button type="button" id="scPush" disabled="">Sinkronkan perubahan</button>
+      <button type="button" class="danger" id="scSignOut" disabled="">Keluar</button>
     </div>
-    <div id="scRecoveryPanel" class="sc-recovery" hidden>
+    <div id="scRecoveryPanel" class="sc-recovery" hidden="">
       <b>Atur kata sandi baru</b>
       <p class="mut" style="margin:6px 0 8px">Panel ini muncul setelah tautan pemulihan Supabase dibuka. Pilih kata sandi baru yang kuat dan jangan gunakan ulang kata sandi lama.</p>
       <label>Kata sandi baru<input id="scNewPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Minimal 8 karakter"></label>
       <label>Ulangi kata sandi baru<input id="scConfirmNewPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Ulangi kata sandi baru"></label>
       <div class="sc-recovery-actions"><button type="button" class="primary" id="scSaveNewPassword">Simpan kata sandi baru</button><button type="button" id="scCancelRecovery">Batal</button></div>
     </div>
-    <p id="scStatus" class="sc-status" role="status" aria-live="polite">Belum terhubung.</p>
+    <p id="scStatus" class="sc-status" role="status" aria-live="polite" data-kind="ok">Konfigurasi tersimpan di browser ini. Login berikutnya tidak perlu memasukkan URL, key, atau UUID organisasi lagi.</p>
     <div class="sc-note sc-warning"><b>Jika muncul “Invalid login credentials”:</b> pastikan akun email ada di Supabase Dashboard → Authentication → Users pada project yang tertanam di file ini, lalu cek kata sandinya. Organization UUID tidak menentukan validitas email/kata sandi. Jika akun belum ada, buat akun Auth terlebih dahulu; setelah login berhasil, akun juga harus memiliki membership aktif pada organisasi ini.</div>
     <div class="sc-note"><b>Prosedur:</b> siapkan project staging → jalankan file SQL pendamping <code>satria-supabase-staging-bootstrap.sql</code> setelah ditinjau → buat akun Auth → bootstrap organisasi dan membership admin melalui SQL Editor → masukkan URL, publishable/anon key, dan UUID organisasi → login → tarik atau kirim snapshot. Ekspor backup lokal terlebih dahulu. Konflik versi tidak ditimpa otomatis. Simpan/unduh backup lokal, tarik versi cloud terbaru, lalu terapkan kembali perubahan yang memang diperlukan.</div>
     <h3>Persiapan database</h3><p class="mut">Untuk pemulihan kata sandi, alamat halaman SATRIA harus diizinkan di Supabase Dashboard → Authentication → URL Configuration → Redirect URLs. SQL bootstrap disediakan sebagai file terpisah dari HTML. Perubahan disimpan otomatis sebagai delta per record setelah Anda menyimpan data. Supabase Realtime memberi tahu pengguna lain tentang versi baru; data yang diterima tetap dibatasi scope server. Tombol Sinkronkan perubahan menjalankan sinkronisasi perubahan yang tertunda. Full snapshot hanya untuk bootstrap/pemulihan Admin yang dilakukan secara eksplisit. Konfigurasi juga dapat disimpan di browser melalui tombol Simpan konfigurasi. Saat file yang sama dibuka kembali pada browser/profil yang sama, URL, publishable/anon key, dan Organization UUID akan diisi otomatis. Kata sandi tidak disimpan. Gunakan Unduh HTML dengan konfigurasi bila ingin membawa konfigurasi bersama file ke browser/perangkat lain; file tersebut memuat publishable/anon key sehingga bagikan dengan bijak.</p>
   </section>
 </div>
 
-<script id="satriaEmbeddedSupabaseConfig">
-// Konfigurasi Supabase default tertanam, termasuk Organization UUID.
-window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://gsmrhrgcilzuelrorarr.supabase.co","key":"sb_publishable_gdDUVrD16HQaVB-nrgdqeg_B2Rk7v9H","org":"64bec4e1-a687-4dce-8935-cc51363171db"};
-</script>
+<script id="satriaEmbeddedSupabaseConfig">// Konfigurasi koneksi klien; jangan pernah menaruh service_role/secret key di sini.
+window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://umccafupxnqlrlzprqeu.supabase.co","key":"sb_publishable_iLvKT0f0PAfO_Z0lrU9lMg_oV2w2sXJ","org":"64bec4e1-a687-4dce-8935-cc51363171db"};</script>
 <script>
 (function(){
   'use strict';
@@ -3324,7 +3345,8 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
   { const e=$id('scClose'); if(e) e.addEventListener('click',close); }
   if(modal) modal.addEventListener('click',e=>{if(e.target===modal)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
   { const _el=$id('scEmbedConfig'); if(_el) _el.addEventListener('click',downloadConfiguredHtml);$id('scSaveConfig').addEventListener('click',()=>{try{saveConfig();}catch(e){showError(e)}});$id('scConnect').addEventListener('click',connect);$id('scResetPassword').addEventListener('click',requestPasswordReset);$id('scSaveNewPassword').addEventListener('click',saveRecoveredPassword);$id('scCancelRecovery').addEventListener('click',()=>{$id('scRecoveryPanel').hidden=true;$id('scNewPassword').value='';$id('scConfirmNewPassword').value='';});$id('scPull').addEventListener('click',pull);$id('scPush').addEventListener('click',push);$id('scSignOut').addEventListener('click',signOut); }
-  { const saved=config(); const a=$id('scUrl'), b=$id('scKey'), c=$id('scOrg'); if(saved.url && a) a.value=saved.url; if(saved.key && b) b.value=saved.key; if(saved.org && c) c.value=saved.org; }
+  const saved=config();
+  { const a=$id('scUrl'), b=$id('scKey'), c=$id('scOrg'); if(saved.url && a) a.value=saved.url; if(saved.key && b) b.value=saved.key; if(saved.org && c) c.value=saved.org; }
   if(window.render){const originalRender=window.render;window.render=function(){originalRender();applyUserLock()}}
   // Restore an existing Supabase session after the static app has booted.
   if(saved.url&&saved.key&&saved.org&&window.supabase?.createClient){try{client=window.supabase.createClient(saved.url,saved.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});bindRecoveryListener(client);orgId=saved.org;client.auth.getSession().then(({data,error})=>{if(error)throw error;if(data.session)loadMembership().catch(showError)}).catch(showError)}catch(e){showError(e)}}
@@ -5650,12 +5672,12 @@ console.log('[SATRIA] Dokumen Pengadaan lazy load + virtual scroll active');
 })();
 </script>
 <!-- PWA AWA Fixed v2 -->
-<div id="pwaInstallBanner" hidden>
+<div id="pwaInstallBanner">
   <span>📲 Install SATRIA ke HP?</span>
   <button id="pwaInstallBtn" type="button">Install</button>
   <button id="pwaDismissBtn" type="button" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3)">Nanti</button>
 </div>
-<div id="satriaSyncBadge" class="satria-sync-badge" hidden><span style="width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block"></span><span id="syncBadgeText">Siap</span></div>
+<div id="satriaSyncBadge" class="satria-sync-badge" data-state="idle" hidden=""><span style="width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block"></span><span id="syncBadgeText">✅ Auto-sync aktif</span></div>
 <script>
 // PWA Safe
 (function(){
@@ -5805,5 +5827,6 @@ main{padding-top:20px !important}
   nav a{height:34px !important; font-size:12px !important; padding:0 10px !important; flex:0 0 auto !important}
 }
 </style>
-</body>
-</html>
+
+
+</body></html>
