@@ -1153,7 +1153,7 @@ const filt=(t=S.ui.tahun)=>{
   const year=Number(t),scope=activeCloudScope();
   if(!Number.isFinite(year)) return [];
   if(scope&&(!scope.years.includes(year)||!scope.opdIds.length)) return [];
-  return (S.paket||[]).filter(p=>Number(p.tahun)===year&&(S.ui.opd==='all'||String(p.opd)===String(S.ui.opd))&&(!scope||scope.opdIds.includes(String(p.opd))));
+  return (S.paket||[]).filter(p=>(S.ui.plife==='arsip'?!!p.arsip:!p.arsip)&&Number(p.tahun)===year&&(S.ui.opd==='all'||String(p.opd)===String(S.ui.opd))&&(!scope||scope.opdIds.includes(String(p.opd))));
 };
 const MOD={paket:['Ringkasan Utama','Dokumen terkait'],pagu:['Ringkasan Utama','Dokumen Pengadaan','Nota Dinas','Laporan dan Analisis'],items:['Ringkasan Utama','Nota Dinas','DPP','SPPBJ','BA Hasil'],nego:['Ringkasan Utama','BA Hasil','Laporan dan Analisis'],pemenang:['Ringkasan Utama','SPPBJ','BA Hasil','Laporan dan Analisis'],settings:['Kop semua dokumen'],master:['Form Paket Pengadaan','Dokumen Pengadaan']};
 function sync(k,label){S.dirty=true;persistRevision++;S.persistError='';S.log.unshift({t:new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}),label,mods:MOD[k]||['Data aplikasi']});S.log=S.log.slice(0,25);toast('Perubahan dicatat: '+((MOD[k]||['Data aplikasi']).join(', ')));if(typeof window.SATRIA_AUTO_SYNC_REQUEST==='function')window.SATRIA_AUTO_SYNC_REQUEST(k,label)}
@@ -1224,8 +1224,11 @@ function vDash(){
 }
 
 function paketListForView(){
- const q=String(S.ui.q||'').trim().toLocaleLowerCase('id-ID');
- return filt().filter(p=>!q||`${p.rup||''} ${p.nama||''}`.toLocaleLowerCase('id-ID').includes(q));
+ const ids=(window.SATRIA&&SATRIA.searchPaketIds)?SATRIA.searchPaketIds(S.ui.q):null;
+ let base=filt();
+ const pl=S.ui.plife;
+ if(pl&&pl!=='all') base=base.filter(p=>SATRIA.lifecycle(p)===pl);
+ return ids?base.filter(p=>ids.has(p.id)):base;
 }
 function paketEmptyState(){
  const scope=activeCloudScope();
@@ -1274,10 +1277,14 @@ function uniqSumber(v){
   return [...new Set(String(v??'').split(',').map(s=>s.trim()).filter(Boolean))].join(', ');
 }
 function rupFromSirup(a){
-  const yr=String(a[6]??'').match(/\d{4}/);
-  return {rup:String(a[0]??a[5]??'').trim(),nama:String(a[1]??'').trim(),pagu:a[2],metodePemilihan:String(a[3]??'').trim(),sumber:uniqSumber(a[4]),tahun:yr?Number(yr[0]):''};
+  const raw=String(a[6]??'').trim();
+  const yr=raw.match(/\d{4}/);
+  const BULAN={january:'Januari',february:'Februari',march:'Maret',april:'April',may:'Mei',june:'Juni',july:'Juli',august:'Agustus',september:'September',october:'Oktober',november:'November',december:'Desember'};
+  const namaBulan=raw.replace(/[0-9]/g,'').trim().toLowerCase();
+  const bulan=BULAN[namaBulan]?(BULAN[namaBulan]+(yr?' '+yr[0]:'')):raw;
+  return {rup:String(a[0]??a[5]??'').trim(),nama:String(a[1]??'').trim(),pagu:a[2],metodePemilihan:String(a[3]??'').trim(),sumber:uniqSumber(a[4]),tahun:yr?Number(yr[0]):'',bulan};
 }
-function rupParseRow(r,i,defTahun,defOpd){
+function rupParseRow(r,i,defTahun,defOpd,defSub){
   const e=m=>({ok:false,err:'Data #'+(i+1)+': '+m});
   if(Array.isArray(r))r=rupFromSirup(r);
   if(!r||typeof r!=='object')return e('harus berupa objek JSON.');
@@ -1296,7 +1303,7 @@ function rupParseRow(r,i,defTahun,defOpd){
   if(S.paket.some(p=>Number(p.tahun)===tahun&&String(p.rup||'').trim()===rup))return e('kode RUP '+rup+' sudah dipakai pada TA '+tahun+'.');
   const pagu=typeof r.pagu==='string'?Number(r.pagu.replace(/[^0-9]/g,'')):Number(r.pagu);
   if(!(pagu>0))return e('pagu harus lebih dari 0.');
-  const sub=String(r.sub||'').trim()||(S.kode[0]?.kode||'');
+  const sub=String(r.sub||'').trim()||String(defSub||S.kode[0]?.kode||'');
   if(sub&&!S.kode.some(k=>k.kode===sub))return e('kode sub kegiatan "'+sub+'" tidak ada di Data Master.');
   const items=[];
   const rawItems=Array.isArray(r.items)?r.items:[];
@@ -1308,18 +1315,19 @@ function rupParseRow(r,i,defTahun,defOpd){
     items.push({id:uid('i'),nama:String(it.nama).trim(),spesifikasi:String(it.spesifikasi||''),merek:String(it.merek||''),pdn:'Perlu verifikasi',linkProduk:'',vol,satuan:String(it.satuan||'Unit'),hs});
   }
   const unit=(S.unit.find(u=>String(u.opd)===String(opd))||{}).id||'';
-  return {ok:true,p:{id:uid('k'),tahun,opd,unit,seq:0,nama,rup,pagu,sumber:String(r.sumber||S.pemda.sumber||''),sub,ppk:pjId(opd,'PPK')||'',pp:pjId(opd,'PP')||'',kabid:pjId(opd,'Kabid')||'',masaHk:Number(r.masaHk)||7,jenisPengadaan:String(r.jenisPengadaan||'Barang'),metodePemilihan:String(r.metodePemilihan||'E-Purchasing dengan Negosiasi Harga'),lokasiPengiriman:String(r.lokasiPengiriman||O(opd).tempat||O(opd).alamat||''),tglSurvei:'',tglEvaluasi:'',tglNego:'',tglPenetapan:'',tglNodis:'',tglDpp:'',tglSppbj:'',tglBahp:'',batas:'',pemenangId:null,items,penawaran:[]}};
+  return {ok:true,p:{id:uid('k'),tahun,opd,unit,seq:0,nama,rup,pagu,sumber:String(r.sumber||S.pemda.sumber||''),sub,bulanPelaksanaan:String(r.bulan??r.bulanPelaksanaan??'').trim(),ppk:pjId(opd,'PPK')||'',pp:pjId(opd,'PP')||'',kabid:pjId(opd,'Kabid')||'',masaHk:Number(r.masaHk)||7,jenisPengadaan:String(r.jenisPengadaan||'Barang'),metodePemilihan:String(r.metodePemilihan||'E-Purchasing dengan Negosiasi Harga'),lokasiPengiriman:String(r.lokasiPengiriman||O(opd).tempat||O(opd).alamat||''),tglSurvei:'',tglEvaluasi:'',tglNego:'',tglPenetapan:'',tglNodis:'',tglDpp:'',tglSppbj:'',tglBahp:'',batas:'',pemenangId:null,items,penawaran:[]}};
 }
-function rupReadJson(text,defOpd){
+function rupReadJson(text,defOpd,defSub){
   let data;
   try{data=JSON.parse(String(text||'').trim()||'null')}catch(err){return {rows:[],errs:['Format JSON tidak valid: '+err.message]}}
   const list=Array.isArray(data)?data:(data&&Array.isArray(data.aaData)?data.aaData:(data&&Array.isArray(data.paket)?data.paket:(data&&typeof data==='object'?[data]:null)));
   if(!list||!list.length)return {rows:[],errs:['Tidak ada data paket. Gunakan array JSON, atau objek dengan kunci "paket".']};
   const rows=[],errs=[],seen=new Set();
-  list.forEach((r,i)=>{const x=rupParseRow(r,i,S.ui.tahun,defOpd);if(!x.ok){errs.push(x.err);return}const key=x.p.tahun+'|'+x.p.rup;if(seen.has(key)){errs.push('Data #'+(i+1)+': kode RUP '+x.p.rup+' duplikat dalam file.');return}seen.add(key);rows.push(x.p)});
+  if(data&&!Array.isArray(data)&&data.iTotalDisplayRecords!==undefined&&Number(data.iTotalDisplayRecords)!==list.length)errs.push('iTotalDisplayRecords ('+data.iTotalDisplayRecords+') tidak sama dengan jumlah baris data ('+list.length+'). Periksa apakah file terpotong.');
+  list.forEach((r,i)=>{const x=rupParseRow(r,i,S.ui.tahun,defOpd,defSub);if(!x.ok){errs.push(x.err);return}const key=x.p.tahun+'|'+x.p.rup;if(seen.has(key)){errs.push('Data #'+(i+1)+': kode RUP '+x.p.rup+' duplikat dalam file.');return}seen.add(key);rows.push(x.p)});
   return {rows,errs};
 }
-const rupPreview=r=>({errs:r.errs,rows:r.rows.map(p=>({rup:p.rup,nama:p.nama,opd:O(p.opd).singkat||O(p.opd).nama,tahun:p.tahun,pagu:p.pagu,n:p.items.length}))});
+const rupPreview=r=>({errs:r.errs,rows:r.rows.map(p=>({rup:p.rup,nama:p.nama,opd:O(p.opd).singkat||O(p.opd).nama,tahun:p.tahun,sub:p.sub,bulan:p.bulanPelaksanaan,pagu:p.pagu,n:p.items.length}))});
 function vInputRup(){
   const mode=S.ui.rupMode||'manual';
   const scope=activeCloudScope();
@@ -1333,7 +1341,7 @@ function vInputRup(){
     const defSumber=S.pemda.sumber||'APBD';
     const sumberOpts=[...new Set([...RUP_SUMBER,defSumber].filter(Boolean))];
     const F=(l,h)=>`<div class="fg"><label>${l}</label>${h}</div>`;
-    return head+tabs+`<div class="card"><h3>Input RUP manual</h3><p class="mut">Isi data utama paket. Rincian barang, HPS, penawaran, dan tanggal dapat dilengkapi setelah paket tersimpan di menu Paket Pengadaan.</p>
+    return head+tabs+(S.ui.rupFormErr?`<div class="card" role="alert" style="border-color:#fca5a5;margin-bottom:12px"><b class="bad">${esc(S.ui.rupFormErr)}</b></div>`:"")+`<div class="card"><h3>Input RUP manual</h3><p class="mut">Isi data utama paket. Rincian barang, HPS, penawaran, dan tanggal dapat dilengkapi setelah paket tersimpan di menu Paket Pengadaan.</p>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
 ${F('Kode RUP *','<input id="rupKode" type="text" autocomplete="off" placeholder="mis. 67122699">')}
 ${F('Nama paket *','<input id="rupNama" type="text" autocomplete="off" placeholder="Nama paket pengadaan">')}
@@ -1350,18 +1358,19 @@ ${F('Lokasi penyerahan','<input id="rupLokasi" type="text" placeholder="Kosongka
 <div class="row" style="margin-top:16px;gap:10px"><button type="button" data-act="rupsave">Simpan paket RUP</button></div></div>`;
   }
   const defDop=opds.some(o=>String(o.id)===String(S.ui.rupDefOpd))?String(S.ui.rupDefOpd):(opds.some(o=>String(o.id)===String(S.ui.opd))?String(S.ui.opd):String(opds[0].id));
+  const defSub=(S.ui.rupDefSub&&S.kode.some(k=>k.kode===S.ui.rupDefSub))?S.ui.rupDefSub:(S.kode[0]?.kode||'');
   const pv=S.ui.rupPrev;
   const prev=!pv?'':(pv.errs.length
     ?`<div class="card" style="margin-top:12px;border-color:#fca5a5"><b class="bad">Ditemukan ${pv.errs.length} kesalahan. Belum ada data yang diimpor.</b><ul>${pv.errs.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`
-    :`<div class="card" style="margin-top:12px"><b>✔ ${pv.rows.length} paket siap diimpor</b><div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>Kode RUP</th><th>Nama paket</th><th>OPD</th><th>TA</th><th class="n">Pagu</th><th class="n">Item</th></tr></thead><tbody>${pv.rows.map(r=>`<tr><td>${esc(r.rup)}</td><td>${esc(r.nama)}</td><td>${esc(r.opd)}</td><td>${r.tahun}</td><td class="n">${rp(r.pagu)}</td><td class="n">${r.n}</td></tr>`).join('')}</tbody></table></div></div>`);
+    :`<div class="card" style="margin-top:12px"><b>✔ ${pv.rows.length} paket siap diimpor</b><div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>Kode RUP</th><th>Nama paket</th><th>OPD</th><th>TA</th><th>Sub kegiatan</th><th>Bulan</th><th class="n">Pagu</th><th class="n">Item</th></tr></thead><tbody>${pv.rows.map(r=>`<tr><td>${esc(r.rup)}</td><td>${esc(r.nama)}</td><td>${esc(r.opd)}</td><td>${r.tahun}</td><td>${esc(r.sub||'-')}</td><td>${esc(r.bulan||'-')}</td><td class="n">${rp(r.pagu)}</td><td class="n">${r.n}</td></tr>`).join('')}</tbody></table></div></div>`);
   return head+tabs+`<div class="card"><h3>Input RUP dengan kode JSON</h3>
-<p class="mut">Muat file JSON atau tempel kodenya di kotak berikut. Formatnya berupa array objek, satu objek per paket. Format SiRUP (<b>aaData</b>) juga didukung: kolom 0 = kode RUP, 1 = nama paket, 2 = pagu, 3 = metode pemilihan, 4 = sumber dana (nilai ganda otomatis digabung), 6 = bulan dan tahun pelaksanaan. Kolom wajib: <b>rup</b>, <b>nama</b>, <b>opd</b>, dan <b>pagu</b>. Kolom opsional: <b>tahun</b>, <b>sub</b>, <b>sumber</b>, <b>masaHk</b>, <b>jenisPengadaan</b>, <b>metodePemilihan</b>, <b>lokasiPengiriman</b>, dan <b>items</b>. Seluruh data diperiksa lebih dulu; jika ada satu kesalahan, tidak ada paket yang diimpor.</p>
-<div class="fg" style="margin-bottom:10px"><label>OPD default (untuk data yang tidak mencantumkan OPD, seperti SiRUP)</label><select id="rupDefOpd" style="max-width:420px">${opds.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===defDop?'selected':''}>${esc(o.singkat||o.nama||o.id)}</option>`).join('')}</select></div><div class="row" style="gap:10px;flex-wrap:wrap;margin-bottom:10px"><input id="rupFile" type="file" accept=".json,application/json"><button type="button" class="g" data-act="rupexample" data-kind="json">Contoh format JSON</button><button type="button" class="g" data-act="rupexample" data-kind="sirup">Contoh format SiRUP</button></div>
+<p class="mut">Muat file JSON atau tempel kodenya di kotak berikut. Formatnya berupa array objek, satu objek per paket. Format SiRUP (<b>aaData</b>) juga didukung: kolom 0 = kode RUP, 1 = nama paket, 2 = pagu, 3 = metode pemilihan, 4 = sumber dana (nilai ganda otomatis digabung), 6 = bulan dan tahun pelaksanaan (contoh: January 2026 menjadi Januari 2026). Kolom 5 diabaikan. Jumlah baris dicocokkan dengan iTotalDisplayRecords. Kolom wajib: <b>rup</b>, <b>nama</b>, <b>opd</b>, dan <b>pagu</b>. Kolom opsional: <b>tahun</b>, <b>sub</b>, <b>sumber</b>, <b>masaHk</b>, <b>jenisPengadaan</b>, <b>metodePemilihan</b>, <b>lokasiPengiriman</b>, dan <b>items</b>. Seluruh data diperiksa lebih dulu; jika ada satu kesalahan, tidak ada paket yang diimpor.</p>
+<div class="fg" style="margin-bottom:10px"><label>OPD default (untuk data yang tidak mencantumkan OPD, seperti SiRUP)</label><select id="rupDefOpd" style="max-width:420px">${opds.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===defDop?'selected':''}>${esc(o.singkat||o.nama||o.id)}</option>`).join('')}</select></div><div class="fg" style="margin-bottom:10px"><label>Sub kegiatan default (SiRUP tidak memuat sub kegiatan)</label><select id="rupDefSub" style="max-width:520px">${S.kode.map(k=>`<option value="${esc(k.kode)}" ${k.kode===defSub?'selected':''}>${esc(k.kode)} — ${esc(k.nama)}</option>`).join('')}</select></div><div class="row" style="gap:10px;flex-wrap:wrap;margin-bottom:10px"><input id="rupFile" type="file" accept=".json,application/json"><button type="button" class="g" data-act="rupexample" data-kind="json">Contoh format JSON</button><button type="button" class="g" data-act="rupexample" data-kind="sirup">Contoh format SiRUP</button></div>
 <textarea id="rupJsonIn" spellcheck="false" style="min-height:260px;font-family:'JetBrains Mono',monospace;font-size:12.5px;width:100%" placeholder="Tempel kode JSON di sini">${esc(S.ui.rupJson??'')}</textarea>
 <div class="row" style="margin-top:12px;gap:10px;flex-wrap:wrap"><button type="button" class="g" data-act="rupvalidate">Periksa data</button><button type="button" data-act="rupimport">Impor ke Paket Pengadaan</button></div>
 ${prev}</div>`;
 }
-function vPaket(){return `<div class="row satria-page-heading"><div><h2>Paket Pengadaan TA ${S.ui.tahun}</h2><p class="mut">Daftar paket mengikuti filter OPD dan tahun aktif.</p></div><button type="button" data-act="newpaket">+ Tambah Paket Pengadaan</button></div><div class="card satria-paket-card"><div class="row satria-paket-toolbar"><label for="qPaket">Cari paket</label><input id="qPaket" type="search" autocomplete="off" placeholder="Cari kode RUP atau nama paket…" value="${esc(S.ui.q||'')}" aria-controls="paketTableResult"/><span class="satria-result-count">${paketListForView().length} paket</span></div><div id="paketTableResult" aria-live="polite">${paketListMarkup()}</div></div>`}
+function vPaket(){return `<div class="row satria-page-heading"><div><h2>Paket Pengadaan TA ${S.ui.tahun}</h2><p class="mut">Daftar paket mengikuti filter OPD dan tahun aktif.</p></div><button type="button" data-act="newpaket">+ Tambah Paket Pengadaan</button></div><div class="card satria-paket-card"><div class="row satria-paket-toolbar"><label for="qPaket">Cari paket</label><input id="qPaket" type="search" autocomplete="off" placeholder="Cari kode RUP atau nama paket…" value="${esc(S.ui.q||'')}" aria-controls="paketTableResult"/><select id="pLife" aria-label="Filter status siklus" style="max-width:200px">${[["all","Semua status"],["draf","Draf"],["berjalan","Berjalan"],["lengkap","Lengkap"],["arsip","Diarsipkan"]].map(([v,l])=>`<option value="${v}" ${(S.ui.plife||"all")===v?"selected":""}>${l}</option>`).join("")}</select><span class="satria-result-count">${paketListForView().length} paket</span></div><div id="paketTableResult" aria-live="polite">${paketListMarkup()}</div></div>`}
 
 function readiness(p){const dup=S.paket.some(x=>x!==p&&x.tahun===p.tahun&&x.rup&&x.rup===p.rup);const H=hps(p);
 const C=[['Kode RUP',!!p.rup&&!dup],['Pagu',p.pagu>0],['Rincian barang',p.items.length>0],['HPS ≤ pagu',H>0&&H<=p.pagu],['Penawaran',p.penawaran.length>0],['Pemenang',!!pemenang(p)],['Tgl DPP',!!p.tglDpp],['PPK aktif',PJ(p.ppk).aktif!==false],['Tgl BA Hasil',!!p.tglBahp]];
@@ -1369,7 +1378,7 @@ return `<div class=row style="margin-bottom:10px">${C.map(([t,ok])=>`<span class
 function vDetail(p){
  if(!p)return '<div class=card>Paket tidak ditemukan.</div>';
  const H=hps(p),dl=S.ui.ptab;
- const warn=H>p.pagu?`<p class=bad>⚠ HPS melebihi pagu (selisih ${rp(H-p.pagu)})</p>`:'';
+ const warn=(H>p.pagu?`<p class=bad>⚠ HPS melebihi pagu (selisih ${rp(H-p.pagu)})</p>`:'')+(window.satriaLifeRow?window.satriaLifeRow(p):'');
  const body=dl==='data'?fData(p):dl==='rincian'?fItems(p):fNego(p);
  const tabs=[['data','Data Paket'],['rincian','Rincian Kebutuhan dan HPS'],['nego','Penawaran dan Negosiasi']];
  return `<div class=row style="justify-content:space-between"><div><a href="#paket">← Daftar paket</a><h2 style="margin:6px 0">${esc(p.nama)}</h2>${pill(p)} <span class=mut>TA ${p.tahun} · ${esc(O(p.opd).singkat)} · No. ${p.seq}</span></div>
@@ -2059,22 +2068,25 @@ document.addEventListener('click',e=>{
  if(a==='chatsend'){return chatSend($('#chatIn').value)}
  if(a==='chatq'){return chatSend(d.q)}
  if(a==='chatclear'){S.chat=[];return render()}
- if(a==='rupmode'){const ta=$('#rupJsonIn');if(ta)S.ui.rupJson=ta.value;S.ui.rupMode=d.mode==='json'?'json':'manual';S.ui.rupPrev=null;return render()}
+ if(a==='rupmode'){const ta=$('#rupJsonIn');if(ta)S.ui.rupJson=ta.value;S.ui.rupMode=d.mode==='json'?'json':'manual';S.ui.rupPrev=null;S.ui.rupFormErr=null;return render()}
  if(a==='rupexample'){S.ui.rupJson=d.kind==='sirup'?RUP_SIRUP:RUP_TPL;S.ui.rupPrev=null;return render()}
  if(a==='rupvalidate'||a==='rupimport'){
-   const txt=$('#rupJsonIn')?.value??S.ui.rupJson??'';S.ui.rupJson=txt;const dop=$('#rupDefOpd')?.value||S.ui.rupDefOpd||'';S.ui.rupDefOpd=dop;
-   const r=rupReadJson(txt,dop);
+   const txt=$('#rupJsonIn')?.value??S.ui.rupJson??'';S.ui.rupJson=txt;const dop=$('#rupDefOpd')?.value||S.ui.rupDefOpd||'';S.ui.rupDefOpd=dop;const dsub=$('#rupDefSub')?.value||S.ui.rupDefSub||'';S.ui.rupDefSub=dsub;
+   const r=rupReadJson(txt,dop,dsub);
    if(a==='rupvalidate'||r.errs.length){S.ui.rupPrev=rupPreview(r);toast(r.errs.length?'Ada '+r.errs.length+' kesalahan. Impor dibatalkan.':r.rows.length+' paket siap diimpor');return render()}
-   r.rows.forEach(p=>{p.seq=nextSeq(p.tahun,p.opd);S.paket.push(p)});
+   const ok=SATRIA.tx('paket','Impor '+r.rows.length+' paket RUP dari JSON',()=>{r.rows.forEach(p=>{p.seq=nextSeq(p.tahun,p.opd);S.paket.push(p)})});
+   if(ok===null){S.ui.rupPrev=rupPreview({rows:[],errs:['Impor dibatalkan seluruhnya karena gagal validasi.']});return render()}
    S.ui.rupJson='';S.ui.rupPrev=null;S.ui.tahun=r.rows[0].tahun;const ops=[...new Set(r.rows.map(p=>String(p.opd)))];S.ui.opd=ops.length===1?ops[0]:'all';
-   sync('paket','Impor '+r.rows.length+' paket RUP dari JSON');location.hash='#paket';return render()
+   location.hash='#paket';return render()
  }
  if(a==='rupsave'){
    const g=k=>String($('#'+k)?.value??'').trim();
    const x=rupParseRow({rup:g('rupKode'),nama:g('rupNama'),opd:g('rupOpd'),tahun:g('rupTahun'),sub:g('rupSub'),pagu:g('rupPagu'),sumber:g('rupSumber'),masaHk:g('rupMasa'),jenisPengadaan:g('rupJenis'),metodePemilihan:g('rupMetode'),lokasiPengiriman:g('rupLokasi')},0,S.ui.tahun);
-   if(!x.ok){toast(x.err.replace(/^Data #1: /,''));return}
-   const p=x.p;p.seq=nextSeq(p.tahun,p.opd);S.paket.push(p);S.ui.tahun=p.tahun;S.ui.opd=String(p.opd);S.ui.ptab='data';
-   sync('paket','Input RUP manual: '+p.rup);location.hash='#paket/'+p.id;return render()
+   if(!x.ok){S.ui.rupFormErr=x.err.replace(/^Data #1: /,'');toast(S.ui.rupFormErr);return render()}
+   const p=x.p;p.seq=nextSeq(p.tahun,p.opd);
+   const ok=SATRIA.tx('paket','Input RUP manual: '+p.rup,()=>{S.paket.push(p)});
+   if(ok===null){S.ui.rupFormErr='Paket belum disimpan karena gagal validasi. Periksa pesan di atas.';return render()}
+   S.ui.rupFormErr=null;S.ui.tahun=p.tahun;S.ui.opd=String(p.opd);S.ui.ptab='data';location.hash='#paket/'+p.id;return render()
  }
  if(a==='newpaket'){
    const scope=activeCloudScope();
@@ -2199,7 +2211,7 @@ function normalizeData(){S.pemda={...SEED.pemda,...(S.pemda||{})};S.penomoran={.
  for(const p of S.paket){if(!p.seq){const key=String(p.tahun)+'|'+String(p.opd);const next=(maxSeqByScope.get(key)||0)+1;p.seq=next;maxSeqByScope.set(key,next)}}
  S.penyedia=(S.penyedia||[]).map(y=>({statusKatalog:'Perlu verifikasi',pdn:'Perlu verifikasi',tipe:'Perlu verifikasi',kbliSesuai:'Perlu verifikasi',daftarHitam:'Perlu verifikasi',...y,aktif:y.aktif!==false}));S.akun=(S.akun||[]).map(x=>({...x,aktif:x.aktif!==false}));S.unit=(S.unit||[]).map(x=>({...x,aktif:x.aktif!==false}));S.pejabat=(S.pejabat||[]).map(x=>({...x,aktif:x.aktif!==false}));S.kode=S.kode||[];S.tahun=[...new Set([...(S.tahun||[]).map(Number),...S.paket.map(p=>+p.tahun).filter(Number.isFinite)])].filter(Number.isInteger).sort((a,b)=>a-b);if(!S.tahun.length)S.tahun=[new Date().getFullYear()];}
 const persistable=()=>{const o={...S};['ui','log','dirty','chat','chatCtx'].forEach(k=>delete o[k]);return o};
-async function persistNow(){if(ENGINE!=='dexie'||!DB)return false;const writingRevision=persistRevision;try{await DB.kv.put({k:'main',v:persistable(),at:Date.now()});lastPersistedRevision=Math.max(lastPersistedRevision,writingRevision);if(S.persistError){S.persistError='';const el=$('#dirty');if(el)el.title='Data tersimpan di browser. Backup JSON tetap perlu diunduh berkala.'}return true}catch(e){S.persistError='Data gagal disimpan ke IndexedDB. Jangan tutup halaman; unduh backup JSON dan periksa ruang penyimpanan browser.';console.error('Gagal menyimpan ke IndexedDB',e);const el=$('#dirty');if(el){el.textContent='⚠ Gagal menyimpan';el.title=S.persistError;el.style.background='#FEE2E2';el.style.color='#991B1B'}toast('GAGAL MENYIMPAN. Unduh backup JSON sekarang.');return false}}
+async function persistNowRaw(){if(ENGINE!=='dexie'||!DB)return false;const writingRevision=persistRevision;try{await DB.kv.put({k:'main',v:persistable(),at:Date.now()});lastPersistedRevision=Math.max(lastPersistedRevision,writingRevision);if(S.persistError){S.persistError='';const el=$('#dirty');if(el)el.title='Data tersimpan di browser. Backup JSON tetap perlu diunduh berkala.'}return true}catch(e){S.persistError='Data gagal disimpan ke IndexedDB. Jangan tutup halaman; unduh backup JSON dan periksa ruang penyimpanan browser.';console.error('Gagal menyimpan ke IndexedDB',e);const el=$('#dirty');if(el){el.textContent='⚠ Gagal menyimpan';el.title=S.persistError;el.style.background='#FEE2E2';el.style.color='#991B1B'}toast('GAGAL MENYIMPAN. Unduh backup JSON sekarang.');return false}}
 function schedulePersist(){if(ENGINE!=='dexie'||!DB||!S?.dirty||persistRevision<=lastPersistedRevision)return;clearTimeout(pTimer);pTimer=setTimeout(()=>{void persistNow()},350)}
 async function loadSaved(){try{const r=await DB.kv.get('main');if(r&&r.v&&r.v.paket&&r.v.opd){const ui=S.ui;Object.assign(S,r.v,{ui,log:[],dirty:false,chat:[],chatCtx:null});normalizeData();if(!S.users.some(u=>u.id===ui.user))ui.user=S.users[0].id;if(!S.tahun.includes(ui.tahun))ui.tahun=S.tahun[0]}}catch(e){console.warn('Gagal memuat dari IndexedDB',e)}}
 function setEngineSelect(){const s=$('#selEngine');s.innerHTML=(DB?'<option value="dexie">IndexedDB (Dexie)</option>':'')+'<option value="memory">Memori sesi</option>';s.value=ENGINE;if(!DB){s.disabled=true;s.title='Dexie.js tidak termuat, memakai memori sesi'}}
@@ -5829,4 +5841,405 @@ main{padding-top:20px !important}
 </style>
 
 
+<script>
+/* ===== SATRIA CORE: lapisan arsitektur 32 konsep (hanya menambah kemampuan) ===== */
+(function(){
+const SATRIA = window.SATRIA = window.SATRIA || {};
+const MAX_UNDO = 50, MAX_EVENTS = 1000, MAX_ERR = 50, IDEMPOTENCY_MS = 350;
+const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let lastRenderMs = 0;
+
+/* [28] Service registry / dependency injection */
+const services = new Map();
+SATRIA.register = (name, impl) => { services.set(name, impl); return impl; };
+SATRIA.resolve = name => { if(!services.has(name)) throw new Error('Service tidak terdaftar: ' + name); return services.get(name); };
+
+/* [4] Event bus: jalur komunikasi antar modul */
+const subs = new Map();
+const bus = {
+  on(evt, fn){ if(!subs.has(evt)) subs.set(evt, new Set()); subs.get(evt).add(fn); return () => subs.get(evt)?.delete(fn); },
+  off(evt, fn){ subs.get(evt)?.delete(fn); },
+  emit(evt, data){ for(const fn of [...(subs.get(evt) || [])]){ try { fn(data); } catch(e){ pushErr(e); } } }
+};
+SATRIA.bus = bus; SATRIA.register('bus', bus);
+
+/* [22] Error handling & recovery: catat error tanpa menghentikan aplikasi */
+const errorLog = [];
+function pushErr(err){
+  const msg = String((err && err.message) || err);
+  errorLog.push({t: new Date().toLocaleTimeString('id-ID'), msg});
+  if(errorLog.length > MAX_ERR) errorLog.shift();
+  if(SATRIA.debug) console.warn('[SATRIA]', msg);
+}
+window.addEventListener('error', e => pushErr(e.error || e.message));
+window.addEventListener('unhandledrejection', e => pushErr(e.reason));
+SATRIA.errors = errorLog;
+
+/* [21] Debounce & throttle */
+SATRIA.debounce = (fn, ms) => { let t; const d = (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; d.cancel = () => clearTimeout(t); return d; };
+SATRIA.throttle = (fn, ms) => { let last = 0, t; return (...a) => { const left = ms - (Date.now() - last); if(left <= 0){ last = Date.now(); fn(...a); } else { clearTimeout(t); t = setTimeout(() => { last = Date.now(); fn(...a); }, left); } }; };
+
+/* [19] Memoization berbasis revisi data (cache otomatis tidak basi) */
+let dataRev = 0;
+const memoStore = new Map();
+SATRIA.memo = (key, compute) => {
+  const k = dataRev + '|' + key;
+  if(memoStore.has(k)) return memoStore.get(k);
+  const v = compute();
+  if(memoStore.size > 100) memoStore.clear();
+  memoStore.set(k, v);
+  return v;
+};
+
+/* [8] Validasi & konsistensi: penjaga gerbang */
+const validators = [];
+SATRIA.addValidator = fn => validators.push(fn);
+let warnings = [];
+function collectIssues(){
+  return validators.flatMap(v => { try { return v(S) || []; } catch(e){ return [{level:'error', msg:'Validator gagal: ' + e.message}]; } });
+}
+function refreshWarnings(){ warnings = collectIssues(); SATRIA.warnings = warnings; }
+SATRIA.addValidator(state => {
+  const seen = new Map(), out = [];
+  for(const p of state.paket || []){
+    if(!p.rup) continue;
+    const key = p.tahun + '|' + String(p.rup).trim();
+    if(seen.has(key)) out.push({level:'error', msg:`Kode RUP ${p.rup} ganda pada tahun ${p.tahun}`});
+    else seen.set(key, p.id);
+  }
+  return out;
+});
+SATRIA.addValidator(state => {
+  const n = (state.paket || []).filter(p => { const s = SATRIA.lifecycle(p); return s === 'berjalan' || s === 'draf'; }).length;
+  return n ? [{level:'warn', msg: `${n} paket belum lengkap datanya`}] : [];
+});
+
+/* [9] Lifecycle data: draf → berjalan → lengkap → arsip */
+SATRIA.lifecycle = p => {
+  if(p.arsip) return 'arsip';
+  if(!p.rup) return 'draf';
+  let g; try { g = gaps(p); } catch(_){ g = ['gagal dihitung']; }
+  return g.length ? 'berjalan' : 'lengkap';
+};
+SATRIA.archivePaket = id => SATRIA.tx('paket', 'Arsipkan paket', () => {
+  const p = S.paket.find(x => String(x.id) === String(id)); if(!p) throw new Error('Paket tidak ditemukan'); p.arsip = true;
+});
+SATRIA.restorePaket = id => SATRIA.tx('paket', 'Pulihkan paket dari arsip', () => {
+  const p = S.paket.find(x => String(x.id) === String(id)); if(!p) throw new Error('Paket tidak ditemukan'); p.arsip = false;
+});
+
+/* [3] Otomatisasi: aturan yang berjalan setelah setiap perubahan */
+const rules = [];
+SATRIA.addRule = (name, fn) => rules.push({name, fn});
+let lengkapIds = null;
+rules.push({name:'paket-lengkap', fn(){
+  const now = new Set((S.paket || []).filter(p => SATRIA.lifecycle(p) === 'lengkap').map(p => p.id));
+  if(lengkapIds) for(const id of now) if(!lengkapIds.has(id)){
+    const p = S.paket.find(x => x.id === id);
+    bus.emit('paket:lengkap', p);
+    toast(`Paket "${p.nama || p.rup}" kini lengkap datanya`);
+  }
+  lengkapIds = now;
+}});
+function runRules(kind, label){ for(const r of rules){ try { r.fn({kind, label, S}); } catch(e){ pushErr(e); } } }
+
+/* [12][29] Audit trail & event store (append-only, tersimpan bersama data) */
+function logEvent(kind, label, extra){
+  const actor = (typeof cur === 'function' ? cur() : null) || {};
+  S.events = S.events || [];
+  S.events.push({id: uid(), t: new Date().toISOString(), actor: actor.nama || '-', role: actor.role || '-', kind, label, ...(extra || {})});
+  if(S.events.length > MAX_EVENTS) S.events.splice(0, S.events.length - MAX_EVENTS);
+  dataRev++;
+  refreshWarnings();
+  runRules(kind, label);
+  bus.emit('data:changed', {kind, label});
+}
+SATRIA.audit = (limit = 100) => (S.events || []).slice(-limit).reverse();
+SATRIA.register('audit', {list: SATRIA.audit});
+
+/* [25] Undo / Redo + [5][6] state terpusat: semua perubahan lewat sync() */
+const undoStack = [], redoStack = [];
+let lastSnap = null, snapRev = -1, snapPaketRef = null;
+const snapshotJson = () => JSON.stringify({...persistable(), events: undefined});
+function applySnapshot(json){
+  const data = JSON.parse(json);
+  const keep = {ui: S.ui, log: S.log, chat: S.chat, chatCtx: S.chatCtx, events: S.events};
+  Object.assign(S, data, keep);
+  normalizeData();
+  dataRev++;
+  lastSnap = snapshotJson(); snapRev = persistRevision; snapPaketRef = S.paket;
+}
+const cloudLocked = () => !!window.SATRIA_CLOUD_CONFIGURED;
+function finishChange(kind, label){
+  logEvent(kind, label);
+  S.dirty = true; persistRevision++;
+  schedulePersist(); render();
+}
+SATRIA.undo = () => {
+  if(cloudLocked()) return toast('Undo hanya tersedia pada mode lokal');
+  if(!undoStack.length) return toast('Tidak ada aksi untuk dibatalkan');
+  redoStack.push(snapshotJson());
+  applySnapshot(undoStack.pop());
+  finishChange('undo', 'Membatalkan perubahan terakhir');
+};
+SATRIA.redo = () => {
+  if(cloudLocked()) return toast('Redo hanya tersedia pada mode lokal');
+  if(!redoStack.length) return toast('Tidak ada aksi untuk diulang');
+  undoStack.push(snapshotJson());
+  applySnapshot(redoStack.pop());
+  finishChange('redo', 'Mengulang perubahan');
+};
+SATRIA.register('undo', {undo: SATRIA.undo, redo: SATRIA.redo, depth: () => ({undo: undoStack.length, redo: redoStack.length})});
+
+const _sync = sync;
+sync = function(k, label){
+  _sync(k, label);
+  const now = snapshotJson();
+  if(lastSnap !== null && now !== lastSnap){
+    undoStack.push(lastSnap);
+    if(undoStack.length > MAX_UNDO) undoStack.shift();
+    redoStack.length = 0;
+  }
+  lastSnap = now; snapRev = persistRevision; snapPaketRef = S.paket;
+  logEvent(k, label);
+  schedulePersist();
+  postSync(k);
+};
+
+const _render = render;
+render = function(){
+  const t0 = performance.now();
+  const loaded = S && S.paket !== snapPaketRef;
+  if(loaded) dataRev++;
+  try { return _render.apply(this, arguments); }
+  finally {
+    lastRenderMs = performance.now() - t0;
+    if(S && !S.dirty && (snapRev !== persistRevision || loaded)){ lastSnap = snapshotJson(); snapRev = persistRevision; }
+    if(S) snapPaketRef = S.paket;
+  }
+};
+
+/* [10] Transaksional & atomic: berhasil semua atau gagal semua */
+const errorsOf = list => list.filter(i => i.level === 'error');
+SATRIA.tx = function(kind, label, fn){
+  const before = snapshotJson();
+  const pre = new Set(errorsOf(collectIssues()).map(i => i.msg));
+  try {
+    const result = fn();
+    const fresh = errorsOf(collectIssues()).filter(i => !pre.has(i.msg));
+    if(fresh.length) throw new Error(fresh[0].msg);
+    sync(kind, label);
+    return result;
+  } catch(e){
+    applySnapshot(before);
+    render();
+    toast('Perubahan dibatalkan: ' + e.message);
+    pushErr(e);
+    return null;
+  }
+};
+SATRIA.register('tx', SATRIA.tx);
+
+/* [24] Concurrency: antrean penyimpanan agar tulisan tidak saling tabrakan */
+let persistChain = Promise.resolve();
+window.persistNow = function(){
+  const run = persistChain.then(() => persistNowRaw());
+  persistChain = run.catch(() => {});
+  return run;
+};
+
+/* [26] Multi-tab sync lewat BroadcastChannel */
+const TAB_ID = uid();
+let channel = null;
+if('BroadcastChannel' in window){
+  channel = new BroadcastChannel('satria-framework-sync');
+  channel.onmessage = ev => {
+    const m = ev.data || {};
+    if(m.from === TAB_ID) return;
+    setTimeout(async () => {
+      if(S.dirty){ toast('Data diubah di tab lain. Simpan dulu lalu muat ulang halaman untuk menyelaraskan.'); return; }
+      if(ENGINE !== 'dexie' || !DB) return;
+      await loadSaved();
+      lastSnap = snapshotJson(); snapRev = persistRevision; snapPaketRef = S.paket;
+      dataRev++; render();
+      toast('Data disinkronkan dari tab lain');
+    }, 600);
+  };
+}
+function postSync(kind){ channel?.postMessage({from: TAB_ID, kind, at: Date.now()}); }
+
+/* [27] Idempotency: klik ganda pada aksi yang sama diabaikan */
+const lastClick = new Map();
+document.addEventListener('click', e => {
+  const el = e.target.closest && e.target.closest('[data-act]');
+  if(!el) return;
+  const key = el.dataset.act + '|' + (el.dataset.id || el.dataset.pid || el.dataset.d || '');
+  const now = Date.now(), prev = lastClick.get(key) || 0;
+  lastClick.set(key, now);
+  if(now - prev < IDEMPOTENCY_MS){ e.stopImmediatePropagation(); e.preventDefault(); }
+}, true);
+
+/* [16] Indexing: indeks token untuk pencarian paket tanpa memindai semua baris */
+function buildPaketIndex(){
+  const map = new Map();
+  for(const p of S.paket || []){
+    const words = `${p.rup || ''} ${p.nama || ''}`.toLocaleLowerCase('id-ID').split(/[\s,.;:()\/\-]+/).filter(Boolean);
+    for(const w of words){ if(!map.has(w)) map.set(w, new Set()); map.get(w).add(p.id); }
+  }
+  return map;
+}
+SATRIA.searchPaketIds = q => {
+  const words = String(q || '').trim().toLocaleLowerCase('id-ID').split(/\s+/).filter(Boolean);
+  if(!words.length) return null;
+  const idx = SATRIA.memo('paketIdx', buildPaketIndex);
+  let result = null;
+  for(const w of words){
+    const hit = new Set();
+    for(const [tok, ids] of idx) if(tok.includes(w)) for(const id of ids) hit.add(id);
+    result = result ? new Set([...result].filter(id => hit.has(id))) : hit;
+  }
+  return result;
+};
+
+/* [31] Compression: ekspor backup terkompresi gzip (bila browser mendukung) */
+SATRIA.exportCompressed = async function(){
+  const json = JSON.stringify(persistable());
+  let blob, name;
+  if(typeof CompressionStream === 'function'){
+    blob = await new Response(new Blob([json]).stream().pipeThrough(new CompressionStream('gzip'))).blob();
+    name = 'SATRIA-Framework-3-0-backup.json.gz';
+  } else {
+    blob = new Blob([json], {type: 'application/json'});
+    name = 'SATRIA-Framework-3-0-backup.json';
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  return {raw: json.length, packed: blob.size, name};
+};
+
+/* [23] Memory management: flush data & jalankan pembersihan saat halaman ditutup */
+const cleanups = [];
+SATRIA.onCleanup = fn => cleanups.push(fn);
+if(channel) SATRIA.onCleanup(() => channel.close());
+window.addEventListener('pagehide', () => {
+  if(S && S.dirty && ENGINE === 'dexie'){ clearTimeout(pTimer); persistNow(); }
+  cleanups.splice(0).forEach(f => { try { f(); } catch(_){} });
+});
+
+/* [32] Plugin system + theming + [1] modul terdaftar */
+const themes = new Map();
+SATRIA.theme = {
+  register(name, vars){ themes.set(name, vars); },
+  apply(name){
+    const v = themes.get(name); if(!v) return false;
+    for(const [k, val] of Object.entries(v)) document.documentElement.style.setProperty(k, val);
+    return true;
+  },
+  list: () => [...themes.keys()]
+};
+const plugins = new Map();
+SATRIA.use = function(plugin){
+  if(!plugin || !plugin.name) throw new Error('Plugin wajib memiliki name');
+  if(plugins.has(plugin.name)) return false;
+  const api = {
+    on: bus.on, emit: bus.emit,
+    addValidator: SATRIA.addValidator, addRule: SATRIA.addRule,
+    theme: SATRIA.theme, register: SATRIA.register, resolve: SATRIA.resolve,
+    tx: SATRIA.tx,
+    read: () => JSON.parse(snapshotJson())   // salinan baca-saja; perubahan wajib lewat tx()
+  };
+  try { plugin.setup && plugin.setup(api); }
+  catch(e){ pushErr(e); return false; }
+  plugins.set(plugin.name, plugin);
+  return true;
+};
+
+/* [32] Observability: panel debug (Ctrl+Shift+D) */
+SATRIA.debug = false;
+const panel = document.createElement('div');
+panel.id = 'satriaDebug'; panel.hidden = true;
+panel.style.cssText = 'position:fixed;left:12px;bottom:12px;z-index:9999;width:340px;max-height:60vh;overflow:auto;background:#0f172a;color:#e2e8f0;font:12px/1.5 ui-monospace,monospace;border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.35)';
+panel.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b>SATRIA Debug</b><button type="button" id="sdClose" style="background:none;border:0;color:#e2e8f0;cursor:pointer">✕</button></div><div id="sdBody"></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button type="button" id="sdUndo">↶ Undo</button><button type="button" id="sdRedo">↷ Redo</button><button type="button" id="sdExport">⬇ Backup terkompresi</button></div>';
+document.body.appendChild(panel);
+const body = panel.querySelector('#sdBody');
+function renderDebug(){
+  if(panel.hidden) return;
+  const counts = {};
+  for(const p of S.paket || []){ const s = SATRIA.lifecycle(p); counts[s] = (counts[s] || 0) + 1; }
+  const rows = [
+    ['Mesin penyimpanan', ENGINE],
+    ['Revisi data', dataRev],
+    ['Revisi persist (tertunda)', persistRevision + ' / ' + lastPersistedRevision],
+    ['Undo / Redo', undoStack.length + ' / ' + redoStack.length],
+    ['Event tersimpan', (S.events || []).length],
+    ['Render terakhir', lastRenderMs.toFixed(1) + ' ms'],
+    ['Siklus hidup', Object.entries(counts).map(([k, v]) => k + ': ' + v).join(', ') || '-'],
+    ['Plugin', [...plugins.keys()].join(', ') || '-'],
+    ['Tema', SATRIA.theme.list().join(', ') || '-']
+  ];
+  body.innerHTML =
+    rows.map(([a, b]) => `<div><span style="color:#94a3b8">${esc(a)}:</span> ${esc(b)}</div>`).join('') +
+    '<div style="margin-top:6px;color:#94a3b8">Peringatan:</div>' +
+    (warnings.map(w => `<div style="color:${w.level === 'error' ? '#f87171' : '#fbbf24'}">• ${esc(w.msg)}</div>`).join('') || '<div>-</div>') +
+    '<div style="margin-top:6px;color:#94a3b8">Audit terbaru:</div>' +
+    (SATRIA.audit(5).map(e => `<div>${esc(new Date(e.t).toLocaleTimeString('id-ID'))} ${esc(e.actor)}: ${esc(e.label)}</div>`).join('') || '<div>-</div>') +
+    '<div style="margin-top:6px;color:#94a3b8">Error terakhir:</div>' +
+    (errorLog.slice(-3).map(e => `<div>${esc(e.t)} ${esc(e.msg)}</div>`).join('') || '<div>-</div>');
+}
+function setDebug(on){ SATRIA.debug = on; panel.hidden = !on; renderDebug(); }
+SATRIA.setDebug = setDebug;
+const debugTimer = setInterval(renderDebug, 1000);
+SATRIA.onCleanup(() => clearInterval(debugTimer));
+panel.querySelector('#sdClose').onclick = () => setDebug(false);
+panel.querySelector('#sdUndo').onclick = () => SATRIA.undo();
+panel.querySelector('#sdRedo').onclick = () => SATRIA.redo();
+panel.querySelector('#sdExport').onclick = () => SATRIA.exportCompressed()
+  .then(r => toast(`${r.name}: ${r.raw} → ${r.packed} byte`)).catch(pushErr);
+SATRIA.register('debug', {setDebug, errors: errorLog});
+
+document.addEventListener('keydown', e => {
+  const k = (e.key || '').toLowerCase();
+  if(e.ctrlKey && e.shiftKey && k === 'd'){ e.preventDefault(); setDebug(panel.hidden); return; }
+  const ae = document.activeElement;
+  const typing = !!ae && (/INPUT|TEXTAREA|SELECT/.test(ae.tagName) || ae.isContentEditable);
+  if(typing || !(e.ctrlKey || e.metaKey) || e.altKey) return;
+  if(k === 'z' && !e.shiftKey){ e.preventDefault(); SATRIA.undo(); }
+  else if(k === 'y' || (k === 'z' && e.shiftKey)){ e.preventDefault(); SATRIA.redo(); }
+});
+
+/* Inisialisasi: baseline snapshot, peringatan awal, dan aturan otomatisasi */
+if(S){ lastSnap = snapshotJson(); snapRev = persistRevision; snapPaketRef = S.paket; }
+rules[0].fn({});
+refreshWarnings();
+SATRIA.ready = true;
+})();
+
+</script>
+
+<script>
+(function(){
+  window.satriaLifeRow = function(p){
+    const s = SATRIA.lifecycle(p);
+    const label = {draf:'Draf', berjalan:'Berjalan', lengkap:'Lengkap', arsip:'Diarsipkan'}[s] || s;
+    const btn = s === 'arsip'
+      ? `<button type="button" class="g" data-act="pulihkanPaket" data-id="${esc(p.id)}">Pulihkan dari arsip</button>`
+      : `<button type="button" class="g" data-act="arsipPaket" data-id="${esc(p.id)}">Arsipkan paket</button>`;
+    return `<div class="row" style="gap:8px;margin:8px 0;align-items:center"><span class="pill">Siklus: ${esc(label)}</span>${btn}</div>`;
+  };
+  document.addEventListener('change', e => {
+    if(e.target && e.target.id === 'pLife'){ S.ui.plife = e.target.value; render(); }
+  });
+  document.addEventListener('click', e => {
+    const el = e.target.closest && e.target.closest('[data-act="arsipPaket"],[data-act="pulihkanPaket"]');
+    if(!el) return;
+    e.preventDefault();
+    if(!canWrite()) return toast('Akun Viewer tidak dapat mengubah data');
+    const fn = el.dataset.act === 'arsipPaket' ? SATRIA.archivePaket : SATRIA.restorePaket;
+    fn(el.dataset.id);
+    render();
+  });
+})();
+</script>
 </body></html>
