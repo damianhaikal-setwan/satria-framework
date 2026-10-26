@@ -1217,17 +1217,17 @@ const RUP_SUMBER=['APBD','APBN','DAK','DAU','DBH','PAD','Lainnya'];
 const RUP_SIRUP=`{
     "aaData": [
         [
-            "64115828",
-            "Belanja Pembayaran Pajak, Bea, dan Perizinan",
-            "3700000",
-            "Dikecualikan",
-            "APBD",
-            "64115828",
+            "67845135",
+            "Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor",
+            "14261300",
+            "E-Purchasing",
+            "APBD, APBD, APBD, APBD, APBD, APBD, APBD, APBD, APBD, APBD, APBD, APBD, APBD",
+            "67845135",
             "January 2026"
         ]
     ],
     "iTotalDisplayRecords": 1,
-    "sEcho": 5
+    "sEcho": 7
 }`;
 const RUP_TPL=`[
   {
@@ -1247,9 +1247,12 @@ const RUP_TPL=`[
     ]
   }
 ]`;
+function uniqSumber(v){
+  return [...new Set(String(v??'').split(',').map(s=>s.trim()).filter(Boolean))].join(', ');
+}
 function rupFromSirup(a){
   const yr=String(a[6]??'').match(/\d{4}/);
-  return {rup:String(a[0]??a[5]??'').trim(),nama:String(a[1]??'').trim(),pagu:a[2],metodePemilihan:String(a[3]??'').trim(),sumber:String(a[4]??'').trim(),tahun:yr?Number(yr[0]):''};
+  return {rup:String(a[0]??a[5]??'').trim(),nama:String(a[1]??'').trim(),pagu:a[2],metodePemilihan:String(a[3]??'').trim(),sumber:uniqSumber(a[4]),tahun:yr?Number(yr[0]):''};
 }
 function rupParseRow(r,i,defTahun,defOpd){
   const e=m=>({ok:false,err:'Data #'+(i+1)+': '+m});
@@ -1329,7 +1332,7 @@ ${F('Lokasi penyerahan','<input id="rupLokasi" type="text" placeholder="Kosongka
     ?`<div class="card" style="margin-top:12px;border-color:#fca5a5"><b class="bad">Ditemukan ${pv.errs.length} kesalahan. Belum ada data yang diimpor.</b><ul>${pv.errs.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`
     :`<div class="card" style="margin-top:12px"><b>✔ ${pv.rows.length} paket siap diimpor</b><div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>Kode RUP</th><th>Nama paket</th><th>OPD</th><th>TA</th><th class="n">Pagu</th><th class="n">Item</th></tr></thead><tbody>${pv.rows.map(r=>`<tr><td>${esc(r.rup)}</td><td>${esc(r.nama)}</td><td>${esc(r.opd)}</td><td>${r.tahun}</td><td class="n">${rp(r.pagu)}</td><td class="n">${r.n}</td></tr>`).join('')}</tbody></table></div></div>`);
   return head+tabs+`<div class="card"><h3>Input RUP dengan kode JSON</h3>
-<p class="mut">Muat file JSON atau tempel kodenya di kotak berikut. Formatnya berupa array objek, satu objek per paket. Format SiRUP (<b>aaData</b>) juga didukung. Kolom wajib: <b>rup</b>, <b>nama</b>, <b>opd</b>, dan <b>pagu</b>. Kolom opsional: <b>tahun</b>, <b>sub</b>, <b>sumber</b>, <b>masaHk</b>, <b>jenisPengadaan</b>, <b>metodePemilihan</b>, <b>lokasiPengiriman</b>, dan <b>items</b>. Seluruh data diperiksa lebih dulu; jika ada satu kesalahan, tidak ada paket yang diimpor.</p>
+<p class="mut">Muat file JSON atau tempel kodenya di kotak berikut. Formatnya berupa array objek, satu objek per paket. Format SiRUP (<b>aaData</b>) juga didukung: kolom 0 = kode RUP, 1 = nama paket, 2 = pagu, 3 = metode pemilihan, 4 = sumber dana (nilai ganda otomatis digabung), 6 = bulan dan tahun pelaksanaan. Kolom wajib: <b>rup</b>, <b>nama</b>, <b>opd</b>, dan <b>pagu</b>. Kolom opsional: <b>tahun</b>, <b>sub</b>, <b>sumber</b>, <b>masaHk</b>, <b>jenisPengadaan</b>, <b>metodePemilihan</b>, <b>lokasiPengiriman</b>, dan <b>items</b>. Seluruh data diperiksa lebih dulu; jika ada satu kesalahan, tidak ada paket yang diimpor.</p>
 <div class="fg" style="margin-bottom:10px"><label>OPD default (untuk data yang tidak mencantumkan OPD, seperti SiRUP)</label><select id="rupDefOpd" style="max-width:420px">${opds.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===defDop?'selected':''}>${esc(o.singkat||o.nama||o.id)}</option>`).join('')}</select></div><div class="row" style="gap:10px;flex-wrap:wrap;margin-bottom:10px"><input id="rupFile" type="file" accept=".json,application/json"><button type="button" class="g" data-act="rupexample" data-kind="json">Contoh format JSON</button><button type="button" class="g" data-act="rupexample" data-kind="sirup">Contoh format SiRUP</button></div>
 <textarea id="rupJsonIn" spellcheck="false" style="min-height:260px;font-family:'JetBrains Mono',monospace;font-size:12.5px;width:100%" placeholder="Tempel kode JSON di sini">${esc(S.ui.rupJson??'')}</textarea>
 <div class="row" style="margin-top:12px;gap:10px;flex-wrap:wrap"><button type="button" class="g" data-act="rupvalidate">Periksa data</button><button type="button" data-act="rupimport">Impor ke Paket Pengadaan</button></div>
