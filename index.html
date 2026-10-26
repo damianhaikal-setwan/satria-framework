@@ -1141,7 +1141,7 @@ function sync(k,label){S.dirty=true;persistRevision++;S.persistError='';S.log.un
 function toast(m){const e=$('#toast');e.textContent=m;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2600)}
 
 /* ===== TAMPILAN ===== */
-const NAV=[['dash','Ringkasan Utama'],['paket','Paket Pengadaan'],['dok','Dokumen Pengadaan'],['lap','Laporan dan Analisis'],['master','Data Master'],['set','Pengaturan Sistem'],['user','Pengguna dan Hak Akses'],['panduan','Panduan Penggunaan'],['chat','Asisten SATRIA']];
+const NAV=[['dash','Ringkasan Utama'],['paket','Paket Pengadaan'],['input','Input RUP'],['dok','Dokumen Pengadaan'],['lap','Laporan dan Analisis'],['master','Data Master'],['set','Pengaturan Sistem'],['user','Pengguna dan Hak Akses'],['panduan','Panduan Penggunaan'],['chat','Asisten SATRIA']];
 const kpi=(l,v)=>`<div class="card kpi"><span>${l}</span><b>${v}</b></div>`;
 const pill=p=>`<span class=pill>${stt(p)}</span>`;
 function tabelPaket(L){
@@ -1211,6 +1211,130 @@ function paketEmptyState(){
  return `<div class="satria-empty-state"><div class="satria-empty-icon">⌕</div><strong>Belum ada paket untuk filter ini</strong><p>Filter aktif: <b>${esc(opdLabel)}</b> · Tahun Anggaran <b>${Number(S.ui.tahun)||'-'}</b>${query?` · Pencarian <b>“${esc(query)}”</b>`:''}.</p><small>${scope?'Data hanya ditampilkan jika OPD dan tahun termasuk assignment akun Anda. Jika seharusnya ada paket, minta admin memeriksa assignment dan data paket pada Supabase.':'Coba pilih OPD/tahun lain atau kosongkan kata pencarian.'}</small></div>`;
 }
 function paketListMarkup(){const rows=paketListForView();return rows.length?tabelPaket(rows):paketEmptyState()}
+/* ===== INPUT RUP (manual & JSON) ===== */
+const RUP_JENIS=['Barang','Jasa Lainnya','Jasa Konsultansi','Pekerjaan Konstruksi'];
+const RUP_SUMBER=['APBD','APBN','DAK','DAU','DBH','PAD','Lainnya'];
+const RUP_SIRUP=`{
+    "aaData": [
+        [
+            "64115828",
+            "Belanja Pembayaran Pajak, Bea, dan Perizinan",
+            "3700000",
+            "Dikecualikan",
+            "APBD",
+            "64115828",
+            "January 2026"
+        ]
+    ],
+    "iTotalDisplayRecords": 1,
+    "sEcho": 5
+}`;
+const RUP_TPL=`[
+  {
+    "rup": "67122700",
+    "nama": "Pengadaan Alat Tulis Kantor",
+    "opd": "DIKNAS",
+    "tahun": 2026,
+    "pagu": 25000000,
+    "sumber": "APBD",
+    "sub": "KODE-DEMO-001",
+    "masaHk": 7,
+    "jenisPengadaan": "Barang",
+    "metodePemilihan": "E-Purchasing dengan Negosiasi Harga",
+    "lokasiPengiriman": "Gudang Dinas",
+    "items": [
+      { "nama": "Kertas HVS A4", "spesifikasi": "80 gsm", "merek": "", "vol": 10, "satuan": "Rim", "hs": 55000 }
+    ]
+  }
+]`;
+function rupFromSirup(a){
+  const yr=String(a[6]??'').match(/\d{4}/);
+  return {rup:String(a[0]??a[5]??'').trim(),nama:String(a[1]??'').trim(),pagu:a[2],metodePemilihan:String(a[3]??'').trim(),sumber:String(a[4]??'').trim(),tahun:yr?Number(yr[0]):''};
+}
+function rupParseRow(r,i,defTahun,defOpd){
+  const e=m=>({ok:false,err:'Data #'+(i+1)+': '+m});
+  if(Array.isArray(r))r=rupFromSirup(r);
+  if(!r||typeof r!=='object')return e('harus berupa objek JSON.');
+  const rup=String(r.rup??r.kodeRup??'').trim();
+  if(!rup)return e('kode RUP wajib diisi.');
+  const nama=String(r.nama??r.namaPaket??'').trim();
+  if(!nama)return e('nama paket wajib diisi.');
+  const tahun=Number(r.tahun===undefined||r.tahun===''?defTahun:r.tahun);
+  if(!S.tahun.includes(tahun))return e('tahun '+tahun+' belum terdaftar di Pengaturan Sistem.');
+  const ref=String(r.opd||defOpd||'').trim().toLowerCase();
+  const od=ref&&S.opd.find(o=>[o.id,o.singkat,o.nama].some(v=>String(v||'').trim().toLowerCase()===ref));
+  if(!od)return e(ref?'OPD "'+String(r.opd??'')+'" tidak ditemukan. Isi id, singkatan, atau nama OPD.':'OPD belum ditentukan. Isi kolom opd atau pilih OPD default.');
+  const opd=od.id;
+  const scope=activeCloudScope();
+  if(scope&&(!scope.opdIds.includes(String(opd))||!scope.years.includes(tahun)))return e('OPD atau tahun di luar assignment akun Anda.');
+  if(S.paket.some(p=>Number(p.tahun)===tahun&&String(p.rup||'').trim()===rup))return e('kode RUP '+rup+' sudah dipakai pada TA '+tahun+'.');
+  const pagu=typeof r.pagu==='string'?Number(r.pagu.replace(/[^0-9]/g,'')):Number(r.pagu);
+  if(!(pagu>0))return e('pagu harus lebih dari 0.');
+  const sub=String(r.sub||'').trim()||(S.kode[0]?.kode||'');
+  if(sub&&!S.kode.some(k=>k.kode===sub))return e('kode sub kegiatan "'+sub+'" tidak ada di Data Master.');
+  const items=[];
+  const rawItems=Array.isArray(r.items)?r.items:[];
+  for(let j=0;j<rawItems.length;j++){
+    const it=rawItems[j]||{};
+    if(!String(it.nama||'').trim())return e('item #'+(j+1)+' belum memiliki nama.');
+    const vol=Number(it.vol),hs=Number(it.hs);
+    if(!(vol>0)||!(hs>0))return e('volume dan harga satuan item "'+it.nama+'" harus lebih dari 0.');
+    items.push({id:uid('i'),nama:String(it.nama).trim(),spesifikasi:String(it.spesifikasi||''),merek:String(it.merek||''),pdn:'Perlu verifikasi',linkProduk:'',vol,satuan:String(it.satuan||'Unit'),hs});
+  }
+  const unit=(S.unit.find(u=>String(u.opd)===String(opd))||{}).id||'';
+  return {ok:true,p:{id:uid('k'),tahun,opd,unit,seq:0,nama,rup,pagu,sumber:String(r.sumber||S.pemda.sumber||''),sub,ppk:pjId(opd,'PPK')||'',pp:pjId(opd,'PP')||'',kabid:pjId(opd,'Kabid')||'',masaHk:Number(r.masaHk)||7,jenisPengadaan:String(r.jenisPengadaan||'Barang'),metodePemilihan:String(r.metodePemilihan||'E-Purchasing dengan Negosiasi Harga'),lokasiPengiriman:String(r.lokasiPengiriman||O(opd).tempat||O(opd).alamat||''),tglSurvei:'',tglEvaluasi:'',tglNego:'',tglPenetapan:'',tglNodis:'',tglDpp:'',tglSppbj:'',tglBahp:'',batas:'',pemenangId:null,items,penawaran:[]}};
+}
+function rupReadJson(text,defOpd){
+  let data;
+  try{data=JSON.parse(String(text||'').trim()||'null')}catch(err){return {rows:[],errs:['Format JSON tidak valid: '+err.message]}}
+  const list=Array.isArray(data)?data:(data&&Array.isArray(data.aaData)?data.aaData:(data&&Array.isArray(data.paket)?data.paket:(data&&typeof data==='object'?[data]:null)));
+  if(!list||!list.length)return {rows:[],errs:['Tidak ada data paket. Gunakan array JSON, atau objek dengan kunci "paket".']};
+  const rows=[],errs=[],seen=new Set();
+  list.forEach((r,i)=>{const x=rupParseRow(r,i,S.ui.tahun,defOpd);if(!x.ok){errs.push(x.err);return}const key=x.p.tahun+'|'+x.p.rup;if(seen.has(key)){errs.push('Data #'+(i+1)+': kode RUP '+x.p.rup+' duplikat dalam file.');return}seen.add(key);rows.push(x.p)});
+  return {rows,errs};
+}
+const rupPreview=r=>({errs:r.errs,rows:r.rows.map(p=>({rup:p.rup,nama:p.nama,opd:O(p.opd).singkat||O(p.opd).nama,tahun:p.tahun,pagu:p.pagu,n:p.items.length}))});
+function vInputRup(){
+  const mode=S.ui.rupMode||'manual';
+  const scope=activeCloudScope();
+  const opds=(S.opd||[]).filter(o=>!scope||scope.opdIds.includes(String(o.id)));
+  const tahuns=(S.tahun||[]).filter(t=>!scope||scope.years.includes(Number(t)));
+  const head=`<div class="row satria-page-heading"><div><h2>Input RUP</h2><p class="mut">Tambahkan paket pengadaan baru ke data aplikasi, secara manual atau dengan mengimpor kode JSON.</p></div></div>`;
+  if(!opds.length||!tahuns.length)return head+`<div class="card"><p class="mut">Akun ini belum memiliki OPD atau tahun yang ditugaskan. Minta admin memperbarui akses.</p></div>`;
+  const tabs=`<div class="row" style="gap:8px;margin-bottom:14px;flex-wrap:wrap"><button type="button" data-act="rupmode" data-mode="manual" class="${mode==='manual'?'':'g'}">1. Input RUP manual</button><button type="button" data-act="rupmode" data-mode="json" class="${mode==='json'?'':'g'}">2. Input RUP dengan kode JSON</button></div>`;
+  if(mode==='manual'){
+    const defOpd=opds.some(o=>String(o.id)===String(S.ui.opd))?String(S.ui.opd):String(opds[0].id);
+    const defSumber=S.pemda.sumber||'APBD';
+    const sumberOpts=[...new Set([...RUP_SUMBER,defSumber].filter(Boolean))];
+    const F=(l,h)=>`<div class="fg"><label>${l}</label>${h}</div>`;
+    return head+tabs+`<div class="card"><h3>Input RUP manual</h3><p class="mut">Isi data utama paket. Rincian barang, HPS, penawaran, dan tanggal dapat dilengkapi setelah paket tersimpan di menu Paket Pengadaan.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
+${F('Kode RUP *','<input id="rupKode" type="text" autocomplete="off" placeholder="mis. 67122699">')}
+${F('Nama paket *','<input id="rupNama" type="text" autocomplete="off" placeholder="Nama paket pengadaan">')}
+${F('OPD *',`<select id="rupOpd">${opds.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===defOpd?'selected':''}>${esc(o.singkat||o.nama||o.id)}</option>`).join('')}</select>`)}
+${F('Tahun anggaran *',`<select id="rupTahun">${tahuns.map(t=>`<option value="${Number(t)}" ${Number(t)===Number(S.ui.tahun)?'selected':''}>${Number(t)}</option>`).join('')}</select>`)}
+${F('Sub kegiatan',`<select id="rupSub">${S.kode.map(k=>`<option value="${esc(k.kode)}">${esc(k.kode)} — ${esc(k.nama)}</option>`).join('')}</select>`)}
+${F('Pagu (Rp) *','<input id="rupPagu" type="text" inputmode="numeric" placeholder="0">')}
+${F('Sumber dana',`<select id="rupSumber">${sumberOpts.map(x=>`<option value="${esc(x)}" ${x===defSumber?'selected':''}>${esc(x)}</option>`).join('')}</select>`)}
+${F('Masa pelaksanaan (hari kerja)','<input id="rupMasa" type="number" min="1" value="7">')}
+${F('Jenis pengadaan',`<select id="rupJenis">${RUP_JENIS.map(x=>`<option>${x}</option>`).join('')}</select>`)}
+${F('Metode pemilihan','<input id="rupMetode" type="text" value="E-Purchasing dengan Negosiasi Harga">')}
+${F('Lokasi penyerahan','<input id="rupLokasi" type="text" placeholder="Kosongkan untuk memakai alamat OPD">')}
+</div>
+<div class="row" style="margin-top:16px;gap:10px"><button type="button" data-act="rupsave">Simpan paket RUP</button></div></div>`;
+  }
+  const defDop=opds.some(o=>String(o.id)===String(S.ui.rupDefOpd))?String(S.ui.rupDefOpd):(opds.some(o=>String(o.id)===String(S.ui.opd))?String(S.ui.opd):String(opds[0].id));
+  const pv=S.ui.rupPrev;
+  const prev=!pv?'':(pv.errs.length
+    ?`<div class="card" style="margin-top:12px;border-color:#fca5a5"><b class="bad">Ditemukan ${pv.errs.length} kesalahan. Belum ada data yang diimpor.</b><ul>${pv.errs.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`
+    :`<div class="card" style="margin-top:12px"><b>✔ ${pv.rows.length} paket siap diimpor</b><div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>Kode RUP</th><th>Nama paket</th><th>OPD</th><th>TA</th><th class="n">Pagu</th><th class="n">Item</th></tr></thead><tbody>${pv.rows.map(r=>`<tr><td>${esc(r.rup)}</td><td>${esc(r.nama)}</td><td>${esc(r.opd)}</td><td>${r.tahun}</td><td class="n">${rp(r.pagu)}</td><td class="n">${r.n}</td></tr>`).join('')}</tbody></table></div></div>`);
+  return head+tabs+`<div class="card"><h3>Input RUP dengan kode JSON</h3>
+<p class="mut">Muat file JSON atau tempel kodenya di kotak berikut. Formatnya berupa array objek, satu objek per paket. Format SiRUP (<b>aaData</b>) juga didukung. Kolom wajib: <b>rup</b>, <b>nama</b>, <b>opd</b>, dan <b>pagu</b>. Kolom opsional: <b>tahun</b>, <b>sub</b>, <b>sumber</b>, <b>masaHk</b>, <b>jenisPengadaan</b>, <b>metodePemilihan</b>, <b>lokasiPengiriman</b>, dan <b>items</b>. Seluruh data diperiksa lebih dulu; jika ada satu kesalahan, tidak ada paket yang diimpor.</p>
+<div class="fg" style="margin-bottom:10px"><label>OPD default (untuk data yang tidak mencantumkan OPD, seperti SiRUP)</label><select id="rupDefOpd" style="max-width:420px">${opds.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===defDop?'selected':''}>${esc(o.singkat||o.nama||o.id)}</option>`).join('')}</select></div><div class="row" style="gap:10px;flex-wrap:wrap;margin-bottom:10px"><input id="rupFile" type="file" accept=".json,application/json"><button type="button" class="g" data-act="rupexample" data-kind="json">Contoh format JSON</button><button type="button" class="g" data-act="rupexample" data-kind="sirup">Contoh format SiRUP</button></div>
+<textarea id="rupJsonIn" spellcheck="false" style="min-height:260px;font-family:'JetBrains Mono',monospace;font-size:12.5px;width:100%" placeholder="Tempel kode JSON di sini">${esc(S.ui.rupJson??'')}</textarea>
+<div class="row" style="margin-top:12px;gap:10px;flex-wrap:wrap"><button type="button" class="g" data-act="rupvalidate">Periksa data</button><button type="button" data-act="rupimport">Impor ke Paket Pengadaan</button></div>
+${prev}</div>`;
+}
 function vPaket(){return `<div class="row satria-page-heading"><div><h2>Paket Pengadaan TA ${S.ui.tahun}</h2><p class="mut">Daftar paket mengikuti filter OPD dan tahun aktif.</p></div><button type="button" data-act="newpaket">+ Tambah Paket Pengadaan</button></div><div class="card satria-paket-card"><div class="row satria-paket-toolbar"><label for="qPaket">Cari paket</label><input id="qPaket" type="search" autocomplete="off" placeholder="Cari kode RUP atau nama paket…" value="${esc(S.ui.q||'')}" aria-controls="paketTableResult"/><span class="satria-result-count">${paketListForView().length} paket</span></div><div id="paketTableResult" aria-live="polite">${paketListMarkup()}</div></div>`}
 
 function readiness(p){const dup=S.paket.some(x=>x!==p&&x.tahun===p.tahun&&x.rup&&x.rup===p.rup);const H=hps(p);
@@ -1687,8 +1811,8 @@ function vSet(){
 
 
 /* ===== ROLE & HAK AKSES ===== */
-const ROLE_PAGES={Operator:['dash','paket','dok','lap','master','panduan','chat'],Viewer:['dash','paket','dok','lap','panduan','chat']};
-const WRITE=['newpaket','copy','delpaket','additem','delitem','delpw','winner','autowin','addrow','delrow','addopd','addyear','delyear','rmlogo','reset','addunit','madd','mtoggle','medit','uadd','utoggle','udel','clearsample','rmkop'];
+const ROLE_PAGES={Operator:['dash','paket','input','dok','lap','master','panduan','chat'],Viewer:['dash','paket','dok','lap','panduan','chat']};
+const WRITE=['newpaket','rupsave','rupimport','copy','delpaket','additem','delitem','delpw','winner','autowin','addrow','delrow','addopd','addyear','delyear','rmlogo','reset','addunit','madd','mtoggle','medit','uadd','utoggle','udel','clearsample','rmkop'];
 const cur=()=>S.users.find(u=>u.id===S.ui.user)||{role:'Viewer',nama:'-'};
 const allowed=k=>{const r=cur().role;return !ROLE_PAGES[r]||ROLE_PAGES[r].includes(k)};
 const canWrite=()=>cur().role!=='Viewer';
@@ -1850,7 +1974,7 @@ function render(){
  $('#selOpd').title=cloudScope?(visibleOpds.length===1?'OPD otomatis mengikuti assignment akun Anda.':`Hanya ${visibleOpds.length} OPD yang ditugaskan kepada akun ini.`):'Pilih OPD untuk memfilter data aplikasi.';
  if(!allowed(u.page))u.page='dash';$('#selUser').innerHTML=S.users.filter(x=>x.aktif!==false).map(x=>`<option value="${x.id}" ${x.id===S.ui.user?'selected':''}>${esc(x.nama)} (${x.role})</option>`).join('');
  $('#nav').innerHTML=NAV.filter(([k])=>allowed(k)).map(([k,t])=>`<a href="#${k}" class="${u.page===k?'on':''}">${t}</a>`).join('');
- const V={dash:vDash,paket:()=>u.pid?vDetail(P(u.pid)):vPaket(),dok:vDok,lap:vLap,master:vMaster,set:vSet,user:vUser,panduan:vPanduan,chat:vChat};
+ const V={dash:vDash,paket:()=>u.pid?vDetail(P(u.pid)):vPaket(),input:vInputRup,dok:vDok,lap:vLap,master:vMaster,set:vSet,user:vUser,panduan:vPanduan,chat:vChat};
  $('#main').innerHTML=(V[u.page]||vDash)();
  schedulePersist();
 }
@@ -1909,6 +2033,23 @@ document.addEventListener('click',e=>{
  if(a==='chatsend'){return chatSend($('#chatIn').value)}
  if(a==='chatq'){return chatSend(d.q)}
  if(a==='chatclear'){S.chat=[];return render()}
+ if(a==='rupmode'){const ta=$('#rupJsonIn');if(ta)S.ui.rupJson=ta.value;S.ui.rupMode=d.mode==='json'?'json':'manual';S.ui.rupPrev=null;return render()}
+ if(a==='rupexample'){S.ui.rupJson=d.kind==='sirup'?RUP_SIRUP:RUP_TPL;S.ui.rupPrev=null;return render()}
+ if(a==='rupvalidate'||a==='rupimport'){
+   const txt=$('#rupJsonIn')?.value??S.ui.rupJson??'';S.ui.rupJson=txt;const dop=$('#rupDefOpd')?.value||S.ui.rupDefOpd||'';S.ui.rupDefOpd=dop;
+   const r=rupReadJson(txt,dop);
+   if(a==='rupvalidate'||r.errs.length){S.ui.rupPrev=rupPreview(r);toast(r.errs.length?'Ada '+r.errs.length+' kesalahan. Impor dibatalkan.':r.rows.length+' paket siap diimpor');return render()}
+   r.rows.forEach(p=>{p.seq=nextSeq(p.tahun,p.opd);S.paket.push(p)});
+   S.ui.rupJson='';S.ui.rupPrev=null;S.ui.tahun=r.rows[0].tahun;const ops=[...new Set(r.rows.map(p=>String(p.opd)))];S.ui.opd=ops.length===1?ops[0]:'all';
+   sync('paket','Impor '+r.rows.length+' paket RUP dari JSON');location.hash='#paket';return render()
+ }
+ if(a==='rupsave'){
+   const g=k=>String($('#'+k)?.value??'').trim();
+   const x=rupParseRow({rup:g('rupKode'),nama:g('rupNama'),opd:g('rupOpd'),tahun:g('rupTahun'),sub:g('rupSub'),pagu:g('rupPagu'),sumber:g('rupSumber'),masaHk:g('rupMasa'),jenisPengadaan:g('rupJenis'),metodePemilihan:g('rupMetode'),lokasiPengiriman:g('rupLokasi')},0,S.ui.tahun);
+   if(!x.ok){toast(x.err.replace(/^Data #1: /,''));return}
+   const p=x.p;p.seq=nextSeq(p.tahun,p.opd);S.paket.push(p);S.ui.tahun=p.tahun;S.ui.opd=String(p.opd);S.ui.ptab='data';
+   sync('paket','Input RUP manual: '+p.rup);location.hash='#paket/'+p.id;return render()
+ }
  if(a==='newpaket'){
    const scope=activeCloudScope();
    if(!S.opd.length){toast('Master OPD belum tersedia. Muat ulang data cloud atau minta admin memeriksa master OPD.');return}
@@ -1976,6 +2117,8 @@ document.addEventListener('input',event=>{
 });
 document.addEventListener('change',e=>{
  const t=e.target,d=t.dataset;
+ if(t.id==='rupDefOpd'){S.ui.rupDefOpd=t.value;return}
+ if(t.id==='rupFile'){const f=t.files[0];if(!f)return;if(f.size>2*1024*1024){toast('File JSON maksimal 2 MB.');t.value='';return}const r=new FileReader();r.onload=()=>{S.ui.rupJson=String(r.result||'');S.ui.rupPrev=null;toast('File JSON dimuat. Klik "Periksa data" untuk memeriksa.');render()};r.readAsText(f);return}
  if(t.id==='selEngine'){ENGINE=t.value==='dexie'&&DB?'dexie':'memory';clearTimeout(pTimer);if(ENGINE==='dexie')persistNow();toast(ENGINE==='dexie'?'Penyimpanan: IndexedDB (Dexie)':'Penyimpanan: memori sesi (hilang saat halaman ditutup)');return}
  if(t.id==='selTahun'){
    const scope=activeCloudScope(),year=Number(t.value);
@@ -2094,7 +2237,7 @@ window.addEventListener('DOMContentLoaded',()=>{void boot()},{once:true});
     slider.style.width=active.offsetWidth+'px';
   }
   function assignIcons(){
-    const map={dash:'dash', paket:'paket', dok:'dok', lap:'lap', master:'master', set:'set', user:'user', panduan:'panduan', chat:'chat'};
+    const map={dash:'dash', paket:'paket', input:'paket', dok:'dok', lap:'lap', master:'master', set:'set', user:'user', panduan:'panduan', chat:'chat'};
     document.querySelectorAll('#nav a').forEach(a=>{
       const href=a.getAttribute('href')||'';
       const key=Object.keys(map).find(k=>href.includes(k))||href.replace('#','').split('/')[0];
