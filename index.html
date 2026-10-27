@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>SATRIA Framework 3.0.41.1 | Integrated Government Intelligence Platform</title>
+<title>SATRIA Framework 3.0.41.2 | Integrated Government Intelligence Platform</title>
 <meta name="description" content="SATRIA Framework merupakan platform tata kelola digital pemerintah yang mengintegrasikan perencanaan, pelaporan, analitik, otomasi dokumen, serta pengambilan keputusan berbasis data.">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/4.0.8/dexie.min.js"></script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -1442,13 +1442,119 @@ header button[data-act="export"]{
 @media print{.satria340-quality{display:none!important}}
 </style>
 <style id="satria-rup-manual-402">.satria-rup-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.satria-rup-manual textarea{width:100%;min-height:68px;padding:11px 13px}.satria-rup-manual .fg{min-width:0!important}.satria-rup-manual input,.satria-rup-manual select{width:100%;max-width:100%}@media(max-width:720px){.satria-rup-form{grid-template-columns:minmax(0,1fr)}.satria-rup-manual{padding:15px!important}.satria-rup-manual button[data-act="rupmanualsave"]{width:100%}}</style>
+
+<style id="satriaSettingsDesktop412">
+/* SATRIA 3.0.41.2: desktop & mobile screen-only settings layout. No PDF/.doc overrides. */
+@media screen {
+  #main .satria-settings-opd-card{padding:24px!important;overflow:visible!important;min-width:0}
+  #main .satria-settings-opd-header{
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+    gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--bd);
+  }
+  #main .satria-settings-opd-title{
+    color:var(--ink);font-size:clamp(15px,1.3vw,19px);font-weight:800;
+    line-height:1.4;overflow-wrap:anywhere;min-width:0;flex:1 1 300px;
+  }
+  #main .satria-settings-opd-header button{
+    flex:0 0 auto!important;max-width:100%;min-height:42px;
+  }
+  #main .satria-settings-opd-fields{
+    display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;
+    gap:16px 18px!important;align-items:start!important;width:100%;
+    margin:0 0 20px;
+  }
+  #main .satria-settings-opd-fields>.fg{
+    min-width:0!important;width:100%!important;max-width:none!important;
+    margin:0!important;grid-column:span 4;flex:none!important;
+  }
+  #main .satria-settings-opd-fields>.fg:nth-child(1){grid-column:span 5}
+  #main .satria-settings-opd-fields>.fg:nth-child(2){grid-column:span 2}
+  #main .satria-settings-opd-fields>.fg:nth-child(3){grid-column:span 5}
+  #main .satria-settings-opd-fields>.fg:nth-child(4){grid-column:span 7}
+  #main .satria-settings-opd-fields>.fg:nth-child(5){grid-column:span 5}
+  #main .satria-settings-opd-fields input,
+  #main .satria-settings-pemda-fields input{
+    display:block;box-sizing:border-box;width:100%!important;min-width:0!important;
+    max-width:100%!important;min-height:45px!important;padding:11px 13px!important;
+    font-size:14px!important;text-overflow:clip;
+  }
+  #main .satria-settings-opd-fields .fg label,
+  #main .satria-settings-pemda-fields .fg label{
+    color:var(--mut)!important;font-size:11px!important;line-height:1.4;
+    white-space:normal!important;overflow-wrap:anywhere!important;letter-spacing:.045em;
+  }
+  #main .satria-settings-pemda-fields{
+    display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;
+    gap:15px 18px!important;margin:14px 0 0!important;
+  }
+  #main .satria-settings-pemda-fields>.fg{
+    grid-column:span 3!important;min-width:0!important;width:100%!important;
+    max-width:none!important;flex:none!important;
+  }
+  #main .satria-settings-pemda-fields>.fg:first-child{grid-column:span 5!important}
+  #main .satria-settings-pemda-fields>.fg:nth-child(2){grid-column:span 2!important}
+  #main .satria-settings-pemda-fields>.fg:nth-child(3){grid-column:span 2!important}
+  #main .satria-settings-pemda-fields>.fg:nth-child(4){grid-column:span 3!important}
+  #main .satria-settings-opd-kop{
+    margin-top:5px!important;max-width:100%;min-width:0;padding:16px 18px;
+    border:1px solid var(--bd);background:var(--card-2);border-radius:16px;
+  }
+  #main .satria-settings-opd-kop>label{
+    display:block;font-size:11px!important;font-weight:800;letter-spacing:.06em;
+    color:var(--mut)!important;margin-bottom:10px;text-transform:uppercase;
+  }
+  #main .satria-settings-opd-kop-preview{
+    display:flex;align-items:center;justify-content:flex-start;
+    box-sizing:border-box;min-height:84px;max-width:780px;width:100%;
+    border:1px solid var(--bd);border-radius:12px;
+    background:#fff;padding:12px;overflow:hidden;
+  }
+  #main .satria-settings-opd-kop-preview img{
+    display:block;width:auto!important;max-width:100%!important;
+    height:auto!important;max-height:164px!important;
+    object-fit:contain;object-position:left center;border:0!important;
+    padding:0!important;margin:0!important;box-shadow:none!important;
+  }
+  #main .satria-settings-opd-kop-actions{
+    display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0 8px;
+  }
+  #main .satria-settings-opd-kop-actions input[type=file]{
+    box-sizing:border-box;flex:0 1 440px;max-width:100%;width:min(100%,440px)!important;
+    height:auto!important;min-height:44px;padding:8px!important;font-size:12px!important;
+  }
+  #main .satria-settings-opd-kop-actions button{flex:0 0 auto}
+  #main .satria-settings-opd-kop>.mut{
+    font-size:12px!important;line-height:1.55;max-width:900px;
+  }
+  #main .satria-settings-opd-card>p.mut{font-size:12px!important;line-height:1.55;overflow-wrap:anywhere}
+}
+@media screen and (min-width:721px) and (max-width:1100px){
+  #main .satria-settings-opd-fields>.fg:nth-child(1){grid-column:span 8}
+  #main .satria-settings-opd-fields>.fg:nth-child(2){grid-column:span 4}
+  #main .satria-settings-opd-fields>.fg:nth-child(n+3){grid-column:span 12}
+  #main .satria-settings-pemda-fields>.fg{grid-column:span 6!important}
+  #main .satria-settings-pemda-fields>.fg:first-child{grid-column:span 12!important}
+}
+@media screen and (max-width:720px){
+  #main .satria-settings-opd-card{padding:16px!important}
+  #main .satria-settings-opd-header{align-items:flex-start}
+  #main .satria-settings-opd-header button{width:auto!important}
+  #main .satria-settings-opd-fields{gap:12px!important}
+  #main .satria-settings-opd-fields>.fg{grid-column:span 12!important}
+  #main .satria-settings-pemda-fields>.fg{grid-column:span 12!important}
+  #main .satria-settings-opd-kop{padding:12px}
+  #main .satria-settings-opd-kop-preview img{max-height:120px!important}
+  #main .satria-settings-opd-kop-actions input[type=file]{flex:1 1 100%;width:100%!important}
+}
+</style>
+
 </head>
 <body>
 <div class="bg-blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
 <div class="noise"></div>
 <header>
   <div class="header-left">
-    <div id="bLogoRow"><div><b id="hPemda">SATRIA Framework <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">Framework Version 3.0.41.1</span></b><div id="hSub"><span style="font-weight:600;letter-spacing:-0.01em">Integrated Government Intelligence Platform</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px;opacity:.8">Smart • Adaptive • Transparent • Responsive • Integrated • Accountable</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px">Multi OPD • Multi Tahun</span></div></div></div>
+    <div id="bLogoRow"><div><b id="hPemda">SATRIA Framework <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">Framework Version 3.0.41.2</span></b><div id="hSub"><span style="font-weight:600;letter-spacing:-0.01em">Integrated Government Intelligence Platform</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px;opacity:.8">Smart • Adaptive • Transparent • Responsive • Integrated • Accountable</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px">Multi OPD • Multi Tahun</span></div></div></div>
   </div>
   <div class="header-right row"><button type="button" class="satria-cloud-btn" id="satriaCloudOpen" title="Konfigurasi autentikasi dan sinkronisasi Supabase">☁ Supabase</button><span id="satriaCloudSyncIndicator" class="satria-sync-indicator" role="status" aria-live="polite" title="Belum login ke cloud" data-kind="muted">Belum login ke cloud</span>
     <div class="control-group"><label>User <select id="selUser" title=""></select></label></div>
@@ -1482,7 +1588,7 @@ header button[data-act="export"]{
  <tr><td><b>2026</b></td><td class="n">0</td><td class="n">Rp 0</td><td class="n">Rp 0</td><td class="n">Rp 0</td><td class="n"><span class="pill" style="background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">0%</span></td></tr></tbody></table></div></div>
  <div class="card"><h3>Paket Pengadaan • TA 2026</h3><p class="mut">Belum ada paket pada filter ini.</p></div>
  <div class="card"><h3>Governance Intelligence • Aktivitas Sinkronisasi</h3><span class="mut">Belum ada perubahan. Ubah data program, rincian, atau penawaran untuk melihat sinkronisasi governance intelligence.</span></div></main>
-<footer class="satria-global-footer no-print"><div class="foot-brand"><b>SATRIA Framework 3.0</b><span>Integrated Government Intelligence Platform</span><span style="font-size:10px;opacity:.8">Framework Version 3.0.41.1</span></div><div class="foot-links"><span>Smart • Adaptive • Transparent • Responsive • Integrated • Accountable</span><span style="opacity:.4">|</span><span>Generated by SATRIA Framework</span></div></footer>
+<footer class="satria-global-footer no-print"><div class="foot-brand"><b>SATRIA Framework 3.0</b><span>Integrated Government Intelligence Platform</span><span style="font-size:10px;opacity:.8">Framework Version 3.0.41.2</span></div><div class="foot-links"><span>Smart • Adaptive • Transparent • Responsive • Integrated • Accountable</span><span style="opacity:.4">|</span><span>Generated by SATRIA Framework</span></div></footer>
 <div id="toast"></div>
 <script>
 
@@ -2765,9 +2871,9 @@ function vMaster(){
  `;
 }
 function kopEditor(o){
- return `<div class=fg style="margin-top:12px"><label>Kop surat OPD (gambar)</label>
- <div class=row>${o.kop?`<img src="${o.kop}" alt="Kop ${esc(o.singkat)}" style="max-width:100%;border:1px solid var(--bd);background:#fff;padding:4px">`:'<span class=mut>Belum ada kop gambar. Dokumen memakai kop teks dari data OPD.</span>'}</div>
- <div class=row><input type=file accept="image/*" data-kopup="${o.id}"> ${o.kop?`<button class=d data-act="rmkop" data-id="${o.id}">Hapus kop</button>`:''}</div>
+ return `<div class="satria-settings-opd-kop" style="margin-top:12px"><label>Kop surat OPD (gambar)</label>
+ <div class="satria-settings-opd-kop-preview">${o.kop?`<img src="${o.kop}" alt="Kop ${esc(o.singkat)}">`:'<span class=mut>Belum ada kop gambar. Dokumen memakai kop teks dari data OPD.</span>'}</div>
+ <div class="satria-settings-opd-kop-actions"><input type=file accept="image/*" data-kopup="${o.id}"> ${o.kop?`<button class=d data-act="rmkop" data-id="${o.id}">Hapus kop</button>`:''}</div>
  <div class=mut>PNG/JPG, maks. 1 MB. Jika tersedia, kop gambar menjadi kop utama dan menggantikan kop teks otomatis (logo pemda tidak ditambahkan lagi). Gunakan gambar yang sudah memuat identitas resmi dan pastikan keterbacaan saat dicetak.</div></div>`}
 function vSet(){
  const k=S.opd[0],warns=[];
@@ -2802,16 +2908,16 @@ function vSet(){
  const inp=(c,f,v,l)=>`<div class=fg><label>${l}</label><input value="${esc(v)}" data-col="${c}" data-id="" data-f="${f}"></div>`;
  const pjNama=(o,r)=>(S.pejabat.find(x=>x.opd===o.id&&x.peran===r)||{}).nama||'belum diatur';
  const kartu=o=>{const used=S.paket.filter(p=>p.opd===o.id).length+(S.rupBank||[]).filter(r=>r.opd===o.id).length;const f=(c,l)=>`<div class=fg><label>${l}</label><input value="${esc(o[c])}" data-col="opd" data-id="${o.id}" data-f="${c}"></div>`;
-  return `<div class=card><div class=row style="justify-content:space-between"><b>${esc(o.singkat||'(tanpa singkatan)')} — ${esc(o.nama)}</b><button class=d ${used?`disabled title="Dipakai ${used} paket"`:''} data-act="delrow" data-c="opd" data-id="${o.id}">Hapus OPD</button></div>
-  <div class=grid>${f('nama','Nama instansi')}${f('singkat','Singkatan')}${f('alamat','Alamat (kop baris 4)')}${f('kontak','Kontak (kop baris 5)')}${f('tempat','Tempat pelaksanaan')}</div>${kopEditor(o)}
+  return `<div class="card satria-settings-opd-card"><div class="satria-settings-opd-header"><b class="satria-settings-opd-title">${esc(o.singkat||'(tanpa singkatan)')} — ${esc(o.nama)}</b><button class=d ${used?`disabled title="Dipakai ${used} paket"`:''} data-act="delrow" data-c="opd" data-id="${o.id}">Hapus OPD</button></div>
+  <div class="satria-settings-opd-fields">${f('nama','Nama instansi')}${f('singkat','Singkatan')}${f('tempat','Tempat pelaksanaan')}${f('alamat','Alamat (kop baris 4)')}${f('kontak','Kontak (kop baris 5)')}</div>${kopEditor(o)}
   <p class=mut>Pejabat: PPK ${esc(pjNama(o,'PPK'))} · PP ${esc(pjNama(o,'PP'))} · Kabid ${esc(pjNama(o,'Kabid'))}. Kelola di <a href="#master">Data Master</a>.</p>${used?`<p class=mut>Dipakai ${used} paket, sehingga tidak bisa dihapus.</p>`:''}</div>`};
  const logo=S.pemda.logo?`<img src="${S.pemda.logo}" alt="logo" style="height:70px;border:1px solid #ddd;padding:4px;background:#fff">`:'<div class=mut style="width:120px">Belum ada logo</div>';
  const years=S.tahun.slice().sort();
  const demo=S.paket.find(p=>p.opd===(k&&k.id))||{seq:1,opd:k&&k.id,tahun:S.ui.tahun};
  const docs=[['NODIS','Nota Dinas'],['PPBJ','SPPBJ'],['DPP','DPP & Lampiran Referensi Harga'],['BAHR','BA Reviu DPP'],['BAHEPE','BA Evaluasi Penyedia'],['BAHP','BA Hasil Pemilihan'],['KKNEGO','Kertas Kerja Negosiasi']];
  return `${diagnostics}${warns.length?`<div class=card style="border-color:#e0a800"><b class=warn>Perlu dilengkapi (${warns.length})</b><ul style="margin:6px 0 0">${warns.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></div>`:'<div class=card><span class=ok>✔ Pengaturan instansi sudah lengkap</span></div>'}
- <div class=card><h3>Identitas Pemerintah Daerah</h3><div class=row>${logo}<div><input type=file id=logoFile accept="image/*"> <button class=g data-act="rmlogo">Hapus logo</button><div class=mut>PNG/JPG, maks. 300 KB. Logo tampil pada kop teks otomatis. Jika OPD memakai kop gambar, gambar kop tersebut menggantikan kop teks termasuk logo ini.</div></div></div><br>
-  <div class=grid>${inp('pemda','nama',S.pemda.nama,'Nama pemda (kop baris 1)')}${inp('pemda','kota',S.pemda.kota,'Kota tanda tangan')}${inp('pemda','provinsi',S.pemda.provinsi,'Provinsi')}${inp('pemda','sumber',S.pemda.sumber,'Sumber dana default')}</div></div>
+ <div class="card satria-settings-pemda-card"><h3>Identitas Pemerintah Daerah</h3><div class=row>${logo}<div><input type=file id=logoFile accept="image/*"> <button class=g data-act="rmlogo">Hapus logo</button><div class=mut>PNG/JPG, maks. 300 KB. Logo tampil pada kop teks otomatis. Jika OPD memakai kop gambar, gambar kop tersebut menggantikan kop teks termasuk logo ini.</div></div></div><br>
+  <div class="satria-settings-pemda-fields">${inp('pemda','nama',S.pemda.nama,'Nama pemda (kop baris 1)')}${inp('pemda','kota',S.pemda.kota,'Kota tanda tangan')}${inp('pemda','provinsi',S.pemda.provinsi,'Provinsi')}${inp('pemda','sumber',S.pemda.sumber,'Sumber dana default')}</div></div>
  <div class=card><h3>Pratinjau Kop Surat per OPD</h3><p class=mut>Pratinjau mengikuti aturan yang dipakai saat cetak: kop gambar menggantikan kop teks; jika tidak ada kop gambar, identitas pemda dan OPD dirender dari data konfigurasi.</p>${S.opd.length?S.opd.map(o=>`<div style="margin:12px 0;background:#fff;border:1px solid var(--bd);padding:12px"><b style="color:#334155">${esc(o.singkat)} — ${esc(o.nama)}</b><div style="margin-top:8px">${kop({opd:o.id})}</div></div>`).join(''):'<span class=mut>Belum ada OPD.</span>'}</div>
  <div class=card><h3>Tahun Anggaran</h3><table><tr><th>Tahun</th><th class=n>Paket</th><th class=n>Total pagu</th><th></th></tr>
   ${years.map(t=>{const x=S.paket.filter(p=>p.tahun==t),bankN=(S.rupBank||[]).filter(r=>+r.tahun===+t).length;return `<tr><td>TA ${t} ${t==S.ui.tahun?'<span class=pill>aktif</span>':''}</td><td class=n>${x.length}</td><td class=n>${rp(sum(x,p=>p.pagu))}</td><td>${x.length||bankN?`<span class=mut>${bankN?'Bank RUP: '+bankN+' · ':''}${x.length?'Paket: '+x.length:''}</span>`:`<button class=d data-act="delyear" data-y="${t}">Hapus</button>`}</td></tr>`}).join('')}</table>
@@ -2971,7 +3077,7 @@ function vPanduan(){const sec=(t,items)=>`<div class=card><h3>${t}</h3><ol style
 /* ===== RENDER & ROUTING ===== */
 function render(){
  const u=S.ui;
- $('#hPemda').innerHTML='SATRIA Framework <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">Framework Version 3.0.41.1</span>';
+ $('#hPemda').innerHTML='SATRIA Framework <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">Framework Version 3.0.41.2</span>';
  $('#hSub').innerHTML='<span style="font-weight:600;letter-spacing:-0.01em">Integrated Government Intelligence Platform</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px;opacity:.8">Smart • Adaptive • Transparent • Responsive • Integrated • Accountable</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px">'+(u.opd==='all'?'Multi OPD • Multi Tahun':esc(O(u.opd).nama))+'</span>';
  $('#dirty').textContent=S.persistError?'⚠ Gagal menyimpan':(S.dirty?'● Perubahan belum di-backup':'✔ Tidak ada perubahan baru');$('#dirty').title=S.persistError||'Penyimpanan lokal dan backup file adalah dua hal berbeda';$('#dirty').style.background=S.persistError?'#FEE2E2':(S.dirty?'#F59E0B':'rgba(15,118,110,.14)'); $('#dirty').style.color=S.persistError?'#991B1B':(S.dirty?'#78350f':'#0F766E');
  $('#selTahun').innerHTML=S.tahun.map(t=>`<option value="${Number(t)}" ${Number(t)===Number(u.tahun)?'selected':''}>${Number(t)}</option>`).join('');
@@ -8377,7 +8483,7 @@ window.SATRIA_SMART_SURVEY={parseProductUrl:fromUrl,calculate:function(base,mode
   }
   const btn=document.querySelector('#satriaMobileMenuToggle');
   if(btn){btn.setAttribute('aria-label','Buka atau tutup menu navigasi SATRIA');}
-  document.title='SATRIA Framework 3.0.41.1 | '+(routeNames[page]||'Integrated Government Intelligence Platform');
+  document.title='SATRIA Framework 3.0.41.2 | '+(routeNames[page]||'Integrated Government Intelligence Platform');
  };
  window.addEventListener('hashchange',apply);
  document.addEventListener('DOMContentLoaded',apply,{once:true});
