@@ -3,10 +3,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>SATRIA Framework 3.0.47 | Integrated Government Intelligence Platform</title>
+<title>SATRIA NEXT 3.0.50 | Dashboard Analytics Terintegrasi</title>
 <meta name="description" content="SATRIA Framework merupakan platform tata kelola digital pemerintah yang mengintegrasikan perencanaan, pelaporan, analitik, otomasi dokumen, serta pengambilan keputusan berbasis data.">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/4.0.8/dexie.min.js"></script>
-<script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
@@ -1628,6 +1627,20 @@ header button[data-act="export"]{
 @media screen and (max-width:640px){.kn45-plan{padding:15px;border-radius:16px}.kn45-plan-metrics strong{font-size:13px}.kn45-suggestion{padding:13px}.kn45-suggestion-grid strong{font-size:13px}.kn45-plan>button,.kn45-use{width:100%!important;justify-self:stretch!important}}
 </style>
 
+
+<style id="satria-350-navigation-award-design">
+@media screen{
+ .kn44-navline{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:0 0 16px;padding:11px 15px;border-radius:16px;background:linear-gradient(110deg,#f0eeff,#edfff8);border:1px solid #ddd9ff;font-size:13px;color:#413d77}
+ .kn44-navline b{color:#493ad6}.satria50-back-offer{background:#251f52!important;color:#fff!important;border:1px solid #251f52!important;padding:11px 16px!important;border-radius:13px!important;font-weight:800!important;min-height:44px;cursor:pointer}
+ .satria50-bottom-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.satria50-bottom-actions>button{min-height:46px}.satria50-bottom-actions [data-kn-action="saveChanged"]{background:#6454f6!important;color:white!important;font-weight:800}
+ .satria50-offer-badges{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.satria50-winner-badge{display:inline-flex;align-items:center;background:#dcfce7;color:#166534;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:900}
+ .satria50-winner-action{background:#6756f8!important;color:white!important;border:0!important;border-radius:13px!important;padding:12px 17px!important;min-height:44px;font-weight:850!important;cursor:pointer;box-shadow:0 8px 18px rgba(90,74,230,.15)}
+ .satria50-winner-action:disabled{opacity:.55;cursor:not-allowed;box-shadow:none;background:#e5e7eb!important;color:#475569!important}
+ .satria-offer-card:has(.satria50-winner-badge){border:2px solid #68c99a!important;box-shadow:0 8px 26px rgba(16,185,129,.1)}
+ .smart-survey-wrap .smart-actions{justify-content:flex-start}.smart-survey-wrap .smart-note{background:#f0f5ff;border-radius:12px;padding:12px;border-left:3px solid #6756f8}
+}
+@media screen and (max-width:700px){.kn44-navline,.satria50-bottom-actions{flex-direction:column;align-items:stretch}.kn44-navline>button,.satria50-bottom-actions>button{width:100%!important}.satria-offer-actions .satria50-winner-action{width:100%!important}}
+</style>
 <style id="satria-347-nego-bridge">
 @media screen {
 .kn47-bridge{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 18px;margin:16px 0;border:1px solid #99dec4;border-radius:17px;background:linear-gradient(115deg,#e7fff5,#f7f8ff);color:#104b3b;box-shadow:0 8px 28px rgba(17,91,73,.06)}
@@ -1641,13 +1654,36 @@ header button[data-act="export"]{
 @media(max-width:640px){.kn47-bridge{align-items:stretch}.kn47-bridge button{width:100%}.kn47-origin{white-space:normal}.kn47-highlight{scroll-margin-top:110px}}
 }
 </style>
+<style id="satria-348-analytics" media="screen">
+.s348-empty{display:flex;align-items:center;justify-content:center;min-height:160px;text-align:center;color:var(--mut,#667085);font:600 13px/1.6 Inter,Arial,sans-serif;padding:20px}
+.s348-axis{fill:var(--mut,#667085);font:600 12px Inter,Arial,sans-serif}
+.chart-card[id],.chart-card{min-width:0}
+.chart-card svg{width:100%;height:100%;max-width:100%;display:block;overflow:visible}
+#chartMultiYear,#chartHpsPagu{min-width:0;padding:6px;display:block}
+#chartMultiYear{height:340px}#chartHpsPagu{height:240px}
+#chartBarPaket,#chartStatus,#chartOpd{min-height:200px;height:auto!important;max-height:400px;overflow-y:auto;padding:8px 6px;display:block}
+#chartDonut{height:auto!important;min-height:220px;display:block!important;padding:8px}
+.s348-donut-wrap{display:flex;justify-content:center;align-items:center;padding:6px 0 12px}
+.s348-donut{width:min(208px,68vw);height:min(208px,68vw);border-radius:50%;display:grid;place-items:center}
+.s348-donut-core{width:64%;height:64%;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--card-solid,#fff);gap:5px;text-align:center;padding:6px}
+.s348-donut-core small{font:750 10px Inter,Arial,sans-serif;color:var(--mut,#64748b)}
+.s348-donut-core b{font:800 17px 'Plus Jakarta Sans',Inter,Arial,sans-serif;color:var(--ink,#191d35);word-break:break-word}
+.s348-legend{font:650 11px/1.5 Inter,Arial,sans-serif;color:var(--ink,#191d35);display:inline-flex;align-items:flex-start;gap:7px;margin:4px 10px 4px 0}
+.s348-legend::before{content:'';width:10px;height:10px;border-radius:3px;background:var(--s348-dot);flex:0 0 10px;margin-top:3px}
+.s348-bar-row{margin:8px 0 15px;min-width:0}.s348-bar-head{display:flex;justify-content:space-between;gap:9px;align-items:start;margin:0 0 5px;font:650 11px/1.4 Inter,Arial,sans-serif;color:var(--ink,#182033)}
+.s348-bar-head span{flex:1;min-width:0;overflow-wrap:anywhere}.s348-bar-head b{white-space:nowrap;font-variant-numeric:tabular-nums}
+.s348-bar-rail{height:10px;background:var(--bd,#e6e9ef);border-radius:999px;overflow:hidden;margin-bottom:3px}.s348-bar-fill{height:100%;border-radius:999px;min-width:0}
+.s348-caption{font:600 11px/1.5 Inter,Arial,sans-serif;color:var(--mut,#64748b);margin:0 0 12px}.s348-warning{font:700 11px/1.5 Inter,Arial,sans-serif;color:#ad373d;margin:9px 0}
+@media(max-width:640px){#chartMultiYear{height:265px}#chartHpsPagu{height:215px}.s348-axis{font-size:14px}.s348-donut{width:190px;height:190px}.s348-bar-head{font-size:12px}}
+</style>
+<style id="satria-349-nego-net-ui">@media screen{.satria342-offer-table-title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.satria342-offer-table-title span{font-size:12px;color:#465574;line-height:1.6}.satria-offer-table td small{display:block;margin-top:4px;line-height:1.4}.satria-offer-table table{min-width:860px}.satria-offer-table input[readonly]{cursor:default;border-color:#cbd5e1}.kn47-bridge p{line-height:1.5}}@media print{.satria-offer-table input[readonly]{border:0;background:transparent}}</style>
 </head>
 <body>
 <div class="bg-blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
 <div class="noise"></div>
 <header>
   <div class="header-left">
-    <div id="bLogoRow"><div><b id="hPemda">SATRIA <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">NEXT · 3.0.47</span></b><div id="hSub"><span style="font-weight:600;letter-spacing:-0.01em">Government work, in flow.</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px;opacity:.8">Simple • Connected • Accountable</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px">Multi OPD • Multi Tahun</span></div></div></div>
+    <div id="bLogoRow"><div><b id="hPemda">SATRIA <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">NEXT · 3.0.50</span></b><div id="hSub"><span style="font-weight:600;letter-spacing:-0.01em">Government work, in flow.</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px;opacity:.8">Simple • Connected • Accountable</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px">Multi OPD • Multi Tahun</span></div></div></div>
   </div>
   <div class="header-right row"><button type="button" class="satria-cloud-btn" id="satriaCloudOpen" title="Konfigurasi autentikasi dan sinkronisasi Supabase">☁ Supabase</button><span id="satriaCloudSyncIndicator" class="satria-sync-indicator" role="status" aria-live="polite" title="Belum login ke cloud" data-kind="muted">Belum login ke cloud</span>
     <div class="control-group"><label>User <select id="selUser" title=""></select></label></div>
@@ -1660,7 +1696,7 @@ header button[data-act="export"]{
   </div>
 </header>
 <nav id="nav"><a href="#dash" class="on" data-icon="dash">Ringkasan Utama</a><a href="#paket" class="" data-icon="paket">Paket Pengadaan</a><a href="#dok" class="" data-icon="dok">Dokumen Pengadaan</a><a href="#lap" class="" data-icon="lap">Laporan dan Analisis</a><a href="#panduan" class="" data-icon="panduan">Panduan Penggunaan</a><a href="#chat" class="" data-icon="chat">Asisten SATRIA</a></nav>
-<main id="main"><div class="satria-command-header"><div class="satria-command-title"><div class="satria-command-badge"><span class="dot"></span> RINGKASAN UTAMA</div><h2>Ringkasan Utama SATRIA</h2><p>Integrated Government Intelligence Platform • Strategic Analytics Overview • Framework Version 3.0</p></div><div class="satria-command-meta"><div class="satria-meta-card"><span>TA Aktif</span><b>2026</b></div><div class="satria-meta-card"><span>Entitas</span><b>0</b></div><div class="satria-meta-card"><span>Kepatuhan</span><b>0%</b></div></div></div>
+<main id="main"><div class="satria-command-header"><div class="satria-command-title"><div class="satria-command-badge"><span class="dot"></span> RINGKASAN UTAMA</div><h2>Ringkasan Utama SATRIA</h2><p>Integrated Government Intelligence Platform • Strategic Analytics Overview • Framework Version 3.0.50</p></div><div class="satria-command-meta"><div class="satria-meta-card"><span>TA Aktif</span><b>2026</b></div><div class="satria-meta-card"><span>Entitas</span><b>0</b></div><div class="satria-meta-card"><span>Kepatuhan</span><b>0%</b></div></div></div>
  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
   <div class="card kpi satria-kpi" style="--kpi-accent:#0F766E"><div class="kpi-icon" style="background:linear-gradient(135deg,#0F766E 0%, color-mix(in srgb, #0F766E 70%, white) 100%)">🏛</div><div class="kpi-content"><span class="kpi-label">Jumlah Entitas</span><b class="kpi-value">0</b><span class="kpi-sub">Governance • Total Program</span></div><div class="kpi-glow"></div></div>
   <div class="card kpi satria-kpi" style="--kpi-accent:#0891B2"><div class="kpi-icon" style="background:linear-gradient(135deg,#0891B2 0%, color-mix(in srgb, #0891B2 70%, white) 100%)">📊</div><div class="kpi-content"><span class="kpi-label">Anggaran Terkelola</span><b class="kpi-value">Rp 0</b><span class="kpi-sub">Analytics • Pagu Terkelola</span></div><div class="kpi-glow"></div></div>
@@ -1668,20 +1704,20 @@ header button[data-act="export"]{
   <div class="card kpi satria-kpi" style="--kpi-accent:#10B981"><div class="kpi-icon" style="background:linear-gradient(135deg,#10B981 0%, color-mix(in srgb, #10B981 70%, white) 100%)">🔐</div><div class="kpi-content"><span class="kpi-label">Kelengkapan Administratif</span><b class="kpi-value">0%</b><span class="kpi-sub">Compliance • 0 Lengkap</span></div><div class="kpi-glow"></div></div>
   <div class="card kpi satria-kpi" style="--kpi-accent:#2563EB"><div class="kpi-icon" style="background:linear-gradient(135deg,#2563EB 0%, color-mix(in srgb, #2563EB 70%, white) 100%)">⚡</div><div class="kpi-content"><span class="kpi-label">Indikator Data Paket</span><b class="kpi-value">Rp 0 • 0%</b><span class="kpi-sub">Performance • Efisiensi</span></div><div class="kpi-glow"></div></div>
  </div>
- <div class="card satria-overview"><h3 style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff">◈</span> Strategic Analytics Overview <span class="badge" style="margin-left:auto;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">SATRIA Intelligence • v3.0 • Lazy Charts</span></h3><p class="mut">Monitoring real-time terhadap anggaran, efektivitas, kepatuhan, dan kinerja tata kelola berbasis data intelligence. Charts lazy load aktif — hanya render saat discroll, hemat 70% di Android.</p><div class="satria-metrics-row"><div><span>Efisiensi</span><b>Rp 0</b><small>0% dari pagu</small></div><div><span>Total HPS</span><b>Rp 0</b><small>Estimasi kebutuhan</small></div><div><span>Nilai Kontrak</span><b>Rp 0</b><small>Realisasi</small></div><div><span>Paket Lengkap</span><b>0/0</b><small>0% compliant</small></div></div></div>
+ <div class="card satria-overview"><h3 style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff">◈</span> Strategic Analytics Overview <span class="badge" style="margin-left:auto;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">SATRIA NEXT • Analitik Terintegrasi</span></h3><p class="mut">Ringkasan berdasarkan data Paket Pengadaan, filter tahun dan OPD. Nilai penetapan bukan pembayaran; selisih HPS–negosiasi bukan penghematan aktual. Grafik diperbarui setelah perubahan data.</p><div class="satria-metrics-row"><div><span>Efisiensi</span><b>Rp 0</b><small>0% dari pagu</small></div><div><span>Total HPS</span><b>Rp 0</b><small>Estimasi kebutuhan</small></div><div><span>Nilai Kontrak</span><b>Rp 0</b><small>Realisasi</small></div><div><span>Paket Lengkap</span><b>0/0</b><small>0% compliant</small></div></div></div>
  <div class="chart-grid">
-   <div class="chart-card wide"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2,#14B8A6)"></div><div class="chart-title">Strategic Performance Trend <span class="badge" style="background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">SATRIA Analytics • Lazy</span></div><div id="chartMultiYear" style="width:100%;height:340px"><div class="chart-skeleton"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading chart...</div></div></div><div class="d3-legend" id="legendMultiYear"></div><div class="d3-tooltip" id="tooltipMulti"></div></div>
-   <div class="chart-card half"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2)"></div><div class="chart-title">Budget Utilization</div><div id="chartDonut" style="width:100%;height:280px; display:grid; place-items:center"><div class="chart-skeleton" style="height:240px"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading...</div></div></div><div class="d3-legend" id="legendDonut" style="justify-content:center"></div></div>
-   <div class="chart-card half"><div class="kh-accent" style="background:linear-gradient(90deg,#0891B2,#14B8A6)"></div><div class="chart-title">Efficiency Analytics</div><div id="chartBarPaket" style="width:100%;height:280px"><div class="chart-skeleton"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading...</div></div></div></div>
-   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#10B981,#14B8A6)"></div><div class="chart-title">Governance Status</div><div id="chartStatus" style="width:100%;height:240px; display:grid; place-items:center"><div class="chart-skeleton" style="height:200px"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading...</div></div></div></div>
-   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#2563EB,#0891B2)"></div><div class="chart-title">Performance Matrix</div><div id="chartHpsPagu" style="width:100%;height:240px"><div class="chart-skeleton" style="height:200px"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading...</div></div></div></div>
-   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#14B8A6)"></div><div class="chart-title">Institution Analytics</div><div id="chartOpd" style="width:100%;height:240px"><div class="chart-skeleton" style="height:200px"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading...</div></div></div></div>
+   <div class="chart-card wide"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2,#14B8A6)"></div><div class="chart-title">Strategic Performance Trend <span class="badge" style="background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">Tren Multi Tahun</span></div><div id="chartMultiYear" style="width:100%;height:340px"><div class="s348-empty">Menyiapkan grafik...</div></div><div class="d3-legend" id="legendMultiYear"></div><div class="d3-tooltip" id="tooltipMulti"></div></div>
+   <div class="chart-card half"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2)"></div><div class="chart-title">Budget Utilization</div><div id="chartDonut" style="width:100%;height:280px; display:grid; place-items:center"><div class="s348-empty">Menyiapkan grafik...</div></div><div class="d3-legend" id="legendDonut" style="justify-content:center"></div></div>
+   <div class="chart-card half"><div class="kh-accent" style="background:linear-gradient(90deg,#0891B2,#14B8A6)"></div><div class="chart-title">Efficiency Analytics</div><div id="chartBarPaket" style="width:100%;height:280px"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
+   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#10B981,#14B8A6)"></div><div class="chart-title">Governance Status</div><div id="chartStatus" style="width:100%;height:240px; display:grid; place-items:center"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
+   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#2563EB,#0891B2)"></div><div class="chart-title">Performance Matrix</div><div id="chartHpsPagu" style="width:100%;height:240px"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
+   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#14B8A6)"></div><div class="chart-title">Institution Analytics</div><div id="chartOpd" style="width:100%;height:240px"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
  </div>
  <div class="card" style="margin-top:14px"><h3>Strategic Analytics Overview • Multi Tahun</h3><div class="table-wrap"><table><tbody><tr><th>Tahun</th><th class="n">Entitas</th><th class="n">Anggaran</th><th class="n">Kontrak</th><th class="n">Efisiensi</th><th class="n">Kinerja</th></tr>
  <tr><td><b>2026</b></td><td class="n">0</td><td class="n">Rp 0</td><td class="n">Rp 0</td><td class="n">Rp 0</td><td class="n"><span class="pill" style="background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">0%</span></td></tr></tbody></table></div></div>
  <div class="card"><h3>Paket Pengadaan • TA 2026</h3><p class="mut">Belum ada paket pada filter ini.</p></div>
  <div class="card"><h3>Governance Intelligence • Aktivitas Sinkronisasi</h3><span class="mut">Belum ada perubahan. Ubah data program, rincian, atau penawaran untuk melihat sinkronisasi governance intelligence.</span></div></main>
-<footer class="satria-global-footer no-print"><div class="foot-brand"><b>SATRIA NEXT</b><span>Integrated Government Intelligence Platform</span><span style="font-size:10px;opacity:.8">NEXT · 3.0.47</span></div><div class="foot-links"><span>Smart • Adaptive • Transparent • Responsive • Integrated • Accountable</span><span style="opacity:.4">|</span><span>Generated by SATRIA Framework</span></div></footer>
+<footer class="satria-global-footer no-print"><div class="foot-brand"><b>SATRIA NEXT</b><span>Integrated Government Intelligence Platform</span><span style="font-size:10px;opacity:.8">NEXT · 3.0.50</span></div><div class="foot-links"><span>Smart • Adaptive • Transparent • Responsive • Integrated • Accountable</span><span style="opacity:.4">|</span><span>Generated by SATRIA Framework</span></div></footer>
 <div id="toast"></div>
 <script>
 
@@ -1708,7 +1744,7 @@ function satriaOfferGate(p,e){
  if(!e.lengkap)errors.push('Harga tayang belum lengkap');
  if(!e.negoLengkap)errors.push('Negosiasi '+e.negoCount+'/'+(p.items||[]).length+' item');
  if(!(e.t>0))errors.push('Total negosiasi tidak valid');
- if(e.t>hps(p))errors.push('Hasil negosiasi melebihi HPS');
+ if(e.t>hps(p))errors.push('Hasil negosiasi melebihi HPS');if(Number(p.pagu)>0&&e.t>Number(p.pagu))errors.push('Hasil negosiasi melebihi pagu');if((p.items||[]).some(i=>{const listed=Number(e.w.harga?.[i.id])||0,gross=Number(e.w.nego?.[i.id])||0;return gross>0&&listed>0&&gross>listed}))errors.push('Ada harga akhir negosiasi per unit melebihi harga tayang');
  if(!p.tglNego)errors.push('Tanggal negosiasi belum diisi');
  if(!e.w.sumberHarga||!e.w.tanggalHarga)errors.push('Sumber dan tanggal harga belum lengkap');
  if(+e.w.ongkir>0)errors.push('Ongkos kirim belum direkonsiliasi dengan HPS');
@@ -1882,7 +1918,7 @@ function knRowHtml(x){const {it,d,qty,display,base,tax,unit,old,errs,touched}=x;
  const safe=knStr(it.id);const done=old>0;const specs=knStr(ref.name||it.nama||'');const initialNet=d.sourceBase;
  return `<article class="kn44-item" data-kn-item="${safe}">
  <div class="kn44-item-head"><div><span class="kn44-eyebrow">RINCIAN HPS • ${knStr(it.sat||'unit')}</span><h3>${knStr(it.nama)}</h3>${ref.name?`<p class="kn44-muted">Produk tayang: ${knStr(ref.name)}</p>`:''}</div><span class="kn44-flag">${done?'Ada nego tersimpan':'Belum dinegosiasi'}</span></div>
- <div class="kn44-item-metas"><span>Jumlah <b>${nf(qty)}</b></span><span>HPS/unit <b>${knIdr(Number(it.hs)||0)}</b></span><span>Harga nego tersimpan <b>${old?knIdr(old):'—'}</b></span></div>
+ <div class="kn44-item-metas"><span>Jumlah <b>${nf(qty)}</b></span><span>HPS/unit <b>${knIdr(Number(it.hs)||0)}</b></span><span>Harga nego sebelum PPN tersimpan <b>${old?knIdr(Number(d.negoBase)||0):'—'}</b></span></div>
  <div class="kn44-fields">
  <label>Harga tayang / unit (sesuai basis di bawah)<input data-kn-field="display" data-kn-iid="${safe}" inputmode="numeric" type="text" value="${knStr(d.display)}" placeholder="contoh 1276500"><small>Dari Penawaran/Smart Survey. Pilih apakah nilai yang Anda ketik sudah termasuk pajak.</small></label>
  <label>Harga tayang yang diketik<select data-kn-field="displayBasis" data-kn-iid="${safe}"><option value="inclusive" ${d.displayBasis==='inclusive'?'selected':''}>Sudah termasuk PPN</option><option value="beforeTax" ${d.displayBasis==='beforeTax'?'selected':''}>Harga sebelum PPN</option></select></label>
@@ -1901,17 +1937,18 @@ function vKalk(){const L=filt();if(KN.pid&&!L.some(p=>p.id===KN.pid)){KN.pid='';
  const choose=(id,opts,value)=>`<select data-kn-select="${id}">${opts.map(([v,t])=>`<option value="${knStr(v)}" ${String(v)===String(value)?'selected':''}>${knStr(t)}</option>`).join('')}</select>`;
  const p=P(KN.pid),ww=p?.penawaran||[];if(p&&!ww.some(w=>w.id===KN.wid)){KN.wid=ww[0]?.id||'';KN.scope=''}knSetup();const s=knSummary();
  let h=`<section class="kn44-page"><header class="kn44-hero"><div><span class="kn44-hero-tag">SATRIA • E-PURCHASING</span><h2>Kalkulator Negosiasi Harga</h2><p>Negosiasikan <b>harga tawaran maksimum sebelum pajak</b> agar harga akhir setelah PPN tidak melampaui HPS satuan dan pagu paket. Masukkan atau periksa harga tayang, lalu gunakan saran otomatis per barang.</p></div><span class="kn44-hero-icon" aria-hidden="true">↘ Rp</span></header>
- <div class="kn44-toolbar"><label>Paket pengadaan${choose('pid',[['','— Pilih paket —'],...L.map(x=>[x.id,`${x.rup||'-'} • ${x.nama}`])],KN.pid)}</label><label>Penyedia${choose('wid',ww.length?ww.map(w=>[w.id,PY(w.pen).nama]):[['','— Tambahkan penyedia pada Paket —']],KN.wid)}</label><div class="kn45-cap-note"><b>Plafon wajib</b><small>HPS per unit + pagu paket<br>Ongkir dihitung lebih dahulu</small></div></div>`;
+ <div class="kn44-navline"><span>ALUR KERJA · <b>Kalkulator Nego</b> → Penawaran & Negosiasi</span>${s?'<button type="button" data-kn-action="viewOffer" class="satria50-back-offer">↗ Buka Penawaran & Negosiasi</button>':''}</div><div class="kn44-toolbar"><label>Paket pengadaan${choose('pid',[['','— Pilih paket —'],...L.map(x=>[x.id,`${x.rup||'-'} • ${x.nama}`])],KN.pid)}</label><label>Penyedia${choose('wid',ww.length?ww.map(w=>[w.id,PY(w.pen).nama]):[['','— Tambahkan penyedia pada Paket —']],KN.wid)}</label><div class="kn45-cap-note"><b>Plafon wajib</b><small>HPS per unit + pagu paket<br>Ongkir dihitung lebih dahulu</small></div></div>`;
  if(!s){h+=`<div class="kn44-empty"><h3>Pilih paket dan penyedia terlebih dahulu.</h3><p>Buat rincian HPS, tambahkan penyedia dan harga tayang di Paket Pengadaan, kemudian hitung negosiasi dari sini.</p></div></section>`;return h}
  if(!s.rows.length){h+=`<div class="kn44-empty">Paket belum memiliki rincian barang. Buka Paket Pengadaan → Rincian Kebutuhan dan HPS.</div></section>`;return h}
  h+=`${satriaNegotiationBridgeNotice(s)}<div class="kn44-summary" data-kn-summary>${knSummaryHtml(s)}</div><div data-kn-plan>${knPlanHtml(s)}</div><section class="kn44-reference"><div class="kn44-section-heading"><h3>Informasi sumber negosiasi</h3><p>Informasi ini bisa disimpan bersama hasil penawaran. Tidak otomatis mengesahkan bukti harga.</p></div><div class="kn44-metadata"><label>Sumber harga / URL katalog<input data-kn-global="source" type="text" value="${knStr(KN.source)}" placeholder="URL atau dokumen referensi"></label><label>Tanggal referensi<input data-kn-global="refDate" type="date" value="${knStr(KN.refDate)}"></label><label>Tanggal negosiasi<input data-kn-global="negDate" type="date" value="${knStr(KN.negDate)}"></label></div></section><section class="kn44-items"><div class="kn44-section-heading"><h3>Negosiasi per barang</h3><p>Harga tayang dan nilai kesepakatan adalah <b>harga satuan</b>. Anda boleh menyimpan satu barang dahulu; barang lain tidak akan berubah.</p></div>${s.rows.map(knRowHtml).join('')}</section>
- <div class="kn44-bottom" data-kn-bottom><div><strong>${s.count} barang diedit</strong><p>Hanya baris yang Anda ubah yang akan diterapkan. Negosiasi lama pada barang lain tetap aman.</p></div><button type="button" data-kn-action="saveChanged">Simpan semua perubahan (${s.count})</button></div></section>`;return h}
+ <div class="kn44-bottom" data-kn-bottom><div><strong>${s.count} barang diedit</strong><p>Hanya baris yang Anda ubah yang akan diterapkan. Negosiasi lama pada barang lain tetap aman.</p></div><div class="satria50-bottom-actions"><button type="button" data-kn-action="viewOffer" class="satria50-back-offer">Lihat Harga per Rincian Barang ↗</button><button type="button" data-kn-action="saveChanged">Simpan semua perubahan (${s.count})</button></div></div></section>`;return h}
 function knSummaryHtml(s){const valid=s.pagu>0&&s.h>0&&s.total<=s.pagu&&(s.total-s.ongkir)<=s.h;
  return `<div class="kn44-metric"><small>HPS paket</small><strong>${knIdr(s.h)}</strong></div><div class="kn44-metric"><small>Pagu paket</small><strong>${knIdr(s.pagu)}</strong></div><div class="kn44-metric"><small>Ongkir terpisah</small><strong>${knIdr(s.ongkir)}</strong></div><div class="kn44-metric kn44-highlight"><small>Total sementara dari harga yang tersimpan / diedit</small><strong>${knIdr(s.total)}</strong></div><div class="kn44-summary-note ${!valid?'kn44-error':''}">${s.invalid.length?`${s.invalid.length} baris memerlukan koreksi. `:''}Batas HPS: ${knIdr(s.h)}; pagu: ${knIdr(s.pagu)}. <b>${valid?'Nilai barang tidak melampaui HPS dan total termasuk ongkir tidak melampaui pagu.':'Nilai barang atau total termasuk ongkir melebihi batas HPS/pagu — gunakan saran otomatis dan selesaikan negosiasi semua barang.'}</b> ${s.complete?'Semua item memiliki nilai negosiasi tersimpan atau usulan valid.':'Sebagian item belum memiliki negosiasi final; total ini SEMENTARA.'} Angka pajak merupakan simulasi sampai diverifikasi.</div>`;
 }
 function knUpdate(){const s=knSummary();if(!s)return;const summary=document.querySelector('[data-kn-summary]');if(summary)summary.innerHTML=knSummaryHtml(s);const planSlot=document.querySelector('[data-kn-plan]');if(planSlot)planSlot.innerHTML=knPlanHtml(s);for(const x of s.rows){const sugg=document.querySelector(`[data-kn-item="${CSS.escape(String(x.it.id))}"] .kn45-suggestion-slot`);if(sugg)sugg.innerHTML=knSuggestionHtml(x);const target=document.querySelector(`[data-kn-result="${CSS.escape(String(x.it.id))}"]`);if(target)target.innerHTML=knPreviewHtml(x);const manual=document.querySelector(`[data-kn-item="${CSS.escape(String(x.it.id))}"] .kn44-tax-manual`);if(manual)manual.hidden=x.d.taxMode!=='custom';const info=document.querySelector(`[data-kn-item="${CSS.escape(String(x.it.id))}"] .kn44-info`);if(info){const val=info.querySelector('strong'),caption=info.querySelector('small');if(val)val.textContent=x.d.sourceBase?knIdr(x.d.sourceBase):'Belum tersedia';if(caption)caption.textContent=x.d.sourceBase?(x.d.sourceExact?'Sesuai rincian pajak Smart Survey':'Estimasi dari harga tayang dan mode PPN'):'Isi harga tayang terlebih dahulu'}}const bottom=document.querySelector('[data-kn-bottom]');if(bottom){const count=bottom.querySelector('strong'),btn=bottom.querySelector('button');if(count)count.textContent=s.count+' barang diedit';if(btn)btn.textContent=`Simpan semua perubahan (${s.count})`;}}
 /* SATRIA 3.0.47 — SINGLE SOURCE OF TRUTH: Calc Nego -> Penawaran.nego[item.id].
-   Kalkulator memasukkan nilai SEBELUM PPN; kolom Harga nego menampilkan harga AKHIR/UNIT (sudah termasuk PPN).
+   Kalkulator memasukkan harga SEBELUM PPN; tabel menampilkannya di kolom Harga Nego.
+   w.nego tetap bruto untuk kompatibilitas total/14 dokumen, detail net/pajak disimpan di negoDetails.
    Akses referensi langsung, bukan menyalin ke koleksi harga kedua. */
 function satriaWriteNegotiatedItems(p,w,selected){
  if(!p||!(p.penawaran||[]).some(x=>x===w))throw Error('Penyedia tidak termasuk paket aktif.');
@@ -1942,7 +1979,7 @@ function satriaNegotiationBridgeNotice(s){
  const saved=KN.lastSaved;
  if(!saved||String(saved.pid)!==String(s.p.id)||String(saved.wid)!==String(s.w.id))return '';
  const match=saved.entries.every(x=>Number(s.w.nego?.[x.iid])===x.gross);
- return `<div class="kn47-bridge ${match?'':'kn47-bridge-error'}" role="status" aria-live="polite"><div><b>${match?'✓ Harga negosiasi telah masuk ke tabel penawaran':'⚠ Harga perlu diperiksa kembali'}</b><p>${match?`${saved.entries.length} barang milik ${knStr(PY(s.w.pen).nama)} tersimpan ke kolom <strong>Harga nego</strong> di Paket Pengadaan. Nilai yang diteruskan adalah harga/unit <strong>termasuk PPN</strong>.`:'Data harga berubah sejak penyimpanan. Periksa kembali penawaran dan sumber harga.'}</p></div><button type="button" data-kn-action="viewOffer">Lihat Harga per Rincian Barang ↗</button></div>`;
+ return `<div class="kn47-bridge ${match?'':'kn47-bridge-error'}" role="status" aria-live="polite"><div><b>${match?'✓ Harga negosiasi telah masuk ke tabel penawaran':'⚠ Harga perlu diperiksa kembali'}</b><p>${match?`${saved.entries.length} barang milik ${knStr(PY(s.w.pen).nama)} tersimpan ke kolom <strong>Harga nego</strong> di Paket Pengadaan. Kolom Harga Nego menampilkan usulan <strong>SEBELUM PPN/unit</strong>; total tetap memakai harga akhir termasuk PPN.`:'Data harga berubah sejak penyimpanan. Periksa kembali penawaran dan sumber harga.'}</p></div><button type="button" data-kn-action="viewOffer">Lihat Harga per Rincian Barang ↗</button></div>`;
 }
 function satriaClearStaleNegoDetails(w,iid,newGross){
  const detail=w?.negoDetails?.[iid];
@@ -1971,7 +2008,7 @@ document.addEventListener('change',event=>{const t=event.target;if(!t?.closest?.
  const field=t.dataset.knField;if(field){const d=KN.rows[t.dataset.knIid];if(!d)return;if(field==='displayBasis'){knChangeDisplayBasis(d,t.value);const entry=t.closest('[data-kn-item]')?.querySelector('[data-kn-field="display"]');if(entry)entry.value=d.display;}else d[field]=t.value;if(field==='display'||field==='taxMode'||field==='displayBasis'){const gross=knDisplayGross(d);const rate=KN_TAX[d.taxMode]?.rate||0;const refBase=Number(d.ref?.beforeTax)||0,refTax=Number(d.ref?.taxAmount)||0;d.sourceExact=refBase>0&&Math.abs(refBase+refTax-gross)<=1;d.sourceBase=d.sourceExact?refBase:(gross?Math.round(gross/(1+rate)):0)}d.dirty=true;knUpdate()}
 },true);
 document.addEventListener('click',event=>{const b=event.target.closest?.('[data-kn-action]');if(!b||!b.closest('.kn44-page'))return;event.preventDefault();event.stopImmediatePropagation();const action=b.dataset.knAction,iid=b.dataset.knIid;
- if(action==='viewOffer'){const {p,w}=knOffer();if(!p||!w)return;S.ui.tahun=Number(p.tahun);S.ui.opd=String(p.opd);S.ui.ptab='nego';S.ui.page='paket';S.ui.pid=p.id;S.ui.knFocusWid=w.id;location.hash='#paket/'+encodeURIComponent(p.id);render();return;}
+ if(action==='viewOffer'){const {p,w}=knOffer();if(!p||!w){S.ui.page='paket';S.ui.ptab='nego';S.ui.pid=p?.id||null;if(p){S.ui.tahun=Number(p.tahun);S.ui.opd=String(p.opd)}location.hash=p?'#paket/'+encodeURIComponent(p.id):'#paket';render();return}if(Object.values(KN.rows||{}).some(x=>x.dirty)&&!confirm('Ada usulan negosiasi yang belum disimpan. Beralih ke tabel Penawaran & Negosiasi tanpa menyimpan perubahan tersebut?'))return;S.ui.tahun=Number(p.tahun);S.ui.opd=String(p.opd);S.ui.ptab='nego';S.ui.page='paket';S.ui.pid=p.id;S.ui.knFocusWid=w.id;location.hash='#paket/'+encodeURIComponent(p.id);render();return;}
  if(action==='useAllSuggested'){const s=knSummary();if(!s?.plan.ready)return;for(const x of s.rows){const a=x.suggestion;if(!a?.ready)continue;x.d.negoBase=String(a.base);x.d.dirty=true;const input=document.querySelector(`[data-kn-item="${CSS.escape(String(x.it.id))}"] [data-kn-field="negoBase"]`);if(input)input.value=x.d.negoBase;}knUpdate();toast('Usulan sebelum PPN telah diisikan. Periksa dan simpan setelah negosiasi disepakati.');}
  else if(action==='useSuggested'){const x=knSummary()?.rows.find(x=>x.it.id===iid),a=x?.suggestion;if(!a?.ready)return;x.d.negoBase=String(a.base);x.d.dirty=true;const input=b.closest('[data-kn-item]')?.querySelector('[data-kn-field="negoBase"]');if(input)input.value=x.d.negoBase;knUpdate();}
  else if(action==='saveChanged')knSave(null);else if(action==='saveOne')knSave([iid]);else if(action==='copyBase'){const d=KN.rows[iid];if(d?.sourceBase){d.negoBase=String(d.sourceBase);d.dirty=true;const input=b.closest('[data-kn-item]')?.querySelector('[data-kn-field="negoBase"]');if(input)input.value=d.negoBase;knUpdate()}else toast('Harga dasar belum tersedia. Isi harga tayang terlebih dahulu.')}
@@ -2031,31 +2068,32 @@ function tabelPaket(L){
 function vDash(){
  const L=filt(),pagu=sum(L,p=>p.pagu),k=sum(L,kontrak);
  const totalHps=sum(L,hps);
- const efisiensi=pagu-k;
- const pctEf=pagu?((efisiensi/pagu)*100).toFixed(1):0;
+ const dashData=satriaDashboardMetrics(L);
+ const efisiensi=dashData.hpsGap;
+ const pctEf=dashData.settledHps?((efisiensi/dashData.settledHps)*100).toFixed(1):0;
  const pctKontrak=pagu?((k/pagu)*100).toFixed(1):0;
  const lengkap=L.filter(p=>gaps(p).length===0).length;
  const pctPatuh=L.length?((lengkap/L.length)*100).toFixed(0):0;
  const kpi=(l,v,icon,sub,accent)=>`<div class="card kpi satria-kpi" style="--kpi-accent:${accent}"><div class="kpi-icon" style="background:linear-gradient(135deg,${accent} 0%, color-mix(in srgb, ${accent} 70%, white) 100%)">${icon}</div><div class="kpi-content"><span class="kpi-label">${l}</span><b class="kpi-value">${v}</b><span class="kpi-sub">${sub}</span></div><div class="kpi-glow"></div></div>`;
- return `<div class="satria-command-header"><div class="satria-command-title"><div class="satria-command-badge"><span class="dot"></span> RINGKASAN UTAMA</div><h2>Ringkasan Utama SATRIA</h2><p>Integrated Government Intelligence Platform • Strategic Analytics Overview • Framework Version 3.0</p></div><div class="satria-command-meta"><div class="satria-meta-card"><span>TA Aktif</span><b>${S.ui.tahun}</b></div><div class="satria-meta-card"><span>Entitas</span><b>${L.length}</b></div><div class="satria-meta-card"><span>Kepatuhan</span><b>${pctPatuh}%</b></div></div></div>
+ return `<div class="satria-command-header"><div class="satria-command-title"><div class="satria-command-badge"><span class="dot"></span> RINGKASAN UTAMA</div><h2>Ringkasan Utama SATRIA</h2><p>Integrated Government Intelligence Platform • Strategic Analytics Overview • Framework Version 3.0.50</p></div><div class="satria-command-meta"><div class="satria-meta-card"><span>TA Aktif</span><b>${S.ui.tahun}</b></div><div class="satria-meta-card"><span>Paket</span><b>${L.length}</b></div><div class="satria-meta-card"><span>Kelengkapan data</span><b>${pctPatuh}%</b></div></div></div>
  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
-  ${kpi('Jumlah Entitas',L.length,'🏛','Governance • Total Program','#0F766E')}
+  ${kpi('Jumlah Paket',L.length,'🏛','Paket sesuai filter tahun/OPD','#0F766E')}
   ${kpi('Anggaran Terkelola',rp(pagu),'📊','Analytics • Pagu Terkelola','#0891B2')}
-  ${kpi('Ringkasan Paket',pctKontrak+'%','🧠','Intelligence • Utilisasi '+rp(k),'#14B8A6')}
-  ${kpi('Kelengkapan Administratif',pctPatuh+'%','🔐','Compliance • '+lengkap+' Lengkap','#10B981')}
-  ${kpi('Indikator Data Paket',rp(efisiensi)+' • '+pctEf+'%','⚡','Performance • Efisiensi','#2563EB')}
+  ${kpi('Ringkasan Paket',pctKontrak+'%','🧠','Nilai penetapan tervalidasi '+rp(k),'#14B8A6')}
+  ${kpi('Kelengkapan Administratif',pctPatuh+'%','🔐','Pemeriksaan kelengkapan • '+lengkap+' lengkap','#10B981')}
+  ${kpi('Selisih HPS–Negosiasi',rp(efisiensi)+' • '+pctEf+'%','⚡','Hanya paket yang telah ditetapkan','#2563EB')}
  </div>
- <div class="card satria-overview"><h3 style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff">◈</span> Strategic Analytics Overview <span class="badge" style="margin-left:auto;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">SATRIA Intelligence • v3.0 • Lazy Charts</span></h3><p class="mut">Monitoring real-time terhadap anggaran, efektivitas, kepatuhan, dan kinerja tata kelola berbasis data intelligence. Charts lazy load aktif — hanya render saat discroll, hemat 70% di Android.</p><div class="satria-metrics-row"><div><span>Efisiensi</span><b>${rp(efisiensi)}</b><small>${pctEf}% dari pagu</small></div><div><span>Total HPS</span><b>${rp(totalHps)}</b><small>Estimasi kebutuhan</small></div><div><span>Nilai Kontrak</span><b>${rp(k)}</b><small>Realisasi</small></div><div><span>Paket Lengkap</span><b>${lengkap}/${L.length}</b><small>${pctPatuh}% compliant</small></div></div></div>
+ <div class="card satria-overview"><h3 style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff">◈</span> Strategic Analytics Overview <span class="badge" style="margin-left:auto;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">SATRIA NEXT • Analitik Terintegrasi</span></h3><p class="mut">Ringkasan berdasarkan data Paket Pengadaan, filter tahun dan OPD. Nilai penetapan bukan pembayaran; selisih HPS–negosiasi bukan penghematan aktual. Grafik diperbarui setelah perubahan data.</p><div class="satria-metrics-row"><div><span>Selisih HPS–Negosiasi</span><b>${rp(efisiensi)}</b><small>Bukan efisiensi kas</small></div><div><span>Total HPS</span><b>${rp(totalHps)}</b><small>Estimasi kebutuhan</small></div><div><span>Nilai Penetapan</span><b>${rp(k)}</b><small>Bukan realisasi pembayaran</small></div><div><span>Paket Lengkap</span><b>${lengkap}/${L.length}</b><small>Kelengkapan data administratif</small></div></div></div>
  <div class="chart-grid">
-   <div class="chart-card wide"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2,#14B8A6)"></div><div class="chart-title">Strategic Performance Trend <span class="badge" style="background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">SATRIA Analytics • Lazy</span></div><div id="chartMultiYear" style="width:100%;height:340px"><div class="chart-skeleton"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading chart...</div></div></div><div class="d3-legend" id="legendMultiYear"></div><div class="d3-tooltip" id="tooltipMulti"></div></div>
-   <div class="chart-card half"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2)"></div><div class="chart-title">Budget Utilization</div><div id="chartDonut" style="width:100%;height:280px; display:grid; place-items:center"><div class="chart-skeleton" style="height:240px"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading...</div></div></div><div class="d3-legend" id="legendDonut" style="justify-content:center"></div></div>
-   <div class="chart-card half"><div class="kh-accent" style="background:linear-gradient(90deg,#0891B2,#14B8A6)"></div><div class="chart-title">Efficiency Analytics</div><div id="chartBarPaket" style="width:100%;height:280px"><div class="chart-skeleton"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading...</div></div></div></div>
-   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#10B981,#14B8A6)"></div><div class="chart-title">Governance Status</div><div id="chartStatus" style="width:100%;height:240px; display:grid; place-items:center"><div class="chart-skeleton" style="height:200px"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading...</div></div></div></div>
-   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#2563EB,#0891B2)"></div><div class="chart-title">Performance Matrix</div><div id="chartHpsPagu" style="width:100%;height:240px"><div class="chart-skeleton" style="height:200px"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading...</div></div></div></div>
-   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#14B8A6)"></div><div class="chart-title">Institution Analytics</div><div id="chartOpd" style="width:100%;height:240px"><div class="chart-skeleton" style="height:200px"><div style="display:grid;place-items:center"><div class="spinner"></div>Loading...</div></div></div></div>
+   <div class="chart-card wide"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2,#14B8A6)"></div><div class="chart-title">Strategic Performance Trend <span class="badge" style="background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">Tren Multi Tahun</span></div><div id="chartMultiYear" style="width:100%;height:340px"><div class="s348-empty">Menyiapkan grafik...</div></div><div class="d3-legend" id="legendMultiYear"></div><div class="d3-tooltip" id="tooltipMulti"></div></div>
+   <div class="chart-card half"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2)"></div><div class="chart-title">Budget Utilization</div><div id="chartDonut" style="width:100%;height:280px; display:grid; place-items:center"><div class="s348-empty">Menyiapkan grafik...</div></div><div class="d3-legend" id="legendDonut" style="justify-content:center"></div></div>
+   <div class="chart-card half"><div class="kh-accent" style="background:linear-gradient(90deg,#0891B2,#14B8A6)"></div><div class="chart-title">Efficiency Analytics</div><div id="chartBarPaket" style="width:100%;height:280px"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
+   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#10B981,#14B8A6)"></div><div class="chart-title">Governance Status</div><div id="chartStatus" style="width:100%;height:240px; display:grid; place-items:center"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
+   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#2563EB,#0891B2)"></div><div class="chart-title">Performance Matrix</div><div id="chartHpsPagu" style="width:100%;height:240px"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
+   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#14B8A6)"></div><div class="chart-title">Institution Analytics</div><div id="chartOpd" style="width:100%;height:240px"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
  </div>
- <div class="card" style="margin-top:14px"><h3>Strategic Analytics Overview • Multi Tahun</h3><div class="table-wrap"><table><tr><th>Tahun</th><th class=n>Entitas</th><th class=n>Anggaran</th><th class=n>Kontrak</th><th class=n>Efisiensi</th><th class=n>Kinerja</th></tr>
- ${S.tahun.map(t=>{const x=filt(t),pg=sum(x,p=>p.pagu),kt=sum(x,kontrak);const ef=pg-kt;const pct=pg?((kt/pg)*100).toFixed(1):0;return `<tr><td><b>${t}</b></td><td class=n>${x.length}</td><td class=n>${rp(pg)}</td><td class=n>${rp(kt)}</td><td class=n>${rp(ef)}</td><td class=n><span class="pill" style="background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">${pct}%</span></td></tr>`}).join('')}</table></div></div>
+ <div class="card" style="margin-top:14px"><h3>Strategic Analytics Overview • Multi Tahun</h3><div class="table-wrap"><table><tr><th>Tahun</th><th class=n>Paket</th><th class=n>Anggaran</th><th class=n>Nilai Penetapan</th><th class=n>Selisih HPS–Nego</th><th class=n>Rasio Penetapan/Pagu</th></tr>
+ ${S.tahun.map(t=>{const x=filt(t),data=satriaDashboardMetrics(x),pg=data.pagu,kt=data.committed,ef=data.hpsGap;const pct=pg?((kt/pg)*100).toFixed(1):0;return `<tr><td><b>${t}</b></td><td class=n>${x.length}</td><td class=n>${rp(pg)}</td><td class=n>${rp(kt)}</td><td class=n>${rp(ef)}</td><td class=n><span class="pill" style="background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">${pct}%</span></td></tr>`}).join('')}</table></div></div>
  <div class="card"><h3>Paket Pengadaan • TA ${S.ui.tahun}</h3>${tabelPaket(L)}</div>
  <div class="card"><h3>Governance Intelligence • Aktivitas Sinkronisasi</h3>${S.log.length?S.log.map(l=>`<div style="padding:8px 0;border-bottom:1px solid var(--bd);display:flex;gap:12px"><span style="font-weight:700;color:#0F766E;min-width:120px">${l.t}</span><span>${esc(l.label)}</span><span class=pill style="margin-left:auto;background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">${l.mods.join(', ')}</span></div>`).join(''):'<span class=mut>Belum ada perubahan. Ubah data program, rincian, atau penawaran untuk melihat sinkronisasi governance intelligence.</span>'}</div>`;
 }
@@ -2329,6 +2367,31 @@ function fItems(p){
   `;
 }
 
+/* SATRIA 3.0.49 — Tabel Harga Nego = harga SEBELUM PPN per unit.
+   Mesin akuntansi lama dan dokumen tetap menyimpan nominal BRUTO di w.nego;
+   rinciannya wajib dapat direkonsiliasi dari kalkulator/Smart Survey.
+   Nominal lama yang tidak memiliki rincian pajak tidak diterka sebagai net. */
+function satriaOfferNegoBreakdown(w,iid){
+ const raw=w?.nego?.[iid],gross=Number(raw);
+ if(raw===undefined||raw===null||raw===''||!Number.isFinite(gross)||gross<=0)return {net:null,tax:null,gross:0,verified:false,legacy:false};
+ const sources=[
+  {base:w?.negoDetails?.[iid]?.beforeTax,tax:w?.negoDetails?.[iid]?.tax,origin:'Kalkulator Nego'},
+  {base:w?.catalogRefs?.[iid]?.negotiatedBase,tax:w?.catalogRefs?.[iid]?.negotiatedTax,origin:'Smart Survey'}
+ ];
+ for(const x of sources){
+  const base=Number(x.base),tax=Number(x.tax);
+  if(x.base!==undefined&&x.base!==null&&x.base!==''&&Number.isSafeInteger(base)&&base>0&&Number.isSafeInteger(tax)&&tax>=0&&base+tax===gross)
+   return {net:base,tax,gross,verified:true,legacy:false,origin:x.origin};
+ }
+ return {net:null,tax:null,gross,verified:false,legacy:true};
+}
+function satriaOfferNegoCells(w,it){
+ const d=satriaOfferNegoBreakdown(w,it.id);
+ const description=d.verified?`<small class="kn47-origin">✓ ${esc(d.origin)}</small>`:
+  d.legacy?'<small class="mut">⚠ Data lama: PPN belum dirinci. Periksa di Kalkulator Nego.</small>':
+  '<small class="mut">Isi di Kalkulator Nego</small>';
+ return `<td class=n><input class=n type=text readonly aria-label="Harga nego sebelum PPN ${esc(it.nama)}" title="Harga nego diisi melalui Kalkulator Nego" value="${d.verified?nf(d.net):''}" placeholder="${d.legacy?'Verifikasi pajak':'Dari kalkulator'}" style="width:100%;text-align:right;font-variant-numeric:tabular-nums;min-width:145px;background:#f6f8ff">${description}</td><td class=n>${d.verified?nf(d.tax):'—'}</td><td class=n><strong>${d.gross?nf(d.gross):'—'}</strong>${d.legacy?'<small class="mut">Nilai lama: pajak belum terverifikasi</small>':''}</td>`;
+}
 function fNego(p){
  const used=p.penawaran.map(w=>w.pen);
  const opts=S.penyedia.filter(y=>!used.includes(y.id)&&y.aktif!==false).map(y=>`<option value="${y.id}">${esc(y.nama)}</option>`).join('');
@@ -2337,13 +2400,13 @@ function fNego(p){
  const negoComplete=evalPw(p).filter(e=>e.negoLengkap).length;
  let s=`<section class="satria342-section-intro satria342-nego-intro" aria-label="Ringkasan survei dan negosiasi"><div class="satria342-intro-text"><span class="satria342-eyebrow">TAHAP 03 / SURVEI & NEGOSIASI</span><h3>Bandingkan dan negosiasikan penawaran</h3><p>Lengkapi harga tayang, hasil negosiasi dan bukti referensi sebelum menetapkan penyedia. Total sementara bukan nilai kontrak final.</p></div><div class="satria342-stat-grid"><div><small>Penyedia</small><strong>${numOffers}</strong></div><div><small>Negosiasi lengkap</small><strong>${negoComplete}/${numOffers}</strong></div><div><small>HPS paket</small><strong>${rp(hps(p))}</strong></div></div></section><div class="row satria342-provider-picker"><div class=fg style="max-width:420px"><label>Tambah penyedia ke survei</label><select data-addpw="${p.id}"><option value="">— pilih penyedia —</option>${opts}</select></div></div><br>`;
  s+=W?`<p><b>Pemenang ditetapkan:</b> ${esc(PY(W.w.pen).nama)} · nilai kontrak <b>${rp(W.t)}</b> <button class=g data-act="autowin" data-pid="${p.id}">Batalkan penetapan</button></p>`:C?`<p class=warn><b>Kandidat otomatis (belum ditetapkan):</b> ${esc(PY(C.w.pen).nama)} · ${rp(C.negoLengkap?C.t:C.tayang)}. Isi tanggal negosiasi dan harga nego untuk setiap item, lalu tetapkan pemenang.</p>`:'<p class=warn>Belum ada kandidat yang memenuhi kelengkapan dan batas HPS.</p>';if(!W&&p.pemenangId)s+=`<p class=bad>Penetapan sebelumnya tidak lagi valid karena data harga berubah. <button class=g data-act="autowin" data-pid="${p.id}">Batalkan penetapan yang tidak valid</button></p>`;
- s+=evalPw(p).map(({w,t,st,lengkap,negoLengkap,negoCount})=>{const missing=(p.items||[]).filter(i=>!(w.nego&&w.nego[i.id]!=null&&w.nego[i.id]!==''&&Number.isFinite(+w.nego[i.id])&&+w.nego[i.id]>0));const {ready,errors:causes}=satriaOfferGate(p,{w,t,lengkap,negoLengkap,negoCount});return `<div class="card satria-offer-card satria342-offer-card" data-offer-wid="${esc(w.id)}"><div class="satria-offer-head"><b class="satria-offer-name">${esc(PY(w.pen).nama)}</b><span class="pill satria-offer-status">${esc(st)}</span></div><div class="satria-offer-summary"><div><small>Harga tayang</small><strong>${rp(totPw(p,w,false))}</strong></div><div><small>${negoLengkap?'Hasil negosiasi':'Total sementara (belum final)'}</small><strong>${rp(t)}</strong></div></div><div class="satria-offer-progress"><span>${negoCount} dari ${p.items.length} item dinegosiasi</span><progress max="${Math.max(1,p.items.length)}" value="${negoCount}"></progress></div>${!ready?`<p class="satria-offer-warning">Belum dapat ditetapkan: ${esc(causes.join(' • ')||'Lengkapi evaluasi')}. ${missing.length?'Item belum nego: '+esc(missing.slice(0,4).map(i=>i.nama).join(', '))+(missing.length>4?' dan '+(missing.length-4)+' lainnya':'')+'.':''}</p>`:''}<div class="satria-offer-actions"><button type="button" class="g kn47-open-calc" data-act="openOfferCalc" data-pid="${esc(p.id)}" data-id="${esc(w.id)}">↗ Kalkulator Nego</button><button class=g data-act="winner" data-pid="${p.id}" data-id="${w.id}" ${ready?'':'disabled title="Lengkapi negosiasi dan data pendukung terlebih dahulu"'}>Tetapkan pemenang</button><button class=d data-act="delpw" data-pid="${p.id}" data-id="${w.id}">Hapus penawaran</button></div>
+ s+=evalPw(p).map(({w,t,st,lengkap,negoLengkap,negoCount})=>{const missing=(p.items||[]).filter(i=>!(w.nego&&w.nego[i.id]!=null&&w.nego[i.id]!==''&&Number.isFinite(+w.nego[i.id])&&+w.nego[i.id]>0));const {ready,errors:causes}=satriaOfferGate(p,{w,t,lengkap,negoLengkap,negoCount});return `<div class="card satria-offer-card satria342-offer-card" data-offer-wid="${esc(w.id)}"><div class="satria-offer-head"><b class="satria-offer-name">${esc(PY(w.pen).nama)}</b><div class="satria50-offer-badges"><span class="pill satria-offer-status">${esc(st)}</span>${W?.w?.id===w.id?'<span class="satria50-winner-badge">✓ Penyedia ditetapkan</span>':''}</div></div><div class="satria-offer-summary"><div><small>Harga tayang</small><strong>${rp(totPw(p,w,false))}</strong></div><div><small>${negoLengkap?'Hasil negosiasi':'Total sementara (belum final)'}</small><strong>${rp(t)}</strong></div></div><div class="satria-offer-progress"><span>${negoCount} dari ${p.items.length} item dinegosiasi</span><progress max="${Math.max(1,p.items.length)}" value="${negoCount}"></progress></div>${!ready?`<p class="satria-offer-warning">Belum dapat ditetapkan: ${esc(causes.join(' • ')||'Lengkapi evaluasi')}. ${missing.length?'Item belum nego: '+esc(missing.slice(0,4).map(i=>i.nama).join(', '))+(missing.length>4?' dan '+(missing.length-4)+' lainnya':'')+'.':''}</p>`:''}<div class="satria-offer-actions"><button type="button" class="g kn47-open-calc" data-act="openOfferCalc" data-pid="${esc(p.id)}" data-id="${esc(w.id)}">↗ Kalkulator Nego</button><button type="button" class="satria50-winner-action" data-act="winner" data-pid="${esc(p.id)}" data-id="${esc(w.id)}" ${W?.w?.id===w.id?'disabled title="Penyedia ini sudah ditetapkan"':ready?'':'disabled title="Lengkapi seluruh syarat sebelum penetapan"'}>${W?.w?.id===w.id?'✓ Sudah ditetapkan':'✓ Tetapkan pemenang'}</button><button class=d data-act="delpw" data-pid="${p.id}" data-id="${w.id}">Hapus penawaran</button></div>
  <div class=grid><div class=fg><label>Sumber/bukti harga</label><input value="${esc(w.sumberHarga||'')}" data-col="offerMeta" data-pid="${p.id}" data-pw="${w.id}" data-f="sumberHarga" placeholder="URL katalog / nomor dokumen / referensi"></div><div class=fg><label>Tanggal harga</label><input type=date value="${esc(w.tanggalHarga||'')}" data-col="offerMeta" data-pid="${p.id}" data-pw="${w.id}" data-f="tanggalHarga"></div><div class=fg><label>Ongkos kirim (Rp, dicatat terpisah)</label><input inputmode=numeric value="${nf(w.ongkir||0)}" data-col="offerMeta" data-pid="${p.id}" data-pw="${w.id}" data-f="ongkir"></div><div class=fg><label>Catatan/ketentuan</label><input value="${esc(w.catatan||'')}" data-col="offerMeta" data-pid="${p.id}" data-pw="${w.id}" data-f="catatan"></div></div>
  <p class=mut>Ongkos kirim dicatat terpisah dan belum masuk ke total penawaran maupun perbandingan terhadap HPS. Pastikan perlakuannya konsisten sebelum menetapkan pemenang.</p>
- <div class="satria342-offer-table-title"><b>Harga per rincian barang</b><span>Harga nego = hasil kesepakatan per unit <strong>termasuk PPN</strong> • otomatis dari Kalkulator Nego</span></div><div class="satria-offer-table"><table><tr><th>Barang</th><th class=n>Vol</th><th class=n>HPS</th><th class=n>Harga tayang</th><th class=n>Harga nego</th></tr>
+ <div class="satria342-offer-table-title"><b>Harga per rincian barang</b><span>Harga Nego = <strong>usulan tawaran SEBELUM PPN/unit</strong> dari Kalkulator Nego. Harga akhir dipakai untuk total dan dokumen.</span></div><div class="satria-offer-table"><table><tr><th>Barang</th><th class=n>Vol</th><th class=n>HPS</th><th class=n>Harga tayang termasuk PPN</th><th class=n>Harga Nego SEBELUM PPN/unit</th><th class=n>PPN/unit</th><th class=n>Harga akhir/unit</th></tr>
  ${p.items.map(it=>`<tr><td>${esc(it.nama)}</td><td class=n>${it.vol}</td><td class=n>${nf(it.hs)}</td>
  <td class=n><input class=n type=text inputmode=numeric value="${w.harga[it.id]?nf(w.harga[it.id]):''}" data-col="harga" data-rp="1" data-pid="${p.id}" data-pw="${w.id}" data-id="${it.id}" style="width:100%;text-align:right;font-variant-numeric:tabular-nums"></td>
- <td class=n><input class=n type=text inputmode=numeric aria-label="Harga nego ${esc(it.nama)}" value="${w.nego[it.id]?nf(w.nego[it.id]):''}" data-col="nego" data-rp="1" data-pid="${p.id}" data-pw="${w.id}" data-id="${it.id}" style="width:100%;text-align:right;font-variant-numeric:tabular-nums">${w.negoDetails?.[it.id]?.source==='Kalkulator Negosiasi SATRIA'&&Number(w.negoDetails[it.id].inclusive)===Number(w.nego[it.id])?'<small class="kn47-origin">✓ Dari Kalkulator</small>':''}</td></tr>`).join('')}</table></div></div>`}).join('');
+ ${satriaOfferNegoCells(w,it)}</tr>`).join('')}</table></div></div>`}).join('');
  return s;
 }
 
@@ -2990,7 +3053,7 @@ function vLap(){
  const rowCount = (rows.match(/<tr>/g)||[]).length;
  return `<div class=card><div class=row style="justify-content:space-between;flex-wrap:wrap;gap:12px"><h3>Laporan dan Analisis • Multi OPD dan Multi Tahun</h3><div style="display:flex;gap:8px"><span class="count-badge">${rowCount} baris • ${rowCount>30?'virtual scroll aktif':''}</span><button class=g data-act="csv">Ekspor Laporan (CSV)</button></div></div>
  <div class="table-wrap" id="lapTableWrap" style="max-height:${rowCount>30?'min(68vh, 640px)':'none'};overflow:auto;contain:layout;-webkit-overflow-scrolling:touch">
- <table id="lapTable"><thead style="position:sticky;top:0;z-index:1;background:var(--bg-2)"><tr><th>TA</th><th>OPD</th><th class=n>Paket</th><th class=n>Pagu</th><th class=n>HPS</th><th class=n>Kontrak</th><th class=n>Efisiensi</th><th class=n>%</th></tr></thead><tbody>${rows||'<tr><td colspan=8 class=mut>Belum ada data.</td></tr>'}</tbody></table>
+ <table id="lapTable"><thead style="position:sticky;top:0;z-index:1;background:var(--bg-2)"><tr><th>TA</th><th>OPD</th><th class=n>Paket</th><th class=n>Pagu</th><th class=n>HPS</th><th class=n>Nilai Penetapan</th><th class=n>Selisih HPS–Nego</th><th class=n>%</th></tr></thead><tbody>${rows||'<tr><td colspan=8 class=mut>Belum ada data.</td></tr>'}</tbody></table>
  </div>
  ${rowCount>30?'<div class="satria-virtual-footer" style="margin-top:8px"><span>'+rowCount+' baris • virtual scroll aktif • hemat 80% di Android</span><span class="mut">Scroll untuk lihat semua</span></div>':''}
  </div>`;
@@ -3397,7 +3460,7 @@ function render(){
  if(S.ui.rupManualSkipCapture)S.ui.rupManualSkipCapture=false;
  else rupManualCapture();
  const u=S.ui;
- $('#hPemda').innerHTML='SATRIA <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">NEXT · 3.0.47</span>';
+ $('#hPemda').innerHTML='SATRIA <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">NEXT · 3.0.50</span>';
  $('#hSub').innerHTML='<span style="font-weight:600;letter-spacing:-0.01em">Government work, in flow.</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px;opacity:.8">Simple • Connected • Accountable</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px">'+(u.opd==='all'?'Multi OPD • Multi Tahun':esc(O(u.opd).nama))+'</span>';
  $('#dirty').textContent=S.persistError?'⚠ Gagal menyimpan':(S.dirty?'● Perubahan belum di-backup':'✔ Tidak ada perubahan baru');$('#dirty').title=S.persistError||'Penyimpanan lokal dan backup file adalah dua hal berbeda';$('#dirty').style.background=S.persistError?'#FEE2E2':(S.dirty?'#F59E0B':'rgba(15,118,110,.14)'); $('#dirty').style.color=S.persistError?'#991B1B':(S.dirty?'#78350f':'#0F766E');
  $('#selTahun').innerHTML=S.tahun.map(t=>`<option value="${Number(t)}" ${Number(t)===Number(u.tahun)?'selected':''}>${Number(t)}</option>`).join('');
@@ -3572,7 +3635,7 @@ document.addEventListener('click',e=>{
  if(a==='additem'){P(pid).items.push({id:uid('i'),nama:'',spesifikasi:'',merek:'',pdn:'Perlu verifikasi',linkProduk:'',vol:1,satuan:'Buah',hs:0});sync('items','Produk ditambahkan');return render()}
  if(a==='delitem'){if(!confirm('Hapus barang ini?'))return;const p=P(pid);p.items=p.items.filter(i=>i.id!==id);p.penawaran.forEach(w=>{delete w.harga[id];delete w.nego[id]});sync('items','Barang dihapus');return render()}
  if(a==='delpw'){if(!confirm('Hapus penawaran penyedia ini?'))return;const p=P(pid);p.penawaran=p.penawaran.filter(w=>w.id!==id);if(p.pemenangId===id)p.pemenangId=null;sync('nego','Penawaran dihapus');return render()}
- if(a==='winner'){const p=P(pid),e=evalPw(p).find(x=>x.w.id===id),check=satriaOfferGate(p,e);if(!check.ready){toast('Penetapan belum dapat dilakukan: '+check.errors.join(' • '));return}p.pemenangId=id;sync('pemenang','Pemenang ditetapkan setelah validasi');return render()}
+ if(a==='winner'){const p=P(pid);if(!p){toast('Paket tidak ditemukan.');return}const e=evalPw(p).find(x=>String(x.w.id)===String(id)),check=satriaOfferGate(p,e);if(!check.ready){alert('Penyedia belum dapat ditetapkan:\n• '+check.errors.join('\n• '));return}if(p.pemenangId===id){toast('Penyedia ini sudah ditetapkan.');return}const seller=PY(e.w.pen).nama;const prior=p.pemenangId?(p.penawaran||[]).find(w=>w.id===p.pemenangId):null;const text=(prior?'Ganti penyedia yang sebelumnya ditetapkan ('+PY(prior.pen).nama+')?\n\n':'')+'Tetapkan '+seller+' sebagai penyedia terpilih untuk paket '+String(p.nama||p.rup)+'?\nNilai hasil negosiasi: '+rp(e.t)+' (termasuk pajak).\n\nSistem mencatat pilihan manual. Periksa kelengkapan bukti serta kewenangan pejabat sebelum menerbitkan dokumen.';if(!confirm(text))return;p.pemenangId=id;sync('pemenang','Penetapan manual penyedia: '+seller);toast('Penyedia '+seller+' berhasil ditetapkan.');return render()}
  if(a==='autowin'){P(pid).pemenangId=null;sync('pemenang','Penetapan pemenang dibatalkan; kandidat tetap dihitung otomatis');return render()}
  if(a==='addrow'){if(typeof MBLANK==='undefined'||!MBLANK[d.c]){toast('Gunakan formulir tambah pada tab ini.');return}S[d.c].push(MBLANK[d.c]());sync('master','Baris master ditambahkan: '+d.c);return render()}
  if(a==='delrow'){if(!confirm('Hapus data ini?'))return;if(!canDel(d.c,id)){toast('Data masih dipakai paket. Nonaktifkan atau ganti dulu.');return}if(d.c==='opd'&&(S.rupBank||[]).some(r=>r.opd===id)){toast('OPD masih digunakan Bank RUP. Hapus/relokasi RUP terlebih dahulu.');return}if(d.c==='opd')S.unit=S.unit.filter(u=>u.opd!==id);S[d.c]=S[d.c].filter(x=>x.id!==id);sync('master','Baris master dihapus: '+d.c);return render()}
@@ -3798,143 +3861,118 @@ window.addEventListener('DOMContentLoaded',()=>{void boot()},{once:true});
 </script>
 <script>
 
-// ===== D3.JS CHARTS - KAPUAS HULU GREEN VARIANT #16a34a =====
-
-function drawKhCharts(){
-  // Lazy load version - init observer
-  if(typeof initChartLazyLoad === 'function'){
-    initChartLazyLoad();
-  }
+/* SATRIA NEXT 3.0.49 — Dashboard Analytics Engine.
+ * Filter-aware; no CDN chart dependency; all data comes from Paket Pengadaan.
+ * Nilai penetapan bukan realisasi/pembayaran. Selisih HPS bukan penghematan riil.
+ */
+const SATRIA_CHART_IDS=['chartMultiYear','chartDonut','chartBarPaket','chartStatus','chartHpsPagu','chartOpd'];
+const SATRIA_CHART_COLORS={pagu:'#6756f8',set:'#087e81',hps:'#38a9d8',gap:'#8cba2c',pending:'#f2b84b',danger:'#e36b75',muted:'#cad1de'};
+function satriaDashboardMetrics(list){
+ const rows=Array.isArray(list)?list:[];
+ const toMoney=v=>Math.max(0,Number(v)||0);
+ let pagu=0,hpsTotal=0,committed=0,hpsGap=0,settledHps=0,settled=0,unassigned=0,remainingSettled=0,overPagu=0;
+ const packages=[];
+ for(const p of rows){
+  const pg=toMoney(p.pagu),hp=toMoney(hps(p));
+  let award=null;
+  try{ award=pemenang(p); }catch(err){console.warn('Analitik: penetapan tidak valid',err);}
+  const amount=award?toMoney(award.t):0;
+  const gap=award&&hp>0?hp-amount:0;
+  const approved=!!award;
+  pagu+=pg;hpsTotal+=hp;
+  if(approved){settled++;committed+=amount;hpsGap+=gap;settledHps+=hp;remainingSettled+=Math.max(0,pg-amount);overPagu+=Math.max(0,amount-pg)}
+  else unassigned+=pg;
+  let status='Draf';try{status=stt(p)}catch(_){status='Perlu pemeriksaan'}
+  packages.push({id:p.id,name:String(p.nama||'Paket tanpa nama'),year:Number(p.tahun),opd:String(p.opd||''),pagu:pg,hps:hp,amount,gap,approved,status});
+ }
+ return {count:rows.length,packages,pagu,hpsTotal,committed,hpsGap,settledHps,settled,unassigned,remainingSettled,overPagu,
+   completed:rows.filter(p=>{try{return gaps(p).length===0}catch(_){return false}}).length};
 }
-function drawKhChartsSingle(targetId){
-  // placeholder, overridden by lazy engine
+function satriaDashE(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=String(text);return e}
+function satriaDashSvg(tag,attrs={},text){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,String(v));if(text!==undefined)el.textContent=String(text);return el}
+function satriaDashEmpty(el,msg){el.replaceChildren();const x=satriaDashE('div','s348-empty',msg);el.appendChild(x);el.setAttribute('aria-label',msg)}
+function satriaDashFormat(v){return rp(Math.round(v||0))}
+function satriaDashCompact(v){const a=Math.abs(v);return a>=1e9?(v/1e9).toFixed(1)+' M':a>=1e6?(v/1e6).toFixed(1)+' jt':a>=1e3?(v/1e3).toFixed(a<1e4?1:0)+' rb':Math.round(v).toLocaleString('id-ID')}
+function satriaDashChartYears(el){
+ const years=[...new Set((S.tahun||[]).map(Number).filter(Number.isInteger))].sort((a,b)=>a-b);
+ if(!years.length){satriaDashEmpty(el,'Tahun anggaran belum tersedia.');return}
+ const data=years.map(y=>({year:y,...satriaDashboardMetrics(filt(y))}));
+ const any=data.some(r=>r.count>0);if(!any){satriaDashEmpty(el,'Belum ada paket untuk OPD/tahun yang dapat Anda akses.');return}
+ el.replaceChildren();const W=760,H=302,ml=76,mr=18,mt=24,mb=45,ih=H-mt-mb;
+ const top=Math.max(1,...data.map(x=>Math.max(x.pagu,x.committed,x.hpsTotal)))*1.12;
+ const svg=satriaDashSvg('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Grafik anggaran, HPS, dan nilai penetapan per tahun',preserveAspectRatio:'xMidYMid meet'});
+ const scaleY=v=>mt+ih-Math.max(0,v)/top*ih;const cell=(W-ml-mr)/data.length;
+ for(let i=0;i<=4;i++){const amount=top*i/4,cy=scaleY(amount);svg.append(satriaDashSvg('line',{x1:ml,y1:cy,x2:W-mr,y2:cy,stroke:'#d9deec','stroke-dasharray':'4 5'}));svg.append(satriaDashSvg('text',{x:ml-8,y:cy+4,'text-anchor':'end',class:'s348-axis'},satriaDashCompact(amount)))}
+ const cols=['pagu','hpsTotal','committed'],colors=[SATRIA_CHART_COLORS.pagu,SATRIA_CHART_COLORS.hps,SATRIA_CHART_COLORS.set];
+ data.forEach((d,i)=>{const base=ml+i*cell, bw=Math.min(25,cell/4-4), mid=base+cell/2;cols.forEach((key,k)=>{const xx=mid+(k-1)*(bw+3)-bw/2,y=scaleY(d[key]);const rect=satriaDashSvg('rect',{x:xx,y,width:bw,height:Math.max(0,H-mb-y),fill:colors[k],rx:3});rect.append(satriaDashSvg('title',{},`TA ${d.year} • ${['Pagu','HPS','Penetapan'][k]} ${satriaDashFormat(d[key])}`));svg.append(rect)});svg.append(satriaDashSvg('text',{x:mid,y:H-19,'text-anchor':'middle',class:'s348-axis'},d.year))});
+ el.append(svg);satriaDashLegend('legendMultiYear',[['Pagu',colors[0]],['HPS',colors[1]],['Nilai penetapan',colors[2]]]);
 }
-
-
-// ===== D3 CHARTS LAZY LOAD ENGINE - Fixed =====
-window.__chartObserver = null;
-window.__renderedCharts = new Set();
-
-function initChartLazyLoad(){
-  if(!('IntersectionObserver' in window)){
-    setTimeout(()=>{ if(typeof window.drawKhChartsSingle==='function'){ ['chartMultiYear','chartDonut','chartBarPaket','chartStatus','chartHpsPagu','chartOpd'].forEach(id=>{ const el=document.getElementById(id); if(el) drawKhChartsSingle(id); }); } }, 800);
-    return;
-  }
-  const chartIds = ['chartMultiYear','chartDonut','chartBarPaket','chartStatus','chartHpsPagu','chartOpd'];
-  if(window.__chartObserver) try{ window.__chartObserver.disconnect(); }catch(_){}
-  const observer = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting){
-        const id = entry.target.id;
-        if(!window.__renderedCharts.has(id)){
-          window.__renderedCharts.add(id);
-          requestAnimationFrame(()=>{ drawKhChartsSingle(id); });
-        }
-      }
-    });
-  }, {rootMargin:'200px 0px', threshold:0.1});
-  
-  chartIds.forEach(id=>{
-    const el = document.getElementById(id);
-    if(el){
-      if(!el.innerHTML.trim() || el.innerHTML.includes('chart-skeleton')){
-        // keep skeleton, observer will replace
-      }
-      observer.observe(el);
-    }
-  });
-  window.__chartObserver = observer;
+function satriaDashLegend(id,items){const el=document.getElementById(id);if(!el)return;el.replaceChildren();items.forEach(([t,c])=>{const e=satriaDashE('span','s348-legend',t);e.style.setProperty('--s348-dot',c);el.append(e)})}
+function satriaDashChartBudget(el,m){
+ if(!m.count){satriaDashEmpty(el,'Belum ada paket pada filter OPD/tahun aktif.');satriaDashLegend('legendDonut',[]);return}
+ el.replaceChildren();const parts=[{label:'Nilai penetapan tervalidasi',value:Math.min(m.pagu,m.committed),color:SATRIA_CHART_COLORS.set},{label:'Sisa pagu paket ditetapkan',value:m.remainingSettled,color:SATRIA_CHART_COLORS.pagu},{label:'Pagu paket belum ditetapkan',value:m.unassigned,color:SATRIA_CHART_COLORS.pending}];
+ const wrap=satriaDashE('div','s348-donut-wrap');const circle=satriaDashE('div','s348-donut');const center=satriaDashE('div','s348-donut-core');center.append(satriaDashE('small','','PAGU'),satriaDashE('b','',satriaDashCompact(m.pagu)));circle.append(center);
+ if(m.pagu>0){let a=0;const arcs=parts.map(p=>{const start=a;a+=p.value/m.pagu*100;return `${p.color} ${Math.max(0,start).toFixed(3)}% ${Math.min(100,a).toFixed(3)}%`});circle.style.background=`conic-gradient(${arcs.join(',')})`}else circle.style.background='#d9deec';
+ wrap.append(circle);el.append(wrap);satriaDashLegend('legendDonut',parts.map(p=>[`${p.label}: ${satriaDashFormat(p.value)}`,p.color]));
+ if(m.overPagu>0)el.append(satriaDashE('p','s348-warning',`Peringatan: nilai penetapan melebihi pagu sebesar ${satriaDashFormat(m.overPagu)}.`));
 }
-
-function drawKhChartsSingle(targetId){
-  if(typeof d3==='undefined') return;
-  const el = document.getElementById(targetId);
-  if(!el) return;
-  const isMobile = window.innerWidth <= 768;
-  const L = (typeof filt==='function') ? filt() : [];
-  const isDark = document.documentElement.getAttribute('data-theme')==='dark';
-  const colMut = getComputedStyle(document.documentElement).getPropertyValue('--mut').trim() || '#64748b';
-  const colBd = getComputedStyle(document.documentElement).getPropertyValue('--bd').trim() || '#e2e8f0';
-  const colInk = getComputedStyle(document.documentElement).getPropertyValue('--ink-2').trim() || '#334155';
-  const COLORS = {pagu: isDark ? '#22d3ee' : '#0891B2', kontrak: isDark ? '#2dd4bf' : '#0F766E', efisiensi: isDark ? '#34d399' : '#10B981', hps: isDark ? '#818cf8' : '#2563EB'};
-  function showTip(html, e){
-    let tip=document.getElementById('globalD3Tip');
-    if(!tip){ tip=document.createElement('div'); tip.id='globalD3Tip'; tip.className='d3-tooltip'; document.body.appendChild(tip); }
-    tip.textContent=String(html).replace(/<br\s*\/?\s*>/gi, '\n'); tip.style.whiteSpace='pre-line'; tip.style.opacity='1';
-    tip.style.left=(e.pageX+14)+'px'; tip.style.top=(e.pageY-28)+'px';
-  }
-  function hideTip(){ const tip=document.getElementById('globalD3Tip'); if(tip) tip.style.opacity='0'; }
-  
-  if(targetId==='chartMultiYear'){
-    el.innerHTML=''; const W=el.clientWidth, H=isMobile?280:340, m={top:20, right:20, bottom:32, left:64};
-    const data=S.tahun.map(t=>{ const x=filt(t); return {tahun:t, pagu:sum(x,p=>p.pagu), kontrak:sum(x,kontrak), efisiensi:sum(x,p=>p.pagu)-sum(x,kontrak)}; });
-    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
-    const x=d3.scaleBand().domain(data.map(d=>d.tahun)).range([m.left, W-m.right]).padding(0.28);
-    const y=d3.scaleLinear().domain([0, (d3.max(data,d=>Math.max(d.pagu, d.kontrak))||1)*1.15]).nice().range([H-m.bottom, m.top]);
-    svg.append('g').selectAll('line').data(y.ticks(isMobile?3:5)).join('line').attr('x1',m.left).attr('x2',W-m.right).attr('y1',d=>y(d)).attr('y2',d=>y(d)).attr('stroke',colBd).attr('stroke-dasharray','3 3').attr('opacity',.6);
-    svg.append('g').attr('transform',`translate(0,${H-m.bottom})`).call(d3.axisBottom(x).tickSize(0)).selectAll('text').attr('font-weight',700).attr('font-size', isMobile?'10px':'12px');
-    svg.append('g').attr('transform',`translate(${m.left},0)`).call(d3.axisLeft(y).ticks(isMobile?3:5).tickFormat(d=> (d/1e6).toFixed(1)+'jt')).selectAll('text').attr('fill',colMut).attr('font-size', isMobile?'10px':'11px');
-    const barW=x.bandwidth()/2.4;
-    svg.selectAll('.bar-pagu').data(data).join('rect').attr('x',d=>x(d.tahun)+2).attr('y',d=>y(d.pagu)).attr('width',barW).attr('height',d=>H-m.bottom-y(d.pagu)).attr('fill',COLORS.pagu).attr('rx',6).on('mousemove', function(e,d){ showTip(`TA ${d.tahun} • Pagu ${rp(d.pagu)}`, e); }).on('mouseleave', hideTip);
-    svg.selectAll('.bar-kontrak').data(data).join('rect').attr('x',d=>x(d.tahun)+barW+6).attr('y',d=>y(d.kontrak)).attr('width',barW).attr('height',d=>H-m.bottom-y(d.kontrak)).attr('fill',COLORS.kontrak).attr('rx',6).on('mousemove', function(e,d){ showTip(`TA ${d.tahun} • Kontrak ${rp(d.kontrak)}`, e); }).on('mouseleave', hideTip);
-    const line=d3.line().x(d=>x(d.tahun)+x.bandwidth()/2).y(d=>y(d.efisiensi)).curve(d3.curveMonotoneX);
-    svg.append('path').datum(data).attr('fill','none').attr('stroke',COLORS.efisiensi).attr('stroke-width', isMobile?2:3).attr('stroke-linecap','round').attr('d',line);
-    svg.selectAll('.dot-eff').data(data).join('circle').attr('cx',d=>x(d.tahun)+x.bandwidth()/2).attr('cy',d=>y(d.efisiensi)).attr('r', isMobile?4:5).attr('fill',COLORS.efisiensi).attr('stroke','#fff').attr('stroke-width',2);
-    const leg=document.getElementById('legendMultiYear'); if(leg) leg.innerHTML=`<div class="d3-legend-item"><span class="d3-legend-dot" style="background:${COLORS.pagu}"></span>Pagu</div><div class="d3-legend-item"><span class="d3-legend-dot" style="background:${COLORS.kontrak}"></span>Kontrak</div><div class="d3-legend-item"><span class="d3-legend-dot" style="background:${COLORS.efisiensi}"></span>Efisiensi</div>`;
-  } else if(targetId==='chartDonut'){
-    el.innerHTML=''; const W=isMobile?240:280, H=isMobile?240:280, R=Math.min(W,H)/2-12; const pagu=sum(L,p=>p.pagu), k=sum(L,kontrak), sisa=pagu-k;
-    const data=[{label:'Kontrak', value:k, color:COLORS.kontrak},{label:'Efisiensi', value:sisa, color:COLORS.efisiensi}];
-    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`).append('g').attr('transform',`translate(${W/2},${H/2})`);
-    const pie=d3.pie().value(d=>d.value).sort(null).padAngle(0.04); const arc=d3.arc().innerRadius(R*0.62).outerRadius(R).cornerRadius(8);
-    svg.selectAll('.arc').data(pie(data)).join('path').attr('d',arc).attr('fill',d=>d.data.color).on('mousemove',(e,d)=>showTip(`${d.data.label}: ${rp(d.data.value)} (${(d.data.value/(pagu||1)*100).toFixed(1)}%)`, e)).on('mouseleave',hideTip);
-    svg.append('text').attr('text-anchor','middle').attr('dy','-6').attr('font-size','11px').attr('font-weight','800').attr('fill',colMut).text('TOTAL PAGU');
-    svg.append('text').attr('text-anchor','middle').attr('dy','14').attr('font-size', isMobile?'14px':'16px').attr('font-weight','800').attr('fill',colInk).text(rp(pagu).replace('Rp ',''));
-  } else if(targetId==='chartBarPaket'){
-    el.innerHTML=''; const W=el.clientWidth, H=isMobile?240:280, m={top:10,right:12,bottom:28,left:48};
-    const data=filt().map(p=>({nama:p.nama.slice(0,isMobile?16:22), efisiensi:p.pagu-kontrak(p), pagu:p.pagu})).sort((a,b)=>b.efisiensi-a.efisiensi).slice(0,isMobile?5:8); if(!data.length) return;
-    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
-    const x=d3.scaleLinear().domain([0, (d3.max(data,d=>d.efisiensi)||1)*1.2]).range([m.left, W-m.right]); const y=d3.scaleBand().domain(data.map(d=>d.nama)).range([m.top, H-m.bottom]).padding(0.22);
-    svg.append('g').attr('transform',`translate(0,${H-m.bottom})`).call(d3.axisBottom(x).ticks(isMobile?3:4).tickFormat(d=>d>=1e6?(d/1e6).toFixed(1)+'jt':d)).selectAll('text').attr('fill',colMut).attr('font-size','10px');
-    svg.append('g').attr('transform',`translate(${m.left},0)`).call(d3.axisLeft(y).tickSize(0)).selectAll('text').attr('fill',colInk).attr('font-weight','600').attr('font-size', isMobile?'9px':'10px');
-    svg.selectAll('.bar').data(data).join('rect').attr('x',m.left).attr('y',d=>y(d.nama)).attr('width',d=>x(d.efisiensi)-m.left).attr('height',y.bandwidth()).attr('fill', COLORS.efisiensi).attr('rx',6).on('mousemove',(e,d)=>showTip(`${d.nama}: Efisiensi ${rp(d.efisiensi)}`, e)).on('mouseleave',hideTip);
-  } else if(targetId==='chartStatus'){
-    el.innerHTML=''; const W=isMobile?200:240,H=isMobile?200:240,R=isMobile?70:90; const counts={}; filt().forEach(p=>{const s=stt(p); counts[s]=(counts[s]||0)+1;});
-    const data=Object.entries(counts).map(([k,v])=>({label:k, value:v})); const color=d3.scaleOrdinal().domain(data.map(d=>d.label)).range([COLORS.kontrak, COLORS.pagu, COLORS.efisiensi, '#8b5cf6', '#f59e0b']);
-    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`).append('g').attr('transform',`translate(${W/2},${H/2})`);
-    const pie=d3.pie().value(d=>d.value).sort(null); const arc=d3.arc().innerRadius(R*0.55).outerRadius(R).cornerRadius(6);
-    svg.selectAll('path').data(pie(data)).join('path').attr('d',arc).attr('fill',d=>color(d.data.label)).on('mousemove',(e,d)=>showTip(`${d.data.label}: ${d.data.value} paket`, e)).on('mouseleave',hideTip);
-  } else if(targetId==='chartHpsPagu'){
-    el.innerHTML=''; const W=el.clientWidth,H=isMobile?200:240,m={top:10,right:10,bottom:28,left:44}; const data=filt().map(p=>({hps:hps(p), pagu:p.pagu, nama:p.nama.slice(0,18)}));
-    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
-    const mx=(d3.max(data,d=>Math.max(d.pagu,d.hps))||1)*1.1; const x=d3.scaleLinear().domain([0,mx]).range([m.left,W-m.right]); const y=d3.scaleLinear().domain([0,mx]).range([H-m.bottom,m.top]);
-    svg.append('g').attr('transform',`translate(0,${H-m.bottom})`).call(d3.axisBottom(x).ticks(isMobile?2:3).tickFormat(d=> (d/1e6).toFixed(0)+'jt')).selectAll('text').attr('fill',colMut).attr('font-size','10px');
-    svg.append('g').attr('transform',`translate(${m.left},0)`).call(d3.axisLeft(y).ticks(isMobile?3:4).tickFormat(d=> (d/1e6).toFixed(0)+'jt')).selectAll('text').attr('fill',colMut).attr('font-size','10px');
-    svg.append('line').attr('x1',x(0)).attr('y1',y(0)).attr('x2',x(mx)).attr('y2',y(mx)).attr('stroke',colBd).attr('stroke-dasharray','4 4');
-    svg.selectAll('circle').data(data).join('circle').attr('cx',d=>x(d.pagu)).attr('cy',d=>y(d.hps)).attr('r', isMobile?4:6).attr('fill',COLORS.kontrak).attr('stroke','#fff').attr('stroke-width',2).on('mousemove',(e,d)=>showTip(`${d.nama} Pagu ${rp(d.pagu)} HPS ${rp(d.hps)}`, e)).on('mouseleave',hideTip);
-  } else if(targetId==='chartOpd'){
-    el.innerHTML=''; const W=el.clientWidth,H=isMobile?200:240,m={top:6,right:10,bottom:24,left:80}; const map={}; filt().forEach(p=>{const k=O(p.opd).singkat||'OPD'; map[k]=(map[k]||0)+kontrak(p);});
-    const data=Object.entries(map).map(([k,v])=>({opd:k, val:v})).sort((a,b)=>b.val-a.val).slice(0, isMobile?5:10);
-    const svg=d3.select(el).append('svg').attr('width',W).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`);
-    const x=d3.scaleLinear().domain([0,d3.max(data,d=>d.val)||1]).range([m.left,W-m.right]); const y=d3.scaleBand().domain(data.map(d=>d.opd)).range([m.top,H-m.bottom]).padding(0.3);
-    svg.append('g').attr('transform',`translate(0,${H-m.bottom})`).call(d3.axisBottom(x).ticks(isMobile?2:3).tickFormat(d=> (d/1e6).toFixed(0)+'jt')).selectAll('text').attr('fill',colMut).attr('font-size','10px');
-    svg.append('g').attr('transform',`translate(${m.left},0)`).call(d3.axisLeft(y).tickSize(0)).selectAll('text').attr('fill',colInk).attr('font-weight','700').attr('font-size', isMobile?'10px':'11px');
-    svg.selectAll('.bar').data(data).join('rect').attr('x',m.left).attr('y',d=>y(d.opd)).attr('width',d=>x(d.val)-m.left).attr('height',y.bandwidth()).attr('fill',COLORS.kontrak).attr('rx',6).on('mousemove',(e,d)=>showTip(`${d.opd}: ${rp(d.val)}`, e)).on('mouseleave',hideTip);
-  }
+function satriaDashChartGap(el,m){
+ const data=m.packages.filter(p=>p.approved&&p.hps>0).sort((a,b)=>b.gap-a.gap).slice(0,8);
+ if(!data.length){satriaDashEmpty(el,'Belum ada penetapan dengan negosiasi lengkap. Selisih HPS belum bisa dihitung.');return}
+ el.replaceChildren();const label=satriaDashE('p','s348-caption','Selisih HPS terhadap hasil negosiasi pada paket yang ditetapkan — bukan penghematan kas.');el.append(label);
+ const max=Math.max(1,...data.map(p=>Math.abs(p.gap)));
+ for(const p of data){const row=satriaDashE('div','s348-bar-row');const head=satriaDashE('div','s348-bar-head');head.append(satriaDashE('span','',p.name),satriaDashE('b','',satriaDashFormat(p.gap)));const rail=satriaDashE('div','s348-bar-rail'),fill=satriaDashE('div','s348-bar-fill');fill.style.width=Math.max(1,Math.abs(p.gap)/max*100)+'%';fill.style.background=p.gap<0?SATRIA_CHART_COLORS.danger:SATRIA_CHART_COLORS.gap;rail.append(fill);row.append(head,rail);el.append(row)}
 }
-
-
-// Hook to render
+function satriaDashChartStatus(el,m){
+ if(!m.count){satriaDashEmpty(el,'Belum ada paket untuk menampilkan status proses.');return}
+ const colors=[SATRIA_CHART_COLORS.pagu,SATRIA_CHART_COLORS.set,SATRIA_CHART_COLORS.hps,SATRIA_CHART_COLORS.pending,SATRIA_CHART_COLORS.gap,SATRIA_CHART_COLORS.danger];
+ const counts=new Map();m.packages.forEach(p=>counts.set(p.status,(counts.get(p.status)||0)+1));el.replaceChildren();
+ for(const [i,[label,n]] of [...counts.entries()].sort((a,b)=>b[1]-a[1]).entries()){
+  const row=satriaDashE('div','s348-bar-row');const h=satriaDashE('div','s348-bar-head');h.append(satriaDashE('span','',label),satriaDashE('b','',n+' paket'));
+  const rail=satriaDashE('div','s348-bar-rail'),fill=satriaDashE('div','s348-bar-fill');fill.style.width=n/m.count*100+'%';fill.style.background=colors[i%colors.length];rail.append(fill);row.append(h,rail);el.append(row)
+ }
+}
+function satriaDashChartMatrix(el,m){
+ const pts=m.packages.filter(p=>p.pagu>0&&p.hps>0);
+ if(!pts.length){satriaDashEmpty(el,'HPS belum diisi. Tambahkan rincian kebutuhan dan harga satuan.');return}
+ el.replaceChildren();const W=400,H=232,l=51,r=15,t=12,b=44;const mx=Math.max(...pts.map(p=>Math.max(p.pagu,p.hps)),1)*1.08;
+ const x=v=>l+(v/mx)*(W-l-r),y=v=>H-b-(v/mx)*(H-t-b);
+ const svg=satriaDashSvg('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Hubungan pagu dengan HPS per paket'});
+ for(let i=0;i<=4;i++){const v=mx*i/4;svg.append(satriaDashSvg('line',{x1:l,y1:y(v),x2:W-r,y2:y(v),stroke:'#d9deec','stroke-dasharray':'3 5'}));svg.append(satriaDashSvg('text',{x:l-7,y:y(v)+3,'text-anchor':'end',class:'s348-axis'},satriaDashCompact(v)))}
+ svg.append(satriaDashSvg('line',{x1:x(0),y1:y(0),x2:x(mx),y2:y(mx),stroke:'#a8b0c3','stroke-dasharray':'6 4'}));
+ pts.forEach(p=>{const circle=satriaDashSvg('circle',{cx:x(p.pagu),cy:y(p.hps),r:6,fill:p.hps>p.pagu?SATRIA_CHART_COLORS.danger:SATRIA_CHART_COLORS.set,stroke:'#fff','stroke-width':2});circle.append(satriaDashSvg('title',{},`${p.name}\nPagu ${satriaDashFormat(p.pagu)}\nHPS ${satriaDashFormat(p.hps)}`));svg.append(circle)});
+ svg.append(satriaDashSvg('text',{x:W/2,y:H-7,'text-anchor':'middle',class:'s348-axis'},'Pagu →'));svg.append(satriaDashSvg('text',{x:12,y:17,class:'s348-axis'},'HPS'));el.append(svg);
+ if(pts.some(p=>p.hps>p.pagu))el.append(satriaDashE('p','s348-warning',`${pts.filter(p=>p.hps>p.pagu).length} paket memiliki HPS lebih besar dari pagu.`));
+}
+function satriaDashChartOpd(el,m){
+ if(!m.count){satriaDashEmpty(el,'Belum ada paket pada filter OPD/tahun aktif.');return}
+ const by=new Map();for(const p of m.packages){if(!by.has(p.opd))by.set(p.opd,{name:O(p.opd).singkat||O(p.opd).nama||p.opd,pagu:0,amount:0,count:0});const o=by.get(p.opd);o.pagu+=p.pagu;o.amount+=p.amount;o.count++}
+ const data=[...by.values()].sort((a,b)=>b.pagu-a.pagu).slice(0,8);const max=Math.max(1,...data.map(o=>o.pagu));el.replaceChildren();
+ const caption=satriaDashE('p','s348-caption','Pagu (ungu) dan nilai penetapan tervalidasi (hijau) per OPD.');el.append(caption);
+ for(const rowdata of data){const row=satriaDashE('div','s348-bar-row');const head=satriaDashE('div','s348-bar-head');head.append(satriaDashE('span','',`${rowdata.name} • ${rowdata.count} paket`),satriaDashE('b','',satriaDashFormat(rowdata.pagu)));row.append(head);
+  for(const [v,color] of [[rowdata.pagu,SATRIA_CHART_COLORS.pagu],[rowdata.amount,SATRIA_CHART_COLORS.set]]){const rail=satriaDashE('div','s348-bar-rail'),fill=satriaDashE('div','s348-bar-fill');fill.style.width=v/max*100+'%';fill.style.background=color;rail.append(fill);row.append(rail)}el.append(row)
+ }
+}
+function drawKhChartsSingle(id){
+ const el=document.getElementById(id);if(!el||!S||S.ui.page!=='dash')return;
+ try{const m=satriaDashboardMetrics(filt());switch(id){
+  case 'chartMultiYear':satriaDashChartYears(el);break;
+  case 'chartDonut':satriaDashChartBudget(el,m);break;
+  case 'chartBarPaket':satriaDashChartGap(el,m);break;
+  case 'chartStatus':satriaDashChartStatus(el,m);break;
+  case 'chartHpsPagu':satriaDashChartMatrix(el,m);break;
+  case 'chartOpd':satriaDashChartOpd(el,m);break;
+ }}catch(error){console.error('Dashboard chart '+id,error);satriaDashEmpty(el,'Grafik tidak dapat ditampilkan. Periksa data paket dan konsol.');}
+}
+function drawKhCharts(){if(!S||S.ui.page!=='dash')return;for(const id of SATRIA_CHART_IDS)drawKhChartsSingle(id)}
+function initChartLazyLoad(){drawKhCharts()}
 (function(){
-  if(window.render){
-    const orig=window.render;
-    window.render=function(){
-      orig();
-      requestAnimationFrame(drawKhCharts);
-    };
-  }
-  window.addEventListener('resize', ()=>{ clearTimeout(window._khResize); window._khResize=setTimeout(drawKhCharts, 250); });
-  document.addEventListener('DOMContentLoaded', drawKhCharts);
-  setTimeout(drawKhCharts, 600);
+ // Rendering is deliberately lightweight and synchronous after paint; old observer cache
+ // persisted across DOM replacements and left the six charts permanently in Loading state.
+ let queued=0;const schedule=()=>{cancelAnimationFrame(queued);queued=requestAnimationFrame(()=>drawKhCharts())};
+ if(typeof window.render==='function'){const old=window.render;window.render=function(){const result=old.apply(this,arguments);schedule();return result}}
+ window.addEventListener('resize',()=>{clearTimeout(window.__s348resize);window.__s348resize=setTimeout(schedule,170)});
+ document.addEventListener('DOMContentLoaded',schedule);setTimeout(schedule,60);
 })();
 
 </script>
@@ -8708,7 +8746,7 @@ function row(label,input,wide=false){return `<div class="fg ${wide?'smart-wide':
 function field(field,value,type='text',extra=''){return `<input data-smart-field="${field}" type="${type}" value="${escapeValue(value)}" ${extra}>`}
 function surveyPanel(p,w){const active=(p.items||[]).find(i=>i.id===w.surveyItemId)||p.items[0];if(!active)return '<div class="smart-survey-wrap">Isi rincian kebutuhan/HPS terlebih dahulu agar referensi katalog dapat ditautkan ke barang.</div>';
 const x=refOf(w,active.id);const tax=x.taxMode||'effective11';const qty=Math.max(0,Number(active.vol)||0);return `<section class="smart-survey-wrap" data-smart-panel data-pid="${escapeValue(p.id)}" data-wid="${escapeValue(w.id)}" data-iid="${escapeValue(active.id)}">
-<div class="smart-survey-head"><h3>✦ Smart Survey Harga & Kalkulator Negosiasi</h3><span class="pill">Terkait HPS • ${escapeValue(PY(w.pen).nama)}</span></div>
+<div class="smart-survey-head"><h3>✦ Smart Survey Harga e-Katalog</h3><span class="pill">Terkait HPS • ${escapeValue(PY(w.pen).nama)}</span></div>
 <p class="smart-hint">Pilih rincian HPS, tempel tautan produk INAPROC, lalu cocokkan nama, penyedia, foto, harga dan PPN. Data referensi tersimpan per penyedia × item. Data katalog otomatis dari jaringan mungkin diblokir CORS; input yang belum terverifikasi tidak dianggap sebagai fakta katalog.</p>
 <div class="smart-survey-grid">
 ${row('Rincian HPS yang dibandingkan',`<select data-smart-item>${p.items.map(i=>`<option value="${escapeValue(i.id)}" ${i.id===active.id?'selected':''}>${escapeValue(i.nama)} · ${escapeValue(i.vol)} ${escapeValue(i.sat||'')}</option>`).join('')}</select>`,true)}
@@ -8720,32 +8758,29 @@ ${row('Tanggal referensi',field('date',x.date||w.tanggalHarga||iso(),'date'))}
 ${row('Harga produk sebelum pajak (Rp)',field('beforeTax',x.beforeTax||'','text','inputmode="numeric"'))}
 ${row('PPN yang tertera (Rp)',field('taxAmount',x.taxAmount||'','text','inputmode="numeric"'))}
 ${row('Harga satuan tayang termasuk pajak (Rp)',field('displayPrice',x.displayPrice||w.harga?.[active.id]||'','text','inputmode="numeric"'))}
-${row('Harga negosiasi SEBELUM pajak (Rp)',field('negotiatedBase',x.negotiatedBase||'','text','inputmode="numeric"'))}
-${row('Perlakuan PPN simulasi',`<select data-smart-field="taxMode"><option value="effective11" ${tax==='effective11'?'selected':''}>Efektif 11% (contoh pada screenshot)</option><option value="rate12" ${tax==='rate12'?'selected':''}>12% × harga sebelum pajak</option><option value="zero" ${tax==='zero'?'selected':''}>0% / tanpa PPN</option><option value="custom" ${tax==='custom'?'selected':''}>Nominal PPN manual</option></select>`)}
-${row('PPN hasil negosiasi manual (Rp)',field('negotiatedTax',x.negotiatedTax||'','text','inputmode="numeric"'))}
 ${row('Spesifikasi produk yang terlihat',`<textarea rows="2" data-smart-field="spec" placeholder="Salin spesifikasi produk dari halaman katalog">${escapeValue(x.spec||'')}</textarea>`,true)}
 ${row('Foto produk (URL gambar, atau upload di bawah)',field('imageUrl',x.imageUrl?.startsWith('data:')?'':x.imageUrl||'','url','placeholder="https://.../foto-produk.jpg"'),true)}
 ${row('Unggah foto/screenshot pendukung (maks. 250 KB)',`<input type="file" data-smart-photo accept="image/png,image/jpeg,image/webp">`,true)}
 </div>
-<div class="smart-actions"><button type="button" class="g" data-smart-action="parse">Baca identitas dari link</button><button type="button" class="g" data-smart-action="fetch">Coba metadata publik</button><button type="button" class="g" data-smart-action="calculate">Hitung negosiasi</button><button type="button" data-smart-action="save">Simpan ke penawaran & dokumen</button></div>
+<div class="smart-actions"><button type="button" class="g" data-smart-action="parse">Baca identitas dari link</button><button type="button" class="g" data-smart-action="fetch">Coba metadata publik</button><button type="button" data-smart-action="save">Simpan referensi harga tayang</button></div>
 <div class="smart-survey-status" data-smart-status role="status">Foto dan harga belum dapat dijamin diambil otomatis. Periksa data dari halaman katalog sebelum menyimpan.</div>
-<div class="smart-survey-preview" data-smart-preview>${x.imageUrl?`<img alt="Foto referensi produk" src="${escapeValue(x.imageUrl)}" onerror="this.style.display='none'">`:''}<div><b>${escapeValue(x.name||'Belum ada produk terverifikasi')}</b><div class="smart-survey-msg">HPS: ${money(active.hs)} × ${qty} ${escapeValue(active.sat||'')} · ${escapeValue(PY(w.pen).nama)}</div><div class="smart-survey-kpi">Harga tayang tersimpan: ${money(w.harga?.[active.id]||0)} · Nego tersimpan: ${money(w.nego?.[active.id]||0)}</div></div></div>
-<div class="smart-note">Harga tayang dan nilai negosiasi yang diteruskan ke dokumen adalah harga <b>per unit termasuk PPN</b>. Harga negosiasi sebelum pajak disimpan sebagai rincian pendukung. Ongkir tetap terpisah. Tarif simulasi tidak menetapkan kewajiban pajak hukum; konfirmasi DPP dan PPN untuk transaksi yang bersangkutan.</div>
+<div class="smart-survey-preview" data-smart-preview>${x.imageUrl?`<img alt="Foto referensi produk" src="${escapeValue(x.imageUrl)}" onerror="this.style.display='none'">`:''}<div><b>${escapeValue(x.name||'Belum ada produk terverifikasi')}</b><div class="smart-survey-msg">HPS: ${money(active.hs)} × ${qty} ${escapeValue(active.sat||'')} · ${escapeValue(PY(w.pen).nama)}</div><div class="smart-survey-kpi">Harga tayang/unit: ${money(w.harga?.[active.id]||0)} · Nego SEBELUM PPN/unit: ${satriaOfferNegoBreakdown(w,active.id).verified?money(satriaOfferNegoBreakdown(w,active.id).net):'Belum terverifikasi'} · Harga akhir: ${money(w.nego?.[active.id]||0)}</div></div></div>
+<div class="smart-note"><b>Smart Survey hanya menyimpan referensi katalog dan harga tayang.</b> Untuk menentukan usulan SEBELUM PPN per unit, gunakan <b>Kalkulator Nego</b> pada kartu penyedia. Hasilnya akan otomatis masuk ke Harga Nego; referensi yang disimpan di sini tidak akan menghapus negosiasi sebelumnya. Data pajak tayang harus diverifikasi dengan sumber.</div>
 </section>`}
 const oldNego=fNego;fNego=function(p){let result=oldNego(p);for(const w of p.penawaran||[])result+=surveyPanel(p,w);return result};
 function read(panel,k){return panel.querySelector(`[data-smart-field="${k}"]`)?.value?.trim()||''}
 function set(panel,k,val){const el=panel.querySelector(`[data-smart-field="${k}"]`);if(el)el.value=val}
 function status(panel,message){const el=panel.querySelector('[data-smart-status]');if(el)el.textContent=message}
-function calc(panel){const base=num(read(panel,'negotiatedBase'));const mode=read(panel,'taxMode');const tax=mode==='effective11'?Math.round(base*.11):mode==='rate12'?Math.round(base*.12):mode==='zero'?0:num(read(panel,'negotiatedTax'));const total=base+tax;set(panel,'negotiatedTax',tax);status(panel,`Simulasi: nego sebelum pajak ${money(base)} + PPN ${money(tax)} = ${money(total)} per unit (termasuk PPN).`);return {base,tax,total}}
 function reload(panel,iid){const {p,w}=offer(panel.dataset.pid,panel.dataset.wid);if(!p||!w)return;w.surveyItemId=iid;render()}
 document.addEventListener('change',ev=>{const t=ev.target,panel=t?.closest?.('[data-smart-panel]');if(!panel)return;if(t.matches('[data-smart-field]')){ev.stopImmediatePropagation();return}if(t.matches('[data-smart-item]')){ev.stopImmediatePropagation();reload(panel,t.value);return}
 if(t.matches('[data-smart-photo]')){ev.stopImmediatePropagation();const file=t.files?.[0];if(!file)return;if(file.size>250*1024||!['image/png','image/jpeg','image/webp'].includes(file.type)){status(panel,'Foto harus PNG, JPEG, atau WEBP dan maksimal 250 KB.');return}const reader=new FileReader();reader.onload=()=>{panel._smartImage=String(reader.result);status(panel,'Foto siap disimpan bersama catatan referensi. Klik Simpan.');const preview=panel.querySelector('[data-smart-preview]');const img=preview?.querySelector('img')||document.createElement('img');img.src=panel._smartImage;img.alt='Foto produk';if(preview&&!img.parentNode)preview.prepend(img)};reader.readAsDataURL(file)}} ,true);
 document.addEventListener('click',async ev=>{const btn=ev.target.closest?.('[data-smart-action]');if(!btn)return;ev.preventDefault();ev.stopImmediatePropagation();const panel=btn.closest('[data-smart-panel]');if(!panel)return;const action=btn.dataset.smartAction;
 if(action==='parse'||action==='fetch'){const found=fromUrl(read(panel,'link'));if(!found){status(panel,'Tautan harus berasal dari https://katalog.inaproc.id/nama-penjual/nama-produk');return}if(!read(panel,'name'))set(panel,'name',found.name);status(panel,'URL valid. Nama produk berikut hanya perkiraan dari URL, bukan hasil verifikasi halaman. Periksa sebelum simpan.');if(action==='fetch'){try{const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),5000);const response=await fetch(found.link,{mode:'cors',signal:ctrl.signal});clearTimeout(tid);if(!response.ok)throw Error('HTTP '+response.status);const html=await response.text();const doc=new DOMParser().parseFromString(html,'text/html');const title=doc.querySelector('meta[property="og:title"]')?.content||doc.querySelector('h1')?.textContent?.trim();const img=doc.querySelector('meta[property="og:image"]')?.content;if(title)set(panel,'name',title);if(img&&new URL(img,found.link).protocol==='https:')set(panel,'imageUrl',new URL(img,found.link).href);status(panel,'Metadata halaman publik terbaca. Harga dan penyedia tetap perlu diperiksa manual.')}catch(e){status(panel,'Halaman tidak dapat dibaca langsung (CORS/akses jaringan). Gunakan nama dari tautan, isi harga dan foto manual atau upload screenshot.')}}return}
-if(action==='calculate'){calc(panel);return}
-if(action==='save'){const {p,w}=offer(panel.dataset.pid,panel.dataset.wid);const iid=panel.dataset.iid;if(!p||!w||!p.items.some(i=>i.id===iid))return;const link=read(panel,'link');if(link&&!fromUrl(link)){status(panel,'Link katalog tidak valid. Gunakan alamat produk INAPROC atau kosongkan kolom.');return}const name=read(panel,'name');const beforeTax=num(read(panel,'beforeTax')),taxAmount=num(read(panel,'taxAmount')),displayPrice=num(read(panel,'displayPrice'));const negotiatedBase=num(read(panel,'negotiatedBase'));if(!name||!displayPrice){status(panel,'Isi minimal nama produk dan harga tayang sebelum menyimpan.');return}if(beforeTax&&taxAmount&&Math.abs(beforeTax+taxAmount-displayPrice)>1){status(panel,'Harga produk + PPN berbeda dari harga tayang. Periksa sumber terlebih dahulu.');return}const res=negotiatedBase?calc(panel):{total:0,tax:0};if(res.total>displayPrice){status(panel,'Harga hasil negosiasi melebihi harga tayang. Periksa nilai sebelum menyimpan.');return}w.catalogRefs=w.catalogRefs||{};w.catalogRefs[iid]={link,name,seller:read(panel,'seller'),unit:read(panel,'unit'),date:read(panel,'date')||iso(),beforeTax,taxAmount,displayPrice,negotiatedBase,negotiatedTax:negotiatedBase?res.tax:0,taxMode:read(panel,'taxMode'),spec:read(panel,'spec'),imageUrl:panel._smartImage||read(panel,'imageUrl')||refOf(w,iid).imageUrl||'',verification:'Perlu verifikasi terhadap katalog',recordedAt:new Date().toISOString()};w.harga=w.harga||{};w.nego=w.nego||{};w.harga[iid]=displayPrice;if(negotiatedBase)w.nego[iid]=res.total;else delete w.nego[iid];w.sumberHarga=link||w.sumberHarga||'Referensi katalog (input manual)';w.tanggalHarga=read(panel,'date')||w.tanggalHarga||iso();sync('nego','Smart Survey referensi katalog dan negosiasi tersimpan');render();toast('Referensi katalog dan harga disimpan. Verifikasi produk sebelum digunakan resmi.')}} ,true);
+if(action==='save'){const {p,w}=offer(panel.dataset.pid,panel.dataset.wid);const iid=panel.dataset.iid;if(!p||!w||!p.items.some(i=>i.id===iid))return;const link=read(panel,'link');if(link&&!fromUrl(link)){status(panel,'Link katalog tidak valid. Gunakan alamat produk INAPROC atau kosongkan kolom.');return}const name=read(panel,'name');const beforeTax=num(read(panel,'beforeTax')),taxAmount=num(read(panel,'taxAmount')),displayPrice=num(read(panel,'displayPrice'));if(!name||!displayPrice){status(panel,'Isi minimal nama produk dan harga tayang sebelum menyimpan.');return}if(beforeTax&&taxAmount&&Math.abs(beforeTax+taxAmount-displayPrice)>1){status(panel,'Harga produk + PPN berbeda dari harga tayang. Periksa sumber terlebih dahulu.');return}const currentNego=Number(w.nego?.[iid])||0;if(currentNego>displayPrice&&!confirm('Harga tayang baru lebih rendah dari harga akhir negosiasi yang telah tersimpan. Referensi baru dapat disimpan, tetapi penetapan harus ditinjau dan harga dinegosiasi ulang melalui Kalkulator Nego. Lanjutkan?'))return;
+// Only update survey metadata and display price; NEVER clear or overwrite negotiated price, tax, or stored calculation.
+w.catalogRefs=w.catalogRefs||{};const previous=refOf(w,iid);w.catalogRefs[iid]={...previous,link,name,seller:read(panel,'seller'),unit:read(panel,'unit'),date:read(panel,'date')||iso(),beforeTax,taxAmount,displayPrice,spec:read(panel,'spec'),imageUrl:panel._smartImage||read(panel,'imageUrl')||previous.imageUrl||'',verification:'Perlu verifikasi terhadap katalog',recordedAt:new Date().toISOString()};w.harga=w.harga||{};w.harga[iid]=displayPrice;w.sumberHarga=link||w.sumberHarga||'Referensi katalog (input manual)';w.tanggalHarga=read(panel,'date')||w.tanggalHarga||iso();sync('nego','Referensi katalog dan harga tayang Smart Survey tersimpan (harga nego tidak diubah)');render();toast('Referensi harga tayang tersimpan. Harga negosiasi lama tidak diubah.')}} ,true);
 const originalSurvei=survei;survei=function(p){const base=originalSurvei(p);const refs=[];for(const w of p.penawaran||[])for(const item of p.items||[]){const r=w.catalogRefs?.[item.id];if(r)refs.push({w,item,r})}if(!refs.length)return base;const table=`<p class="doc-section-heading"><b>C. Referensi produk e-Katalog per rincian HPS</b></p><table class="tbl-reference-items"><thead><tr><th>No.</th><th>Barang HPS / Produk Katalog</th><th>Penyedia</th><th>Harga tayang/unit</th><th>Nego/unit</th><th>Sumber dan tanggal</th></tr></thead><tbody>${refs.map(({w,item,r},i)=>`<tr><td>${i+1}</td><td>${escapeValue(item.nama)}<div style="font-size:9pt">Produk katalog: ${escapeValue(r.name)}${r.spec?`<div>${escapeValue(r.spec)}</div>`:''}</div></td><td>${escapeValue(r.seller||PY(w.pen).nama)}</td><td class="n">${money(r.displayPrice)}</td><td class="n">${r.negotiatedBase?money((r.negotiatedBase||0)+(r.negotiatedTax||0)):'Belum nego'}</td><td>${r.link?`<span>${escapeValue(r.link)}</span>`:'Input manual'}<div>${escapeValue(r.date||'')}</div></td></tr>`).join('')}</tbody></table><p class="doc-note">Data referensi katalog dicatat dari sumber yang dimasukkan pengguna dan memerlukan verifikasi terhadap tayangan aktual. Harga akhir mengikuti struktur penawaran di SATRIA.</p>`;return base+table};
-window.SATRIA_SMART_SURVEY={parseProductUrl:fromUrl,calculate:function(base,mode='effective11'){let b=Number(base)||0;const tax=mode==='effective11'?Math.round(b*.11):mode==='rate12'?Math.round(b*.12):0;return {beforeTax:b,tax,inclusive:b+tax}}};
+window.SATRIA_SMART_SURVEY={parseProductUrl:fromUrl};
 })();
 </script>
 <script id="satria-document-quality-engine-v340">
