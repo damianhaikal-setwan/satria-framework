@@ -1,11 +1,11 @@
 {
   "name": "SATRIA",
   "short_name": "SATRIA",
-  "description": "SATRIA Framework 3.0",
+  "description": "SATRIA Framework 3.0.41",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f7faf9",
-  "theme_color": "#0F766E",
+  "background_color": "#f6f7fc",
+  "theme_color": "#6357F5",
   "scope": "./",
   "icons": [
     {

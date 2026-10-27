@@ -24,11 +24,14 @@ checks = {
   'New Operator creation requires year_ids': 'normalizeYears(body.year_ids)' in create and 'satria_admin_set_membership_years' in create,
   'Roster response includes year_ids': 'year_ids: (yearByUser.get(row.user_id) ?? []).sort((a, b) => a - b)' in roster,
   'Frontend non-admin read uses scoped RPC': "client.rpc('satria_get_scoped_state'" in html and "if(member.role==='admin')" in html,
-  'Frontend non-admin save uses scoped RPC': "admin?'satria_save_state':'satria_save_scoped_state'" in html,
-  'Failed cloud pull disables writes for all roles unless admin explicitly imports a backup': 'cloudStateReady=false' in html and 'Snapshot cloud belum berhasil dimuat' in html and 'SATRIA_CLOUD_ADMIN_IMPORT_READY===true' in html,
+  'Frontend non-admin save uses versioned per-record delta RPC': "client.rpc('satria_apply_state_delta'" in html and 'p_expected_version:version' in html and 'if(!cloudStateReady||!lastSyncedPayload)' in html,
+  'Failed cloud pull disables writes for all roles unless admin explicitly imports a backup': 'cloudStateReady=false' in html and 'Baseline cloud belum tersedia. Tarik data Supabase terlebih dahulu.' in html and 'SATRIA_CLOUD_ADMIN_IMPORT_READY===true' in html,
   'Cloud connection warning documents server-side scoped access': 'akses langsung ke snapshot ditolak RLS' in html and 'Semua anggota organisasi yang aktif dapat membaca seluruh data snapshot' not in html,
   'Non-admin import is blocked': 'Impor backup penuh hanya tersedia bagi admin' in html,
   'Non-admin full reset/global OPD and year edits are blocked': "['addopd','addyear','delyear','rmlogo','reset','clearsample','uadd','utoggle','udel']" in html,
+  'Bank RUP included in per-record delta allowlist': "const ARRAY_DELTAS=['rupBank'" in html,
+  'Bank RUP cleared at cloud logout': 'penyedia:[],rupBank:[],paket:[]' in html,
+  'Bank RUP scoped after operator pull': 'S.rupBank=(S.rupBank||[]).filter(r=>allowedOpdSet.has' in html,
   'Scoped state is used for local reports/export after authentication': 'Object.assign(S,data.payload' in html and 'function csvExport' in html,
 }
 failed = False

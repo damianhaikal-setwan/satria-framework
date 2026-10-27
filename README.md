@@ -1,3 +1,13 @@
+
+## Pembaruan GitHub + kompatibilitas database SATRIA 3.0.41 (28 Oktober 2026)
+
+- `index.html` di arsip asal sudah sama dengan 3.0.41 yang digunakan. Patch baru fokus pada jembatan database: Bank RUP sekarang disinkronkan sebagai koleksi `rupBank` dengan validasi OPD/tahun, duplikasi, dan referensi paket.
+- Tambahan migrasi **`20261028010000_satria_rup_bank_cloud_compat.sql` wajib diterapkan setelah migrasi 20261024053400** pada **staging dahulu**. Tidak ada penggantian data cloud secara otomatis hanya dengan commit ke GitHub.
+- Bank RUP tetap disimpan dalam snapshot JSON SATRIA (`satria_state.payload.rupBank`) untuk kompatibilitas; ini belum migrasi skema penuh ke tabel relasional.
+- Panduan migrasi dan uji negatif terdapat di [`docs/BANK_RUP_CLOUD_MIGRATION.md`](docs/BANK_RUP_CLOUD_MIGRATION.md) dan [`DEPLOY.md`](DEPLOY.md).
+- Jalankan `python tools/security_static_check.py` dan `python tools/test_rup_bank_contract.py` sebelum deployment.
+- Edge Functions yang benar terletak pada `supabase/functions/*`. Salinan lama `supabase/admin-*` telah dihapus dari paket untuk mencegah deploy versi yang keliru.
+
 # SATRIA — Pengguna, Hak Akses, dan Assignment OPD
 
 Repo ini menyediakan modul pengguna Supabase Auth dan assignment OPD untuk aplikasi SATRIA Framework 3.0.
@@ -31,10 +41,13 @@ Repo ini menyediakan modul pengguna Supabase Auth dan assignment OPD untuk aplik
 3. Terapkan `supabase/migrations/20261024052900_satria_opd_assignments_rls.sql`.
 4. Terapkan `supabase/migrations/20261024053000_satria_user_opd_assignment_api.sql`.
 5. Terapkan `supabase/migrations/20261024053100_satria_catalog_and_assignment_repair.sql`.
-6. Terapkan `supabase/migrations/20261024053200_satria_scoped_access_and_years.sql` terakhir untuk hardening OPD + tahun.
-7. Gabungkan konfigurasi `supabase/config.toml` dengan konfigurasi project yang sudah ada; jangan menimpa fungsi lain.
-8. Set `ALLOWED_ORIGINS` ke origin aplikasi yang tepat. Pastikan Supabase runtime menyediakan `SUPABASE_URL`, publishable key, dan secret/service-role key.
-9. Deploy Edge Function:
+6. Terapkan `supabase/migrations/20261024053200_satria_scoped_access_and_years.sql` untuk hardening OPD + tahun.
+7. Terapkan `supabase/migrations/20261024053300_satria_shared_master_collaboration.sql` untuk master bersama.
+8. Terapkan `supabase/migrations/20261024053400_satria_autosync_delta_realtime.sql` untuk sinkronisasi delta/realtime.
+9. Terapkan `supabase/migrations/20261028010000_satria_rup_bank_cloud_compat.sql` untuk dukungan Bank RUP SATRIA 3.0.41 (OPD+tahun).
+10. Gabungkan konfigurasi `supabase/config.toml` dengan konfigurasi project yang sudah ada; jangan menimpa fungsi lain.
+11. Set `ALLOWED_ORIGINS` ke origin aplikasi yang tepat. Pastikan Supabase runtime menyediakan `SUPABASE_URL`, publishable key, dan secret/service-role key.
+12. Deploy Edge Function:
 
 ```bash
 supabase functions deploy admin-list-users
@@ -97,4 +110,4 @@ Jika daftar pengguna tampil tetapi modal Atur OPD kosong sementara indikator apl
 
 ## OPD + Tahun access hardening (Stage 1–3)
 
-See [`docs/SECURITY_SCOPE_HARDENING.md`](docs/SECURITY_SCOPE_HARDENING.md) for the deployment order and required staging tests. The latest migration is `supabase/migrations/20261024053200_satria_scoped_access_and_years.sql`. It makes direct snapshot read/full replacement admin-only, adds explicit year assignments, serializes scope changes against reads/writes, validates package-to-master/winner references, and moves non-admin reads/writes to scoped RPCs. After applying the migration, existing Operators and Viewers must be assigned both OPD and fiscal year by an admin before they can access scoped data. Deploy the updated `admin-list-users` and `admin-create-user` Edge Functions, then run `supabase/tests/security_hardening_assertions.sql` and the live negative test matrix in `docs/SECURITY_SCOPE_HARDENING.md`.
+See [`docs/SECURITY_SCOPE_HARDENING.md`](docs/SECURITY_SCOPE_HARDENING.md) for the deployment order and required staging tests. The latest Bank RUP compatibility migration is `supabase/migrations/20261028010000_satria_rup_bank_cloud_compat.sql` (after 53300/53400). It makes direct snapshot read/full replacement admin-only, adds explicit year assignments, serializes scope changes against reads/writes, validates package-to-master/winner references, and moves non-admin reads/writes to scoped RPCs. After applying the migration, existing Operators and Viewers must be assigned both OPD and fiscal year by an admin before they can access scoped data. Deploy the updated `admin-list-users` and `admin-create-user` Edge Functions, then run `supabase/tests/security_hardening_assertions.sql` and the live negative test matrix in `docs/SECURITY_SCOPE_HARDENING.md`.

@@ -24,3 +24,6 @@ Error di screenshot:
    -> Untuk reset local: buka Console > localStorage.removeItem('satria-supabase-bridge-config-v1') > refresh
 
 Setelah fix ini, console harus bersih 0 error.
+
+
+> Catatan: dokumen ini adalah riwayat perbaikan lama. Untuk deploy SATRIA 3.0.41 dan sinkronisasi Bank RUP gunakan `DEPLOY.md` serta `docs/BANK_RUP_CLOUD_MIGRATION.md`.

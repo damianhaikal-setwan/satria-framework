@@ -1,3 +1,5 @@
+> **Pembaruan 28 Oktober 2026:** daftar migrasi di bawah adalah urutan untuk hardening tahap awal. Setelah 53200, terapkan juga 53300, 53400, lalu 20261028010000 untuk Bank RUP SATRIA 3.0.41. Rincian: [BANK_RUP_CLOUD_MIGRATION.md](BANK_RUP_CLOUD_MIGRATION.md).
+
 # SATRIA 3.0 — Security hardening: OPD + fiscal-year scope
 
 ## Scope of this release
