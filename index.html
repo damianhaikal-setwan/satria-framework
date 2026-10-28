@@ -2711,7 +2711,7 @@ ${satriaDppSignerVisual(dppSigner,p)}<b><u>${esc(dppSigner?.nama||'[PPK belum di
 </div></section>`}
 
 function sppbj(p){
- // 3.0.59.19 — Surat Perintah Pengadaan tanpa bingkai/kotak sesuai pedoman pengguna.
+ // 3.0.59.20 — Surat Perintah Pengadaan tanpa bingkai/kotak sesuai pedoman pengguna.
  // Nama instansi harus berasal dari OPD paket, bukan seed S.pemda.nama yang bisa berupa demo.
  const o=OP(p),pej=PJ(p.ppk);
  const institution=String(o.nama||'').trim();
@@ -4491,7 +4491,7 @@ main{overflow-anchor:none}
 
 
 
-<div id="satriaCloudModal" aria-hidden="false">
+<div id="satriaCloudModal" aria-hidden="true" hidden>
   <section class="sc-dialog" role="dialog" aria-modal="true" aria-labelledby="scTitle">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:start">
       <div><h2 id="scTitle">Koneksi Supabase</h2><div class="mut">Sinkronisasi delta otomatis dan Supabase Realtime untuk SATRIA Framework 3.0</div></div>
@@ -4506,6 +4506,7 @@ main{overflow-anchor:none}
       <label>Kata sandi Supabase<input id="scPassword" type="password" autocomplete="current-password"></label>
       <div class="sc-note" style="margin:18px 0 0">Unduh salinan HTML berkonfigurasi agar URL, anon key, dan UUID tertanam di file. Siapa pun yang menerima file dapat melihat publishable/anon key; akses data tetap wajib dibatasi RLS. Jangan pernah memasukkan `service_role` atau secret key.</div>
     </div>
+    <div class="sc-note" id="satriaPersistentLoginNotice"><b>Ingat login di perangkat ini:</b> SATRIA akan memulihkan sesi Supabase secara otomatis setelah Anda masuk sekali. Kata sandi tidak disimpan. Jika memilih <b>Keluar</b>, akun dicabut, atau data situs dihapus, Anda perlu login kembali. Aplikasi dari ikon Layar Utama iPhone memiliki penyimpanan terpisah dari Safari.</div>
     <div class="sc-actions">
       <button type="button" id="scEmbedConfig">Unduh HTML dengan konfigurasi</button>
       <button type="button" id="scSaveConfig">Simpan konfigurasi</button>
@@ -4522,7 +4523,7 @@ main{overflow-anchor:none}
       <label>Ulangi kata sandi baru<input id="scConfirmNewPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Ulangi kata sandi baru"></label>
       <div class="sc-recovery-actions"><button type="button" class="primary" id="scSaveNewPassword">Simpan kata sandi baru</button><button type="button" id="scCancelRecovery">Batal</button></div>
     </div>
-    <p id="scStatus" class="sc-status" role="status" aria-live="polite" data-kind="ok">Konfigurasi tersimpan di browser ini. Login berikutnya tidak perlu memasukkan URL, key, atau UUID organisasi lagi.</p>
+    <p id="scStatus" class="sc-status" role="status" aria-live="polite" data-kind="ok">SATRIA mengingat sesi Supabase di HP ini selama masih berlaku. Gunakan tombol Keluar untuk mengakhirinya.</p>
     <div class="sc-note sc-warning"><b>Jika muncul “Invalid login credentials”:</b> pastikan akun email ada di Supabase Dashboard → Authentication → Users pada project yang tertanam di file ini, lalu cek kata sandinya. Organization UUID tidak menentukan validitas email/kata sandi. Jika akun belum ada, buat akun Auth terlebih dahulu; setelah login berhasil, akun juga harus memiliki membership aktif pada organisasi ini.</div>
     <div class="sc-note"><b>Prosedur:</b> siapkan project staging → jalankan file SQL pendamping <code>satria-supabase-staging-bootstrap.sql</code> setelah ditinjau → buat akun Auth → bootstrap organisasi dan membership admin melalui SQL Editor → masukkan URL, publishable/anon key, dan UUID organisasi → login → tarik atau kirim snapshot. Ekspor backup lokal terlebih dahulu. Konflik versi tidak ditimpa otomatis. Simpan/unduh backup lokal, tarik versi cloud terbaru, lalu terapkan kembali perubahan yang memang diperlukan.</div>
     <h3>Persiapan database</h3><p class="mut">Untuk pemulihan kata sandi, alamat halaman SATRIA harus diizinkan di Supabase Dashboard → Authentication → URL Configuration → Redirect URLs. SQL bootstrap disediakan sebagai file terpisah dari HTML. Perubahan disimpan otomatis sebagai delta per record setelah Anda menyimpan data. Supabase Realtime memberi tahu pengguna lain tentang versi baru; data yang diterima tetap dibatasi scope server. Tombol Sinkronkan perubahan menjalankan sinkronisasi perubahan yang tertunda. Full snapshot hanya untuk bootstrap/pemulihan Admin yang dilakukan secara eksplisit. Konfigurasi juga dapat disimpan di browser melalui tombol Simpan konfigurasi. Saat file yang sama dibuka kembali pada browser/profil yang sama, URL, publishable/anon key, dan Organization UUID akan diisi otomatis. Kata sandi tidak disimpan. Gunakan Unduh HTML dengan konfigurasi bila ingin membawa konfigurasi bersama file ke browser/perangkat lain; file tersebut memuat publishable/anon key sehingga bagikan dengan bijak.</p>
@@ -4536,6 +4537,7 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://umccafupxnqlrlzprqeu.su
   'use strict';
   const CONFIG_KEY='satria-supabase-bridge-config-v1';
   let client=null, member=null, orgId='', version=0, localUsersBackup=null, recoveryListenerClient=null, cloudStateReady=false;
+  let clientConfigUrl='', clientConfigKey='', sessionRestorePromise=null, explicitSignOut=false;
   let lastSyncedPayload=null, autoSaveTimer=null, autoSaveInFlight=false, autosyncRequested=false, realtimeChannel=null, remoteNoticePending=false, remoteNoticeVersion=0, conflictActive=false, realtimeRefreshTimer=null, autoRetryTimer=null, autoRetryAttempt=0;
   const $id=id=>document.getElementById(id);
   const modal=$id('satriaCloudModal');
@@ -4621,22 +4623,31 @@ window.SATRIA_EMBEDDED_SUPABASE_CONFIG = {"url":"https://umccafupxnqlrlzprqeu.su
     const cfg=readConfigFields();
     try{localStorage.setItem(CONFIG_KEY,JSON.stringify(cfg));}
     catch(e){throw new Error('Browser tidak mengizinkan penyimpanan konfigurasi. Buka file pada browser/profil yang sama atau gunakan Unduh HTML dengan konfigurasi. Detail: '+(e?.message||e));}
-    orgId=cfg.org;status('Konfigurasi tersimpan di browser ini. Login berikutnya tidak perlu memasukkan URL, key, atau UUID organisasi lagi.','ok');
+    orgId=cfg.org;status('Konfigurasi tersimpan di HP/browser ini. Sesi Supabase akan dipulihkan otomatis selama masih berlaku.','ok');
     return cfg;
   }
-  async function initClient(){
-    if(!window.supabase||!window.supabase.createClient) throw new Error('Library Supabase JS tidak termuat. Periksa koneksi internet/CDN.');
-    const {url,key,org}=saveConfig(); orgId=org;
-    if(!url||!key||!org) throw new Error('Konfigurasi Supabase belum lengkap. URL, Key, dan Organization UUID wajib diisi.');
-    if(!url.startsWith('https://')) throw new Error('Supabase URL harus https://...supabase.co');
-    try{
-      client=window.supabase.createClient(url,key,{
-        auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'sb-'+btoa(url).slice(0,16)+'-auth-token'}
-      });
-    }catch(e){
-      throw new Error('Gagal init Supabase client: '+(e.message||e)+'. Pastikan key adalah anon/publishable key, bukan service_role.');
-    }
+  /* SATRIA NEXT 3.0.59.20 — satu klien dan SATU storageKey untuk login serta pemulihan.
+     Kunci ini sengaja dipertahankan dari versi terdahulu agar sesi yang sudah tersimpan
+     tidak terhapus ketika pengguna memperbarui index.html. Jangan menyimpan password. */
+  const sessionStorageKey=url=>'sb-'+btoa(url).slice(0,16)+'-auth-token';
+  function ensureCloudClient(url,key){
+    if(!window.supabase?.createClient) throw new Error('Library Supabase JS tidak termuat. Periksa koneksi internet/CDN.');
+    if(!url||!key)throw new Error('Konfigurasi Supabase belum lengkap.');
+    if(client&&clientConfigUrl===url&&clientConfigKey===key)return client;
+    if(client){try{client.auth?.dispose?.()}catch(_){} }
+    client=window.supabase.createClient(url,key,{
+      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:sessionStorageKey(url)}
+    });
+    clientConfigUrl=url;clientConfigKey=key;
+    bindRecoveryListener(client);
     return client;
+  }
+  async function initClient(){
+    const {url,key,org}=saveConfig();orgId=org;
+    if(!url||!key||!org)throw new Error('Konfigurasi Supabase belum lengkap. URL, Key, dan Organization UUID wajib diisi.');
+    if(!url.startsWith('https://'))throw new Error('Supabase URL harus https://...supabase.co');
+    try{return ensureCloudClient(url,key)}
+    catch(e){throw new Error('Gagal menghubungkan Supabase: '+(e.message||e))}
   }
 
   async function loadMembership(){
@@ -4712,7 +4723,10 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
     setButtons();
     applyUserLock();
     await pull();
-    if(cloudStateReady)startRealtime();
+    if(cloudStateReady){
+      startRealtime();
+      close(); // Login manual atau sesi tersimpan berhasil; jangan minta login ulang.
+    }
     return member;
   }
   function resetCloudScopedView(){
@@ -4807,6 +4821,20 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
         modal.hidden=false;modal.setAttribute('aria-hidden','false');
         status('Tautan pemulihan diterima. Masukkan kata sandi baru di bawah.','ok');
         try{$id('scNewPassword').focus()}catch(_){}
+      }
+      // Keluar dari perangkat lain / sesi dicabut: data cloud harus kembali terkunci.
+      if(event==='SIGNED_OUT'&&!explicitSignOut){
+        setTimeout(()=>{
+          if(c!==client||!member)return;
+          cancelAutosaveTimer();stopRealtime();
+          member=null;version=0;cloudStateReady=false;lastSyncedPayload=null;conflictActive=false;
+          window.SATRIA_CLOUD_ROLE=null;window.SATRIA_CLOUD_MEMBER=null;
+          window.SATRIA_MEDIA?.clear?.();resetCloudScopedView();
+          localUsersBackup=null;
+          try{if(typeof DB!=='undefined'&&DB?.kv)DB.kv.delete('main').catch(()=>{})}catch(_){}
+          if(typeof render==='function')render();applyUserLock();
+          open();status('Sesi telah berakhir atau akses dicabut. Silakan masuk lagi.','error');
+        },0);
       }
     });
   }
@@ -5083,6 +5111,7 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
   async function signOut(){
     try{
       if(S.dirty&&!confirm('Ada perubahan lokal yang belum dikirim ke Supabase. Keluar akan mengosongkan cache data aktif pada browser ini. Unduh backup sesuai kewenangan Anda atau simpan perubahan terlebih dahulu. Tetap keluar?'))return;
+      explicitSignOut=true;
       cancelAutosaveTimer();if(autoRetryTimer){clearTimeout(autoRetryTimer);autoRetryTimer=null}stopRealtime();if(client)await client.auth.signOut();
       window.SATRIA_MEDIA?.clear();
       member=null;version=0;cloudStateReady=false;lastSyncedPayload=null;conflictActive=false;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;orgId=$id('scOrg').value.trim();window.SATRIA_CLOUD_ROLE=null;
@@ -5090,8 +5119,8 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
       try{if(DB&&DB.kv)await DB.kv.delete('main')}catch(e){console.warn('Cache SATRIA tidak dapat dihapus setelah logout',e)}
       localUsersBackup=null;
       if(typeof render==='function')render();
-      setButtons();applyUserLock();status('Keluar dari Supabase. Cache bisnis lokal telah dikosongkan pada browser ini.','ok');syncIndicator('Belum login ke cloud','muted');
-    }catch(e){showError(e)}
+      setButtons();applyUserLock();open();status('Berhasil keluar. Sesi tersimpan sudah dihapus; silakan login kembali jika ingin masuk.','ok');syncIndicator('Belum login ke cloud','muted');
+    }catch(e){showError(e)}finally{explicitSignOut=false}
   }
   function downloadConfiguredHtml(){
     try{
@@ -5121,8 +5150,43 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
   if(window.render){const originalRender=window.render;window.render=function(){originalRender();applyUserLock()}}
   // SATRIA 3.0.55: grant the media module a live authenticated client; never expose service_role.
   window.SATRIA_MEDIA_GET_ACCESS=()=>({client,member,orgId,cloudStateReady});
-  // Restore an existing Supabase session after the static app has booted.
-  if(saved.url&&saved.key&&saved.org&&window.supabase?.createClient){try{client=window.supabase.createClient(saved.url,saved.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});bindRecoveryListener(client);orgId=saved.org;client.auth.getSession().then(({data,error})=>{if(error)throw error;if(data.session)loadMembership().catch(showError)}).catch(showError)}catch(e){showError(e)}}
+  // Pemulihan sesi iPhone/Android/PWA. HARUS menggunakan storageKey yang sama
+  // dengan signInWithPassword(), tidak menggunakan default dari Supabase.
+  function restorePersistedSession(showLoginIfMissing=true){
+    if(sessionRestorePromise)return sessionRestorePromise;
+    sessionRestorePromise=(async()=>{
+      const cfg=config();
+      if(!cfg.url||!cfg.key||!cfg.org){
+        if(showLoginIfMissing){open();status('Isi konfigurasi Supabase untuk mulai login.','');}
+        return false;
+      }
+      try{
+        orgId=cfg.org;
+        const c=ensureCloudClient(cfg.url,cfg.key);
+        if(showLoginIfMissing)status('Memulihkan sesi Supabase dari perangkat ini…');
+        const {data,error}=await c.auth.getSession();
+        if(error)throw error;
+        if(!data?.session){
+          if(showLoginIfMissing){open();status('Belum ada sesi aktif pada HP/browser ini. Silakan login sekali; setelah itu sesi akan diingat.','');}
+          return false;
+        }
+        if(member&&cloudStateReady){close();return true;}
+        await loadMembership(); // getUser + membership/RLS + pull; bukan sekadar percaya data localStorage.
+        if(cloudStateReady){close();return true;}
+        if(showLoginIfMissing){open();status('Sesi ditemukan, tetapi data organisasi belum dapat dimuat. Periksa koneksi lalu tekan Masuk ke SATRIA tanpa mengetik password.','error');}
+        return false;
+      }catch(e){
+        showError(e);
+        if(showLoginIfMissing)open();
+        return false;
+      }
+    })().finally(()=>{sessionRestorePromise=null});
+    return sessionRestorePromise;
+  }
+  // Jangan tampilkan popup login selama sesi masih sedang diperiksa.
+  restorePersistedSession(true).catch(showError);
+  window.addEventListener('online',()=>{if(!member)restorePersistedSession(false).catch(showError)});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!member)restorePersistedSession(false).catch(showError)});
 
   // Modal tambah akun Auth menggunakan session, member, orgId dari bridge ini.
 /*
@@ -11296,7 +11360,7 @@ window.addEventListener('click',ev=>{
  display:grid!important;grid-template-columns:minmax(0, 3fr) minmax(0, 2fr)!important;
  align-items:start!important;gap:12px!important;margin:8px 0 21px!important;
 }
-/* 3.0.59.19: SPPBJ adalah surat biasa, bukan tabel bergaris. */
+/* 3.0.59.20: SPPBJ adalah surat biasa, bukan tabel bergaris. */
 .doc[data-document-type="sppbj"] .sppbj-letter-meta,
 #satria-print-root .doc[data-document-type="sppbj"] .sppbj-letter-meta{
  width:100%!important;min-width:0!important;display:flex!important;flex-direction:column!important;

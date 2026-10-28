@@ -1,7 +1,7 @@
 {
   "name": "SATRIA NEXT — Government Procurement Workspace",
   "short_name": "SATRIA NEXT",
-  "description": "SATRIA NEXT 3.0.59.19 — Surat Perintah Pengadaan tanpa garis/kotak sesuai pedoman",
+  "description": "SATRIA NEXT 3.0.59.20 — Pemulihan login Supabase otomatis di HP dan PWA, tanpa perlu mengulang kata sandi selama sesi masih berlaku",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f4f2fb",
