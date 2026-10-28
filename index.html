@@ -1677,13 +1677,80 @@ header button[data-act="export"]{
 @media(max-width:640px){#chartMultiYear{height:265px}#chartHpsPagu{height:215px}.s348-axis{font-size:14px}.s348-donut{width:190px;height:190px}.s348-bar-head{font-size:12px}}
 </style>
 <style id="satria-349-nego-net-ui">@media screen{.satria342-offer-table-title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.satria342-offer-table-title span{font-size:12px;color:#465574;line-height:1.6}.satria-offer-table td small{display:block;margin-top:4px;line-height:1.4}.satria-offer-table table{min-width:860px}.satria-offer-table input[readonly]{cursor:default;border-color:#cbd5e1}.kn47-bridge p{line-height:1.5}}@media print{.satria-offer-table input[readonly]{border:0;background:transparent}}</style>
-</head>
+<style id="satria35911-spek-styles">
+.spek-pdf{font-family:Arial,Helvetica,sans-serif;font-size:9.5pt;color:#111;line-height:1.32}
+.spek-pdf .spek-title{font-size:11pt;text-align:center;font-weight:bold;text-decoration:underline;margin:8px 0 14px}
+.spek-pdf .spek-meta{width:100%;border-collapse:collapse;margin:0 0 10px;table-layout:fixed}
+.spek-pdf .spek-meta td{padding:2px 1px;vertical-align:top}
+.spek-pdf .spek-meta .label{width:26%}.spek-pdf .spek-meta .colon{width:3%;text-align:center}.spek-pdf .spek-meta .value{width:71%}
+.spek-pdf .spek-main{width:100%;border-collapse:collapse;table-layout:fixed;font-size:9pt}
+.spek-pdf .spek-main th,.spek-pdf .spek-main td{border:1px solid #222;padding:3px 4px;vertical-align:top}
+.spek-pdf .spek-main th{text-align:center;font-weight:bold;background:#f0f0f0}
+.spek-pdf .spek-main .no{width:5%;text-align:center}.spek-pdf .spek-main .element{width:21%}.spek-pdf .spek-main .description{width:62%}.spek-pdf .spek-main .note{width:12%}
+.spek-pdf .spek-sign{width:48%;margin:18px 0 0 auto;line-height:1.45}
+@media print{.spek-pdf{font-size:9pt;line-height:1.25}.spek-pdf .spek-main{font-size:8.2pt}.spek-pdf .spek-meta{margin-bottom:7px}.spek-pdf .spek-title{margin:5px 0 9px}.spek-pdf .spek-main tr{break-inside:avoid;page-break-inside:avoid}.spek-pdf .spek-main th,.spek-pdf .spek-main td{padding:2.5px 3px}.spek-pdf .spek-sign{margin-top:14px}.spek-pdf a{color:#111;text-decoration:none;overflow-wrap:anywhere}.spek-pdf .spek-main table{font-size:8pt}}
+</style>
+<style id="satria35911-audit-print-polish">
+/* Only audited general-document profiles; BAHP, Reviu DPP, DPP unchanged. */
+.doc[data-document-type="idkb"] table {break-inside:auto!important;page-break-inside:auto!important}
+.doc[data-document-type="idkb"] table tr {break-inside:avoid!important;page-break-inside:avoid!important}
+.doc[data-document-type="idkb"] > div > div[style*="border:1px"]{padding:7px 10px!important}
+.doc[data-document-type="idkb"] table td{padding:1px 3px!important;font-size:8.6pt!important;line-height:1.13!important}
+.doc[data-document-type="idkb"] p{margin:3px 0!important;line-height:1.18!important}
+.doc[data-document-type="idkb"] div[style*="height:70px"]{height:48px!important}
+.doc[data-document-type="idkb"] div[style*="height:70px"] img{max-height:44px!important}
+.doc[data-document-type="idkb"] table:last-child {break-inside:avoid!important;page-break-inside:avoid!important}
+.doc[data-document-type="nodis"] table table {margin:0!important}
+.doc[data-document-type="nodis"] table table td,.doc[data-document-type="nodis"] table table th{font-size:8.6pt!important;padding:2px 3px!important}
+.doc[data-document-type="lamp"] .satria-doc-subnote{font-size:7pt!important;line-height:1.2!important;overflow-wrap:anywhere!important}
+.doc[data-document-type="rfi"] .doc-note{font-size:8pt!important;line-height:1.2!important}
+.doc[data-document-type="spek"] .spek-pdf .spek-sign {break-inside:avoid!important;page-break-inside:avoid!important}
+@media print{#satria-print-root .doc[data-document-type="idkb"] table:last-child{break-inside:avoid!important}}
+</style>
+<style id="satria35911-print-pagination-fixes">
+/* Scope confined to audited outputs; DPP/BAHP/Reviu retain their own structures. */
+@media print {
+  #satria-print-root .doc[data-document-type="bahp"] .bahp-reference-layout p {margin:2px 0!important;line-height:1.13!important}
+  #satria-print-root .doc[data-document-type="bahp"] .bahp-section {margin:5px 0 2px!important}
+  #satria-print-root .doc[data-document-type="bahp"] .bahp-ref-block {margin:3px 0 4px 17px!important}
+  #satria-print-root .doc[data-document-type="bahp"] .bahp-assessment {margin:4px 0 5px!important}
+  #satria-print-root .doc[data-document-type="bahp"] .bahp-info {margin:1px 0 5px 17px!important}
+  #satria-print-root .doc[data-document-type="bahp"] .bahp-info-line {margin:1px 0!important}
+  #satria-print-root .doc[data-document-type="bahp"] .bahp-signatures {margin:5px 0 0 28px!important;break-inside:avoid!important}
+  #satria-print-root .doc[data-document-type="bahp"] .bahp-signatures>div {min-height:63px!important;font-size:8pt!important}
+  #satria-print-root .doc[data-document-type="bahp"] .bahp-grid :is(td,th) {padding:1.5px 2.5px!important;font-size:7pt!important;line-height:1.1!important}
+  #satria-print-root .doc[data-document-type="spek"] .spek-pdf .spek-main :is(td,th){padding:1px 2px!important;font-size:7.5pt!important;line-height:1.14!important}
+  #satria-print-root .doc[data-document-type="spek"] .spek-pdf .spek-main table :is(td,th){padding:1px 2px!important;font-size:7.2pt!important;line-height:1.12!important}
+  #satria-print-root .doc[data-document-type="spek"] .spek-pdf .spek-meta td{padding:1px!important;font-size:8.3pt!important}
+  #satria-print-root .doc[data-document-type="spek"] .spek-pdf .spek-sign{margin-top:5px!important;font-size:8.4pt!important;line-height:1.23!important;break-inside:avoid!important}
+  #satria-print-root .doc[data-document-type="hpsnego"] table{margin:3px 0!important}
+  #satria-print-root .doc[data-document-type="hpsnego"] .tbl-price-matrix :is(td,th),
+  #satria-print-root .doc[data-document-type="hpsnego"] .tbl-negotiation-summary :is(td,th){font-size:8pt!important;line-height:1.1!important;padding:2px 3px!important}
+  #satria-print-root .doc[data-document-type="hpsnego"] p{margin:3px 0!important;font-size:9pt!important;line-height:1.16!important}
+  #satria-print-root .doc[data-document-type="hpsnego"] div[style*="float:right"]{margin-top:10px!important}
+}
+</style>
+<style id="satria35911-long-spek-print">
+@media print{
+ #satria-print-root .doc[data-document-type="spek"] .spek-main:has(.satria35911-long-item) :is(td,th){font-size:7pt!important;line-height:1.08!important;padding:.7px 2px!important}
+ #satria-print-root .doc[data-document-type="spek"] .spek-main .satria35911-long-item div{font-size:7pt!important;line-height:1.08!important}
+ #satria-print-root .doc[data-document-type="spek"] .spek-main .satria35911-long-item td:nth-child(2){font-size:7pt!important;line-height:1.08!important}
+}
+</style><style id="satria35911-bahp-many-pagination">
+/* Hanya paket BAHP yang sangat panjang; PDF dua halaman normal tetap sama. */
+@media print{
+ #satria-print-root .doc[data-document-type="bahp"] .bahp-reference-layout.bahp-many table.bahp-grid :is(th,td){font-size:6.85pt!important;line-height:1.07!important;padding:1px 2px!important}
+ #satria-print-root .doc[data-document-type="bahp"] .bahp-reference-layout.bahp-many .bahp-ref-row{margin:1.5px 0!important;font-size:8pt!important}
+ #satria-print-root .doc[data-document-type="bahp"] .bahp-reference-layout.bahp-many .bahp-info-line{font-size:8pt!important;line-height:1.09!important}
+ #satria-print-root .doc[data-document-type="bahp"] .bahp-reference-layout.bahp-many .bahp-signatures{margin-top:3px!important}
+}
+</style></head>
 <body>
 <div class="bg-blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
 <div class="noise"></div>
 <header>
   <div class="header-left">
-    <div id="bLogoRow"><div><b id="hPemda">SATRIA <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">NEXT · 3.0.59.5.2</span></b><div id="hSub"><span style="font-weight:600;letter-spacing:-0.01em">Government work, in flow.</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px;opacity:.8">Simple • Connected • Accountable</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px">Multi OPD • Multi Tahun</span></div></div></div>
+    <div id="bLogoRow"><div><b id="hPemda">SATRIA <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">NEXT · 3.0.59.18</span></b><div id="hSub"><span style="font-weight:600;letter-spacing:-0.01em">Government work, in flow.</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px;opacity:.8">Simple • Connected • Accountable</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px">Multi OPD • Multi Tahun</span></div></div></div>
   </div>
   <div class="header-right row"><button type="button" class="satria-cloud-btn" id="satriaCloudOpen" title="Konfigurasi autentikasi dan sinkronisasi Supabase">☁ Supabase</button><span id="satriaCloudSyncIndicator" class="satria-sync-indicator" role="status" aria-live="polite" title="Belum login ke cloud" data-kind="muted">Belum login ke cloud</span>
     <div class="control-group"><label>User <select id="selUser" title=""></select></label></div>
@@ -1717,7 +1784,7 @@ header button[data-act="export"]{
  <tr><td><b>2026</b></td><td class="n">0</td><td class="n">Rp 0</td><td class="n">Rp 0</td><td class="n">Rp 0</td><td class="n"><span class="pill" style="background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">0%</span></td></tr></tbody></table></div></div>
  <div class="card"><h3>Paket Pengadaan • TA 2026</h3><p class="mut">Belum ada paket pada filter ini.</p></div>
  <div class="card"><h3>Governance Intelligence • Aktivitas Sinkronisasi</h3><span class="mut">Belum ada perubahan. Ubah data program, rincian, atau penawaran untuk melihat sinkronisasi governance intelligence.</span></div></main>
-<footer class="satria-global-footer no-print"><div class="foot-brand"><b>SATRIA NEXT</b><span>Integrated Government Intelligence Platform</span><span style="font-size:10px;opacity:.8">NEXT · 3.0.59.5.2</span></div><div class="foot-links"><span>Smart • Adaptive • Transparent • Responsive • Integrated • Accountable</span><span style="opacity:.4">|</span><span>Generated by SATRIA Framework</span></div></footer>
+<footer class="satria-global-footer no-print"><div class="foot-brand"><b>SATRIA NEXT</b><span>Integrated Government Intelligence Platform</span><span style="font-size:10px;opacity:.8">NEXT · 3.0.59.18</span></div><div class="foot-links"><span>Smart • Adaptive • Transparent • Responsive • Integrated • Accountable</span><span style="opacity:.4">|</span><span>Generated by SATRIA Framework</span></div></footer>
 <div id="toast"></div>
 <style id="satria352-dpp-controls">
 @media screen{
@@ -1733,7 +1800,17 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const nf=n=>Math.round(+n||0).toLocaleString('id-ID');
 const rp=n=>'Rp '+nf(n);
-const tg=d=>d?new Date(d+'T00:00:00').toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'-';
+/* SATRIA 3.0.59.18 — tanggal dokumen memakai zona tanggal lokal; tidak mengubah tanggal sumber. */
+function satriaDateId(value, weekday=false){
+ const raw=String(value??'').trim();if(!raw)return '-';
+ const m=/^(\d{4})-(\d{2})-(\d{2})(?:T.*)?$/.exec(raw);
+ if(!m)return raw; // Bukan ISO, biarkan data sumber tampil untuk diperiksa, jangan mengarang.
+ const y=+m[1],mon=+m[2],day=+m[3],d=new Date(y,mon-1,day,12);
+ if(d.getFullYear()!==y||d.getMonth()!==mon-1||d.getDate()!==day)return raw;
+ const label=d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+ return weekday?d.toLocaleDateString('id-ID',{weekday:'long'})+', '+label:label;
+}
+const tg=d=>satriaDateId(d,true);
 const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const NUMF=['vol','hs','pagu','masaHk','seq'];
 const sum=(a,f)=>a.reduce((s,x)=>s+(+f(x)||0),0);
@@ -1744,7 +1821,7 @@ const PY=id=>S.penyedia.find(y=>y.id===id)||{nama:'(penyedia dihapus)'};
 const kodeNama=c=>(S.kode.find(k=>k.kode===c)||{nama:c}).nama;
 const hps=p=>sum(p.items,i=>Math.max(0,+i.vol||0)*Math.max(0,+i.hs||0));
 const totPw=(p,w,nego=false)=>sum(p.items,i=>Math.max(0,+i.vol||0)*Math.max(0,+((nego&&w.nego&&w.nego[i.id]!=null)?w.nego[i.id]:(w.harga&&w.harga[i.id])||0)));
-function evalPw(p){const H=hps(p);return (p.penawaran||[]).map(w=>{const items=p.items||[];const lengkap=items.length>0&&items.every(i=>Number.isFinite(+w.harga?.[i.id])&&+w.harga[i.id]>0);const negoCount=items.filter(i=>w.nego&&w.nego[i.id]!=null&&w.nego[i.id]!==''&&Number.isFinite(+w.nego[i.id])&&+w.nego[i.id]>0).length;const negoLengkap=items.length>0&&negoCount===items.length;const negoAda=negoCount>0;const tayang=totPw(p,w,false),t=totPw(p,w,true);let st;if(negoAda&&!negoLengkap)st='Negosiasi parsial';else if(!lengkap)st='Harga tayang belum lengkap';else if(!(tayang>0))st='Belum diisi';else if(negoLengkap)st=t>H?'Gugur (> HPS)':'Memenuhi HPS — hasil negosiasi';else st=tayang>H?'Gugur (> HPS)':'Memenuhi HPS — harga tayang, belum negosiasi';return{w,t,tayang,st,lengkap,negoAda,negoLengkap,negoCount}})}
+function evalPw(p){const H=hps(p);return (p.penawaran||[]).map(w=>{const items=p.items||[];const lengkap=items.length>0&&items.every(i=>Number.isFinite(+w.harga?.[i.id])&&+w.harga[i.id]>0);const negoCount=items.filter(i=>w.nego&&w.nego[i.id]!=null&&w.nego[i.id]!==''&&Number.isFinite(+w.nego[i.id])&&+w.nego[i.id]>0).length;const negoLengkap=items.length>0&&negoCount===items.length;const negoAda=negoCount>0;const ongkir=Number(w.ongkir||0),shipping=Number.isFinite(ongkir)&&ongkir>=0?ongkir:0;const tayang=totPw(p,w,false)+shipping,t=totPw(p,w,true)+shipping;let st;if(negoAda&&!negoLengkap)st='Negosiasi parsial';else if(!lengkap)st='Harga tayang belum lengkap';else if(!(tayang>0))st='Belum diisi';else if(negoLengkap)st=t>H?'Gugur (> HPS)':'Memenuhi HPS — hasil negosiasi';else st=tayang>H?'Gugur (> HPS)':'Memenuhi HPS — harga tayang, belum negosiasi';return{w,t,tayang,st,lengkap,negoAda,negoLengkap,negoCount}})}
 function kandidat(p){return evalPw(p).filter(e=>e.lengkap&&e.tayang>0&&(!e.negoAda||e.negoLengkap)&&(e.negoLengkap?e.t:e.tayang)<=hps(p)).sort((a,b)=>(a.negoLengkap?a.t:a.tayang)-(b.negoLengkap?b.t:b.tayang))[0]||null}
 function satriaOfferGate(p,e){
  const errors=[];if(!e)return {ready:false,errors:['Penawaran tidak ditemukan']};
@@ -1755,7 +1832,9 @@ function satriaOfferGate(p,e){
  if(e.t>hps(p))errors.push('Hasil negosiasi melebihi HPS');if(Number(p.pagu)>0&&e.t>Number(p.pagu))errors.push('Hasil negosiasi melebihi pagu');if((p.items||[]).some(i=>{const listed=Number(e.w.harga?.[i.id])||0,gross=Number(e.w.nego?.[i.id])||0;return gross>0&&listed>0&&gross>listed}))errors.push('Ada harga akhir negosiasi per unit melebihi harga tayang');
  if(!p.tglNego)errors.push('Tanggal negosiasi belum diisi');
  if(!e.w.sumberHarga||!e.w.tanggalHarga)errors.push('Sumber dan tanggal harga belum lengkap');
- if(+e.w.ongkir>0)errors.push('Ongkos kirim belum direkonsiliasi dengan HPS');
+ if(!Number.isFinite(Number(e.w.ongkir||0))||Number(e.w.ongkir||0)<0)errors.push('Ongkos kirim harus angka tidak negatif');
+ if((p.items||[]).some(i=>Number(e.w.nego?.[i.id]||0)>Number(i.hs||0)))errors.push('Harga akhir per unit melebihi HPS satuan');
+ // e.t termasuk ongkos kirim satu kali; batas HPS dan pagu sudah diperiksa di atas.
  return {ready:errors.length===0,errors};
 }
 function pemenang(p){if(!p.pemenangId)return null;const e=evalPw(p).find(x=>x.w.id===p.pemenangId);return satriaOfferGate(p,e).ready?e:null}
@@ -2481,25 +2560,42 @@ const sig=(x,jab)=>`<div style="float:right;text-align:center;width:300px;margin
 const itemLabel=i=>esc(i.nama);
 function tabelItems(p){const H=hps(p);return `<table class="tbl-items-standard"><thead><tr><th>No</th><th>Nama Barang dan Spesifikasi</th><th>Vol</th><th>Satuan</th><th>Harga Satuan (Rp)</th><th>Jumlah (Rp)</th></tr></thead><tbody>${p.items.map((i,n)=>`<tr><td>${n+1}</td><td>${itemLabel(i)}</td><td>${vf(i.vol)}</td><td>${esc(i.satuan)}</td><td style="text-align:right">${nf(i.hs)}</td><td style="text-align:right">${nf(i.vol*i.hs)}</td></tr>`).join('')}<tr><th colspan=5 style="text-align:right">Jumlah</th><th style="text-align:right">${nf(H)}</th></tr></tbody></table><p><i>Terbilang: ${terb(H)}</i></p>`}
 
+/* SATRIA 3.0.59.18 — Rekonsiliasi dokumen, tidak mengubah data penawaran. */
+function satriaDocPricing(p,w){
+ const rows=Array.isArray(p.items)?p.items:[];
+ let net=0,tax=0,gross=0,valid=rows.length>0;
+ for(const item of rows){
+  const qty=Number(item.vol)||0, unit=Number(w?.nego?.[item.id]);
+  const d=w?.negoDetails?.[item.id];
+  const base=Number(d?.beforeTax),ppn=Number(d?.tax),included=Number(d?.inclusive);
+  if(!(qty>0)||!Number.isFinite(unit)||unit<=0){valid=false;continue;}
+  gross+=qty*unit;
+  if(!d||!Number.isFinite(base)||!Number.isFinite(ppn)||base<0||ppn<0||Math.abs(base+ppn-unit)>1||
+     (Number.isFinite(included)&&included>0&&Math.abs(included-unit)>1))valid=false;
+  else {net+=qty*base;tax+=qty*ppn;}
+ }
+ const shipping=Math.max(0,Number(w?.ongkir)||0);
+ return {net,tax,gross,shipping,total:gross+shipping,verified:valid};
+}
 function nodis(p){
 const k=PJ(p.kabid),o=OP(p),u=unitOf(p);
 const dari=esc(u.bidang||o.nama);
 const B='border:1px solid #000;padding:3px 6px;vertical-align:top';
 const N='border:0;padding:2px 0;vertical-align:top';
 const tglID=d=>d?new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}):'-';
-const en=n=>(+n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const en=n=>nf(n); // Rupiah bulat dengan pemisah ribuan Indonesia
 const akun=S.akun.find(a=>a.id===p.akunId);
 const rekening=akun?`${esc(akun.kode)} ${esc(akun.nama)}`:'-';
 const baris=p.items.map((i,n)=>`<tr><td style="${B};text-align:center">${n+1}</td><td style="${B}">${itemLabel(i)}</td><td style="${B};text-align:center">${vf(i.vol)}</td><td style="${B};text-align:center">${esc(i.satuan)}</td><td style="${B};text-align:right">${en(i.hs)}</td><td style="${B};text-align:right">${en(i.vol*i.hs)}</td></tr>`).join('');
 const rincian=`<table style="border-collapse:collapse;width:100%"><thead><tr><th style="${B};text-align:center">No</th><th style="${B}">Nama Barang</th><th style="${B}">Vol</th><th style="${B}">Satuan</th><th style="${B}">Harga Satuan (Rp)</th><th style="${B}">Jumlah (Rp)</th></tr></thead><tbody>${baris}</tbody></table>`;
 const meta=[['Yth.','Pejabat Pembuat Komitmen (PPK)'],['Dari',dari],['Tanggal',tglID(p.tglNodis)],['Nomor',nomor('NODIS',p)],['Sifat','Biasa'],['Lampiran','1 (satu) rangkap'],['Perihal',`Penyampaian Pengajuan ${esc(p.nama)}`]]
  .map(([a,b])=>`<tr><td style="${N};width:100px">${a}</td><td style="${N};width:12px">:</td><td style="${N}">${b}</td></tr>`).join('');
-const rows=[['1.','Nama Program',esc(progOf(p)).replace(/\n/g,'<br>')],['2.','Nama Kegiatan',esc(kegOf(p)).replace(/\n/g,'<br>')],['3.','Nama Sub Kegiatan',esc(subOf(p)).replace(/\n/g,'<br>')],['4.','Nama Paket',esc(p.nama)],['5.','Kode Rekening Belanja',rekening],['6.','Pagu Anggaran','Rp'+en(p.pagu)]]
+const rows=[['1.','Nama Program',esc(progOf(p)).replace(/\n/g,'<br>')],['2.','Nama Kegiatan',esc(kegOf(p)).replace(/\n/g,'<br>')],['3.','Nama Sub Kegiatan',esc(subOf(p)).replace(/\n/g,'<br>')],['4.','Nama Paket',esc(p.nama)],['5.','Kode Rekening Belanja',rekening],['6.','Pagu Anggaran','Rp '+en(p.pagu)]]
  .map(([a,b,c])=>`<tr><td style="${B};text-align:center;width:36px">${a}</td><td style="${B};width:190px">${b}</td><td style="${B}">${c}</td></tr>`).join('');
 return `${kop(p)}
 <table style="border:0;margin-top:16px">${meta}</table>
 <p style="margin:14px 0 8px">Terlampir disampaikan pengajuan dengan rincian sebagai berikut:</p>
-<table style="border-collapse:collapse;width:100%">${rows}<tr><td style="${B};text-align:center">7.</td><td style="${B}">Rincian Belanja</td><td style="${B};padding:0">${rincian}</td></tr></table>
+<table style="border-collapse:collapse;width:100%">${rows}${p.items.length>8?`<tr><td style="${B};text-align:center">7.</td><td colspan="2" style="${B}">Rincian Belanja — daftar per item pada tabel berikut</td></tr></table>${rincian}`:`<tr><td style="${B};text-align:center">7.</td><td style="${B}">Rincian Belanja</td><td style="${B};padding:0">${rincian}</td></tr></table>`}
 <p style="margin-top:14px">Demikian disampaikan untuk dapat dipergunakan sebagaimana mestinya.</p>
 <div style="margin-top:28px;margin-left:auto;width:320px;text-align:left;line-height:1.4">${dari}<br>${sigImg(k)}<b>${esc(k.nama)}</b><br>NIP. ${esc(k.nip)}</div>`;
 }
@@ -2524,12 +2620,12 @@ function satriaDppPicture(src,kind){
   const isCap=kind==='cap';
   return `<img class="${isCap?'satria-dpp-cap':'satria-dpp-ttd'}" src="${esc(v)}" alt="${isCap?'Cap atau stempel PPK':'Tanda tangan PPK'}" decoding="async">`;
 }
-function satriaDppSignerVisual(x){
+function satriaDppSignerVisual(x,p){
  const stamp=x?satriaDppPicture(x.cap,'cap'):'';
  const signature=x?satriaDppPicture(x.ttd,'ttd'):'';
  // Cap kiri, TTD kanan dengan sedikit tumpang tindih, tetap dalam satu bidang tetap.
  // Cap lebih dulu agar garis TTD berada di atas cap bila gambarnya transparan.
- return `<div class="satria-dpp-ppk-images" aria-label="Tanda tangan dan cap PPK terpilih">${stamp}${signature}</div>`;
+ return `<div class="satria-dpp-ppk-images" style="${globalThis.SATRIA_DPP_SIGN_LAYOUT?.inlineStyle?.(p)||''}" aria-label="Tanda tangan dan cap PPK terpilih">${stamp}${signature}</div>`;
 }
 function satriaDppPpkControl(p){
  const current=String(p.dppPpkId||p.ppk||'');
@@ -2577,7 +2673,7 @@ ${items}
 <p style="margin:6px 0 4px"><b>b. Justifikasi Teknis Dalam Penggunaan Merek (Jika ada)</b><br>${p.items.some(i=>String(i.merek||'').trim())?'Merek/tipe yang tercatat: '+p.items.filter(i=>String(i.merek||'').trim()).map(i=>esc(i.nama)+': '+esc(i.merek)).join('; ')+'. Justifikasi penggunaan merek harus dilengkapi sesuai kebutuhan dan ketentuan.':'Tidak ada justifikasi khusus merek yang tercatat dalam data paket.'}</p>
 <p style="margin:4px 0"><b>c. Spesifikasi Waktu</b><br>Pelaksanaan pekerjaan mulai dari diterbitkannya surat pesanan sampai dengan tanggal ${TS(p.batas)}.</p>
 <p class="satria594-spec-block" style="margin:4px 0"><b>d. Spesifikasi Tempat</b><br>Pengiriman sampai ke lokasi yaitu ${esc(p.lokasiPengiriman||o.tempat||o.alamat||o.nama||'-')}<br>Lokasi pengantaran: langsung ke tempat/lokasi tujuan.<br>Jarak dan akses lokasi diperhitungkan oleh penyedia tanpa biaya tambahan di luar harga satuan e-Katalog.</p>
-<p style="margin:4px 0"><b>e. Spesifikasi Layanan</b><br>Penyedia wajib memenuhi tingkat layanan meliputi ketepatan waktu, kesesuaian spesifikasi, kualitas hasil, ketepatan jumlah, responsivitas, pengemasan dan pengiriman, jaminan/garansi, fleksibilitas layanan, kepatuhan administratif, serta standar keamanan dan kepatuhan. Penyedia juga wajib menindaklanjuti setiap ketidaksesuaian melalui perbaikan atau penggantian tanpa biaya tambahan sesuai ketentuan yang disepakati serta bertanggung jawab penuh atas pengadaan.</p>
+<p class="satria-dpp-service-block" style="margin:4px 0"><b>e. Spesifikasi Layanan</b><br>Penyedia wajib memenuhi tingkat layanan meliputi ketepatan waktu, kesesuaian spesifikasi, kualitas hasil, ketepatan jumlah, responsivitas, pengemasan dan pengiriman, jaminan/garansi, fleksibilitas layanan, kepatuhan administratif, serta standar keamanan dan kepatuhan. Penyedia juga wajib menindaklanjuti setiap ketidaksesuaian melalui perbaikan atau penggantian tanpa biaya tambahan sesuai ketentuan yang disepakati serta bertanggung jawab penuh atas pengadaan.</p>
 
 <p style="margin:8px 0 4px"><b>II. Prioritas Penggunaan Produk Dalam Negeri</b></p>
 ${P_('', 'Berdasarkan Pasal 66 ayat (1) dan (2) Peraturan Presiden Nomor 46 Tahun 2025 tentang Perubahan Kedua Atas Peraturan Presiden Nomor 16 Tahun 2018 tentang Pengadaan Barang/Jasa Pemerintah, maka PPK/PP yang akan melakukan e-Purchasing memilih barang/jasa pada Katalog Elektronik dengan urutan/prioritas sebagai berikut:')}
@@ -2611,26 +2707,56 @@ ${P_('', 'Rencana metode pemilihan penyedia Katalog Elektronik menggunakan: <b>N
 <p style="margin:4px 0;text-align:justify">Demikian Dokumen Persiapan e-Purchasing dibuat untuk dapat diketahui bersama sebagai acuan bagi pelaksanaan proses pengadaan barang/jasa bagi pihak terkait dan dibuat untuk digunakan sebagaimana mestinya.</p>
 <div class="satria-dpp-signature" style="width:330px;max-width:100%;margin:22px 0 0 auto;line-height:1.5;text-align:center;break-inside:avoid;page-break-inside:avoid">
 ${esc(satriaDppOfficialPlace(p))}, ${TS(p.tglDpp)}<br>Ditetapkan oleh:<br>Pejabat Pembuat Komitmen (PPK)<br>${esc(o.nama)}
-${satriaDppSignerVisual(dppSigner)}<b><u>${esc(dppSigner?.nama||'[PPK belum dipilih]')}</u></b><br>NIP. ${esc(dppSigner?.nip||'-')}
+${satriaDppSignerVisual(dppSigner,p)}<b><u>${esc(dppSigner?.nama||'[PPK belum dipilih]')}</u></b><br>NIP. ${esc(dppSigner?.nip||'-')}
 </div></section>`}
 
 function sppbj(p){
- const pej=PJ(p.ppk),pp=PJ(p.pp);
- return `${kop(p)}
- <div class="sppbj-pdf-layout" style="font-family:Arial,Helvetica,sans-serif;font-size:10.5pt;line-height:1.35;color:#111">
- <table style="width:100%;border-collapse:collapse;border:0;margin:8px 0 22px;font-size:10pt">
- <tr><td style="border:0;padding:2px 0;width:76px;vertical-align:top">Nomor</td><td style="border:0;padding:2px 0;vertical-align:top">: ${nomor('PPBJ',p)}</td><td style="border:0;padding:2px 0;text-align:right;white-space:nowrap;vertical-align:top">${esc(S.pemda.kota)}, &nbsp;${tg(p.tglSppbj)}</td></tr>
- <tr><td style="border:0;padding:2px 0;vertical-align:top">Sifat</td><td colspan="2" style="border:0;padding:2px 0;vertical-align:top">: Biasa</td></tr>
- <tr><td style="border:0;padding:2px 0;vertical-align:top">Lampiran</td><td colspan="2" style="border:0;padding:2px 0;vertical-align:top">: 1 (satu) rangkap</td></tr>
- <tr><td style="border:0;padding:2px 0;vertical-align:top">Perihal</td><td colspan="2" style="border:0;padding:2px 0;vertical-align:top">: Perintah Pengadaan Barang &amp; Jasa</td></tr>
- </table>
- <p style="margin:0 0 16px">Yth. Pejabat Pengadaan<br>${esc(OP(p).nama)}<br>di -<br>&nbsp;&nbsp;&nbsp;&nbsp;${esc(S.pemda.kota||'Tempat kedudukan instansi')}</p>
- <p style="text-align:justify;margin:0 0 10px">Sehubungan dengan akan dilaksanakannya kegiatan pengadaan barang/jasa di lingkungan ${esc(S.pemda.nama)}, Tahun Anggaran ${esc(p.tahun||S.tahun||'')}, melalui E-Purchasing, maka dengan ini disampaikan untuk segera melakukan proses kegiatan dimaksud sebagai dasar pelaksanaan dan berikut lampiran:</p>
- <ol style="margin:0 0 12px 28px;padding-left:8px"><li style="padding-left:2px;margin-bottom:3px">Spesifikasi Teknis Barang/Jasa;</li><li style="padding-left:2px">Dokumen Persiapan Pengadaan Barang/Jasa</li></ol>
- <p style="text-align:justify;margin:0 0 10px">Dalam melakukan proses kegiatan tersebut harus berpedoman pada peraturan perundang-undangan yang berlaku dengan tetap memperhatikan batasan waktu yang tersedia.</p>
- <p style="margin:0 0 54px">Demikian disampaikan untuk dapat dipergunakan sebagaimana mestinya.</p>
- <table style="width:100%;border:0;border-collapse:collapse;margin-top:0"><tr><td style="width:48%;border:0"></td><td style="width:52%;border:0;vertical-align:top;text-align:left;padding:0 0 0 8px">Pejabat Pembuat Komitmen (PPKom)<br>${esc(OP(p).nama)}<br><br><br><br><br><b><u>${esc(pej.nama||'')}</u></b><br>NIP. ${esc(pej.nip||'')}</td></tr></table>
- </div>`
+ // 3.0.59.19 — Surat Perintah Pengadaan tanpa bingkai/kotak sesuai pedoman pengguna.
+ // Nama instansi harus berasal dari OPD paket, bukan seed S.pemda.nama yang bisa berupa demo.
+ const o=OP(p),pej=PJ(p.ppk);
+ const institution=String(o.nama||'').trim();
+ const opdName=institution&&institution!=='-'&&!/\b(?:demo|dummy|contoh|simulasi)\b/i.test(institution)?institution:'[Nama OPD belum diisi]';
+ const place=satriaDppOfficialPlace(p);
+ const pemdaName=String(S.pemda?.nama||'').trim();
+ const pemdaSafe=pemdaName&&!/\b(?:demo|dummy|contoh|simulasi|instansi pemerintah)\b/i.test(pemdaName)?pemdaName:'';
+ const orgKop=o.kop?kop(p):`<div class="kop kop-text" style="text-align:center;margin-bottom:10px">${S.pemda?.logo?`<img src="${esc(S.pemda.logo)}" alt="Logo pemerintah daerah" style="height:56px;max-width:100%;object-fit:contain;margin-bottom:6px"><br>`:''}${pemdaSafe?`<div style="font-size:15px;font-weight:bold">${esc(pemdaSafe)}</div>`:''}<div style="font-size:14px;font-weight:bold">${esc(opdName.toUpperCase())}</div><div style="font-size:11px;margin-top:4px">${esc(o.alamat||'')}</div><div style="font-size:11px">${esc(o.kontak||'')}</div><hr style="border:0;border-top:2.5px solid #000;margin:10px 0 4px"></div>`;
+ const subject='Perintah Pengadaan Barang & Jasa';
+ const meta=(label,value)=>`<div class="sppbj-meta-row"><span class="sppbj-meta-label">${label}</span><span class="sppbj-meta-colon">:</span><span class="sppbj-meta-value">${value}</span></div>`;
+ const tahun=String(p.tahun||S.tahun||'').trim();
+ return `${orgKop}
+ <div class="sppbj-pdf-layout satria-sppbj-official">
+ <div class="sppbj-letter-heading">
+ <div class="sppbj-letter-meta" aria-label="Identitas surat perintah pengadaan">
+ ${meta('Nomor',esc(nomor('PPBJ',p)))}${meta('Sifat','Biasa')}${meta('Lampiran','1 (satu) rangkap')}${meta('Perihal',esc(subject))}</div>
+ <div class="sppbj-letter-place">${esc(place)}, ${tg(p.tglSppbj)}</div>
+ </div>
+ <div class="sppbj-destination">Yth. &nbsp; Pejabat Pengadaan pada ${esc(opdName)}<br>di -<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${esc(place)}</div>
+ <p class="sppbj-body-text">Sehubungan dengan akan dilaksanakannya kegiatan pengadaan barang/jasa di lingkungan ${esc(opdName)}${tahun?' Tahun Anggaran '+esc(tahun):''} melalui <b><i>E-Purchasing</i></b>, maka dengan ini disampaikan untuk segera melakukan proses kegiatan dimaksud sebagai dasar pelaksanaan dan berikut lampiran:</p>
+ <ol class="sppbj-attachments"><li>Spesifikasi Teknis Barang/Jasa;</li><li>Dokumen Persiapan Pengadaan Barang/Jasa.</li></ol>
+ <p class="sppbj-body-text">Dalam melakukan proses kegiatan tersebut harus berpedoman pada peraturan perundang-undangan yang berlaku dengan tetap memperhatikan batasan waktu yang tersedia.</p>
+ <p class="sppbj-closing">Demikian disampaikan untuk dapat dipergunakan sebagaimana mestinya.</p>
+ <div class="sppbj-signature-layout"><div class="sppbj-signature-left" aria-hidden="true"></div><div class="sppbj-signature-cell">Pejabat Pembuat Komitmen (PPKom)<br>${esc(opdName)}<div class="sppbj-signature-space"></div><b><u>${esc(pej.nama&&pej.nama!=='-'?pej.nama:'[PPK belum dipilih]')}</u></b><br>NIP. ${esc(pej.nip&&pej.nip!=='-'?pej.nip:'-')}</div></div>
+ </div>`;
+}
+
+/* 3.0.59.18 — BAHP mengikuti tata letak TTD/cap DPP tanpa mengubah pejabat BAHP. */
+function satriaBahpPicture(src,kind){
+  const safe=satriaDppPicture(src,kind); // Utamakan sumber yang sama dengan DPP (Storage privat/Base64).
+  if(safe)return safe;
+  // Pertahankan kompatibilitas berkas gambar HTTPS lama yang sebelumnya didukung sigImg.
+  const v=String(src||'').trim();
+  if(/^https:\/\/[^\s"'<>]+$/i.test(v)){
+    return `<img class="${kind==='cap'?'satria-dpp-cap':'satria-dpp-ttd'}" src="${esc(v)}" alt="${kind==='cap'?'Cap atau stempel pejabat':'Tanda tangan pejabat'}" decoding="async">`;
+  }
+  return '';
+}
+function satriaBahpSignerVisual(pejabat,p){
+  const cap=satriaBahpPicture(pejabat?.cap,'cap');
+  const ttd=satriaBahpPicture(pejabat?.ttd,'ttd');
+  // Foto stempel HARUS lebih dulu (di kiri), TTD di atasnya (kanan) sebagaimana DPP.
+  if(!cap&&!ttd)return '<div class="satria-bahp-signature-spacer" aria-hidden="true"></div>';
+  const layout=globalThis.SATRIA_DPP_SIGN_LAYOUT?.inlineStyle?.(p)||'';
+  return `<div class="satria-bahp-ppk-images" style="${layout}" aria-label="Tanda tangan dan cap pejabat">${cap}${ttd}</div>`;
 }
 function bahp(p){
  const offers=p.penawaran||[], W=pemenang(p), chosen=W?.w||null;
@@ -2654,15 +2780,16 @@ function bahp(p){
  }).join('')||'<p>Belum ada penyedia untuk dievaluasi.</p>';
  const negotable=rows.map((it,n)=>{
    const unit=chosen?+(chosen.nego?.[it.id]??chosen.harga?.[it.id]??0):0;
-   const shipping=0;
+   const shipping=0; // ongkir dicatat satu kali pada baris total paket
    return `<tr><td class="bahp-center">${n+1}</td><td>${itemLabel(it)}</td><td class="bahp-center">${vf(it.vol)} ${esc(it.satuan||'')}</td><td class="bahp-money">${unit?rp(unit):'-'}</td><td class="bahp-money">${shipping?rp(shipping):'-'}</td><td class="bahp-money">${unit?rp((+it.vol||0)*unit):'-'}</td></tr>`;
  }).join('')||'<tr><td colspan="6">Rincian barang belum tersedia.</td></tr>';
  const base=chosen?sum(rows,it=>(+it.vol||0)*(+(chosen.nego?.[it.id]??chosen.harga?.[it.id]??0)||0)):0;
  const shipping=chosen?+(chosen.ongkir||0):0;
  const final=base+shipping;
  const selected=chosen?PY(chosen.pen):{};
- const ppnNote='PPN belum dipisahkan pada data paket; verifikasi kembali perlakuan pajak sebelum pengesahan.';
- return `${kop(p)}<div class="bahp-reference-layout">
+ const pricing=chosen?satriaDocPricing(p,chosen):null;
+ const ppnNote=pricing?.verified?'PPN merupakan bagian dari harga satuan hasil negosiasi (bruto), bukan tambahan atas subtotal.':'Komponen sebelum PPN dan PPN pada sebagian rincian belum lengkap/selaras; harga satuan dalam tabel adalah harga akhir termasuk pajak yang tersimpan. Verifikasi sebelum pengesahan.';
+ return `${kop(p)}<div class="bahp-reference-layout ${rows.length>12||offers.length>3?'bahp-many':''}">
  <p class="bahp-document-title"><b><u>BERITA ACARA HASIL PEMILIHAN E-PURCHASING</u></b><span>Nomor : ${esc(nomor('BAHP',p))}</span></p>
  <p>Pada Hari ini ${esc(date)} kami yang bertandatangan di bawah ini Pengguna Anggaran selaku Pejabat Pembuat Komitmen (PPKom) bersama Pejabat Pengadaan pada ${esc(OP(p).nama)} telah melaksanakan proses pemilihan melalui E-Purchasing, dengan hasil sebagai berikut :</p>
  <p class="bahp-section"><b>A. &nbsp; DATA UMUM</b></p>
@@ -2683,65 +2810,97 @@ function bahp(p){
  <p class="bahp-inset">a) &nbsp; <b>Negosiasi Teknis</b> dilakukan terhadap layanan yang diberikan agar dapat menyelesaikan sesuai spesifikasi yang disepakati, dengan tetap memperhatikan waktu.</p>
  <p class="bahp-inset">b) &nbsp; <b>Negosiasi harga</b> dilakukan berdasarkan riwayat harga transaksi terakhir/struktur pembentuk harga (bila ada), fitur harga terbaik pada aplikasi katalog elektronik (bila ada), sumber RFI dan/atau hasil pencarian internet yang dapat diverifikasi.</p>
  <p class="bahp-inset">c) &nbsp; Hasil negosiasi harga sebagai berikut :</p>
- <table class="bahp-grid bahp-negotiation">${head(['No.','Jenis Barang/Jasa','Vol.','Harga Satuan Hasil Negosiasi','Ongkos Kirim','Jumlah Total Hasil Negosiasi'],[1,2,3,4,5,6])}<tbody>${negotable}<tr><td colspan="5" class="bahp-right">Sub Total</td><td class="bahp-money">${chosen?rp(base):'-'}</td></tr><tr><td colspan="5" class="bahp-right">PPN (lihat catatan)</td><td class="bahp-money">-</td></tr><tr><td colspan="5" class="bahp-right"><b>Total${shipping?' (termasuk ongkir)':''}</b></td><td class="bahp-money"><b>${chosen?rp(final):'-'}</b></td></tr></tbody></table>
- <p class="bahp-small">${ppnNote} ${shipping?'Ongkos kirim total yang dicatat: '+rp(shipping)+'; pembebanan per item belum tersedia.':''} ${W?'Penyedia memenuhi pemeriksaan otomatis dasar SATRIA.':'Penetapan akhir penyedia belum dinyatakan tervalidasi oleh SATRIA.'}</p>
+ <table class="bahp-grid bahp-negotiation">${head(['No.','Jenis Barang/Jasa','Vol.','Harga Satuan Hasil Negosiasi','Ongkos Kirim','Jumlah Total Hasil Negosiasi'],[1,2,3,4,5,6])}<tbody>${negotable}<tr><td colspan="5" class="bahp-right">Sub Total</td><td class="bahp-money">${chosen?rp(base):'-'}</td></tr><tr><td colspan="5" class="bahp-right">PPN (termasuk dalam harga satuan, informasi)</td><td class="bahp-money">${pricing?.verified?rp(pricing.tax):'-'}</td></tr><tr><td colspan="5" class="bahp-right">Ongkos kirim paket (tidak dialokasikan per rincian)</td><td class="bahp-money">${chosen?rp(shipping):'-'}</td></tr><tr><td colspan="5" class="bahp-right"><b>Total${shipping?' (termasuk ongkir)':''}</b></td><td class="bahp-money"><b>${chosen?rp(final):'-'}</b></td></tr></tbody></table>
+ <p class="bahp-small">${ppnNote} ${shipping?'Ongkos kirim total yang dicatat: '+rp(shipping)+'; pembebanan per item belum tersedia.':''} ${chosen?'Penyedia dicatat sebagai pemenang manual; seluruh bukti administrasi dan teknis tetap perlu diverifikasi.':'Penetapan akhir penyedia belum tervalidasi.'}</p>
  <p>Demikian berita acara ini dibuat untuk dipergunakan sebagaimana mestinya.</p>
- <div class="bahp-signatures"><div><span>Disetujui oleh,</span><span>PA / KPA / PPK</span>${sigImg(approver)}<b><u>${esc(approver.nama)}</u></b><span>NIP. ${esc(approver.nip||'-')}</span></div><div><span>Dipesan oleh,</span><span>Pejabat Pengadaan</span>${sigImg(officer)}<b><u>${esc(officer.nama)}</u></b><span>NIP. ${esc(officer.nip||'-')}</span></div></div></div>`;
+ <div class="bahp-signatures"><div><span>Disetujui oleh,</span><span>PA / KPA / PPK</span>${satriaBahpSignerVisual(approver,p)}<b><u>${esc(approver.nama)}</u></b><span>NIP. ${esc(approver.nip||'-')}</span></div><div><span>Dipesan oleh,</span><span>Pejabat Pengadaan</span>${satriaBahpSignerVisual(officer,p)}<b><u>${esc(officer.nama)}</u></b><span>NIP. ${esc(officer.nip||'-')}</span></div></div></div>`;
 }
 const LT=rows=>`<table class="tbl-meta" style="border:0">${rows.map(([a,b])=>`<tr><td style="border:0;width:170px">${a}</td><td style="border:0">: ${esc(b)}</td></tr>`).join('')}</table>`;
 const KAB=()=>S.pemda.nama.replace(/^PEMERINTAH (KABUPATEN )?/,'');
 function idkb(p){
-const k=PJ(p.ppk),pp=PJ(p.pp),o=OP(p),u=unitOf(p);
-const dari=esc(u.bidang||o.nama);
-const N='border:0;padding:3px 0;vertical-align:top;text-align:left';
-const B='border:1px solid #000;padding:4px 8px;vertical-align:top';
-const tc=s=>String(s||'').toLowerCase().split(' ').map(w=>w?w[0].toUpperCase()+w.slice(1):w).join(' ');
-const nl=s=>esc(s).replace(/\n/g,'<br>');
-const en0=n=>(+n||0).toLocaleString('en-US',{maximumFractionDigits:0});
-const tglID=d=>d?new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}):'-';
-const info=[['Pemerintah Daerah',esc(tc(S.pemda.nama))],['PA/KPA/PPK *)',esc(k.nama)],['Program',nl(progOf(p))],['Kegiatan',nl(kegOf(p))],['Sub Kegiatan',nl(subOf(p))],['Output',nl(outOf(p))],['Jenis Pengadaan',`<b><u>${esc(p.jenisPengadaan||'Pengadaan Barang')}</u></b>`]]
- .map(([a,b])=>`<tr><td style="${N};width:150px;white-space:nowrap">${a}</td><td style="${N};width:12px">:</td><td style="${N}">${b}</td></tr>`).join('');
-const itemList=p.items.map((i,n)=>`<div style="margin-left:28px">${n+1}. ${itemLabel(i)}</div>`).join('');
-const jumlah=p.items.map((i,n)=>`<tr><td style="${N};padding-left:28px;width:380px">${n+1}. ${itemLabel(i)}</td><td style="${N};width:24px;text-align:center">=</td><td style="${N}">${vf(i.vol)} ${esc(i.satuan)}</td></tr>`).join('');
-const prov=p.penawaran.map((w,n)=>{const y=PY(w.pen);return `<div style="margin-left:28px">${n+1}) ${esc(y.nama)}<br>${y.link?`<a href="${esc(y.link)}" style="color:#1d4ed8;text-decoration:underline">${esc(y.link)}</a>`:'-'}</div>`}).join('')||'<div style="margin-left:28px">Belum ada penyedia yang dicatat.</div>';
-const sigBlok=(x,label,nama)=>`${label}<br>${nama}<br>${sigImg(x)}<b><u>${esc(x.nama)}</u></b><br>NIP. ${esc(x.nip)}`;
-return `<div style="text-align:left;font-size:11pt;line-height:1.35;color:#000">
-<p style="text-align:center;font-size:14px;margin:0 0 12px">FORMULIR IDENTIFIKASI KEBUTUHAN</p>
-<div style="border:1px solid #000;padding:10px 12px">
-<table style="border:0;width:100%;margin-bottom:10px">${info}</table>
-<p style="margin:10px 0 2px"><b>A. Identifikasi Jenis/Tipe Barang/Jasa</b></p>
-<p style="margin:2px 0 2px">a) Identifikasi barang/jasa yang dibutuhkan :</p>${itemList}
-<p style="margin:8px 0 2px">b) Jumlah kebutuhan barang/jasa :</p>
-<table style="border:0;width:100%">${jumlah}</table>
-<table style="border:0;width:100%;margin-top:4px">
-<tr><td style="${N};width:300px">c) Waktu pemanfaatan barang/jasa</td><td style="${N};width:24px;text-align:center">=</td><td style="${N}">${nl(p.bulanPelaksanaan||'-')}</td></tr>
-<tr><td style="${N}">d) Perkiraan waktu (termasuk pengiriman)</td><td style="${N};text-align:center">=</td><td style="${N}">${esc(p.masaHk||'-')} Hari Kalender</td></tr>
-<tr><td style="${N}">e) Terdapat di Katalog LKPP</td><td style="${N};text-align:center">=</td><td style="${N}">${nl(p.katalogRef||'-')}</td></tr>
-<tr><td style="${N}">f) Perkiraan biaya</td><td style="${N};text-align:center">=</td><td style="${N}">Rp ${en0(p.pagu)}</td></tr>
-</table>
-<p style="margin:10px 0 2px"><b>B. Spesifikasi Teknis Minimal Barang/Jasa</b></p>${itemList}
-<p style="margin:10px 0 2px"><b>C. Ketersediaan Produk dan Pelaku Usaha</b></p>
-<div style="margin-left:14px">1. Fotokopi ; tersedia sesuai informasi dari etalase katalog lokal :</div>${prov}
-<p style="margin:10px 0 2px"><b>E. Penentuan Prioritas Barang/Jasa</b></p>
-<div style="margin-left:14px">Prioritas PDN,UMKM, Lokal ${esc(tc(S.pemda.nama).replace(/^Pemerintah (Kabupaten |Kota )?/,''))}</div>
-</div>
-<table style="border-collapse:collapse;width:100%;margin-top:0">
-<tr><td style="${B};width:50%">Disusun pada tanggal</td><td style="${B};text-align:center">${tglID(p.tglIdkb||p.tglNodis)}</td></tr>
-<tr><td style="${B}">${sigBlok(k,'Ditetapkan oleh,<br>PA/KPA/PPK',o.nama)}</td><td style="${B}">${sigBlok(pp,'Disusun oleh,',dari)}</td></tr>
-</table>
-</div>`;
+ // Pedoman Identifikasi Kebutuhan: formulir dua kolom pengesahan pada AKHIR dokumen.
+ // Nilai berasal dari paket dan Data Master, tidak menyalin angka/nama pada foto pedoman.
+ const k=PJ(p.ppk),o=OP(p);
+ const staf=(S.pejabat||[]),penId=String(p.idkbPenyusunId||p.pp||'');
+ const penyusun=staf.find(x=>String(x.id)===penId&&String(x.opd)===String(p.opd))||null;
+ const text=x=>esc(String(x??'')), nl=x=>text(x||'-').replace(/\r?\n/g,'<br>');
+ const titleCase=x=>String(x||'').toLowerCase().replace(/(^|\s)[a-z]/g,m=>m.toUpperCase());
+ const dateLong=x=>{
+   if(!x)return 'Belum diisi';
+   const d=new Date(String(x).slice(0,10)+'T00:00:00');
+   return Number.isNaN(d.valueOf())?text(x):d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+ };
+ const itemRows=(p.items||[]).map((it,n)=>`<li>${itemLabel(it)}</li>`).join('')||'<li>Rincian barang/jasa belum dicatat.</li>';
+ const volRows=(p.items||[]).map((it,n)=>`<tr><td class="idkb-desc">${n+1}. ${itemLabel(it)}</td><td class="idkb-eq">=</td><td class="idkb-vol">${vf(it.vol)} ${text(it.satuan||'')}</td></tr>`).join('')||'<tr><td colspan="3">Belum ada rincian kebutuhan.</td></tr>';
+ const suppliers=(p.penawaran||[]).map((w,n)=>{
+   const pen=PY(w.pen)||{},refs=Object.values(w.catalogRefs||{});
+   const source=refs.find(r=>r&&/^https:\/\//i.test(String(r.link||'')))?.link||pen.link||'';
+   const safeLink=/^https:\/\/[^\s\"'<>]+$/i.test(String(source))?String(source):'';
+   return `<li><b>${text(pen.nama||'Penyedia belum dilengkapi')}</b>${safeLink?`<div class="idkb-link"><a href="${text(safeLink)}">${text(safeLink)}</a></div>`:'<div class="idkb-muted">Link katalog belum dicatat</div>'}</li>`;
+ }).join('')||'<li>Belum ada referensi penyedia pada paket.</li>';
+ const jawaban=(p.idkbJabatanPenyusun||penyusun?.jabatan||penyusun?.namaJabatan||penyusun?.bidang||'').trim();
+ const namaPenyusun=penyusun?.nama||'Belum ditentukan';
+ const nipPenyusun=penyusun?.nip||'-';
+ const province=titleCase(S.pemda?.nama||'Pemerintah Daerah');
+ const row=(key,val)=>`<tr><td class="idkb-label">${key}</td><td class="idkb-colon">:</td><td class="idkb-value">${val}</td></tr>`;
+ const info=[
+  row('Pemerintah Daerah',text(province)),
+  row('PA/KPA/PPK *)',text(k.nama||'Belum ditentukan')),
+  row('Program',nl(progOf(p))),row('Kegiatan',nl(kegOf(p))),row('Sub Kegiatan',nl(subOf(p))),
+  row('Output',nl(outOf(p))),row('Jenis Pengadaan',`<b><u>${text(p.jenisPengadaan||'Belum diisi')}</u></b>`)
+ ].join('');
+ const priorities=String(p.prioritasBarang||p.prioritas||'').trim();
+ const prefer=priorities?nl(priorities):'Prioritas PDN, TKDN, UMKM dan produk lokal diperiksa sesuai informasi paket serta ketentuan pengadaan yang berlaku.';
+ // Rangka pengesahan khusus dua kolom sesuai foto pedoman. Tidak boleh masuk ke metadata/Output.
+ const approvedBy=`Ditetapkan oleh,<br>PA/KPA/PPK<br>${text(o.nama||'')}`;
+ const assembledBy=`Disusun oleh,${jawaban?`<br>${nl(jawaban)}`:'<br>Jabatan penyusun belum dicatat'}`;
+ return `<div class="satria-idkb-form${(p.items||[]).length>18?' idkb-long':''}" data-satria-idkb-reference="pedoman-2026">
+  <p class="satria-idkb-title"><b><u>FORMULIR IDENTIFIKASI KEBUTUHAN</u></b></p>
+  <div class="satria-idkb-sheet">
+   <table class="satria-idkb-info-table" data-satria-idkb-section="metadata"><tbody>${info}</tbody></table>
+   <section class="satria-idkb-section"><h3>A. Identifikasi Jenis/Tipe Barang/Jasa</h3>
+    <div class="idkb-subhead">a) Identifikasi barang/jasa yang dibutuhkan :</div><ol class="idkb-list">${itemRows}</ol>
+    <div class="idkb-subhead">b) Jumlah kebutuhan barang/jasa :</div>
+    <table class="idkb-quantity-table"><tbody>${volRows}</tbody></table>
+    <table class="idkb-extra-table"><tbody>
+     ${row('c) Waktu pemanfaatan barang/jasa',nl(p.bulanPelaksanaan||'Belum diisi'))}
+     ${row('d) Perkiraan waktu (termasuk pengiriman)',`${p.masaHk?text(p.masaHk)+' Hari Kalender':'Belum diisi'}`)}
+     ${row('e) Terdapat di Katalog LKPP',nl(p.katalogRef||'Belum dicatat'))}
+     ${row('f) Perkiraan Biaya',p.pagu>0?`Rp ${nf(p.pagu)}`:'Belum diisi')}
+    </tbody></table>
+   </section>
+   <section class="satria-idkb-section"><h3>B. Spesifikasi Teknis Minimal Barang/Jasa</h3>
+    ${(p.items||[]).length>12?`<p>Spesifikasi minimal untuk ${p.items.length} rincian tercantum pada daftar kebutuhan bagian A dan dokumen spesifikasi teknis per barang; kesesuaian produk wajib diverifikasi.</p>`:`<ol class="idkb-list">${itemRows}</ol>`}
+   </section>
+   <section class="satria-idkb-section"><h3>C. Ketersediaan Produk dan Pelaku Usaha</h3>
+    <p>Referensi ketersediaan produk dan penyedia sesuai informasi yang tercatat untuk paket:</p><ol class="idkb-suppliers">${suppliers}</ol>
+   </section>
+   <section class="satria-idkb-section"><h3>E. Penentuan Prioritas Barang/Jasa</h3><p>${prefer}</p></section>
+  </div>
+  <table class="satria-idkb-sign-table" data-satria-idkb-section="signatures"><tbody>
+   <tr class="idkb-date-row"><td>Disusun pada tanggal</td><td>${dateLong(p.tglIdkb||p.tglNodis)}</td></tr>
+   <tr class="idkb-approval-row"><td class="satria-idkb-approval-cell" data-satria-idkb-section="approval">
+     ${approvedBy}<div class="idkb-sig-media">${sigImg(k)}</div>
+     <div class="idkb-sign-identity"><b><u>${text(k.nama||'Belum ditentukan')}</u></b><div>NIP. ${text(k.nip||'-')}</div></div>
+    </td><td class="idkb-preparer-cell">${assembledBy}
+      <div class="idkb-preparer-space" aria-hidden="true"></div>
+      <div class="idkb-sign-identity"><b><u>${text(namaPenyusun)}</u></b><div>NIP. ${text(nipPenyusun)}</div></div>
+    </td></tr>
+  </tbody></table>
+ </div>`;
 }
 function rfi(p){const rows=[];p.penawaran.forEach(w=>p.items.forEach(i=>{if((+w.harga[i.id]||0)>0)rows.push({w,i,h:+w.harga[i.id]})}));
-const en2=n=>(+n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const en2=n=>nf(n); // Harga rupiah dibulatkan, tanpa .00 dan koma ribuan Inggris
 const vTot=p.items.reduce((s,x)=>s+(+x.vol||0),0)||1;
 const TH='border:1px solid #000;background:#c8c8c8;font-weight:700;text-align:center;vertical-align:middle';
 const TD='border:1px solid #000;vertical-align:top';
 const W=[3,8,12,6,4,4,6,4,6,7,6,8,4,8,9,5];const cg='<colgroup>'+W.map(w=>`<col style="width:${w}%">`).join('')+'</colgroup>';
-const head=`<thead><tr><th rowspan=2 style="${TH}">NO</th><th rowspan=2 style="${TH}">PENYEDIA</th><th rowspan=2 style="${TH}">NAMA PRODUK TAYANG</th><th colspan=12 style="${TH}">UNSUR PENILAIAN</th><th rowspan=2 style="${TH}">KET.</th></tr><tr>${['Spesifikasi','PDN','UMKM','LOKASI','PDN','STATUS KATALOG','HARGA SATUAN','ONGKIR','HARGA SATUAN + ONGKIR','QTY','TOTAL HARGA','LINK'].map(t=>`<th style="${TH}">${t}</th>`).join('')}</tr></thead>`;
-const body=rows.map(({w,i,h},n)=>{const y=PY(w.pen);const ref=(w.catalogRefs||{})[i.id]||{};const ong=+w.ongkir||0;const ongU=ong/vTot;
-return `<tr><td style="${TD};text-align:center">${n+1}</td><td style="${TD}"><b>${esc(y.nama)}</b></td><td style="${TD}">${esc(ref.name||i.nama)}</td><td style="${TD};text-align:center">${esc(ref.spec||i.spesifikasi||'Spesifikasi perlu dicocokkan')}</td><td style="${TD};text-align:center">${esc(i.pdn||'Perlu verifikasi')}</td><td style="${TD};text-align:center">${y.tipe==='UMKM'?'Ya':(y.tipe?'Tidak':'Perlu verifikasi')}</td><td style="${TD};text-align:center">${esc(y.kabupaten||y.alamat||'-')}</td><td style="${TD};text-align:center">${esc(y.pdn||i.pdn||'Perlu verifikasi')}</td><td style="${TD};text-align:center">${esc(y.statusKatalog||'Perlu verifikasi')}</td><td style="${TD};text-align:right;white-space:nowrap">Rp ${en2(h)}</td><td style="${TD};text-align:right;white-space:nowrap">${ong?'Rp '+en2(ongU):'Rp -'}</td><td style="${TD};text-align:right;white-space:nowrap">Rp ${en2(h+ongU)}</td><td style="${TD};text-align:center;white-space:nowrap">${vf(i.vol)}</td><td style="${TD};text-align:right;white-space:nowrap">Rp ${en2(i.vol*(h+ongU))}</td><td style="${TD};word-break:break-all">${(ref.link||y.link)?`<a href="${esc(ref.link||y.link)}" style="color:#1d4ed8;text-decoration:underline">${esc(ref.link||y.link)}</a>`:'-'}</td><td style="${TD}"></td></tr>`}).join('');
+const head=`<thead><tr><th rowspan=2 style="${TH}">NO</th><th rowspan=2 style="${TH}">PENYEDIA</th><th rowspan=2 style="${TH}">NAMA PRODUK TAYANG</th><th colspan=12 style="${TH}">UNSUR PENILAIAN</th><th rowspan=2 style="${TH}">KET.</th></tr><tr>${['Spesifikasi','PDN Produk','UMKM','LOKASI','PDN Penyedia','STATUS KATALOG','HARGA SATUAN','ONGKIR','HARGA SATUAN + ONGKIR','QTY','TOTAL HARGA','LINK'].map(t=>`<th style="${TH}">${t}</th>`).join('')}</tr></thead>`;
+const body=rows.map(({w,i,h},n)=>{const y=PY(w.pen);const ref=(w.catalogRefs||{})[i.id]||{};const ong=+w.ongkir||0;const ongU=0; // ongkir paket tidak dialokasikan ke setiap barang tanpa dasar
+
+return `<tr class="${rows.length>=7&&rows.length<=12&&n===Math.ceil(rows.length/2)?'satria35912-rfi-half-break':''}"><td style="${TD};text-align:center">${n+1}</td><td style="${TD}"><b>${esc(y.nama)}</b></td><td style="${TD}">${esc(ref.name||i.nama)}</td><td style="${TD};text-align:center">${esc(ref.spec||i.spesifikasi||'Spesifikasi perlu dicocokkan')}</td><td style="${TD};text-align:center">${esc(i.pdn||'Perlu verifikasi')}</td><td style="${TD};text-align:center">${y.tipe==='UMKM'?'Ya':(y.tipe?'Tidak':'Perlu verifikasi')}</td><td style="${TD};text-align:center">${esc(y.kabupaten||y.alamat||'-')}</td><td style="${TD};text-align:center">${esc(y.pdn||i.pdn||'Perlu verifikasi')}</td><td style="${TD};text-align:center">${esc(y.statusKatalog||'Perlu verifikasi')}</td><td style="${TD};text-align:right;white-space:nowrap">Rp ${en2(h)}</td><td style="${TD};text-align:right;white-space:nowrap">${ong?'Ongkir paket': 'Rp -'}</td><td style="${TD};text-align:right;white-space:nowrap">Rp ${en2(h+ongU)}</td><td style="${TD};text-align:center;white-space:nowrap">${vf(i.vol)}</td><td style="${TD};text-align:right;white-space:nowrap">Rp ${en2(i.vol*(h+ongU))}</td><td style="${TD};word-break:break-all">${(ref.link||y.link)?`<a href="${esc(ref.link||y.link)}" style="color:#1d4ed8;text-decoration:underline">${esc(ref.link||y.link)}</a>`:'-'}</td><td style="${TD}"></td></tr>`}).join('');
 return `<p style="text-align:center;margin:0 0 10px"><b><u>HASIL REQUEST FOR INFORMATION (RFI) PENYEDIA BARANG/JASA ATAU ANALISIS PASAR PRA E-PURCHASING</u></b></p>
-<table class="tbl-rfi" style="border-collapse:collapse;width:100%;table-layout:fixed">${cg}${head}<tbody>${body||`<tr><td colspan=16 style="${TD}">Belum ada data RFI; lengkapi penyedia dan harga tayang pada menu Penawaran dan Negosiasi.</td></tr>`}</tbody></table>`;}
+<table class="tbl-rfi" style="border-collapse:collapse;width:100%;table-layout:fixed">${cg}${head}<tbody>${body||`<tr><td colspan=16 style="${TD}">Belum ada data RFI; lengkapi penyedia dan harga tayang pada menu Penawaran dan Negosiasi.</td></tr>`}</tbody></table><p class="doc-note"><b>Catatan ongkos kirim:</b> Ongkir disimpan per penyedia dan tidak dibagi per unit barang tanpa dasar alokasi. ${p.penawaran.map(w=>`${esc(PY(w.pen).nama)}: ${rp(Number(w.ongkir)||0)}`).join(' · ')}. Total pada tabel hanya harga tayang barang; tambah ongkir sekali di ringkasan paket bila relevan.</p>`;}
 function survei(p){const W=p.penawaran,H=hps(p);return `${kop(p)}<p class="doc-title" style="text-align:center"><b><u>SURVEI PASAR / REFERENSI HARGA</u></b></p>
 ${LT([['Nama Paket',p.nama],['Kode RUP',p.rup],['Pagu',rp(p.pagu)],['Nilai HPS',rp(H)],['Sumber referensi','Sumber bukti harga dan tanggal yang dicatat pada masing-masing penawaran penyedia']])}
 <p class="doc-section-heading"><b>A. Perbandingan harga per barang</b></p><table class="tbl-price-matrix"><thead><tr><th>No</th><th>Item Barang dan Spesifikasi Minimal</th><th>Volume</th><th>Satuan</th><th class=n>Harga Satuan HPS</th><th class=n>Jumlah HPS</th>${W.map(w=>`<th class=n>${esc(PY(w.pen).nama)}<br>Harga Satuan</th>`).join('')}</tr></thead><tbody>
@@ -2751,7 +2910,7 @@ ${p.items.map((i,n)=>`<tr><td>${n+1}</td><td>${itemLabel(i)}</td><td class=n>${v
 <p><b>Catatan analisis:</b> bandingkan kesesuaian spesifikasi, harga satuan, ongkos kirim, status katalog, lokasi, PDN/UMKM, serta kelengkapan bukti. Nilai kosong tidak diperlakukan sebagai harga nol.</p>${sig(PJ(p.pp),'Pejabat Pengadaan,')}`}
 function bahepe(p){
 const W=Array.isArray(p.penawaran)?p.penawaran:[],o=OP(p);
-const en0=n=>(+n||0).toLocaleString('en-US',{maximumFractionDigits:0});
+const en0=n=>nf(n);
 const money=n=>(n===null||n===undefined||n==='')?'Rp -':`Rp ${en0(n)}`;
 const quoteMoney=n=>(+n>0)?money(n):'Rp -';
 const sat=['','Satu','Dua','Tiga','Empat','Lima','Enam','Tujuh','Delapan','Sembilan'];
@@ -2791,7 +2950,7 @@ const cnt=w=>p.items.filter(i=>{const l=low(i);return l&&l.winners.some(x=>x===w
 const rank=W.map((w,index)=>({w,cnt:cnt(w),index})).sort((a,b)=>b.cnt-a.cnt||a.index-b.index);
 const maxCnt=rank.length?rank[0].cnt:0;
 let rankNumber=0,previousCount=null;
-const rankRows=rank.map((x,n)=>{if(previousCount===null||x.cnt!==previousCount)rankNumber=n+1;previousCount=x.cnt;const follow=maxCnt>0&&x.cnt===maxCnt?'Dilanjutkan':'Tidak dilanjutkan';return `<tr><td style="${TB};text-align:center">${rankNumber}</td><td style="${TB}">${esc(nama(x.w))}</td><td style="${TB};text-align:center">${x.cnt}</td><td style="${TB}">${follow}</td></tr>`}).join('');
+const rankRows=rank.map((x,n)=>{if(previousCount===null||x.cnt!==previousCount)rankNumber=n+1;previousCount=x.cnt;const follow=maxCnt>0&&x.cnt===maxCnt?'Pembanding utama':'Pembanding lain';return `<tr><td style="${TB};text-align:center">${rankNumber}</td><td style="${TB}">${esc(nama(x.w))}</td><td style="${TB};text-align:center">${x.cnt}</td><td style="${TB}">${follow}</td></tr>`}).join('');
 const top=rank.find(x=>maxCnt>0&&x.cnt===maxCnt);
 const subKegiatanLines=value=>{
  const raw=String(value??'').replace(/\r\n?/g,'\n').trim();
@@ -2812,13 +2971,13 @@ return `${kop(p)}<div class="bahepe-body">
 <p class="bahepe-subtitle">Verifikasi Penyedia Jasa (berdasarkan persyaratan penyedia yang tercantum pada Dokumen Pengumuman Pendaftaran)</p>
 <table class="tbl-bahepe-admin ${W.length<=3?'compact':'wide'}"><colgroup>${admColWidths}</colgroup><thead><tr><th rowspan="2">No</th><th rowspan="2">Aspek penilaian</th><th colspan="${PCols.length}">Penyedia</th><th rowspan="2">Ket</th></tr><tr>${PCols.map(w=>`<th>${esc(nama(w))}</th>`).join('')}</tr></thead><tbody>${aspRows}</tbody></table>
 <p class="bahepe-section bahepe-section-c"><b>C. SURVEY HARGA PEMBANDING DENGAN NILAI TERENDAH</b></p>
-<table class="tbl-bahepe-price"><colgroup>${itemColWidths}</colgroup><thead><tr><th>No</th><th>Item Barang dan Spek Minimal</th><th>Harga Satuan HPS</th>${PCols.map(w=>`<th>${esc(nama(w))}</th>`).join('')}<th>Terendah</th><th>Terpilih</th></tr></thead><tbody>${itemRows||`<tr><td colspan="${PCols.length+5}">Belum ada rincian barang pada paket.</td></tr>`}</tbody></table>
+<table class="tbl-bahepe-price"><colgroup>${itemColWidths}</colgroup><thead><tr><th>No</th><th>Item Barang dan Spek Minimal</th><th>Harga Satuan HPS</th>${PCols.map(w=>`<th>${esc(nama(w))}</th>`).join('')}<th>Terendah</th><th>Penyedia harga terendah (pembanding)</th></tr></thead><tbody>${itemRows||`<tr><td colspan="${PCols.length+5}">Belum ada rincian barang pada paket.</td></tr>`}</tbody></table>
 <p class="bahepe-note">Dari beberapa penyedia yang mencantumkan harga masing-masing produk pada E-Katalog lokal ${esc(kabupaten||'-')} yang produknya sesuai dengan kebutuhan dan spesifikasi pada paket pekerjaan tersebut sebanyak ${supplierCount} penyedia. Hasil tangkap layar harga satuan tayang masing-masing penyedia terlampir pada lampiran Dokumen Persiapan Pengadaan (DPP).</p>
 <div class="bahepe-rank-block"><p class="bahepe-section bahepe-section-d"><b>D. PERENGKINGAN HARGA TERENDAH</b></p>
-<table class="tbl-bahepe-rank"><colgroup><col style="width:10%"><col style="width:40%"><col style="width:20%"><col style="width:30%"></colgroup><thead><tr><th>Rank</th><th>Nama Penyedia</th><th>Item Terendah</th><th>Tindak Lanjut</th></tr></thead><tbody>${rankRows||`<tr><td colspan="4">Belum ada data penawaran penyedia.</td></tr>`}</tbody></table></div>
-<p class="bahepe-note">Dari hasil verifikasi calon penyedia yang memiliki item pekerjaan/subkategori produk lengkap sesuai kebutuhan pekerjaan, memiliki kualifikasi usaha yang sesuai, serta memenuhi persyaratan administrasi dan teknis, item terbanyak dengan harga terendah adalah:</p>
+<table class="tbl-bahepe-rank"><colgroup><col style="width:10%"><col style="width:40%"><col style="width:20%"><col style="width:30%"></colgroup><thead><tr><th>Rank</th><th>Nama Penyedia</th><th>Item Terendah</th><th>Status harga pembanding</th></tr></thead><tbody>${rankRows||`<tr><td colspan="4">Belum ada data penawaran penyedia.</td></tr>`}</tbody></table></div>
+<p class="bahepe-note">Berdasarkan jumlah item dengan harga tayang terendah (informasi pembanding harga, bukan keputusan otomatis mengenai kualifikasi atau penetapan pemenang), penyedia pembanding teratas adalah:</p>
 <p class="bahepe-selected"><b>${top?esc(nama(top.w)):'Belum dapat ditentukan'}</b></p>
-<p class="bahepe-note">Selanjutnya apabila disetujui oleh PPK dan/atau Kepala Satuan Kerja, Kami selaku Pejabat Pengadaan akan segera memproses transaksi pembelian pada E-Purchasing.</p>
+<p class="bahepe-note"><b>Penyedia yang ditetapkan secara manual:</b> ${pemenang(p)?esc(PY(pemenang(p).w.pen).nama):'Belum ditetapkan'}. Peringkat harga di atas hanya alat bantu perbandingan. Proses selanjutnya memerlukan verifikasi administratif, teknis, persetujuan pejabat berwenang, dan bukti pendukung.</p>
 <p class="bahepe-note">Demikian Berita Acara Pemilihan Calon Penyedia ini dibuat untuk dapat digunakan sebagaimana mestinya.</p>
 <div class="bahepe-signature">${esc(o.nama||'')}<br>Pejabat Pengadaan<br>${sigImg(PJ(p.pp))}<b><u>${esc(PJ(p.pp).nama)}</u></b><br>NIP. ${esc(PJ(p.pp).nip)}</div>
 </div>`;}
@@ -2852,17 +3011,17 @@ function metode(p){
  const rowsA=(p.items||[]).map((i,n)=>`<tr><td class="metode-no">${n+1}.</td><td>${h(i.nama||'-')}</td><td class="metode-qty">${vf(i.vol)}</td><td>${h(i.satuan||'-')}</td></tr>`).join('')||'<tr><td colspan="4" class="metode-empty">Belum ada rincian barang/jasa.</td></tr>';
  const rowsB=(p.items||[]).map((i,n)=>`<tr><td class="metode-no">${n+1}.</td><td colspan="3">${specs(i)}</td></tr>`).join('')||'<tr><td class="metode-no">1.</td><td colspan="3">Spesifikasi minimal belum diisi.</td></tr>';
  const criteria=[
-  ['Cara pengiriman','Darat'],
-  ['Cara pengangkutan','Roda Dua/Roda Empat'],
+  ['Cara pengiriman','Perlu konfirmasi berdasarkan ketentuan paket'],
+  ['Cara pengangkutan','Perlu konfirmasi berdasarkan ketentuan paket'],
   ['Cara pemasangan','-'],
-  ['Cara penyimpanan','Dibungkus Rapi'],
+  ['Cara penyimpanan','Perlu konfirmasi berdasarkan ketentuan paket'],
   ['Cara pengoperasian/penggunaan','-'],
-  ['Kebutuhan pelatihan untuk pengoperasian/pemeliharaan Barang','Tidak'],
-  ['Jaminan Bebas Cacat Mutudan Garansi','Ya'],
-  ['Menjamin ketersediaan Barang dan/atau Jasa yang sesuai dengan spesifikasi','Ya'],
-  ['Aspek pengadaan berkelanjutan','Ya'],
-  ['Metode Pemilihan','Sekali Proses'],
-  ['Metode Pembayaran','Sekaligus']
+  ['Kebutuhan pelatihan untuk pengoperasian/pemeliharaan Barang','Perlu konfirmasi berdasarkan ketentuan paket'],
+  ['Jaminan Bebas Cacat Mutudan Garansi','Perlu konfirmasi berdasarkan ketentuan paket'],
+  ['Menjamin ketersediaan Barang dan/atau Jasa yang sesuai dengan spesifikasi','Perlu konfirmasi berdasarkan ketentuan paket'],
+  ['Aspek pengadaan berkelanjutan','Perlu konfirmasi berdasarkan ketentuan paket'],
+  ['Metode Pemilihan','Perlu konfirmasi berdasarkan ketentuan paket'],
+  ['Metode Pembayaran','Perlu konfirmasi berdasarkan ketentuan paket']
  ].map(([a,b],n)=>`<tr><td class="metode-no">${n+1}.</td><td>${h(a)}</td><td colspan="2">${h(b)}</td></tr>`).join('');
  const signImage=x=>`<div class="metode-sign-visual">${(x.ttd||x.cap)?`${x.ttd?`<img class="metode-ttd" src="${esc(x.ttd)}" alt="Tanda tangan">`:''}${x.cap?`<img class="metode-cap" src="${esc(x.cap)}" alt="Cap/stempel">`:''}`:''}</div>`;
  return `${kepala}
@@ -2883,7 +3042,7 @@ function metode(p){
     ${rowsB}
     <tr class="metode-section"><td>C</td><td colspan="3">Persyaratan Lain Yang Diperlukan</td></tr>
     ${criteria}
-    <tr class="metode-section"><td>D</td><td colspan="3">PENETAPAN METODE E-PURCHASING</td></tr>
+    <tr class="metode-section satria35912-page-second"><td>D</td><td colspan="3">PENETAPAN METODE E-PURCHASING</td></tr>
     <tr><td class="metode-no">1.</td><td>Penetapan Metode E-Purchasing</td><td colspan="2">${h(metodeLabel)}</td></tr>
     <tr class="metode-basis-row"><td class="metode-no">2.</td><td>Dasar Pemilihan Metode E-Purchasing <i>(termasuk justifikasi memilih penyedia secara berulang)</i></td><td colspan="2">
      Dasar memilih Metode E-Purchasing dengan Negosiasi melalui Katalog Elektronik LKPP dipilih berdasarkan pertimbangan berikut:
@@ -2929,19 +3088,6 @@ const inner=`<table style="width:100%;border-collapse:collapse;font-size:9pt;tab
 <th style="${cell}width:6%">No</th><th style="${cell}width:48%">Nama Barang dan Spesifikasi</th><th style="${cell}width:10%">Kua</th><th style="${cell}width:11%">Satuan</th><th style="${cell}width:15%">Harga Satuan (Rp)</th><th style="${cell}width:10%">Ket.</th>
 </tr></thead><tbody>${itemRows}</tbody></table>`;
 return `${kop(p)}
-<style>
-.spek-pdf{font-family:Arial,Helvetica,sans-serif;font-size:9.5pt;color:#111;line-height:1.32}
-.spek-pdf .spek-title{font-size:11pt;text-align:center;font-weight:bold;text-decoration:underline;margin:8px 0 14px}
-.spek-pdf .spek-meta{width:100%;border-collapse:collapse;margin:0 0 10px;table-layout:fixed}
-.spek-pdf .spek-meta td{padding:2px 1px;vertical-align:top}
-.spek-pdf .spek-meta .label{width:26%}.spek-pdf .spek-meta .colon{width:3%;text-align:center}.spek-pdf .spek-meta .value{width:71%}
-.spek-pdf .spek-main{width:100%;border-collapse:collapse;table-layout:fixed;font-size:9pt}
-.spek-pdf .spek-main th,.spek-pdf .spek-main td{border:1px solid #222;padding:3px 4px;vertical-align:top}
-.spek-pdf .spek-main th{text-align:center;font-weight:bold;background:#f0f0f0}
-.spek-pdf .spek-main .no{width:5%;text-align:center}.spek-pdf .spek-main .element{width:21%}.spek-pdf .spek-main .description{width:62%}.spek-pdf .spek-main .note{width:12%}
-.spek-pdf .spek-sign{width:48%;margin:18px 0 0 auto;line-height:1.45}
-@media print{@page{size:A4 portrait;margin:10mm 12mm}.spek-pdf{font-size:9pt;line-height:1.25}.spek-pdf .spek-main{font-size:8.2pt}.spek-pdf .spek-meta{margin-bottom:7px}.spek-pdf .spek-title{margin:5px 0 9px}.spek-pdf .spek-main tr{break-inside:avoid;page-break-inside:avoid}.spek-pdf .spek-main th,.spek-pdf .spek-main td{padding:2.5px 3px}.spek-pdf .spek-sign{margin-top:14px}.spek-pdf a{color:#111;text-decoration:none;overflow-wrap:anywhere}.spek-pdf .spek-main table{font-size:8pt}}
-</style>
 <div class="spek-pdf">
 <p class="spek-title">SPESIFIKASI TEKNIS PAKET E-PURCHASING</p>
 <table class="spek-meta">
@@ -2955,7 +3101,7 @@ return `${kop(p)}
 <colgroup><col class="no"><col class="element"><col class="description"><col class="note"></colgroup>
 <thead><tr><th>No</th><th>Elemen Spesifikasi</th><th>Uraian Spesifikasi</th><th>Keterangan</th></tr></thead>
 <tbody>
-<tr><td class="no">1.</td><td>Jenis, Spesifikasi, Kuantitas, Satuan dan Harga</td><td style="padding:0">${inner}</td><td></td></tr>
+${(p.items||[]).length>8 ? (p.items||[]).map((it,index)=>`<tr class="satria35911-long-item"><td class="no">${index===0?'1.':''}</td><td>${index===0?'Jenis, Spesifikasi, Kuantitas, Satuan dan Harga':'Rincian barang '+(index+1)}</td><td>${index+1}. ${esc(it.nama||'-')}${it.spesifikasi?`<div>Spesifikasi: ${esc(it.spesifikasi)}</div>`:''}<div>Volume ${vf(it.vol)} ${esc(it.satuan||'-')} · Harga satuan ${nf(it.hs)}</div></td><td></td></tr>`).join('') : `<tr><td class="no">1.</td><td>Jenis, Spesifikasi, Kuantitas, Satuan dan Harga</td><td style="padding:0">${inner}</td><td></td></tr>`}
 <tr><td class="no">2.</td><td>Tempat</td><td colspan="2">${esc(lokasi)}</td></tr>
 <tr><td class="no">3.</td><td>Waktu</td><td colspan="2">${esc(p.masaHk||'-')} Hari Kerja</td></tr>
 <tr><td class="no">4.</td><td>Tingkat Layanan</td><td colspan="2">Penyedia wajib memenuhi tingkat layanan meliputi ketepatan waktu, kesesuaian spesifikasi, kualitas hasil, ketepatan jumlah, responsivitas, pengemasan dan pengiriman, jaminan/garansi, fleksibilitas layanan, kepatuhan administratif, serta standar keamanan dan kepatuhan. Penyedia juga wajib menindaklanjuti setiap ketidaksesuaian melalui perbaikan atau penggantian tanpa biaya tambahan sesuai ketentuan yang disepakati serta bertanggung jawab penuh atas pengadaan.</td></tr>
@@ -2966,12 +3112,12 @@ return `${kop(p)}
 }
 function lamp(p){const H=hps(p);return `${kop(p)}<p class="doc-title" style="text-align:center"><b><u>LAMPIRAN REFERENSI HARGA KATALOG ELEKTRONIK</u></b><br>Nomor Lampiran: ${nomor('DPP',p)}</p>
 ${LT([['Nama Paket',p.nama],['Kode RUP',p.rup],['Tanggal dokumen',tg(p.tglDpp)],['Nilai HPS',rp(H)]])}
-${p.penawaran.map((w,k)=>{const y=PY(w.pen),rows=p.items.map((i,n)=>({i,n,h:+w.harga[i.id]||0})).filter(x=>x.h>0);return `<p><b>Referensi Harga ${k+1}</b></p>${LT([['Penyedia',y.nama],['Alamat',y.alamat||'-'],['Status/Tipe',(y.status||'-')+' / '+(y.tipe||'-')],['Link toko',y.link||'Belum dicatat'],['Total harga tercatat',rp(totPw(p,w,false))]])}<table class="tbl-reference-items"><thead><tr><th>No</th><th>Nama Produk / Spesifikasi</th><th>Volume</th><th>Satuan</th><th class=n>Harga Satuan (Rp)</th><th class=n>Jumlah (Rp)</th></tr></thead><tbody>${rows.map(({i,n,h})=>`<tr><td>${n+1}</td><td>${itemLabel(i)}</td><td class=n>${vf(i.vol)}</td><td>${esc(i.satuan)}</td><td class=n>${nf(h)}</td><td class=n>${nf(i.vol*h)}</td></tr>`).join('')||'<tr><td colspan=6>Belum ada harga produk yang dicatat untuk penyedia ini.</td></tr>'}<tr><th colspan=5 style="text-align:right">Jumlah referensi</th><th class=n>${nf(sum(rows,r=>r.i.vol*r.h))}</th></tr></tbody></table>`}).join('')||'<p>Belum ada referensi harga yang dicatat.</p>'}
+${p.penawaran.map((w,k)=>{const y=PY(w.pen),rows=p.items.map((i,n)=>({i,n,h:+w.harga[i.id]||0})).filter(x=>x.h>0);return `<p><b>Referensi Harga ${k+1}</b></p>${LT([['Penyedia',y.nama],['Alamat',y.alamat||'-'],['Status/Tipe',(y.status||'-')+' / '+(y.tipe||'-')],['Link toko',y.link||'Belum dicatat'],['Total harga tercatat',rp(totPw(p,w,false))]])}<table class="tbl-reference-items"><thead><tr><th>No</th><th>Nama Produk / Spesifikasi</th><th>Volume</th><th>Satuan</th><th class=n>Harga Satuan (Rp)</th><th class=n>Jumlah (Rp)</th></tr></thead><tbody>${rows.map(({i,n,h})=>`<tr><td>${n+1}</td><td>${itemLabel(i)}${(w.catalogRefs||{})[i.id]?.name?`<div class="satria-doc-subnote">Produk: ${esc(w.catalogRefs[i.id].name)}</div>`:''}${(w.catalogRefs||{})[i.id]?.link?`<div class="satria-doc-subnote">Tautan: ${esc(w.catalogRefs[i.id].link)}</div>`:''}${(w.catalogRefs||{})[i.id]?.date?`<div class="satria-doc-subnote">Tanggal referensi: ${esc(satriaDateId(w.catalogRefs[i.id].date))}</div>`:''}</td><td class=n>${vf(i.vol)}</td><td>${esc(i.satuan)}</td><td class=n>${nf(h)}</td><td class=n>${nf(i.vol*h)}</td></tr>`).join('')||'<tr><td colspan=6>Belum ada harga produk yang dicatat untuk penyedia ini.</td></tr>'}<tr><th colspan=5 style="text-align:right">Jumlah referensi</th><th class=n>${nf(sum(rows,r=>r.i.vol*r.h))}</th></tr></tbody></table>`}).join('')||'<p>Belum ada referensi harga yang dicatat.</p>'}
 <p><i>Catatan: tautan, harga tayang, tanggal akses, dan bukti pendukung perlu disimpan/diperiksa sebagai dasar audit.</i></p>`}
 function reviu(p){
  // Format diturunkan dari PDF contoh "Riviu DPP.pdf" (2 halaman).
  // Hasil pada referensi adalah contoh; jangan mengesahkan kondisi yang belum diperiksa.
- const o=OP(p), pp=PJ(p.pp), ppk=PJ(p.ppk);
+ const o=OP(p), pp=PJ(p.pp), ppk=satriaDppSigner(p)||PJ(p.ppk);
  const e=esc;
  const list=(entries)=>entries.map(([no,act,res])=>`<tr><td class="rv-no">${e(no)}</td><td>${act}</td><td>${res}</td></tr>`).join('');
  const table=(n,title,entries)=>`<section class="rv-section"><div class="rv-section-title"><span>${n}</span><b>${title}</b></div><table class="rv-table"><colgroup><col style="width:6%"><col style="width:49%"><col style="width:45%"></colgroup><thead><tr><th>NO.</th><th>KEGIATAN</th><th>HASIL</th></tr><tr class="rv-numbering"><th>1</th><th>2</th><th>3</th></tr></thead><tbody>${list(entries)}</tbody></table></section>`;
@@ -3002,7 +3148,7 @@ function reviu(p){
  ]);
  const t3=table(3,'Kertas Kerja Evaluasi terhadap Rancangan Kontrak (Surat Pesanan dan/atau Surat Perjanjian Kerja)',[
  ['1',`Memastikan Surat Pesanan/SPK telah dituangkan secara lengkap dan benar terkait dengan :${sub('a','Paket pengadaan')}${sub('b','Sumber dana')}${sub('c','Nilai kontrak termasuk pajak')}${sub('d','Jenis kontrak')}${sub('e','Waktu pelaksanaan')}`,
- `Rancangan Surat Pesanan/SPK perlu diperiksa meliputi:${sub('a',`Nama paket: ${e(p.nama||'-')}`)}${sub('b',`Sumber dana: ${e(S.pemda.sumber||'-')} (verifikasi)`)}${sub('c','Nilai kontrak termasuk pajak: belum diverifikasi.')}${sub('d','Jenis kontrak: perlu diverifikasi.')}${sub('e',`Waktu pelaksanaan: ${e(p.masaHk||'-')} hari kerja (verifikasi).`)}`],
+ `Rancangan Surat Pesanan/SPK perlu diperiksa meliputi:${sub('a',`Nama paket: ${e(p.nama||'-')}`)}${sub('b',`Sumber dana: ${e(p.sumber||'-')} (verifikasi)`)}${sub('c','Nilai kontrak termasuk pajak: belum diverifikasi.')}${sub('d','Jenis kontrak: perlu diverifikasi.')}${sub('e',`Waktu pelaksanaan: ${e(p.masaHk||'-')} hari kerja (verifikasi).`)}`],
  ['2','Memastikan Syarat-Syarat Umum Kontrak dan Syarat-Syarat Khusus Kontrak','Kesesuaian syarat kontrak dengan rancangan Surat Pesanan/SPK perlu diperiksa.'],
  ['3','Memastikan jenis kontrak dalam SPK sudah sesuai dengan dokumen persiapan lainnya','Kesesuaian jenis kontrak dengan dokumen persiapan perlu diperiksa.'],
  ['4','Hal lain yang relevan dan perlu dilakukan reviu terkait rancangan kontrak','Belum ada catatan reviu tambahan; isi sesuai hasil pemeriksaan.']
@@ -3031,15 +3177,15 @@ ${LT([['Pagu',rp(p.pagu)],['Nilai HPS',rp(H)],['Selisih Pagu - HPS',rp(p.pagu-H)
 ${p.items.map((i,n)=>`<tr><td>${n+1}</td><td>${itemLabel(i)}</td><td class=n>${vf(i.vol)}</td><td>${esc(i.satuan)}</td><td class=n>${nf(i.hs)}</td><td class=n>${nf(i.vol*i.hs)}</td>${W.map(w=>`<td class=n>${(+w.harga[i.id]||0)?nf(w.harga[i.id]):'-'}</td>`).join('')}</tr>`).join('')}
 <tr><th colspan=5 style="text-align:right">Total</th><th class=n>${nf(H)}</th>${W.map(w=>`<th class=n>${nf(totPw(p,w,false))}</th>`).join('')}</tr></tbody></table>
 <p class="doc-section-heading"><b>B. Perbandingan hasil negosiasi</b></p><table class="tbl-negotiation-summary"><thead><tr><th>No</th><th>Penyedia</th><th class=n>Total Harga Tayang</th><th class=n>Total Harga Nego</th><th class=n>Terhadap HPS</th><th>Hasil sistem</th></tr></thead><tbody>${ev.map(({w,t,st},n)=>`<tr><td>${n+1}</td><td>${esc(PY(w.pen).nama)}</td><td class=n>${nf(totPw(p,w,false))}</td><td class=n>${nf(t)}</td><td class=n>${H?(t/H*100).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2}):'0'}%</td><td>${st}</td></tr>`).join('')||'<tr><td colspan=6>Belum ada data penawaran.</td></tr>'}</tbody></table>
-<p><b>Catatan:</b> HPS dan referensi harga harus ditopang sumber yang dapat diperiksa. Nilai ongkos kirim, tanggal akses, dan tautan bukti yang belum tersedia perlu dilengkapi sebelum penetapan.</p>${sig(PJ(p.pp),'Pejabat Pengadaan,')}`}
-function kknego(p){const pm=pemenang(p);if(!pm)return `${kop(p)}<p style="text-align:center"><b><u>KERTAS KERJA NEGOSIASI</u></b></p><p>Belum ada pemenang. Kertas kerja negosiasi dapat dibuat setelah data penawaran lengkap dan penyedia ditetapkan oleh pejabat berwenang.</p>`;const w=pm.w,H=hps(p);const rows=p.items.map((i,n)=>{const a=+w.harga[i.id]||0,nn=+(w.nego[i.id]??a)||0;return{n,i,a,nn}});const fin=sum(rows,r=>r.i.vol*r.nn);
+<p class="doc-section-heading"><b>C. Rekonsiliasi harga negosiasi dan pajak (informasi)</b></p><table class="tbl-negotiation-summary"><thead><tr><th>Penyedia</th><th class=n>Harga sebelum PPN</th><th class=n>PPN tercatat</th><th class=n>Subtotal bruto</th><th class=n>Ongkir</th><th class=n>Total akhir</th></tr></thead><tbody>${W.map(w=>{const a=satriaDocPricing(p,w);return `<tr><td>${esc(PY(w.pen).nama)}</td><td class=n>${a.verified?nf(a.net):'Perlu verifikasi'}</td><td class=n>${a.verified?nf(a.tax):'Perlu verifikasi'}</td><td class=n>${nf(a.gross)}</td><td class=n>${nf(a.shipping)}</td><td class=n>${nf(a.total)}</td></tr>`}).join('')}</tbody></table><p><i>PPN sudah termasuk dalam harga satuan bruto; tidak ditambahkan lagi ke total. Perbedaan perhitungan harus diverifikasi terhadap bukti transaksi.</i></p><p><b>Catatan:</b> HPS dan referensi harga harus ditopang sumber yang dapat diperiksa. Nilai ongkos kirim, tanggal akses, dan tautan bukti yang belum tersedia perlu dilengkapi sebelum penetapan.</p>${sig(PJ(p.pp),'Pejabat Pengadaan,')}`}
+function kknego(p){const pm=pemenang(p);if(!pm)return `${kop(p)}<p style="text-align:center"><b><u>KERTAS KERJA NEGOSIASI</u></b></p><p>Belum ada pemenang. Kertas kerja negosiasi dapat dibuat setelah data penawaran lengkap dan penyedia ditetapkan oleh pejabat berwenang.</p>`;const w=pm.w,H=hps(p);const rows=p.items.map((i,n)=>{const a=+w.harga[i.id]||0,nn=+(w.nego[i.id]??a)||0;return{n,i,a,nn}});const pricing=satriaDocPricing(p,w);const subTotal=sum(rows,r=>r.i.vol*r.nn);const shipping=Math.max(0,Number(w.ongkir)||0);const fin=subTotal+shipping;const terbilangFinal=terb(fin);
 return `${kop(p)}<p style="text-align:center"><b><u>KERTAS KERJA NEGOSIASI</u></b><br>Nomor: ${nomor('KKNEGO',p)}</p>
 ${LT([['Nama Paket',p.nama],['Kode RUP',p.rup],['Sub Kegiatan',subOf(p)],['Penyedia',PY(w.pen).nama],['Pagu',rp(p.pagu)],['HPS',rp(H)],['Tanggal',tg(p.tglNego)]])}
 <table class="tbl-knego-items"><thead><tr><th>No</th><th>Nama Barang dan Spesifikasi</th><th class=n>Volume</th><th>Satuan</th><th class=n>HPS Satuan</th><th class=n>Jumlah HPS</th><th class=n>Harga Satuan Awal</th><th class=n>Harga Satuan Nego</th><th class=n>Jumlah Harga Nego</th></tr></thead><tbody>
 ${rows.map(r=>`<tr><td>${r.n+1}</td><td>${esc(r.i.nama)}</td><td class=n>${vf(r.i.vol)}</td><td>${esc(r.i.satuan)}</td><td class=n>${nf(r.i.hs)}</td><td class=n>${nf(r.i.vol*r.i.hs)}</td><td class=n>${nf(r.a)}</td><td class=n>${nf(r.nn)}</td><td class=n>${nf(r.i.vol*r.nn)}</td></tr>`).join('')}
-<tr><th colspan=5 style="text-align:right">Total</th><th class=n>${nf(H)}</th><th></th><th></th><th class=n>${nf(fin)}</th></tr></tbody></table>
-<p>Selisih HPS dengan harga akhir: <b>${rp(H-fin)}</b>. Persentase selisih terhadap HPS: <b>${H?((H-fin)/H*100).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2}):'0'}%</b>. Terbilang nilai akhir: ${terb(fin)}.</p>
-<p>Hasil negosiasi perlu dikonfirmasi dan didokumentasikan sesuai mekanisme e-Purchasing yang digunakan.</p>${sig(PJ(p.pp),'Pejabat Pengadaan,')}`}
+<tr><th colspan=5 style="text-align:right">Subtotal harga akhir item (termasuk PPN)</th><th class=n>${nf(H)}</th><th></th><th></th><th class=n>${nf(subTotal)}</th></tr><tr><th colspan=8 style="text-align:right">Ongkos kirim paket (tidak dialokasikan per item)</th><th class=n>${nf(shipping)}</th></tr><tr><th colspan=8 style="text-align:right">Total akhir termasuk ongkos kirim</th><th class=n>${nf(fin)}</th></tr></tbody></table>
+<p>Selisih HPS dengan harga akhir: <b>${rp(H-fin)}</b>. Persentase selisih terhadap HPS: <b>${H?((H-fin)/H*100).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2}):'0'}%</b>. Terbilang nilai akhir <b>${esc(terbilangFinal)}</b> (berdasarkan total akhir ${rp(fin)}).</p>
+<p><b>Rincian PPN:</b> ${pricing.verified?`Harga sebelum PPN ${rp(pricing.net)} + PPN ${rp(pricing.tax)} = subtotal ${rp(pricing.gross)}; ongkir terpisah ${rp(shipping)}.`:'Komponen harga sebelum PPN/PPN belum lengkap atau belum konsisten pada seluruh rincian; nilai bruto yang tersimpan tidak dipajaki kembali.'}</p><p>Hasil negosiasi perlu dikonfirmasi dan didokumentasikan sesuai mekanisme e-Purchasing yang digunakan.</p>${sig(PJ(p.pp),'Pejabat Pengadaan,')}`}
 const DOCS={nodis,idkb,rfi,survei,bahepe,metode,sppbj,spek,dpp,lamp,reviu,hpsnego,kknego,bahp};
 
 /* SATRIA 3.0.40 — narrow document-output sanitizer (templates, not arbitrary rich HTML).
@@ -3065,6 +3211,25 @@ function satriaSafeDocHtml(source){
  return t.innerHTML;
 }
 
+function satria35912DocumentWarnings(p,doc){
+ const notes=[];
+ const dppId=String(p.docPpkSettings?.[doc]?.ppkId || (doc==='dpp'||doc==='reviu'?p.dppPpkId:p.ppk)||p.ppk||'');
+ const packetId=String(p.ppk||'');
+ if(dppId&&packetId&&dppId!==packetId && ['idkb','sppbj','spek','bahp','reviu','dpp','metode'].includes(doc)){
+  const a=satriaDppSigner(p),b=PJ(p.ppk);
+  notes.push('PPK penandatangan '+doc.toUpperCase()+' ('+String((S.pejabat||[]).find(x=>String(x.id)===dppId)?.nama||'belum ditemukan')+') berbeda dari PPK paket ('+String(b?.nama||'belum ditemukan')+'). Pastikan kewenangan sebelum disahkan. Pilihan pejabat tidak diganti otomatis.');
+ }
+ if(doc==='sppbj') notes.push('Dokumen nomor 6 adalah Surat Perintah Pengadaan kepada Pejabat Pengadaan, bukan surat penunjukan pemenang. Pastikan nomor, tujuan, dan tata naskah dinas yang berlaku.');
+ if(doc==='metode') notes.push('Isian Persyaratan Lain Yang Diperlukan berstatus Perlu konfirmasi. Lengkapi/validasi secara resmi sebelum formulir ditandatangani.');
+ if(doc==='reviu') notes.push('Isi hasil reviu harus dicocokkan dengan berita acara pemeriksaan yang benar-benar dilakukan dan bukti paket.');
+ if(doc==='bahepe'||doc==='rfi'||doc==='survei') notes.push('Periksa PDN/UMKM, spesifikasi, dan bukti katalog pada setiap referensi penyedia; hasil pembanding bukan penetapan pemenang otomatis.');
+ if(doc==='kknego' && p.pemenangId && !pemenang(p))notes.push('Pemenang tersimpan belum lolos pemeriksaan harga/HPS/pagu. Perbaiki penawaran dan penetapan sebelum pengesahan.');
+ return notes;
+}
+function satria35912WarningPanel(p,doc){
+ const a=satria35912DocumentWarnings(p,doc);if(!a.length)return '';
+ return `<section class="card no-print" style="border:1px solid #d9a441;background:#fffbeb;margin:12px 0" role="note"><b style="color:#7c4808">Pemeriksaan khusus sebelum pengesahan</b><ul style="margin:8px 0 0 18px;font-size:12px">${a.map(t=>`<li>${esc(t)}</li>`).join('')}</ul><small>Catatan ini tidak dimasukkan ke PDF dan tidak mengganti pejabat atau keputusan pengguna.</small></section>`;
+}
 function warnDoc(p){
  const m=docMiss(p,S.ui.dok);
  const pj=[['PPK',p.ppk],['Pejabat Pengadaan',p.pp],['Kabid',p.kabid]].filter(([,id])=>!S.pejabat.some(x=>x.id===id)).map(([r])=>'pejabat '+r);
@@ -3074,7 +3239,7 @@ function warnDoc(p){
 function vDok(){
  const L=filt(),p=P(S.ui.dpid)||L[0];
  if(!p)return '<div class=card>Belum ada paket pada tahun ini. Tambahkan paket melalui menu Paket Pengadaan.</div>';
- const T=[['nodis','1 Nota Dinas'],['idkb','2 Identifikasi Kebutuhan Pengadaan'],['rfi','3 Hasil Permintaan Informasi (RFI)'],['bahepe','4 Berita Acara Evaluasi Penyedia'],['metode','5 Formulir Penetapan E-Purchasing'],['sppbj','6 Surat Penunjukan Penyedia (SPPBJ)'],['spek','7 Spesifikasi Teknis'],['dpp','8 Dokumen Persiapan Pengadaan (DPP)'],['lamp','9 Lampiran Referensi Harga'],['reviu','10 Berita Acara Reviu DPP'],['bahp','11 Berita Acara Hasil Pemilihan'],['survei','12 Survei Harga'],['hpsnego','13 HPS dan Negosiasi'],['kknego','14 Kertas Kerja Negosiasi']];
+ const T=[['nodis','1 Nota Dinas'],['idkb','2 Identifikasi Kebutuhan Pengadaan'],['rfi','3 Hasil Permintaan Informasi (RFI)'],['bahepe','4 Berita Acara Evaluasi Penyedia'],['metode','5 Formulir Penetapan E-Purchasing'],['sppbj','6 Surat Perintah Pengadaan kepada PP'],['spek','7 Spesifikasi Teknis'],['dpp','8 Dokumen Persiapan Pengadaan (DPP)'],['lamp','9 Lampiran Referensi Harga'],['reviu','10 Berita Acara Reviu DPP'],['bahp','11 Berita Acara Hasil Pemilihan'],['survei','12 Survei Harga'],['hpsnego','13 HPS dan Negosiasi'],['kknego','14 Kertas Kerja Negosiasi']];
  const docContent = DOCS[S.ui.dok] ? satriaSafeDocHtml(DOCS[S.ui.dok](p)) : '<p class=mut>Dokumen tidak tersedia</p>';
  return `
     <div class="card no-print satria-dok-toolbar">
@@ -3093,7 +3258,7 @@ function vDok(){
       </div>
       <p class="mut" style="margin:10px 0 0;font-size:12px">Seluruh template dokumen diselaraskan dengan struktur contoh workbook. Data/bukti yang tidak tersedia ditandai untuk verifikasi. • Lazy load + virtual scroll aktif • Generated by SATRIA Framework</p>
     </div>
-    ${S.ui.dok==='dpp'?satriaDppPpkControl(p)+ (window.SATRIA_DPP_PREFLIGHT?.panel?.(p)||''):''}
+    ${window.SATRIA_DOC_PPK?.panel?.(p,S.ui.dok)||''}${S.ui.dok==='dpp'?(window.SATRIA_DPP_PREFLIGHT?.panel?.(p)||''):''}
     ${warnDoc(p)}
     <div id="dokLazyContainer" class="satria-doc-lazy-container">
       <div class="doc doc-${S.ui.dok} ${S.ui.dok==='rfi'?'doc-landscape':'doc-portrait'}" data-document-type="${esc(S.ui.dok)}" data-lazy="true">
@@ -3379,7 +3544,7 @@ const canWrite=()=>cur().role!=='Viewer';
 const isLastAdmin=id=>{const u=S.users.find(x=>x.id===id);return !!u&&u.role==='Admin'&&u.aktif!==false&&S.users.filter(x=>x.role==='Admin'&&x.aktif!==false).length<=1};
 
 /* ===== CHATBOT (berbasis aturan, membaca data aplikasi) ===== */
-function gaps(p){const H=hps(p),g=[];if(!p.rup)g.push('Kode RUP');if(S.paket.some(x=>x.id!==p.id&&x.tahun===p.tahun&&x.rup&&x.rup===p.rup))g.push('Kode RUP duplikat pada tahun yang sama');if(!(p.pagu>0))g.push('pagu');if(!p.items.length)g.push('rincian barang');else{if(H>p.pagu)g.push('HPS melebihi pagu');if(p.items.some(i=>!(+i.vol>0)||!(+i.hs>0)))g.push('volume/harga HPS belum valid');}if(!p.penawaran.length)g.push('penawaran');else if(evalPw(p).some(e=>!e.lengkap))g.push('penawaran belum mencakup seluruh item');if(p.penawaran.some(w=>!w.sumberHarga||!w.tanggalHarga))g.push('sumber/tanggal bukti harga');if(p.penawaran.some(w=>(+w.ongkir||0)>0))g.push('ongkir belum direkonsiliasi dengan HPS');if(p.penawaran.some(w=>(+w.ongkir||0)>0)&&!p.lokasiPengiriman)g.push('lokasi pengiriman untuk verifikasi ongkir');if(!pemenang(p))g.push('pemenang valid');if(!p.tglDpp)g.push('tanggal DPP');if(!p.tglBahp)g.push('tanggal BA Hasil');if(PJ(p.ppk).aktif===false)g.push('PPK nonaktif');if(!p.lokasiPengiriman)g.push('lokasi penyerahan');return [...new Set(g)]}
+function gaps(p){const H=hps(p),g=[];if(!p.rup)g.push('Kode RUP');if(S.paket.some(x=>x.id!==p.id&&x.tahun===p.tahun&&x.rup&&x.rup===p.rup))g.push('Kode RUP duplikat pada tahun yang sama');if(!(p.pagu>0))g.push('pagu');if(!p.items.length)g.push('rincian barang');else{if(H>p.pagu)g.push('HPS melebihi pagu');if(p.items.some(i=>!(+i.vol>0)||!(+i.hs>0)))g.push('volume/harga HPS belum valid');}if(!p.penawaran.length)g.push('penawaran');else if(evalPw(p).some(e=>!e.lengkap))g.push('penawaran belum mencakup seluruh item');if(p.penawaran.some(w=>!w.sumberHarga||!w.tanggalHarga))g.push('sumber/tanggal bukti harga');if(p.penawaran.some(w=>Number(w.ongkir||0)<0))g.push('ongkir tidak boleh negatif');if(p.penawaran.some(w=>(+w.ongkir||0)>0)&&p.pemenangId&&!pemenang(p))g.push('ongkir/total akhir penyedia terpilih perlu rekonsiliasi dengan HPS dan pagu');if(p.penawaran.some(w=>(+w.ongkir||0)>0)&&!p.lokasiPengiriman)g.push('lokasi pengiriman untuk verifikasi ongkir');if(!pemenang(p))g.push('pemenang valid');if(!p.tglDpp)g.push('tanggal DPP');if(!p.tglBahp)g.push('tanggal BA Hasil');if(PJ(p.ppk).aktif===false)g.push('PPK nonaktif');if(!p.lokasiPengiriman)g.push('lokasi penyerahan');return [...new Set(g)]}
 const DINFO=[{k:'nodis',n:'Nota Dinas',w:['nota dinas','nodis'],code:'NODIS'},{k:'idkb',n:'Identifikasi Kebutuhan',w:['identifikasi','idkb'],code:null},{k:'rfi',n:'Hasil RFI',w:['rfi','request for information'],code:null},{k:'bahepe',n:'BA Evaluasi Penyedia',w:['evaluasi penyedia','bahepe'],code:'BAHEPE'},{k:'metode',n:'Formulir Penetapan E-Purchasing',w:['penetapan metode'],code:null},{k:'sppbj',n:'SPPBJ',w:['sppbj','perintah pengadaan'],code:'PPBJ'},{k:'spek',n:'Spesifikasi Teknis',w:['spesifikasi','spek'],code:null},{k:'dpp',n:'DPP',w:['dpp','dokumen persiapan'],code:'DPP'},{k:'lamp',n:'Lampiran Referensi Harga',w:['lampiran','referensi harga'],code:'DPP'},{k:'reviu',n:'BA Reviu DPP',w:['reviu','review'],code:'BAHR'},{k:'bahp',n:'BA Hasil Pemilihan',w:['ba hasil','hasil pemilihan','bahp'],code:'BAHP'},{k:'survei',n:'Survei Harga',w:['survei','survey'],code:null},{k:'hpsnego',n:'HPS & Nego',w:['hps nego','lembar hps'],code:null},{k:'kknego',n:'KK Negosiasi',w:['kk nego','kertas kerja'],code:null}];
 const STOP=['belanja','kantor','paket','untuk','tahun','total','berapa','harga','status','dokumen','pagu','hps','menang','tampilkan','lihat','yang','dengan','alat','bahan','tulis','anggaran','efisiensi','penyedia','pemenang','kontrak'];
 const nrm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9./&\- ]/g,' ').replace(/\s+/g,' ').trim();
@@ -3412,8 +3577,10 @@ function docMiss(p,k){const m=[];if(!p.rup)m.push('Kode RUP');if(!p.items.length
    if(!signer)m.push('PPK penandatangan DPP dari Data Master');
    else{
      if(signer.aktif===false)m.push('PPK DPP berstatus nonaktif');
-     if(!signer.ttd)m.push('gambar tanda tangan PPK DPP (jika dibutuhkan pada dokumen elektronik)');
-     if(!signer.cap)m.push('gambar cap PPK DPP (jika dibutuhkan pada dokumen elektronik)');
+     if(p.docPpkSettings?.dpp?.showImages!==false){
+      if(!signer.ttd)m.push('gambar tanda tangan PPK DPP (jika dibutuhkan pada dokumen elektronik)');
+      if(!signer.cap)m.push('gambar cap PPK DPP (jika dibutuhkan pada dokumen elektronik)');
+     }
    }
    if(satriaDppOfficialPlace(p)==='[Tempat belum diatur]')m.push('tempat pelaksanaan OPD pada Pengaturan Sistem');
  }
@@ -3528,7 +3695,7 @@ function render(){
  if(S.ui.rupManualSkipCapture)S.ui.rupManualSkipCapture=false;
  else rupManualCapture();
  const u=S.ui;
- $('#hPemda').innerHTML='SATRIA <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">NEXT · 3.0.59.5.2</span>';
+ $('#hPemda').innerHTML='SATRIA <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">NEXT · 3.0.59.18</span>';
  $('#hSub').innerHTML='<span style="font-weight:600;letter-spacing:-0.01em">Government work, in flow.</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px;opacity:.8">Simple • Connected • Accountable</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px">'+(u.opd==='all'?'Multi OPD • Multi Tahun':esc(O(u.opd).nama))+'</span>';
  $('#dirty').textContent=S.persistError?'⚠ Gagal menyimpan':(S.dirty?'● Perubahan belum di-backup':'✔ Tidak ada perubahan baru');$('#dirty').title=S.persistError||'Penyimpanan lokal dan backup file adalah dua hal berbeda';$('#dirty').style.background=S.persistError?'#FEE2E2':(S.dirty?'#F59E0B':'rgba(15,118,110,.14)'); $('#dirty').style.color=S.persistError?'#991B1B':(S.dirty?'#78350f':'#0F766E');
  $('#selTahun').innerHTML=S.tahun.map(t=>`<option value="${Number(t)}" ${Number(t)===Number(u.tahun)?'selected':''}>${Number(t)}</option>`).join('');
@@ -7236,7 +7403,7 @@ function vDokOptimized(){
 
   const T=[
     ['nodis','1 Nota Dinas'],['idkb','2 Identifikasi Kebutuhan Pengadaan'],['rfi','3 Hasil Permintaan Informasi (RFI)'],
-    ['bahepe','4 Berita Acara Evaluasi Penyedia'],['metode','5 Formulir Penetapan E-Purchasing'],['sppbj','6 Surat Penunjukan Penyedia (SPPBJ)'],
+    ['bahepe','4 Berita Acara Evaluasi Penyedia'],['metode','5 Formulir Penetapan E-Purchasing'],['sppbj','6 Surat Perintah Pengadaan kepada PP'],
     ['spek','7 Spesifikasi Teknis'],['dpp','8 Dokumen Persiapan Pengadaan (DPP)'],['lamp','9 Lampiran Referensi Harga'],
     ['reviu','10 Berita Acara Reviu DPP'],['bahp','11 Berita Acara Hasil Pemilihan'],['survei','12 Survei Harga'],
     ['hpsnego','13 HPS dan Negosiasi'],['kknego','14 Kertas Kerja Negosiasi']
@@ -7324,7 +7491,8 @@ function vDokOptimized(){
       <section class="dok-preview-section">
         <div class="dok-preview-heading no-print"><div><span class="dok-section-kicker">03 / LIVE PREVIEW</span><h3>Pratinjau dokumen</h3><p>${activeT[1]} · Paket ${esc(p.rup||'belum memiliki Kode RUP')}</p></div><span class="dok-preview-status ${currentMissing.length?'is-pending':'is-ready'}"><i></i>${currentMissing.length?currentMissing.length+' hal perlu dicek':'Isian dasar OK'}</span></div>
         ${docQualityHtml}
-        ${S.ui.dok==='dpp'?satriaDppPpkControl(p)+ (window.SATRIA_DPP_PREFLIGHT?.panel?.(p)||''):''}
+        ${satria35912WarningPanel(p,S.ui.dok)}
+        ${window.SATRIA_DOC_PPK?.panel?.(p,S.ui.dok)||''}${S.ui.dok==='dpp'?(window.SATRIA_DPP_PREFLIGHT?.panel?.(p)||''):''}
         ${warnDoc(p)}
         <div class="dok-preview-frame" id="dokLazyContainer">
           <div class="dok-preview-caption no-print"><span><i></i> LIVE PREVIEW <b>·</b> FORMAT DOKUMEN RESMI</span><span>${docLandscape?'A4 LANDSCAPE':'A4 PORTRAIT'}</span></div>
@@ -8012,7 +8180,7 @@ SATRIA.ready = true;
     cakupan:   {label:'Setiap rincian memiliki setidaknya satu referensi harga',tab:'nego'},
     sinkron:   {label:'Harga Smart Survey konsisten dengan harga penawaran dan negosiasi',tab:'nego'},
     pemenang:  {label:'Penyedia telah ditetapkan dan hasil negosiasi valid',tab:'nego'},
-    pajak:     {label:'Ongkir positif memerlukan rekonsiliasi; nilai PPN tetap harus diverifikasi',tab:'nego'},
+    pajak:     {label:'Ongkir bernilai sah dan direkap satu kali; rincian PPN tetap harus diperiksa',tab:'nego'},
     lokasi:    {label:'Lokasi penyerahan',tab:'data',f:'lokasiPengiriman'},
     akun:      {label:'Rekening anggaran terdaftar',tab:'data',f:'akunId'},
     ppk:       {label:'PPK terdaftar di Data Master',tab:'data',f:'ppk'},
@@ -8043,12 +8211,20 @@ SATRIA.ready = true;
     add('pagu',Number.isFinite(+p.pagu)&&+p.pagu>0);
     add('items',items.length>0);add('itemData',items.length>0&&items.every(validItem));
     add('hpsPagu',items.length>0&&hps(p)>0&&hps(p)<=+p.pagu);
-    const officers={nodis:['kabid','ppk'],idkb:['ppk'],spek:['ppk'],dpp:['ppk'],reviu:['ppk','pp'],bahepe:['pp'],bahp:['ppk','pp'],sppbj:['ppk','pp'],metode:['ppk','pp'],rfi:[],survei:['pp'],lamp:[],hpsnego:['pp'],kknego:['pp']};
-    (officers[k]||[]).forEach(id=>add(id,trustedOfficer(p[id])));
+    const officers={nodis:['kabid','ppk'],idkb:['ppk'],spek:['ppk'],dpp:[],reviu:['ppk','pp'],bahepe:['pp'],bahp:['ppk','pp'],sppbj:['ppk','pp'],metode:['ppk','pp'],rfi:[],survei:['pp'],lamp:[],hpsnego:['pp'],kknego:['pp']};
+    (officers[k]||[]).forEach(id=>{
+      const selected=id==='ppk'?(p.docPpkSettings?.[k]?.ppkId||p[id]):p[id];
+      add(id,trustedOfficer(selected));
+    });
+    if(k==='dpp'){
+      const customId=p.docPpkSettings?.dpp?.ppkId||p.dppPpkId||p.ppk;
+      const chosen=(S.pejabat||[]).find(x=>String(x.id)===String(customId)&&String(x.opd)===String(p.opd)&&x.peran==='PPK');
+      add('ppk',!!chosen&&chosen.aktif!==false);
+    }
     if(NUM_CODE[k])add('nomor',!!(S.penomoran&&String(S.penomoran[NUM_CODE[k]]||'').trim()));
     const dateFields={nodis:'tglNodis',dpp:'tglDpp',reviu:'tglDpp',sppbj:'tglSppbj',bahp:'tglBahp',bahepe:'tglEvaluasi',kknego:'tglNego'};
     if(dateFields[k])add(dateFields[k],isValidDate(p[dateFields[k]]));
-    if(['bahp','sppbj'].includes(k))add('tglNego',isValidDate(p.tglNego));
+    if(['bahp'].includes(k))add('tglNego',isValidDate(p.tglNego));
     if(['nodis','idkb'].includes(k))add('akun',!!p.akunId&&(S.akun||[]).some(x=>x.id===p.akunId));
     if(['survei','rfi','lamp','hpsnego','dpp','spek'].includes(k))add('lokasi',String(p.lokasiPengiriman||'').trim());
     if(needsOffers.includes(k))add('penawaran',offers.length>0);
@@ -8061,9 +8237,9 @@ SATRIA.ready = true;
       return (!price||Math.abs(price-offer)<=1)&&(!nego||Math.abs(nego+tax-saved)<=1);
     })));
     if(needsProof.includes(k))add('bukti',offers.length>0&&offers.every(w=>String(w.sumberHarga||'').trim()&&isValidDate(w.tanggalHarga)));
-    if(['bahp','sppbj','kknego'].includes(k))add('pemenang',!!pemenang(p));
+    if(['bahp','kknego'].includes(k))add('pemenang',!!pemenang(p));
     // Do not certify VAT reconciliation from display gross prices alone.
-    if(['bahp','kknego','sppbj'].includes(k))add('pajak',!!pemenang(p)&&!offers.some(w=>(+w.ongkir||0)>0));
+    if(['bahp','kknego'].includes(k))add('pajak',!!pemenang(p)&&offers.every(w=>Number.isFinite(Number(w.ongkir||0))&&Number(w.ongkir||0)>=0));
     return R;
   }
   docMiss=(p,k)=>docReqs(p,k).filter(r=>!r.ok).map(r=>r.label);
@@ -8948,7 +9124,7 @@ if(action==='parse'||action==='fetch'){const found=fromUrl(read(panel,'link'));i
 if(action==='save'){const {p,w}=offer(panel.dataset.pid,panel.dataset.wid);const iid=panel.dataset.iid;if(!p||!w||!p.items.some(i=>i.id===iid))return;const link=read(panel,'link');const parsedLink=link?fromUrl(link):null;if(link&&!parsedLink){status(panel,'Link katalog tidak valid. Gunakan alamat produk INAPROC atau kosongkan kolom.');return}if(parsedLink&&!read(panel,'name'))autoIdentity(panel);const name=read(panel,'name');const netText=read(panel,'beforeTax'),taxText=read(panel,'taxAmount'),displayPrice=updateTayang(panel);const beforeTax=num(netText),taxAmount=num(taxText);if(!name){status(panel,'Isi nama produk tayang terlebih dahulu. Jika memakai link e-Katalog, klik atau tempel ulang link agar nama terisi otomatis.');return}if(displayPrice===null){status(panel,'Isi harga produk SEBELUM pajak dan nilai PPN yang tertera. Harga satuan tayang dihitung otomatis.');return}if(!(beforeTax>0)||!(displayPrice>0)){status(panel,'Harga sebelum pajak harus lebih dari Rp 0; PPN boleh Rp 0.');return}if(!Number.isSafeInteger(beforeTax)||!Number.isSafeInteger(taxAmount)||!Number.isSafeInteger(displayPrice)){status(panel,'Nilai harga melebihi batas angka yang aman. Periksa kembali.');return}const currentNego=Number(w.nego?.[iid])||0;if(currentNego>displayPrice&&!confirm('Harga tayang baru lebih rendah dari harga akhir negosiasi yang telah tersimpan. Referensi baru dapat disimpan, tetapi penetapan harus ditinjau dan harga dinegosiasi ulang melalui Kalkulator Nego. Lanjutkan?'))return;
 // Only update survey metadata and display price; NEVER clear or overwrite negotiated price, tax, or stored calculation.
 w.catalogRefs=w.catalogRefs||{};const previous=refOf(w,iid);w.catalogRefs[iid]={...previous,link,name,seller:read(panel,'seller'),unit:read(panel,'unit'),date:read(panel,'date')||iso(),beforeTax,taxAmount,displayPrice,spec:read(panel,'spec'),imageUrl:panel._smartImage||read(panel,'imageUrl')||previous.imageUrl||'',verification:'Perlu verifikasi terhadap katalog',recordedAt:new Date().toISOString()};w.harga=w.harga||{};w.harga[iid]=displayPrice;window.SATRIA_SURVEY_PRO?.afterMainSave?.({p,w,iid,previous,ref:w.catalogRefs[iid],panel});w.sumberHarga=link||w.sumberHarga||'Referensi katalog (input manual)';w.tanggalHarga=read(panel,'date')||w.tanggalHarga||iso();sync('nego','Referensi katalog dan harga tayang Smart Survey tersimpan (harga nego tidak diubah)');render();toast('Referensi harga tayang tersimpan. Harga negosiasi lama tidak diubah.')}} ,true);
-const originalSurvei=survei;survei=function(p){const base=originalSurvei(p);const refs=[];for(const w of p.penawaran||[])for(const item of p.items||[]){const r=w.catalogRefs?.[item.id];if(r)refs.push({w,item,r})}if(!refs.length)return base;const table=`<p class="doc-section-heading"><b>C. Referensi produk e-Katalog per rincian HPS</b></p><table class="tbl-reference-items"><thead><tr><th>No.</th><th>Barang HPS / Produk Katalog</th><th>Penyedia</th><th>Harga tayang/unit</th><th>Nego/unit</th><th>Sumber dan tanggal</th></tr></thead><tbody>${refs.map(({w,item,r},i)=>`<tr><td>${i+1}</td><td>${escapeValue(item.nama)}<div style="font-size:9pt">Produk katalog: ${escapeValue(r.name)}${r.spec?`<div>${escapeValue(r.spec)}</div>`:''}</div></td><td>${escapeValue(r.seller||PY(w.pen).nama)}</td><td class="n">${money(r.displayPrice)}</td><td class="n">${r.negotiatedBase?money((r.negotiatedBase||0)+(r.negotiatedTax||0)):'Belum nego'}</td><td>${r.link?`<span>${escapeValue(r.link)}</span>`:'Input manual'}<div>${escapeValue(r.date||'')}</div></td></tr>`).join('')}</tbody></table><p class="doc-note">Data referensi katalog dicatat dari sumber yang dimasukkan pengguna dan memerlukan verifikasi terhadap tayangan aktual. Harga akhir mengikuti struktur penawaran di SATRIA.</p>`;return base+table};
+const originalSurvei=survei;survei=function(p){const base=originalSurvei(p);const refs=[];for(const w of p.penawaran||[])for(const item of p.items||[]){const r=w.catalogRefs?.[item.id];if(r)refs.push({w,item,r})}if(!refs.length)return base;const table=`<p class="doc-section-heading"><b>C. Referensi produk e-Katalog per rincian HPS</b></p><table class="tbl-reference-items"><thead><tr><th>No.</th><th>Barang HPS / Produk Katalog</th><th>Penyedia</th><th>Harga tayang/unit</th><th>Nego/unit</th><th>Sumber dan tanggal</th></tr></thead><tbody>${refs.map(({w,item,r},i)=>`<tr><td>${i+1}</td><td>${escapeValue(item.nama)}<div style="font-size:9pt">Produk katalog: ${escapeValue(r.name)}${r.spec?`<div>${escapeValue(r.spec)}</div>`:''}</div></td><td>${escapeValue(r.seller||PY(w.pen).nama)}</td><td class="n">${money(r.displayPrice)}</td><td class="n">${r.negotiatedBase?money((r.negotiatedBase||0)+(r.negotiatedTax||0)):'Belum nego'}</td><td>${r.link?`<span>${escapeValue(r.link)}</span>`:'Input manual'}<div>${escapeValue(r.date?satriaDateId(r.date):'')}</div></td></tr>`).join('')}</tbody></table><p class="doc-note">Data referensi katalog dicatat dari sumber yang dimasukkan pengguna dan memerlukan verifikasi terhadap tayangan aktual. Harga akhir mengikuti struktur penawaran di SATRIA.</p>`;return base+table};
 window.SATRIA_SMART_SURVEY={parseProductUrl:fromUrl,parseCopiedText:copiedBreakdown,computeDisplayPrice:calcTayang};
 })();
 </script>
@@ -9147,7 +9323,7 @@ window.SATRIA_SURVEY_PRO=Object.freeze({panel,afterMainSave,score,extrasTable,pa
   }
   const btn=document.querySelector('#satriaMobileMenuToggle');
   if(btn){btn.setAttribute('aria-label','Buka atau tutup menu navigasi SATRIA');}
-  document.title='SATRIA NEXT 3.0.59.2 | '+(routeNames[page]||'Integrated Government Intelligence Platform');
+  document.title='SATRIA NEXT 3.0.59.18 | '+(routeNames[page]||'Integrated Government Intelligence Platform');
  };
  window.addEventListener('hashchange',apply);
  document.addEventListener('DOMContentLoaded',apply,{once:true});
@@ -10213,9 +10389,9 @@ window.addEventListener('click',ev=>{
 
 </script>
 
-<style id="satria-3593-dpp-signature-layout">
-/* 3.0.59.3 — DPP: cap dan tanda tangan harus saling bersentuhan secara proporsional,
-   dengan tumpang tindih ringan dan tetap etis pada pratinjau maupun cetak A4 100%. */
+<style id="satria-3596-dpp-signature-layout">
+/* 3.0.59.7 — DPP: cap dan tanda tangan dibuat lebih dekat lagi
+   dengan overlap ringan yang lebih rapat namun tetap proporsional dan etis. */
 .doc[data-document-type="dpp"] .satria-dpp-signature,
 #satria-print-root .doc[data-document-type="dpp"] .satria-dpp-signature {
   width:330px!important;
@@ -10263,19 +10439,19 @@ window.addEventListener('click',ev=>{
 .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-cap,
 #satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-cap {
   z-index:1!important;
-  left:2mm!important;
-  top:.3mm!important;
-  width:20.5mm!important;
-  height:20.2mm!important;
+  left:2.6mm!important;
+  top:.35mm!important;
+  width:20.2mm!important;
+  height:19.9mm!important;
   object-position:center center!important;
 }
 .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-ttd,
 #satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-ttd {
   z-index:2!important;
-  left:16.2mm!important;
-  top:1.1mm!important;
-  width:45.5mm!important;
-  height:17.4mm!important;
+  left:14.2mm!important;
+  top:1.0mm!important;
+  width:46.2mm!important;
+  height:17.6mm!important;
   object-position:left center!important;
 }
 /* Bila hanya satu berkas gambar tersedia, tetap tampil terpusat dan rapi. */
@@ -10377,7 +10553,7 @@ window.addEventListener('click',ev=>{
    if(refs.some(r=>r.imageUrl&&!String(r.spec||'').trim()))warnings.push('Sebagian foto referensi belum memiliki spesifikasi katalog; baris kosong disembunyikan dari lampiran.');
    if(!refs.length)warnings.push('Belum ada referensi produk katalog untuk paket ini.');
    else if(refs.some(r=>r.imageUrl&&!r.date))warnings.push('Tanggal survei pada sebagian referensi foto belum diisi.');
-   if(signer&&(!signer.ttd||!signer.cap))warnings.push('Gambar TTD atau cap PPK belum lengkap; pastikan penandatanganan resmi dilakukan sesuai prosedur.');
+   if(p.docPpkSettings?.dpp?.showImages!==false&&signer&&(!signer.ttd||!signer.cap))warnings.push('Gambar TTD atau cap PPK belum lengkap; pastikan penandatanganan resmi dilakukan sesuai prosedur.');
    return {blockers,warnings};
  }
  function panel(p){const a=checks(p);return `<div class="satria594-check-panel no-print" role="status" aria-label="Pemeriksaan cetak DPP"><strong>✦ Pemeriksaan DPP sebelum cetak</strong><p style="margin:5px 0">${a.blockers.length?`<span class="satria594-critical">${a.blockers.length} masalah wajib diperbaiki sebelum cetak resmi</span>`:'<span style="color:#13784e">Data wajib dasar terisi</span>'}${a.warnings.length?` · ${a.warnings.length} catatan untuk diverifikasi`:''}</p>${a.blockers.length?`<ul>${a.blockers.map(x=>`<li class="satria594-critical">${esc594(x)}</li>`).join('')}</ul>`:''}${a.warnings.length?`<ul>${a.warnings.map(x=>`<li class="satria594-warning">${esc594(x)}</li>`).join('')}</ul>`:''}<small>Periksa data pada menu Paket Pengadaan, Data Master, dan Pengaturan Sistem. SATRIA tidak mengisi atau mengarang data yang tidak tersedia.</small></div>`}
@@ -10400,7 +10576,7 @@ window.addEventListener('click',ev=>{
 })();
 </script>
 <style id="satria-3595-dpp-pagination-spec-only">
-/* SATRIA 3.0.59.5 — Pagination + lembar lampiran DPP saja.
+/* SATRIA 3.0.59.7 — Pagination + lembar lampiran DPP saja.
    Tidak menyentuh Smart Survey, Kalkulator Nego maupun generator lainnya. */
 @page satriaDppCompactA4 {
   size:A4 portrait;
@@ -10463,6 +10639,740 @@ window.addEventListener('click',ev=>{
     overflow:visible!important;
     max-height:none!important;
   }
+}
+</style>
+
+<style id="satria-3597-dpp-signature-control-css">
+/* User-customizable DPP signature; the --satria-dpp-* custom values are sanitized as mm numbers.
+   CSS comes LAST so preview and A4 print use the identical positions. */
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images {
+  width:68mm!important;
+  height:20mm!important;
+  min-height:20mm!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+}
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-cap,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-cap {
+  left:var(--satria-dpp-cap-x,2.8mm)!important;
+  top:var(--satria-dpp-cap-y,0.3mm)!important;
+  width:var(--satria-dpp-cap-w,19.5mm)!important;
+  height:var(--satria-dpp-cap-h,19mm)!important;
+  object-position:center center!important;
+}
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-ttd,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-ttd {
+  left:var(--satria-dpp-ttd-x,15.2mm)!important;
+  top:var(--satria-dpp-ttd-y,1mm)!important;
+  width:var(--satria-dpp-ttd-w,45.5mm)!important;
+  height:var(--satria-dpp-ttd-h,17.5mm)!important;
+  object-position:left center!important;
+  mix-blend-mode:multiply!important;
+}
+/* The preserved one-image fallback keeps controls predictable even if a PPK has only one image. */
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-ttd:only-child,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-ttd:only-child {
+  left:var(--satria-dpp-ttd-x,15.2mm)!important;
+  top:var(--satria-dpp-ttd-y,1mm)!important;
+  width:var(--satria-dpp-ttd-w,45.5mm)!important;
+  height:var(--satria-dpp-ttd-h,17.5mm)!important;
+}
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-cap:only-child,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-cap:only-child {
+  left:var(--satria-dpp-cap-x,2.8mm)!important;
+  top:var(--satria-dpp-cap-y,0.3mm)!important;
+  width:var(--satria-dpp-cap-w,19.5mm)!important;
+  height:var(--satria-dpp-cap-h,19mm)!important;
+}
+.satria597-panel{margin:12px 0;padding:15px;border:1px solid #dcd9f3;background:linear-gradient(135deg,#f7f6ff,#f4fbff);border-radius:16px;color:#22243c;font-family:Arial,Helvetica,sans-serif;}
+.satria597-panel *{box-sizing:border-box;}
+.satria597-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;}
+.satria597-panel-head b{font-size:14px;}
+.satria597-panel-head p,.satria597-help{font-size:12px;line-height:1.5;color:#575b75;margin:5px 0 0;}
+.satria597-preset-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.satria597-preset-row label{font-size:12px;font-weight:700;}
+.satria597-preset-row select{min-width:174px;max-width:100%;padding:9px 12px;border:1px solid #d1d4e4;border-radius:11px;background:white;color:#22243c;}
+.satria597-details{margin-top:12px;border:1px solid #e1e0ee;background:#fff;border-radius:12px;padding:11px;}
+.satria597-details summary{cursor:pointer;font-weight:700;font-size:12px;}
+.satria597-slidergrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px;}
+.satria597-group{min-width:0;padding:9px;background:#f8f8fc;border-radius:10px;}
+.satria597-group b{font-size:12px;color:#343754;display:block;margin-bottom:8px;}
+.satria597-row{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:center;margin:9px 0;}
+.satria597-row label{font-size:11px;font-weight:650;min-width:0;}
+.satria597-row output{font-size:11px;font-weight:750;font-variant-numeric:tabular-nums;}
+.satria597-row input{grid-column:1/-1;width:100%;accent-color:#6354c9;touch-action:pan-y;}
+.satria597-actions{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:12px;}
+.satria597-actions button{border-radius:11px;padding:10px 13px;min-height:40px;border:1px solid #c8c8e5;font-size:12px;font-weight:750;background:#fff;color:#333653;cursor:pointer;}
+.satria597-actions button.satria597-primary{background:#5142b7;color:#fff;border-color:#5142b7;}
+.satria597-actions button:disabled{opacity:.55;cursor:not-allowed;}
+.satria597-status{margin-top:9px;font-size:12px;color:#575b75;line-height:1.45;}
+@media(max-width:580px){.satria597-panel{padding:12px;}.satria597-slidergrid{grid-template-columns:minmax(0,1fr);}.satria597-preset-row{align-items:stretch;}.satria597-preset-row select{width:100%;}.satria597-actions button{flex:1 1 auto;}}
+@media print{.satria597-panel{display:none!important;}}
+</style>
+<script id="satria-3597-dpp-signature-controls">
+/* SATRIA NEXT 3.0.59.7 — DPP-only layout presets + manual overrides, stored per package.
+   Writes only paket.dppSignatureLayout; never mutates signed image bytes, other documents,
+   negotiation, Smart Survey, or pemenang. */
+(function(){'use strict';
+ const keys=['capX','capY','capW','capH','ttdX','ttdY','ttdW','ttdH'];
+ const limits={
+  capX:[-5,25],capY:[-3,5],capW:[13,27],capH:[13,20],
+  ttdX:[-5,35],ttdY:[-3,7],ttdW:[27,65],ttdH:[11,20]
+ };
+ const presets={
+  rapat:{capX:2.8,capY:.3,capW:19.5,capH:19,ttdX:11.7,ttdY:1,ttdW:47,ttdH:17.5},
+  sedang:{capX:2.8,capY:.3,capW:19.5,capH:19,ttdX:15.2,ttdY:1,ttdW:45.5,ttdH:17.5},
+  formal:{capX:2.8,capY:.3,capW:19.5,capH:19,ttdX:18.4,ttdY:1.1,ttdW:43,ttdH:17.3}
+ };
+ const props={capX:'--satria-dpp-cap-x',capY:'--satria-dpp-cap-y',capW:'--satria-dpp-cap-w',capH:'--satria-dpp-cap-h',ttdX:'--satria-dpp-ttd-x',ttdY:'--satria-dpp-ttd-y',ttdW:'--satria-dpp-ttd-w',ttdH:'--satria-dpp-ttd-h'};
+ const labels={capX:'Geser kiri / kanan',capY:'Geser atas / bawah',capW:'Lebar stempel',capH:'Tinggi stempel',ttdX:'Geser kiri / kanan',ttdY:'Geser atas / bawah',ttdW:'Lebar tanda tangan',ttdH:'Tinggi tanda tangan'};
+ const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const clamp=(v,k,fallback)=>{const n=Number(v),[a,b]=limits[k];return Math.round(Math.min(b,Math.max(a,Number.isFinite(n)?n:fallback))*10)/10;};
+ function clean(raw){const valid=raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{};const mode=['rapat','sedang','formal','manual'].includes(valid.mode)?valid.mode:'sedang';const defaults=presets[mode==='manual'?'sedang':mode];const result={mode};for(const k of keys)result[k]=mode==='manual'?clamp(valid[k],k,presets.sedang[k]):defaults[k];return result;}
+ function styleValue(v){return keys.map(k=>props[k]+':'+clamp(v[k],k,presets.sedang[k])+'mm').join(';')+';';}
+ function inlineStyle(p){return styleValue(clean(p?.dppSignatureLayout));}
+ function readValues(panel){const result={mode:panel.querySelector('[data-satria597-preset]')?.value||'sedang'};for(const k of keys)result[k]=clamp(panel.querySelector('[data-satria597-field="'+k+'"]')?.value,k,presets.sedang[k]);return result;}
+ function apply(panel,value){const v=clean(value);const select=panel.querySelector('[data-satria597-preset]');if(select)select.value=v.mode;
+  for(const k of keys){const input=panel.querySelector('[data-satria597-field="'+k+'"]');if(input)input.value=String(v[k]);const output=panel.querySelector('[data-satria597-value="'+k+'"]');if(output)output.textContent=v[k].toFixed(1)+' mm';}
+  const doc=panel.closest('.dok-preview-section')||panel.parentElement;
+  const imageRegion=doc?.querySelector('.doc[data-document-type="dpp"] .satria-dpp-ppk-images')||document.querySelector('.doc[data-document-type="dpp"] .satria-dpp-ppk-images');
+  if(imageRegion)for(const k of keys)imageRegion.style.setProperty(props[k],v[k]+'mm');
+  panel.dataset.satria597Pending=JSON.stringify(v);
+  const status=panel.querySelector('[data-satria597-status]');if(status)status.textContent='Pratinjau diperbarui. Klik Simpan Tata Letak untuk menyimpan ke paket DPP.';
+ }
+ function panel(p){const v=clean(p.dppSignatureLayout);const disabled=typeof canWrite==='function'&&!canWrite();const slider=(k)=>`<div class="satria597-row"><label for="satria597-${esc(p.id)}-${k}">${labels[k]}</label><output data-satria597-value="${k}">${v[k].toFixed(1)} mm</output><input id="satria597-${esc(p.id)}-${k}" data-satria597-field="${k}" type="range" min="${limits[k][0]}" max="${limits[k][1]}" step="0.1" value="${v[k]}" ${disabled?'disabled':''}></div>`;
+ return `<section class="satria597-panel no-print" data-satria597-panel data-pid="${esc(p.id)}" aria-label="Pengaturan manual tanda tangan dan stempel DPP">
+  <div class="satria597-panel-head"><div><b>✍ Atur Posisi TTD & Stempel DPP</b><p>Standar: Mode Sedang. Sesuaikan sendiri tanpa mengubah gambar asli di Data Master.</p></div></div>
+  <div class="satria597-preset-row"><label for="satria597Mode">Tata letak</label><select id="satria597Mode" data-satria597-preset ${disabled?'disabled':''}><option value="rapat" ${v.mode==='rapat'?'selected':''}>Rapat</option><option value="sedang" ${v.mode==='sedang'?'selected':''}>Sedang (standar)</option><option value="formal" ${v.mode==='formal'?'selected':''}>Formal</option><option value="manual" ${v.mode==='manual'?'selected':''}>Manual (sesuaikan sendiri)</option></select></div>
+  <details class="satria597-details" ${v.mode==='manual'?'open':''}><summary>Pengaturan manual: posisi dan ukuran gambar</summary><div class="satria597-slidergrid"><div class="satria597-group"><b>Stempel / cap PPK</b>${keys.filter(k=>k.startsWith('cap')).map(slider).join('')}</div><div class="satria597-group"><b>Tanda tangan PPK</b>${keys.filter(k=>k.startsWith('ttd')).map(slider).join('')}</div></div><p class="satria597-help">Geser sambil melihat pratinjau DPP. Nilai dalam mm untuk A4 skala 100%. PNG dengan ruang transparan lebar mungkin memerlukan pergeseran tambahan.</p></details>
+  <div class="satria597-actions"><button type="button" class="satria597-primary" data-satria597-action="save" ${disabled?'disabled':''}>Simpan Tata Letak</button><button type="button" data-satria597-action="reset" ${disabled?'disabled':''}>Kembalikan Mode Sedang</button></div>
+  <div class="satria597-status" data-satria597-status role="status" aria-live="polite">${p.dppSignatureLayout?'Menggunakan tata letak yang tersimpan di paket ini.':'Mode Sedang aktif sebagai standar. Klik Simpan agar preferensi tercatat di paket.'}</div>
+ </section>`;
+ }
+ function findPack(panel){const id=panel.dataset.pid;return typeof P==='function'?P(id):null;}
+ document.addEventListener('input',ev=>{const t=ev.target;if(!t?.matches?.('[data-satria597-field]'))return;const panel=t.closest('[data-satria597-panel]');if(!panel)return;ev.stopImmediatePropagation();ev.stopPropagation();const preset=panel.querySelector('[data-satria597-preset]');if(preset)preset.value='manual';apply(panel,readValues(panel));},true);
+ document.addEventListener('change',ev=>{const t=ev.target;if(!t?.matches?.('[data-satria597-preset],[data-satria597-field]'))return;const panel=t.closest('[data-satria597-panel]');if(!panel)return;ev.stopImmediatePropagation();ev.stopPropagation();if(t.matches('[data-satria597-preset]')){const mode=t.value;if(mode==='manual'){const current=readValues(panel);apply(panel,{...current,mode:'manual'});panel.querySelector('.satria597-details')?.setAttribute('open','');}else apply(panel,{...presets[mode],mode});}else apply(panel,{...readValues(panel),mode:'manual'});},true);
+ document.addEventListener('click',ev=>{const btn=ev.target.closest?.('[data-satria597-action]');if(!btn)return;const panel=btn.closest('[data-satria597-panel]');if(!panel)return;ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();if(typeof canWrite==='function'&&!canWrite()){const status=panel.querySelector('[data-satria597-status]');if(status)status.textContent='Akun ini tidak memiliki izin mengubah paket.';return;}
+  const p=findPack(panel);if(!p){const status=panel.querySelector('[data-satria597-status]');if(status)status.textContent='Paket tidak ditemukan. Muat ulang dokumen.';return;}
+  const value=btn.dataset.satria597Action==='reset'?{mode:'sedang',...presets.sedang}:readValues(panel);
+  p.dppSignatureLayout=clean(value);
+  apply(panel,p.dppSignatureLayout);
+  sync('paket','Tata letak TTD dan stempel DPP disimpan untuk paket '+(p.rup||p.id));
+  render();
+ },true);
+ window.SATRIA_DPP_SIGN_LAYOUT={panel,inlineStyle,clean,presets,limits};
+})();
+</script>
+
+
+<style id="satria-3599-dpp-hps-thin-grid-clarity">
+/* SATRIA NEXT 3.0.59.9 — tabel HPS DPP memakai grid 1px yang lebih jelas.
+   Penyebab garis pemisah tampak samar adalah border-collapse pada beberapa browser/PDF
+   dapat me-render garis gabungan di posisi sub-pixel sehingga terlihat abu-abu/faint.
+   Solusi: pakai model border terpisah namun tetap 1px, sehingga setiap pemisah sel stabil. */
+#main .doc[data-document-type="dpp"] table.tbl-dpp-items,
+#satria-print-root .doc[data-document-type="dpp"] table.tbl-dpp-items {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border: 1px solid #000 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background:#fff !important;
+}
+#main .doc[data-document-type="dpp"] table.tbl-dpp-items :is(thead,tbody,tfoot,tr),
+#satria-print-root .doc[data-document-type="dpp"] table.tbl-dpp-items :is(thead,tbody,tfoot,tr) {
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+#main .doc[data-document-type="dpp"] table.tbl-dpp-items :is(th,td),
+#satria-print-root .doc[data-document-type="dpp"] table.tbl-dpp-items :is(th,td) {
+  border: 0 !important;
+  border-right: 1px solid #000 !important;
+  border-bottom: 1px solid #000 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background:#fff !important;
+}
+#main .doc[data-document-type="dpp"] table.tbl-dpp-items tr > :first-child,
+#satria-print-root .doc[data-document-type="dpp"] table.tbl-dpp-items tr > :first-child {
+  border-left: 1px solid #000 !important;
+}
+#main .doc[data-document-type="dpp"] table.tbl-dpp-items thead tr:first-child > *,
+#satria-print-root .doc[data-document-type="dpp"] table.tbl-dpp-items thead tr:first-child > *,
+#main .doc[data-document-type="dpp"] table.tbl-dpp-items tbody tr:first-child > *,
+#satria-print-root .doc[data-document-type="dpp"] table.tbl-dpp-items tbody tr:first-child > * {
+  border-top: 1px solid #000 !important;
+}
+</style>
+
+<style id="satria-35910-dpp-final-typography">
+/* SATRIA NEXT 3.0.59.18 — DPP ONLY. Finishing tipografi mengacu pada PDF contoh asli.
+   Tidak menyentuh struktur data, isi hukum, foto, cap/TTD, atau generator dokumen lain.
+   Tidak memperkecil halaman dengan transform/zoom, dan tidak mengganti grid HPS 1px. */
+.doc[data-document-type="dpp"] .tbl-letter-meta,
+#satria-print-root .doc[data-document-type="dpp"] .tbl-letter-meta {
+  table-layout:fixed!important;
+  border-spacing:0!important;
+}
+.doc[data-document-type="dpp"] .tbl-letter-meta td:first-child,
+#satria-print-root .doc[data-document-type="dpp"] .tbl-letter-meta td:first-child {
+  width:41mm!important;
+  vertical-align:top!important;
+  text-align:left!important;
+}
+.doc[data-document-type="dpp"] .tbl-letter-meta td:nth-child(2),
+#satria-print-root .doc[data-document-type="dpp"] .tbl-letter-meta td:nth-child(2) {
+  width:3.6mm!important;
+  vertical-align:top!important;
+  text-align:center!important;
+}
+.doc[data-document-type="dpp"] .tbl-letter-meta td:nth-child(3),
+#satria-print-root .doc[data-document-type="dpp"] .tbl-letter-meta td:nth-child(3) {
+  width:auto!important;
+  vertical-align:top!important;
+  text-align:left!important;
+  overflow-wrap:break-word!important;
+}
+.doc[data-document-type="dpp"] p.doc-title,
+#satria-print-root .doc[data-document-type="dpp"] p.doc-title {
+  text-align:center!important;
+  font-weight:700!important;
+  line-height:1.2!important;
+  text-underline-offset:2px!important;
+}
+/* Sekat subbagian tidak boleh meninggalkan judul atau paragraf pendek terbelah. */
+.doc[data-document-type="dpp"] > p.satria-dpp-service-block,
+#satria-print-root .doc[data-document-type="dpp"] > p.satria-dpp-service-block {
+  break-inside:avoid!important;
+  page-break-inside:avoid!important;
+}
+.doc[data-document-type="dpp"] > p.doc-section-heading,
+#satria-print-root .doc[data-document-type="dpp"] > p.doc-section-heading {
+  break-after:avoid!important;
+  page-break-after:avoid!important;
+}
+.doc[data-document-type="dpp"] > p.satria594-spec-block,
+#satria-print-root .doc[data-document-type="dpp"] > p.satria594-spec-block {
+  break-inside:avoid!important;
+  page-break-inside:avoid!important;
+}
+@media print {
+  #satria-print-root .doc[data-document-type="dpp"] {
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:9.35pt!important;
+    line-height:1.135!important;
+    font-weight:400!important;
+    word-spacing:normal!important;
+    transform:none!important;
+    zoom:1!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] :is(p,li) {
+    font-size:9.35pt!important;
+    line-height:1.135!important;
+    letter-spacing:normal!important;
+    word-spacing:normal!important;
+  }
+  /* Jarak terukur: sedikit lebih lapang pada teks, tanpa memperbesar total tinggi halaman. */
+  #satria-print-root .doc[data-document-type="dpp"] > p:not(.doc-title) {
+    margin-top:0.85mm!important;
+    margin-bottom:0.85mm!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] > ol,
+  #satria-print-root .doc[data-document-type="dpp"] > ul {
+    margin-top:0.35mm!important;
+    margin-bottom:0.35mm!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .tbl-letter-meta {
+    margin-top:1.2mm!important;
+    margin-bottom:2.1mm!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .tbl-letter-meta td {
+    font-size:8.9pt!important;
+    line-height:1.135!important;
+    padding:1.0px 3px!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] p.doc-title {
+    font-size:10.5pt!important;
+    margin:2.2mm 0 2.3mm!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .tbl-dpp-items :is(th,td) {
+    line-height:1.17!important;
+    padding:1.8px 3px!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .satria594-closing-signature {
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+    margin-top:.8mm!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .satria594-closing-signature > p {
+    margin:.8mm 0!important;
+    line-height:1.135!important;
+  }
+  /* Kontrol TTD dan cap manual tetap berwenang mengatur koordinat via CSS variable. */
+  #satria-print-root .doc[data-document-type="dpp"] .satria594-closing-signature .satria-dpp-signature {
+    margin:1.7mm 0 0 auto!important;
+  }
+}
+</style>
+
+<style id="satria-35912-quality-print">
+/* Penyempurnaan keterbacaan hanya dokumen 3 (RFI) dan 5 (Formulir Penetapan).
+   Format BAHP dan BA Reviu DPP tetap menggunakan template khusus sumber. */
+#main .doc[data-document-type="rfi"] table.tbl-rfi :is(td,th),
+#satria-print-root .doc[data-document-type="rfi"] table.tbl-rfi :is(td,th){font-size:8pt!important;line-height:1.2!important}
+#main .doc[data-document-type="metode"] .metode-main-table :is(td,th),
+#satria-print-root .doc[data-document-type="metode"] .metode-main-table :is(td,th){font-size:7.9pt!important;line-height:1.16!important;padding:2.2px 3px!important}
+#main .doc[data-document-type="metode"] .metode-main-table .metode-column-head th,
+#satria-print-root .doc[data-document-type="metode"] .metode-main-table .metode-column-head th{font-size:8pt!important}
+#main .doc[data-document-type="metode"] .metode-reasons li,
+#satria-print-root .doc[data-document-type="metode"] .metode-reasons li{font-size:7.9pt!important;line-height:1.16!important}
+#main .doc[data-document-type="metode"] .metode-footnote,
+#satria-print-root .doc[data-document-type="metode"] .metode-footnote{font-size:8pt!important;line-height:1.18!important}
+#main .doc[data-document-type="metode"] .metode-meta-table td,
+#satria-print-root .doc[data-document-type="metode"] .metode-meta-table td{font-size:8pt!important;line-height:1.16!important}
+#main .doc[data-document-type="metode"] .metode-signature-table td,
+#satria-print-root .doc[data-document-type="metode"] .metode-signature-table td{font-size:8pt!important;line-height:1.16!important}
+/* Format surat nomor 6, BAHP dan BA Reviu DPP tidak diubah lewat stylesheet ini. */
+</style>
+
+<style id="satria-35912-metode-pagination">
+@media print {
+/* Form Penetapan lebih mudah dibaca dalam dua bagian utuh jika satu halaman tidak cukup. */
+#satria-print-root .doc[data-document-type="metode"] .metode-main-table {break-inside:auto!important;page-break-inside:auto!important;}
+#satria-print-root .doc[data-document-type="metode"] .metode-main-table tbody {break-inside:auto!important;page-break-inside:auto!important;}
+#satria-print-root .doc[data-document-type="metode"] .metode-main-table .satria35912-page-second {break-before:page!important;page-break-before:always!important;}
+#satria-print-root .doc[data-document-type="metode"] .metode-signature-table .metode-sign-people {break-inside:avoid!important;page-break-inside:avoid!important;}
+#satria-print-root .doc[data-document-type="rfi"] .satria35912-rfi-half-break {break-before:page!important;page-break-before:always!important;}
+}
+</style>
+
+<style id="satria-35913-bahp-signature-dpp-parity">
+/* Hanya BAHP. Data gambar tetap dari pejabat BAHP; geometri dari preferensi DPP per paket.
+   Tidak mengubah dua kolom/format PDF rujukan BAHP dan dokumen lain. */
+.doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images {
+  display:block!important;
+  flex:0 0 20mm!important;
+  position:relative!important;
+  width:68mm!important;
+  max-width:100%!important;
+  height:20mm!important;
+  min-height:20mm!important;
+  margin:1mm 0 0.5mm!important;
+  padding:0!important;
+  overflow:hidden!important;
+  line-height:normal!important;
+  box-sizing:border-box!important;
+  break-inside:avoid!important;
+  page-break-inside:avoid!important;
+}
+.doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images > img,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images > img {
+  display:block!important;
+  position:absolute!important;
+  float:none!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  min-width:0!important;
+  min-height:0!important;
+  object-fit:contain!important;
+  box-sizing:border-box!important;
+  transform:none!important;
+  mix-blend-mode:multiply!important;
+}
+.doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images > .satria-dpp-cap,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images > .satria-dpp-cap {
+  z-index:1!important;
+  left:var(--satria-dpp-cap-x,2.8mm)!important;
+  top:var(--satria-dpp-cap-y,0.3mm)!important;
+  width:var(--satria-dpp-cap-w,19.5mm)!important;
+  height:var(--satria-dpp-cap-h,19mm)!important;
+  object-position:center center!important;
+}
+.doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images > .satria-dpp-ttd,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images > .satria-dpp-ttd {
+  z-index:2!important;
+  left:var(--satria-dpp-ttd-x,15.2mm)!important;
+  top:var(--satria-dpp-ttd-y,1mm)!important;
+  width:var(--satria-dpp-ttd-w,45.5mm)!important;
+  height:var(--satria-dpp-ttd-h,17.5mm)!important;
+  object-position:left center!important;
+}
+/* Bila hanya tanda tangan atau hanya cap, gunakan posisi yang tersimpan. */
+.doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-signature-spacer,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-signature-spacer {
+  height:20mm!important;
+  min-height:20mm!important;
+  width:68mm!important;
+  max-width:100%!important;
+  margin:1mm 0 0.5mm!important;
+  flex:0 0 20mm!important;
+}
+.doc[data-document-type="bahp"] .bahp-signatures > div > b,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-signatures > div > b {
+  margin-top:0!important;
+}
+</style>
+<style id="satria35914-ppk-studio-style">
+/* Menu pengaturan berada di luar dokumen cetak. Generator lain tetap utuh. */
+.satria914-panel{border:1px solid #d9d8ef;border-radius:15px;background:linear-gradient(125deg,#f8f7ff,#f4fbff);padding:16px;margin:12px 0;color:#25263d;font-family:Arial,sans-serif}
+.satria914-panel *{box-sizing:border-box}.satria914-panel h3{margin:0 0 4px;font-size:15px}.satria914-panel p{margin:3px 0 10px;font-size:12px;color:#525a74;line-height:1.5}
+.satria914-main{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px}.satria914-field{display:flex;flex-direction:column;gap:5px;min-width:0}.satria914-field label{font-size:12px;font-weight:700}.satria914-field select{width:100%;padding:10px;border-radius:10px;border:1px solid #cbcde1;background:#fff;color:#222;font-size:13px}
+.satria914-switch{display:flex;align-items:center;gap:9px;padding:9px 10px;background:white;border:1px solid #dedff0;border-radius:10px;cursor:pointer;font-size:12px;font-weight:650;min-height:43px}.satria914-switch input{width:17px;height:17px;accent-color:#5848b9}
+.satria914-layout{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}.satria914-layout .satria914-field{min-width:150px;flex:1}
+.satria914-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.satria914-grp{padding:10px;background:#fff;border:1px solid #e0e0ec;border-radius:11px}.satria914-grp>strong{font-size:12px}
+.satria914-range{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;margin-top:10px;align-items:center}.satria914-range label,.satria914-range output{font-size:11px}.satria914-range output{font-variant-numeric:tabular-nums;font-weight:700}.satria914-range input{grid-column:1/-1;width:100%;accent-color:#5848b9}
+.satria914-actions{display:flex;flex-wrap:wrap;gap:8px;margin:13px 0 0}.satria914-actions button{background:#fff;border:1px solid #bdbbd9;border-radius:10px;padding:10px 13px;font-weight:700;font-size:12px;color:#272540;min-height:40px;cursor:pointer}.satria914-actions .satria914-save{background:#5142b7;color:white;border-color:#5142b7}.satria914-actions button:disabled{opacity:.5;cursor:not-allowed}
+.satria914-live{font-size:11px;color:#494965;margin-top:9px}.satria914-sample{display:flex;align-items:center;gap:12px;margin-top:10px;padding:9px;background:white;border:1px dashed #cfcee5;border-radius:11px;min-height:106px}.satria914-sample .satria914-demo{width:68mm;height:21mm;max-width:100%;position:relative;overflow:hidden;flex-shrink:0}.satria914-sample .satria914-sample-text{font-size:11px;color:#65667a;line-height:1.5}
+@media(max-width:700px){.satria914-main,.satria914-grid{grid-template-columns:1fr}.satria914-panel{padding:12px}.satria914-sample{flex-wrap:wrap}.satria914-actions button{flex:1 1 auto}}
+@media print{.satria914-panel{display:none!important}}
+/* Semua blok PPK menggunakan gambar cap dahulu, lalu TTD, mengikuti Mode Sedang DPP. */
+.doc .satria914-images,#satria-print-root .doc .satria914-images{width:68mm!important;max-width:100%!important;height:21mm!important;min-height:21mm!important;position:relative!important;display:block!important;margin:1.4mm auto .8mm!important;padding:0!important;overflow:hidden!important;break-inside:avoid!important;page-break-inside:avoid!important}
+.doc .satria914-images>img,#satria-print-root .doc .satria914-images>img,.satria914-demo>img{position:absolute!important;display:block!important;margin:0!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;object-fit:contain!important;transform:none!important;mix-blend-mode:multiply!important}
+.doc .satria914-images>.satria914-cap,#satria-print-root .doc .satria914-images>.satria914-cap,.satria914-demo>.satria914-cap{left:var(--satria-dpp-cap-x,2.8mm)!important;top:var(--satria-dpp-cap-y,.3mm)!important;width:var(--satria-dpp-cap-w,19.5mm)!important;height:var(--satria-dpp-cap-h,19mm)!important;z-index:1!important}
+.doc .satria914-images>.satria914-ttd,#satria-print-root .doc .satria914-images>.satria914-ttd,.satria914-demo>.satria914-ttd{left:var(--satria-dpp-ttd-x,15.2mm)!important;top:var(--satria-dpp-ttd-y,1mm)!important;width:var(--satria-dpp-ttd-w,45.5mm)!important;height:var(--satria-dpp-ttd-h,17.5mm)!important;object-position:left center!important;z-index:2!important}
+.doc[data-document-type="bahp"] .bahp-signatures .satria914-images{margin:1mm 0 .5mm!important}
+.doc[data-document-type="idkb"] .satria914-images,.doc[data-document-type="metode"] .satria914-images{margin-left:0!important}
+.doc[data-document-type="spek"] .satria914-images{margin:1mm auto!important}
+.doc[data-document-type="reviu"] .rv-sign-col .satria914-images{margin:1mm 0!important}
+.doc .satria914-signature-blank{height:21mm;min-height:21mm;display:block;break-inside:avoid!important}
+</style>
+<script id="satria35914-doc-ppk-control">
+(function(){'use strict';
+ const TARGETS={idkb:'2 · Identifikasi Kebutuhan',metode:'5 · Formulir Penetapan',sppbj:'6 · Surat Perintah Pengadaan',spek:'7 · Spesifikasi Teknis',dpp:'8 · DPP',reviu:'10 · BA Reviu DPP',bahp:'11 · BAHP'};
+ const keys=['capX','capY','capW','capH','ttdX','ttdY','ttdW','ttdH'];
+ const ranges={capX:[-5,25],capY:[-3,5],capW:[13,27],capH:[13,20],ttdX:[-5,35],ttdY:[-3,7],ttdW:[27,65],ttdH:[11,20]};
+ const presets=window.SATRIA_DPP_SIGN_LAYOUT?.presets||{
+ rapat:{capX:2.8,capY:.3,capW:19.5,capH:19,ttdX:11.7,ttdY:1,ttdW:47,ttdH:17.5},
+ sedang:{capX:2.8,capY:.3,capW:19.5,capH:19,ttdX:15.2,ttdY:1,ttdW:45.5,ttdH:17.5},
+ formal:{capX:2.8,capY:.3,capW:19.5,capH:19,ttdX:18.4,ttdY:1.1,ttdW:43,ttdH:17.3}};
+ const labels={capX:'Kiri/kanan stempel',capY:'Atas/bawah stempel',capW:'Lebar stempel',capH:'Tinggi stempel',ttdX:'Kiri/kanan TTD',ttdY:'Atas/bawah TTD',ttdW:'Lebar TTD',ttdH:'Tinggi TTD'};
+ const vars={capX:'--satria-dpp-cap-x',capY:'--satria-dpp-cap-y',capW:'--satria-dpp-cap-w',capH:'--satria-dpp-cap-h',ttdX:'--satria-dpp-ttd-x',ttdY:'--satria-dpp-ttd-y',ttdW:'--satria-dpp-ttd-w',ttdH:'--satria-dpp-ttd-h'};
+ function h(s){return String(s??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));}
+ function bounded(val,k,base){const n=Number(val),[lo,hi]=ranges[k];return Math.round(Math.min(hi,Math.max(lo,Number.isFinite(n)?n:base))*10)/10;}
+ function norm(raw,base){const src=raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{};const fallback=base&&typeof base==='object'?base:{};const mode=['rapat','sedang','formal','manual'].includes(src.mode)?src.mode:(['rapat','sedang','formal','manual'].includes(fallback.mode)?fallback.mode:'sedang');const defaults=presets[mode==='manual'?'sedang':mode];const res={mode};for(const k of keys)res[k]=mode==='manual'?bounded(src[k]??fallback[k],k,presets.sedang[k]):defaults[k];return res;}
+ function get(p,doc){if(!TARGETS[doc])return null;const old=p.docPpkSettings?.[doc]||{};const id=String(old.ppkId||(doc==='dpp'||doc==='reviu'?p.dppPpkId||p.ppk:p.ppk)||'');const fallback=(doc==='dpp'||doc==='bahp')?p.dppSignatureLayout:null;return {ppkId:id,showImages:old.showImages!==false,...norm(old,fallback)};}
+ function style(c){return keys.map(k=>vars[k]+':'+bounded(c[k],k,presets.sedang[k])+'mm').join(';')+';'}
+ function officer(p,c){return (S.pejabat||[]).find(x=>String(x.id)===String(c.ppkId)&&x.peran==='PPK'&&String(x.opd)===String(p.opd))||null;}
+ function picture(v,type){const raw=String(v||'').trim();if(!raw)return '';if(!/^https:\/\/[^\s"'<>]+$/i.test(raw)&&!/^data:image\/(?:png|jpeg|jpg|webp|gif);base64,[a-z0-9+/=\s]+$/i.test(raw)&&!/^satria-media:\/\/[a-f0-9-]+\/(?:opd|shared)\//i.test(raw))return '';return `<img class="satria914-${type}" src="${h(raw)}" alt="${type==='cap'?'Stempel PPK':'Tanda tangan PPK'}" decoding="async">`;}
+ function visual(x,c){const cap=c.showImages?picture(x?.cap,'cap'):'';const ttd=c.showImages?picture(x?.ttd,'ttd'):'';return `<div class="satria914-images${!c.showImages?' satria914-no-images':''}" style="${style(c)}" aria-label="${c.showImages?'Bidang tanda tangan dan stempel PPK':'Bidang tanda tangan kosong; gambar tidak dibubuhkan'}">${cap}${ttd}</div>`;}
+ function rewrite(html,p,doc,signer,c){const t=document.createElement('template');t.innerHTML=html;const image=visual(signer,c);const name=h(signer?.nama||'Belum dipilih'),nip=h(signer?.nip||'-');
+ if(doc==='dpp'){
+  const place=t.content.querySelector('.satria-dpp-ppk-images');if(place)place.outerHTML=image;
+ }else if(doc==='bahp'){
+  const block=t.content.querySelector('.bahp-signatures > div:first-child');if(block){const old=block.querySelector('.satria-bahp-ppk-images,.satria-bahp-signature-spacer');if(old)old.outerHTML=image;else block.insertAdjacentHTML('beforeend',image);const b=block.querySelector('b u');if(b)b.textContent=signer?.nama||'Belum dipilih';const spans=block.querySelectorAll(':scope > span');if(spans.length)spans[spans.length-1].textContent='NIP. '+(signer?.nip||'-');}
+ }else if(doc==='idkb'){
+  const cell=t.content.querySelector('table.satria-idkb-sign-table td.satria-idkb-approval-cell[data-satria-idkb-section="approval"]');
+  // Metadata PA/KPA/PPK dan Output hanya memuat identitas paket, BUKAN blok pengesahan.
+  // Pemilih tanda tangan wajib mengarah ke sel pengesahan paling akhir.
+  if(cell)cell.innerHTML=`Ditetapkan oleh,<br>PA/KPA/PPK<br>${h(OP(p).nama)}<div class="idkb-sig-media">${image}</div><div class="idkb-sign-identity"><b><u>${name}</u></b><div>NIP. ${nip}</div></div>`;
+  const metadata=t.content.querySelector('table.satria-idkb-info-table[data-satria-idkb-section="metadata"]');
+  if(metadata){
+    // Pertahankan persis isi metadata asli, tanpa gambar/nama-NIP blok pengesahan.
+    const source=document.createElement('template');source.innerHTML=html;
+    const untouched=source.content.querySelector('table.satria-idkb-info-table[data-satria-idkb-section="metadata"]');
+    if(untouched)metadata.innerHTML=untouched.innerHTML;
+  }
+ }else if(doc==='metode'){
+  const cell=t.content.querySelector('.metode-sign-people > td:first-child');if(cell)cell.innerHTML=`${image}<b><u>${name}</u></b><br>NIP. ${nip}`;
+ }else if(doc==='sppbj'){
+  const cell=t.content.querySelector('.sppbj-pdf-layout .sppbj-signature-cell');if(cell)cell.innerHTML=`Pejabat Pembuat Komitmen (PPKom)<br>${h(OP(p).nama)}<br>${image}<b><u>${name}</u></b><br>NIP. ${nip}`;
+ }else if(doc==='spek'){
+  const cell=t.content.querySelector('.spek-sign');if(cell) {const o=OP(p);cell.innerHTML=`${h(satriaDppOfficialPlace(p))}, ${h(tg(p.tglDpp))}<br>Ditetapkan oleh :<br>Pejabat Pembuat Komitmen (PPKom)<br>${h(o.nama)}<br>${image}<b><u>${name}</u></b><br>NIP. ${nip}`;}
+ }else if(doc==='reviu'){
+  const cell=t.content.querySelector('.rv-signatures > .rv-sign-col:first-child');if(cell){const blank=cell.querySelector('.rv-sign-space');if(blank)blank.outerHTML=image;else cell.insertAdjacentHTML('beforeend',image);const b=cell.querySelector('b u');if(b)b.textContent=signer?.nama||'Belum dipilih';const divs=cell.querySelectorAll(':scope > div');if(divs.length)divs[divs.length-1].textContent='NIP. '+(signer?.nip||'-');}
+ }
+ return t.innerHTML;}
+ function build(p,doc,original){const c=get(p,doc),pej=officer(p,c);if(!pej){return original(p);}const clone={...p,ppk:pej.id};if(doc==='dpp'||doc==='reviu')clone.dppPpkId=pej.id;
+ return rewrite(original(clone),p,doc,pej,c);}
+ for(const name of Object.keys(TARGETS)){const original=DOCS[name];if(typeof original!=='function')continue;DOCS[name]=function(p){return build(p,name,original);};}
+ function panel(p,doc){if(!TARGETS[doc])return '';const c=get(p,doc);const signer=officer(p,c),mayWrite=typeof canWrite==='function'?canWrite():false;const options=(S.pejabat||[]).filter(x=>x.peran==='PPK'&&String(x.opd)===String(p.opd)&&(x.aktif!==false||String(x.id)===c.ppkId));const id=`satria914-${String(p.id).replace(/[^\w-]/g,'')}-${doc}`;
+ const range=k=>`<div class="satria914-range"><label for="${id}-${k}">${labels[k]}</label><output data-satria914-val="${k}">${Number(c[k]).toFixed(1)} mm</output><input id="${id}-${k}" data-satria914-range="${k}" type="range" min="${ranges[k][0]}" max="${ranges[k][1]}" step="0.1" value="${c[k]}" ${!mayWrite?'disabled':''}></div>`;
+ return `<section class="satria914-panel no-print" data-satria914-panel data-pid="${h(p.id)}" data-doc="${doc}" aria-label="Pengaturan PPK dokumen ${doc}">
+ <h3>✍ Penandatangan PPK/PPKom — ${h(TARGETS[doc])}</h3><p>Setelan tersimpan <b>khusus dokumen ini</b> dalam paket aktif. Foto asli tetap dari Data Master / Supabase Storage; menghilangkan gambar tidak menghapus berkas.</p>
+ <div class="satria914-main"><div class="satria914-field"><label for="${id}-ppk">Pilih PPK/PPKom dari Data Master</label><select id="${id}-ppk" data-satria914-ppk ${!mayWrite?'disabled':''}><option value="">— pilih PPK —</option>${options.map(x=>`<option value="${h(x.id)}" ${String(x.id)===c.ppkId?'selected':''}>${h(x.nama)} · NIP ${h(x.nip||'-')}${x.aktif===false?' (nonaktif)':''}</option>`).join('')}</select></div><label class="satria914-switch"><input type="checkbox" data-satria914-show ${c.showImages?'checked':''} ${!mayWrite?'disabled':''}><span>Bubuhkan gambar TTD dan stempel pada PDF</span></label></div>
+ <div class="satria914-layout"><div class="satria914-field"><label for="${id}-mode">Posisi gambar</label><select id="${id}-mode" data-satria914-mode ${!mayWrite?'disabled':''}><option value="rapat" ${c.mode==='rapat'?'selected':''}>Rapat</option><option value="sedang" ${c.mode==='sedang'?'selected':''}>Sedang (standar)</option><option value="formal" ${c.mode==='formal'?'selected':''}>Formal</option><option value="manual" ${c.mode==='manual'?'selected':''}>Manual</option></select></div><p>${signer?`PPK: ${h(signer.nama)} · ${signer.ttd?'TTD ada':'TTD belum diunggah'} · ${signer.cap?'Cap ada':'Cap belum diunggah'}`:'Pilih PPK dari Data Master sesuai OPD paket.'}</p></div>
+ <details data-satria914-details ${c.mode==='manual'?'open':''}><summary style="font-size:12px;cursor:pointer;font-weight:700">Pengaturan manual posisi dan ukuran (mm)</summary><div class="satria914-grid"><div class="satria914-grp"><strong>Stempel</strong>${keys.slice(0,4).map(range).join('')}</div><div class="satria914-grp"><strong>Tanda tangan</strong>${keys.slice(4).map(range).join('')}</div></div></details>
+ <div class="satria914-sample"><div class="satria914-demo" style="${style(c)}">${c.showImages?picture(signer?.cap,'cap')+picture(signer?.ttd,'ttd'):''}</div><span class="satria914-sample-text">Pratinjau gambar. Jika pilihan nonaktif, area penandatangan tetap kosong untuk tanda tangan basah. Nama dan NIP tetap dicetak.</span></div>
+ <div class="satria914-actions"><button type="button" class="satria914-save" data-satria914-save ${!mayWrite?'disabled':''}>Simpan untuk dokumen ini</button><button type="button" data-satria914-reset ${!mayWrite?'disabled':''}>Mode Sedang</button></div>
+ <div class="satria914-live" role="status" data-satria914-status>${p.docPpkSettings?.[doc]?'Pengaturan tersimpan untuk dokumen ini.':'Mode standar aktif. Klik Simpan untuk menyimpan pengaturan.'}</div></section>`;}
+ function read(box){const doc=box.dataset.doc,pack=P(box.dataset.pid),fallback=get(pack,doc),mode=box.querySelector('[data-satria914-mode]')?.value||'sedang',v={ppkId:box.querySelector('[data-satria914-ppk]')?.value||'',showImages:!!box.querySelector('[data-satria914-show]')?.checked,mode};for(const k of keys)v[k]=bounded(box.querySelector(`[data-satria914-range="${k}"]`)?.value,k,presets.sedang[k]);return {...v,...norm(v,fallback)};}
+ function applyPreset(box,mode){if(!presets[mode])return;for(const k of keys){const el=box.querySelector(`[data-satria914-range="${k}"]`);if(el)el.value=String(presets[mode][k]);}}
+ function update(box){const cfg=read(box),p=P(box.dataset.pid),doc=box.dataset.doc,signer=officer(p,cfg),preview=box.querySelector('.satria914-demo');if(preview){preview.innerHTML=cfg.showImages?picture(signer?.cap,'cap')+picture(signer?.ttd,'ttd'):'';preview.setAttribute('style',style(cfg));}
+ for(const k of keys){const o=box.querySelector(`[data-satria914-val="${k}"]`);if(o)o.textContent=cfg[k].toFixed(1)+' mm';}
+ box.dataset.satria914Pending=JSON.stringify(cfg);
+ const target=document.querySelector(`.doc[data-document-type="${doc}"]`);if(target){const clone={...p,docPpkSettings:{...p.docPpkSettings,[doc]:cfg}};target.innerHTML=satriaSafeDocHtml(DOCS[doc](clone));if(typeof window.SATRIA_MEDIA?.hydrate==='function')window.SATRIA_MEDIA.hydrate(target);}
+ const status=box.querySelector('[data-satria914-status]');if(status)status.textContent='Pratinjau berubah. Klik Simpan untuk menerapkan pada cetak berikutnya.';}
+ document.addEventListener('input',event=>{const el=event.target;if(!el?.matches?.('[data-satria914-range]'))return;const box=el.closest('[data-satria914-panel]');if(!box)return;event.stopImmediatePropagation();const mode=box.querySelector('[data-satria914-mode]');if(mode)mode.value='manual';update(box);},true);
+ document.addEventListener('change',event=>{const el=event.target;if(!el?.matches?.('[data-satria914-mode],[data-satria914-ppk],[data-satria914-show],[data-satria914-range]'))return;const box=el.closest('[data-satria914-panel]');if(!box)return;event.stopImmediatePropagation();if(el.matches('[data-satria914-range]')){const selector=box.querySelector('[data-satria914-mode]');if(selector)selector.value='manual';}if(el.matches('[data-satria914-mode]')){applyPreset(box,el.value);if(el.value==='manual')box.querySelector('[data-satria914-details]')?.setAttribute('open','');}update(box);},true);
+ document.addEventListener('click',event=>{const el=event.target.closest?.('[data-satria914-save],[data-satria914-reset]');if(!el)return;const box=el.closest('[data-satria914-panel]');if(!box)return;event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();if(typeof canWrite!=='function'||!canWrite()){const status=box.querySelector('[data-satria914-status]');if(status)status.textContent='Akun ini tidak dapat mengubah paket.';return;}
+ const p=P(box.dataset.pid),doc=box.dataset.doc;if(!p||!TARGETS[doc])return;
+ if(el.matches('[data-satria914-reset]')){box.querySelector('[data-satria914-mode]').value='sedang';applyPreset(box,'sedang');update(box);return;}
+ const c=read(box),signer=officer(p,c);if(!signer){const status=box.querySelector('[data-satria914-status]');if(status)status.textContent='Pilih PPK yang terdaftar pada OPD paket sebelum menyimpan.';return;}
+ if(signer.aktif===false&&String(p.docPpkSettings?.[doc]?.ppkId||'')!==String(signer.id)){const status=box.querySelector('[data-satria914-status]');if(status)status.textContent='PPK nonaktif tidak dapat dipilih untuk dokumen baru.';return;}
+ p.docPpkSettings=p.docPpkSettings&&typeof p.docPpkSettings==='object'?p.docPpkSettings:{};
+ p.docPpkSettings[doc]=c;
+ if(doc==='dpp'){p.dppPpkId=c.ppkId;p.dppSignatureLayout={mode:c.mode,...Object.fromEntries(keys.map(k=>[k,c[k]]))};}
+ sync('paket','Pengaturan penandatangan '+doc.toUpperCase()+' disimpan untuk RUP '+(p.rup||p.id));render();
+ },true);
+ window.SATRIA_DOC_PPK={panel,get,visual,norm,picture,targets:TARGETS};
+})();
+</script>
+
+<style id="satria-35916-idkb-approval-guard">
+/* Identifikasi Kebutuhan: identitas paket di atas, pengesahan hanya di tabel penutup.
+   Tidak mengubah PPK yang tercatat pada baris metadata PA/KPA/PPK. */
+.doc[data-document-type="idkb"] table.satria-idkb-info-table .satria914-images,
+#satria-print-root .doc[data-document-type="idkb"] table.satria-idkb-info-table .satria914-images,
+.doc[data-document-type="idkb"] table.satria-idkb-info-table .sig-legacy,
+#satria-print-root .doc[data-document-type="idkb"] table.satria-idkb-info-table .sig-legacy{display:none!important}
+</style>
+
+<style id="satria-35917-idkb-reference-layout">
+/* Pedoman identifikasi kebutuhan: only Document #2, print A4/Arial, one-pixel rules. */
+/* Izinkan tabel isi tanpa garis pada browser dan cetak; aturan ID khusus
+   mengalahkan CSS grid umum SATRIA tanpa mempengaruhi tabel pengesahan. */
+#main .doc[data-document-type="idkb"] .satria-idkb-form :is(.satria-idkb-info-table,.idkb-quantity-table,.idkb-extra-table) :is(th,td),
+#satria-print-root .doc[data-document-type="idkb"] .satria-idkb-form :is(.satria-idkb-info-table,.idkb-quantity-table,.idkb-extra-table) :is(th,td){
+  border:0!important;border-width:0!important;box-shadow:none!important;
+}
+#main .doc[data-document-type="idkb"] .satria-idkb-form :is(.satria-idkb-info-table,.idkb-quantity-table,.idkb-extra-table),
+#satria-print-root .doc[data-document-type="idkb"] .satria-idkb-form :is(.satria-idkb-info-table,.idkb-quantity-table,.idkb-extra-table){
+  border:0!important;border-spacing:0!important;outline:none!important;
+}
+
+.doc[data-document-type="idkb"] .satria-idkb-form{
+  font: 9.6pt/1.25 Arial,Helvetica,sans-serif!important;color:#000!important;
+  max-width:100%!important;overflow:visible!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-form *{font-family:Arial,Helvetica,sans-serif!important}
+.doc[data-document-type="idkb"] .satria-idkb-title{
+  text-align:center!important;font-size:11pt!important;line-height:1.2!important;
+  margin:0 0 14px!important;font-weight:700!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-sheet{
+  border:1px solid #000!important;padding:9px 11px!important;
+  margin:0!important;overflow:visible!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-form table{
+  margin:0!important;border-spacing:0!important;border-collapse:collapse!important;
+  width:100%!important;table-layout:fixed!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-form table:not(.satria-idkb-sign-table),
+.doc[data-document-type="idkb"] .satria-idkb-form table:not(.satria-idkb-sign-table) tr,
+.doc[data-document-type="idkb"] .satria-idkb-form table:not(.satria-idkb-sign-table) td{
+  border:0!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-form table td{
+  background:#fff!important;padding:2px 3px!important;font-size:9.4pt!important;
+  line-height:1.22!important;vertical-align:top!important;overflow-wrap:break-word!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-info-table .idkb-label{width:22%!important}
+.doc[data-document-type="idkb"] .satria-idkb-info-table .idkb-colon{width:2.7%!important;text-align:center!important}
+.doc[data-document-type="idkb"] .satria-idkb-info-table .idkb-value{width:75.3%!important}
+.doc[data-document-type="idkb"] .satria-idkb-info-table{margin:0 0 9px!important}
+.doc[data-document-type="idkb"] .satria-idkb-section{margin:8px 0 0!important;break-inside:auto!important}
+.doc[data-document-type="idkb"] .satria-idkb-section h3{
+  font-size:9.7pt!important;line-height:1.2!important;margin:0 0 3px!important;
+  font-weight:700!important;break-after:avoid!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-section p{
+  font-size:9.4pt!important;line-height:1.25!important;margin:1px 0 3px 20px!important;
+  text-align:left!important;orphans:2;widows:2;
+}
+.doc[data-document-type="idkb"] .satria-idkb-section .idkb-subhead{
+  font-size:9.4pt!important;line-height:1.25!important;margin:2px 0 1px 20px!important;
+  break-after:avoid!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-section ol{
+  margin:0 0 5px 48px!important;padding:0!important;
+  font-size:9.4pt!important;line-height:1.28!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-section li{padding:0!important;margin:0 0 2px!important;font-size:9.4pt!important;line-height:1.28!important;break-inside:avoid!important}
+.doc[data-document-type="idkb"] .satria-idkb-section .idkb-suppliers{margin-left:42px!important}
+.doc[data-document-type="idkb"] .satria-idkb-section .idkb-link{
+  font-size:8.4pt!important;overflow-wrap:anywhere!important;word-break:break-word!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-section .idkb-muted{font-size:8.5pt!important}
+.doc[data-document-type="idkb"] .idkb-quantity-table{margin:1px 0 3px 45px!important;width:calc(100% - 45px)!important}
+.doc[data-document-type="idkb"] .idkb-quantity-table .idkb-desc{width:68%!important}
+.doc[data-document-type="idkb"] .idkb-quantity-table .idkb-eq{width:4%!important;text-align:center!important}
+.doc[data-document-type="idkb"] .idkb-quantity-table .idkb-vol{width:28%!important}
+.doc[data-document-type="idkb"] .idkb-extra-table{margin:3px 0 0 22px!important;width:calc(100% - 22px)!important}
+.doc[data-document-type="idkb"] .idkb-extra-table .idkb-label{width:58%!important}
+.doc[data-document-type="idkb"] .idkb-extra-table .idkb-colon{width:4%!important;text-align:center!important}
+.doc[data-document-type="idkb"] .idkb-extra-table .idkb-value{width:38%!important}
+.doc[data-document-type="idkb"] .satria-idkb-sign-table{
+  margin:0!important;border:1px solid #000!important;
+  border-top:0!important;border-collapse:collapse!important;width:100%!important;
+  table-layout:fixed!important;break-inside:avoid!important;page-break-inside:avoid!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-sign-table tr{border:0!important}
+.doc[data-document-type="idkb"] .satria-idkb-sign-table td{
+  width:50%!important;border:1px solid #000!important;
+  font-size:9.5pt!important;line-height:1.25!important;
+  padding:4px 8px!important;vertical-align:top!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-sign-table .idkb-date-row td{padding:3px 8px!important}
+.doc[data-document-type="idkb"] .satria-idkb-sign-table .idkb-date-row td:last-child{text-align:center!important}
+.doc[data-document-type="idkb"] .satria-idkb-sign-table .idkb-approval-row td{height:37mm!important;position:relative!important}
+.doc[data-document-type="idkb"] .idkb-sig-media,
+.doc[data-document-type="idkb"] .idkb-preparer-space{
+  display:block!important;min-height:20mm!important;height:20mm!important;margin:1mm 0 0!important;
+}
+.doc[data-document-type="idkb"] .idkb-sig-media .satria914-images{margin:0!important}
+.doc[data-document-type="idkb"] .idkb-sig-media img{object-fit:contain!important}
+.doc[data-document-type="idkb"] .idkb-sign-identity{margin:0!important;font-size:9.6pt!important;line-height:1.2!important}
+.doc[data-document-type="idkb"] .idkb-sign-identity b{font-size:9.6pt!important}
+@media print{
+ /* Paket >18 rincian: tarik bagian prioritas ke halaman pengesahan agar tidak ada halaman khusus TTD. */
+ #satria-print-root .doc[data-document-type="idkb"] .satria-idkb-form.idkb-long .satria-idkb-section:last-child{
+  break-before:page!important;page-break-before:always!important;
+ }
+ #satria-print-root .doc[data-document-type="idkb"] .satria-idkb-form{font-size:9.4pt!important}
+ #satria-print-root .doc[data-document-type="idkb"] .satria-idkb-sign-table{break-inside:avoid!important;page-break-inside:avoid!important}
+}
+</style>
+<script id="satria35917-idkb-preparer-control">
+(function(){'use strict';
+ const old=window.SATRIA_DOC_PPK?.panel;
+ if(typeof old!=='function')return;
+ const safe=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+ window.SATRIA_DOC_PPK.panel=function(p,doc){const core=old(p,doc);if(doc!=='idkb')return core;
+   const people=(S.pejabat||[]).filter(x=>String(x.opd)===String(p.opd));
+   const pick=String(p.idkbPenyusunId||p.pp||'');const chosen=people.find(x=>String(x.id)===pick);
+   const title=String(p.idkbJabatanPenyusun||'');const ro=typeof canWrite==='function'&&!canWrite();
+   return core+`<section class="satria914-panel no-print" data-satria917-preparer data-pid="${safe(p.id)}" aria-label="Penyusun dokumen Identifikasi Kebutuhan">
+     <h3>✍ Penyusun Formulir Identifikasi Kebutuhan</h3>
+     <p>Pedoman memakai <b>dua kolom pengesahan</b>: PPK yang menetapkan dan pejabat yang menyusun. Pilih penyusun dari Data Master. Perubahan ini berlaku <b>hanya untuk Identifikasi Kebutuhan</b>.</p>
+     <div class="satria914-main"><div class="satria914-field"><label>Penyusun dari Data Master</label><select data-satria917-person ${ro?'disabled':''}><option value="">— Belum dipilih —</option>${people.map(x=>`<option value="${safe(x.id)}" ${String(x.id)===pick?'selected':''}>${safe(x.nama)} · ${safe(x.peran||'Pejabat')} · NIP ${safe(x.nip||'-')}</option>`).join('')}</select></div><div class="satria914-field"><label>Jabatan penyusun (sesuai surat tugas / Data Master)</label><input data-satria917-role value="${safe(title)}" placeholder="Contoh: Kasubbag Umum dan Aparatur" ${ro?'disabled':''}></div></div>
+     <div class="satria914-actions"><button type="button" data-satria917-save class="satria914-save" ${ro?'disabled':''}>Simpan Penyusun Dokumen</button></div>
+     <div role="status" data-satria917-status class="satria914-live">${p.idkbPenyusunId?'Penyusun tersimpan khusus dokumen ini.':'Awal menggunakan Pejabat Pengadaan paket; pastikan orang yang benar sebelum pengesahan.'}</div>
+   </section>`;};
+ document.addEventListener('click',event=>{const b=event.target.closest?.('[data-satria917-save]');if(!b)return;
+  const panel=b.closest('[data-satria917-preparer]');if(!panel)return;event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
+  const p=typeof P==='function'?P(panel.dataset.pid):null;const status=panel.querySelector('[data-satria917-status]');
+  if(!p||typeof canWrite!=='function'||!canWrite()){if(status)status.textContent='Akun tidak dapat menyimpan perubahan.';return;}
+  const id=panel.querySelector('[data-satria917-person]')?.value||'';
+  const person=(S.pejabat||[]).find(x=>String(x.id)===id&&String(x.opd)===String(p.opd));
+  if(!person){if(status)status.textContent='Pilih pejabat penyusun yang terdaftar pada OPD paket.';return;}
+  p.idkbPenyusunId=id;p.idkbJabatanPenyusun=String(panel.querySelector('[data-satria917-role]')?.value||'').trim().slice(0,180);
+  sync('paket','Penyusun Identifikasi Kebutuhan disimpan untuk RUP '+(p.rup||p.id));render();
+ },true);
+})();
+</script>
+
+<style id="satria-35919-bahp-title-sppbj-letter">
+/* 3.0.59.18 — Perubahan hanya BAHP heading dan Surat Perintah Pengadaan. */
+.doc[data-document-type="bahp"] .bahp-document-title,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-document-title{
+ display:block!important;width:100%!important;max-width:none!important;
+ box-sizing:border-box!important;text-align:center!important;
+ margin:5px auto 9px!important;padding:0!important;text-indent:0!important;
+ float:none!important;clear:both!important;
+}
+.doc[data-document-type="bahp"] .bahp-document-title>b,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-document-title>b{
+ display:block!important;width:100%!important;text-align:center!important;
+ font-size:10pt!important;line-height:1.24!important;
+}
+.doc[data-document-type="bahp"] .bahp-document-title>span,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-document-title>span{
+ display:block!important;width:100%!important;text-align:center!important;
+ font-size:9pt!important;line-height:1.2!important;margin-top:2px!important;
+}
+.doc[data-document-type="sppbj"] .satria-sppbj-official,
+#satria-print-root .doc[data-document-type="sppbj"] .satria-sppbj-official{
+ font-family:Arial,Helvetica,sans-serif!important;font-size:10.2pt!important;
+ line-height:1.35!important;color:#000!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-letter-heading,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-letter-heading{
+ display:grid!important;grid-template-columns:minmax(0, 3fr) minmax(0, 2fr)!important;
+ align-items:start!important;gap:12px!important;margin:8px 0 21px!important;
+}
+/* 3.0.59.19: SPPBJ adalah surat biasa, bukan tabel bergaris. */
+.doc[data-document-type="sppbj"] .sppbj-letter-meta,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-letter-meta{
+ width:100%!important;min-width:0!important;display:flex!important;flex-direction:column!important;
+ border:none!important;outline:none!important;box-shadow:none!important;
+ margin:0!important;padding:0!important;background:transparent!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-meta-row,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-meta-row{
+ display:grid!important;grid-template-columns:75px 13px minmax(0,1fr)!important;
+ width:100%!important;min-width:0!important;break-inside:avoid!important;
+ padding:1px 0!important;margin:0!important;border:none!important;outline:none!important;box-shadow:none!important;
+ font-size:9.7pt!important;line-height:1.22!important;background:transparent!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-meta-row>span,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-meta-row>span{
+ display:block!important;border:none!important;outline:none!important;box-shadow:none!important;
+ padding:0!important;margin:0!important;min-width:0!important;
+ font-size:inherit!important;line-height:inherit!important;overflow-wrap:break-word!important;
+ background:transparent!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-letter-place,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-letter-place{
+ text-align:right!important;white-space:normal!important;overflow-wrap:break-word!important;
+ font-size:9.7pt!important;line-height:1.24!important;padding-top:1px!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-destination,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-destination{
+ margin:4px 0 18px!important;font-size:10.1pt!important;
+ line-height:1.33!important;overflow-wrap:break-word!important;
+}
+.doc[data-document-type="sppbj"] p.sppbj-body-text,
+#satria-print-root .doc[data-document-type="sppbj"] p.sppbj-body-text{
+ margin:10px 0 12px!important;text-align:justify!important;
+ line-height:1.35!important;font-size:10.2pt!important;
+}
+.doc[data-document-type="sppbj"] ol.sppbj-attachments,
+#satria-print-root .doc[data-document-type="sppbj"] ol.sppbj-attachments{
+ margin:10px 0 16px 22px!important;padding-left:7px!important;
+ font-size:10.2pt!important;line-height:1.35!important;
+}
+.doc[data-document-type="sppbj"] ol.sppbj-attachments>li,
+#satria-print-root .doc[data-document-type="sppbj"] ol.sppbj-attachments>li{
+ padding-left:4px!important;margin-bottom:4px!important;
+}
+.doc[data-document-type="sppbj"] p.sppbj-closing,
+#satria-print-root .doc[data-document-type="sppbj"] p.sppbj-closing{
+ margin:13px 0 14px!important;text-align:left!important;
+ font-size:10.2pt!important;line-height:1.35!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-signature-layout,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-signature-layout{
+ display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+ width:100%!important;min-width:0!important;margin:8px 0 0!important;
+ border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;
+ break-inside:avoid!important;page-break-inside:avoid!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-signature-cell,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-signature-cell{
+ min-width:0!important;border:none!important;outline:none!important;box-shadow:none!important;
+ padding:0 6px!important;margin:0!important;background:transparent!important;
+ font-size:10pt!important;line-height:1.25!important;text-align:left!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-signature-left,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-signature-left{
+ border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-signature-space,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-signature-space{
+ height:24mm!important;min-height:24mm!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-signature-cell .satria914-images,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-signature-cell .satria914-images{
+ margin:1mm 0 2mm!important;
+}
+@media(max-width:600px){
+ .doc[data-document-type="sppbj"] .sppbj-letter-heading{grid-template-columns:minmax(0,3fr) minmax(0,2fr)!important;gap:8px!important}
 }
 </style>
 </body></html>
