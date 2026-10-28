@@ -1,11 +1,11 @@
 {
-  "name": "SATRIA",
-  "short_name": "SATRIA",
-  "description": "SATRIA Framework 3.0.41",
+  "name": "SATRIA NEXT — Government Procurement Workspace",
+  "short_name": "SATRIA NEXT",
+  "description": "SATRIA NEXT 3.0.54 — Gen Z Government Procurement Workspace",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f6f7fc",
-  "theme_color": "#6357F5",
+  "background_color": "#f4f2fb",
+  "theme_color": "#1b1736",
   "scope": "./",
   "icons": [
     {

@@ -15,3 +15,7 @@
 **Perubahan skema**: Bank RUP tetap disimpan dalam `satria_state.payload.rupBank` (array JSON) demi kompatibilitas; migrasi memperbarui RPC pembacaan berdasarkan OPD/tahun dan penyimpanan delta, serta validasi referensi dan duplikasi. Tidak memigrasikan data ke tabel relasional baru dan tidak otomatis memodifikasi isi snapshot yang sudah ada.
 
 Catatan: buka aplikasi melalui HTTPS yang di-host, bukan `file://`, untuk PWA/servis pekerja yang andal. Pastikan `ALLOWED_ORIGINS` Edge Functions mencakup origin aplikasi. Publishable key di HTML bukan kunci rahasia, tetapi hanya aman bila RLS/RPC server telah diuji.
+
+
+## SATRIA NEXT 3.0.54 — Private media storage
+Baca `docs/SUPABASE_MEDIA_STORAGE_3.0.54.md`. Terapkan migrasi `20261028060000_satria_private_media_storage.sql` sesudah migrasi Bank RUP dan sebelum memakai unggah gambar. **Bucket privat**, gunakan kredensial Auth biasa, jangan memakai service_role di HTML.

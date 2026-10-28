@@ -111,3 +111,7 @@ Jika daftar pengguna tampil tetapi modal Atur OPD kosong sementara indikator apl
 ## OPD + Tahun access hardening (Stage 1–3)
 
 See [`docs/SECURITY_SCOPE_HARDENING.md`](docs/SECURITY_SCOPE_HARDENING.md) for the deployment order and required staging tests. The latest Bank RUP compatibility migration is `supabase/migrations/20261028010000_satria_rup_bank_cloud_compat.sql` (after 53300/53400). It makes direct snapshot read/full replacement admin-only, adds explicit year assignments, serializes scope changes against reads/writes, validates package-to-master/winner references, and moves non-admin reads/writes to scoped RPCs. After applying the migration, existing Operators and Viewers must be assigned both OPD and fiscal year by an admin before they can access scoped data. Deploy the updated `admin-list-users` and `admin-create-user` Edge Functions, then run `supabase/tests/security_hardening_assertions.sql` and the live negative test matrix in `docs/SECURITY_SCOPE_HARDENING.md`.
+
+
+## Media cloud privat (3.0.54)
+Baca [panduan migrasi gambar dan kebijakan Storage](docs/SUPABASE_MEDIA_STORAGE_3.0.54.md). Foto produk, TTD, stempel, kop OPD, dan logo menggunakan bucket `satria-media` privat, **bukan** Base64 baru di JSON. Jalankan migrasi SQL sebelum menguji unggahan, dan lakukan migrasi berkas lama secara eksplisit melalui modal Supabase.
