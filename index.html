@@ -2206,23 +2206,22 @@ const RUP_SUMBER=['APBD','APBN','DAK','DAU','DBH','PAD','Lainnya'];
 const RUP_SIRUP=`{
     "aaData": [
         [
-            "67845135",
-            "Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor",
-            "14261300",
+            "68401050",
+            "Belanja Makanan dan Minuman Aktivitas Lapangan",
+            "52800000",
             "E-Purchasing",
-            "APBD, APBD, APBD, APBD, APBD, APBD, APBD, APBD, APBD, APBD, APBD, APBD, APBD",
-            "67845135",
+            "APBD, APBD",
+            "68401050",
             "January 2026"
         ]
     ],
     "iTotalDisplayRecords": 1,
-    "sEcho": 7
+    "sEcho": 4
 }`;
 const RUP_TPL=`[
   {
     "rup": "67122700",
     "nama": "Pengadaan Alat Tulis Kantor",
-    "opd": "DIKNAS",
     "tahun": 2026,
     "pagu": 25000000,
     "sumber": "APBD",
@@ -2236,65 +2235,134 @@ const RUP_TPL=`[
     ]
   }
 ]`;
+/* PATCH IMPOR RUP JSON — 2026-10-29. Bank RUP saja; tidak membuat paket otomatis. */
 function uniqSumber(v){
-  return [...new Set(String(v??'').split(',').map(s=>s.trim()).filter(Boolean))].join(', ');
+  return [...new Set((Array.isArray(v)?v.join(','):String(v??'')).split(',').map(s=>s.trim()).filter(Boolean))].join(', ');
+}
+function rupField(row,aliases){
+  if(!row||typeof row!=='object'||Array.isArray(row))return undefined;
+  const norm=v=>String(v).toLowerCase().replace(/[^a-z0-9]/g,'');
+  const byName=new Map(Object.keys(row).map(k=>[norm(k),row[k]]));
+  for(const name of aliases){const val=byName.get(norm(name));if(val!==null&&val!==undefined&&String(val).trim()!=='')return val;}
+  return undefined;
+}
+function rupText(value){
+  const v=Array.isArray(value)?value.join(', '):String(value??'');
+  return v.replace(/<[^>]*>/g,'').trim();
+}
+function rupRupiah(value){
+  if(typeof value==='number')return Number.isSafeInteger(value)&&value>0?value:NaN;
+  let s=String(value??'').trim().replace(/^rp\.?\s*/i,'').replace(/\s/g,'');
+  if(!/^\d[\d.,]*$/.test(s))return NaN;
+  // Pecahan rupiah hanya diterima jika ,00 atau .00; angka pecahan lain ditolak.
+  if(/[.,]\d{2}$/.test(s)){
+    if(!/[.,]00$/.test(s))return NaN;
+    s=s.slice(0,-3);
+  }
+  if(!/^\d+$/.test(s)&&!/^\d{1,3}([.,]\d{3})+$/.test(s))return NaN;
+  const n=Number(s.replace(/[.,]/g,''));
+  return Number.isSafeInteger(n)&&n>0?n:NaN;
 }
 function rupFromSirup(a){
-  const raw=String(a[6]??'').trim();
-  const yr=raw.match(/\d{4}/);
+  const raw=rupText(a[6]);
+  const yr=raw.match(/(?:19|20)\d{2}/);
   const BULAN={january:'Januari',february:'Februari',march:'Maret',april:'April',may:'Mei',june:'Juni',july:'Juli',august:'Agustus',september:'September',october:'Oktober',november:'November',december:'Desember'};
   const namaBulan=raw.replace(/[0-9]/g,'').trim().toLowerCase();
   const bulan=BULAN[namaBulan]?(BULAN[namaBulan]+(yr?' '+yr[0]:'')):raw;
-  return {rup:String(a[0]??a[5]??'').trim(),nama:String(a[1]??'').trim(),pagu:a[2],metodePemilihan:String(a[3]??'').trim(),sumber:uniqSumber(a[4]),tahun:yr?Number(yr[0]):'',bulan};
+  return {rup:rupText(a[0]??a[5]),nama:rupText(a[1]),pagu:a[2],metodePemilihan:rupText(a[3]),sumber:uniqSumber(a[4]),tahun:yr?Number(yr[0]):undefined,bulan};
 }
 function rupParseRow(r,i,defTahun,defOpd,defSub){
   const e=m=>({ok:false,err:'Data #'+(i+1)+': '+m});
   if(Array.isArray(r))r=rupFromSirup(r);
-  if(!r||typeof r!=='object')return e('harus berupa objek JSON.');
-  const rup=String(r.rup??r.kodeRup??'').trim();
-  if(!rup)return e('kode RUP wajib diisi.');
-  const nama=String(r.nama??r.namaPaket??'').trim();
-  if(!nama)return e('nama paket wajib diisi.');
-  const tahun=Number(r.tahun===undefined||r.tahun===''?defTahun:r.tahun);
-  if(!S.tahun.includes(tahun))return e('tahun '+tahun+' belum terdaftar di Pengaturan Sistem.');
-  const ref=String(r.opd||defOpd||'').trim().toLowerCase();
-  const od=ref&&S.opd.find(o=>[o.id,o.singkat,o.nama].some(v=>String(v||'').trim().toLowerCase()===ref));
-  if(!od)return e(ref?'OPD "'+String(r.opd??'')+'" tidak ditemukan. Isi id, singkatan, atau nama OPD.':'OPD belum ditentukan. Isi kolom opd atau pilih OPD default.');
+  if(!r||typeof r!=='object')return e('baris harus berupa objek JSON atau array aaData.');
+  const get=(...names)=>rupField(r,names);
+  const rup=rupText(get('rup','kodeRup','kode_rup','noRup','nomorRup','kodePaket','idRup'));
+  if(!rup||rup.length>100)return e('kode RUP wajib diisi (maksimal 100 karakter).');
+  const nama=rupText(get('nama','namaPaket','nama_paket','namaPengadaan','namaRup','uraianPekerjaan'));
+  if(!nama||nama.length>1000)return e('nama paket wajib diisi (maksimal 1000 karakter).');
+  const y=get('tahun','tahunAnggaran','tahun_anggaran','tahunPaket','ta');
+  const yearHint=rupText(get('bulan','bulanPelaksanaan','jadwalPelaksanaan','waktuPelaksanaan')).match(/(?:19|20)\d{2}/);
+  const tahun=Number(y===undefined?(yearHint?yearHint[0]:defTahun):y);
+  if(!Number.isInteger(tahun)||!S.tahun.includes(tahun))return e('tahun anggaran '+String(y??defTahun)+' belum terdaftar di Pengaturan Sistem.');
+  const opdValue=get('opd','kodeOpd','idOpd','namaOpd','satker','namaSatker','perangkatDaerah','organisasi');
+  const ref=rupText(opdValue??defOpd).toLowerCase();
+  const od=ref&&(S.opd||[]).find(o=>[o.id,o.singkat,o.nama].some(v=>String(v||'').trim().toLowerCase()===ref));
+  if(!od)return e(ref?'OPD "'+rupText(opdValue??defOpd)+'" tidak ada di Data Master.':'OPD tidak ada pada baris; pilih OPD tujuan di atas sebelum impor.');
   const opd=od.id;
   const scope=activeCloudScope();
-  if(scope&&(!scope.opdIds.includes(String(opd))||!scope.years.includes(tahun)))return e('OPD atau tahun di luar assignment akun Anda.');
-  if((S.rupBank||[]).some(p=>Number(p.tahun)===tahun&&String(p.rup||'').trim()===rup&&String(p.opd)===String(opd)))return e('RUP '+rup+' sudah ada di Bank RUP untuk OPD dan tahun ini.');
-  const pagu=typeof r.pagu==='string'?Number(r.pagu.replace(/[^0-9]/g,'')):Number(r.pagu);
-  if(!(pagu>0))return e('pagu harus lebih dari 0.');
-  const sub=satriaValidSubCode(r.sub??defSub??''); // Abaikan kode demo, tanpa fallback Data Master.
-  if(sub&&!S.kode.some(k=>k.kode===sub))return e('kode sub kegiatan "'+sub+'" tidak ada di Data Master.');
+  if(scope&&(!scope.opdIds.includes(String(opd))||!scope.years.includes(tahun)))return e('OPD/tahun di luar assignment akun Anda.');
+  const pagu=rupRupiah(get('pagu','paguPaket','pagu_anggaran','paguAnggaran','nilaiPagu','jumlahPagu','nilaiAnggaran'));
+  if(!Number.isSafeInteger(pagu)||pagu<=0)return e('pagu harus berupa rupiah positif tanpa pecahan dan dalam batas angka aman.');
+  const sub=satriaValidSubCode(get('sub','subKegiatan','kodeSubKegiatan','kode_sub_kegiatan')??defSub??'');
+  if(sub&&!(S.kode||[]).some(k=>k.kode===sub))return e('kode sub kegiatan "'+sub+'" tidak ada di Data Master.');
   const items=[];
-  const rawItems=Array.isArray(r.items)?r.items:[];
-  for(let j=0;j<rawItems.length;j++){
-    const it=rawItems[j]||{};
-    if(!String(it.nama||'').trim())return e('item #'+(j+1)+' belum memiliki nama.');
-    const vol=Number(it.vol),hs=Number(it.hs);
-    if(!(vol>0)||!(hs>0))return e('volume dan harga satuan item "'+it.nama+'" harus lebih dari 0.');
-    items.push({id:uid('i'),nama:String(it.nama).trim(),spesifikasi:String(it.spesifikasi||''),merek:String(it.merek||''),pdn:'Perlu verifikasi',linkProduk:'',vol,satuan:String(it.satuan||'Unit'),hs});
+  const rawItems=get('items','rincian','rincianBarang');
+  if(rawItems!==undefined&&!Array.isArray(rawItems))return e('rincian/items harus berbentuk array.');
+  for(let j=0;j<(rawItems||[]).length;j++){
+    const it=rawItems[j];
+    if(!it||typeof it!=='object'||Array.isArray(it))return e('item #'+(j+1)+' tidak valid.');
+    if(!rupText(it.nama))return e('item #'+(j+1)+' belum memiliki nama.');
+    const vol=Number(it.vol),hs=rupRupiah(it.hs);
+    if(!Number.isFinite(vol)||vol<=0||!Number.isSafeInteger(hs)||hs<=0)return e('volume dan harga satuan item "'+rupText(it.nama)+'" harus lebih dari 0.');
+    items.push({id:uid('i'),nama:rupText(it.nama),spesifikasi:rupText(it.spesifikasi),merek:rupText(it.merek),pdn:'Perlu verifikasi',linkProduk:'',vol,satuan:rupText(it.satuan)||'Unit',hs});
   }
-  const unit=(S.unit.find(u=>String(u.opd)===String(opd))||{}).id||'';
-  return {ok:true,p:{id:uid('k'),tahun,opd,unit,seq:0,nama,rup,pagu,sumber:String(r.sumber||S.pemda.sumber||''),sub,bulanPelaksanaan:String(r.bulan??r.bulanPelaksanaan??'').trim(),ppk:pjId(opd,'PPK')||'',pp:pjId(opd,'PP')||'',kabid:pjId(opd,'Kabid')||'',masaHk:Number(r.masaHk)||7,jenisPengadaan:String(r.jenisPengadaan||'Barang'),metodePemilihan:String(r.metodePemilihan||'E-Purchasing dengan Negosiasi Harga'),lokasiPengiriman:String(r.lokasiPengiriman||O(opd).tempat||O(opd).alamat||''),tglSurvei:'',tglEvaluasi:'',tglNego:'',tglPenetapan:'',tglNodis:'',tglDpp:'',tglSppbj:'',tglBahp:'',batas:'',pemenangId:null,items,penawaran:[]}};
+  const unit=((S.unit||[]).find(u=>String(u.opd)===String(opd))||{}).id||'';
+  return {ok:true,p:{id:uid('k'),tahun,opd,unit,seq:0,nama,rup,pagu,sumber:uniqSumber(get('sumber','sumberDana','sumber_dana','sumberAnggaran')??S.pemda.sumber??''),sub,
+    bulanPelaksanaan:rupText(get('bulan','bulanPelaksanaan','jadwalPelaksanaan','waktuPelaksanaan')),
+    ppk:pjId(opd,'PPK')||'',pp:pjId(opd,'PP')||'',kabid:pjId(opd,'Kabid')||'',
+    masaHk:Number(get('masaHk'))||7,
+    jenisPengadaan:rupText(get('jenisPengadaan','jenis_pengadaan','jenisBelanja'))||'Barang',
+    metodePemilihan:rupText(get('metodePemilihan','metodePengadaan','metode_pemilihan','metode'))||'E-Purchasing dengan Negosiasi Harga',
+    lokasiPengiriman:rupText(get('lokasiPengiriman','lokasiPekerjaan'))||O(opd).tempat||O(opd).alamat||'',
+    tglSurvei:'',tglEvaluasi:'',tglNego:'',tglPenetapan:'',tglNodis:'',tglDpp:'',tglSppbj:'',tglBahp:'',batas:'',pemenangId:null,items,penawaran:[]}};
 }
-function rupReadJson(text,defOpd,defSub){
+function rupListFromJson(data,depth=0){
+  if(Array.isArray(data))return data;
+  if(!data||typeof data!=='object'||depth>3)return null;
+  for(const k of ['aaData','paket','packages','rows','results','rups','daftarRup','daftarRUP','records','data']){
+    const v=rupField(data,[k]);
+    if(v!==undefined){const list=rupListFromJson(v,depth+1);if(list)return list;}
+  }
+  return rupField(data,['rup','kodeRup','kode_rup','noRup','nomorRup','kodePaket'])!==undefined?[data]:null;
+}
+function rupBankKey(p){return String(p.opd)+'|'+Number(p.tahun)+'|'+String(p.rup).trim().toLowerCase();}
+function rupReadJson(text,defOpd,defSub,mode='skip'){
+  const result={rows:[],updates:[],skips:0,errs:[],warnings:[],detail:[],total:0};
+  const raw=String(text||'').replace(/^\uFEFF/,'').trim();
+  if(!raw){result.errs.push('Pilih file JSON/CSV atau tempel JSON terlebih dahulu.');return result;}
+  if(raw.length>5*1024*1024){result.errs.push('Ukuran JSON melampaui batas 5 MB. Pisahkan berkas menjadi beberapa bagian.');return result;}
   let data;
-  try{data=JSON.parse(String(text||'').trim()||'null')}catch(err){return {rows:[],errs:['Format JSON tidak valid: '+err.message]}}
-  const list=Array.isArray(data)?data:(data&&Array.isArray(data.aaData)?data.aaData:(data&&Array.isArray(data.paket)?data.paket:(data&&typeof data==='object'?[data]:null)));
-  if(!list||!list.length)return {rows:[],errs:['Tidak ada data paket. Gunakan array JSON, atau objek dengan kunci "paket".']};
-  const rows=[],errs=[],seen=new Set();
-  if(data&&!Array.isArray(data)&&data.iTotalDisplayRecords!==undefined&&Number(data.iTotalDisplayRecords)!==list.length)errs.push('iTotalDisplayRecords ('+data.iTotalDisplayRecords+') tidak sama dengan jumlah baris data ('+list.length+'). Periksa apakah file terpotong.');
-  list.forEach((r,i)=>{const x=rupParseRow(r,i,S.ui.tahun,defOpd,defSub);if(!x.ok){errs.push(x.err);return}const key=x.p.tahun+'|'+x.p.rup;if(seen.has(key)){errs.push('Data #'+(i+1)+': kode RUP '+x.p.rup+' duplikat dalam file.');return}seen.add(key);rows.push(x.p)});
-  return {rows,errs};
+  try{data=JSON.parse(raw)}catch(err){result.errs.push('Format JSON tidak valid: '+err.message);return result;}
+  const list=rupListFromJson(data);
+  if(!list||!list.length){result.errs.push('Tidak ditemukan daftar RUP. Gunakan array, aaData, paket, data, rows, atau results.');return result;}
+  if(list.length>10000){result.errs.push('Maksimal 10.000 baris per impor. Pisahkan file menjadi beberapa bagian.');return result;}
+  result.total=list.length;
+  if(data&&!Array.isArray(data)){
+    const totalFound=rupField(data,['iTotalRecords','recordsTotal','iTotalDisplayRecords']);
+    if(totalFound!==undefined&&Number.isFinite(Number(totalFound))&&Number(totalFound)>list.length){
+      result.warnings.push('Sumber melaporkan '+totalFound+' paket, sedangkan JSON ini memuat '+list.length+' baris. Kemungkinan hanya satu halaman hasil; periksa halaman lain sebelum menganggap impor lengkap.');
+    }
+  }
+  const seen=new Set(),existing=new Map((S.rupBank||[]).map(r=>[rupBankKey(r),r]));
+  list.forEach((row,i)=>{
+    const x=rupParseRow(row,i,S.ui.tahun,defOpd,defSub);
+    if(!x.ok){result.errs.push(x.err);return;}
+    const p=x.p,key=rupBankKey(p);
+    if(seen.has(key)){result.errs.push('Data #'+(i+1)+': RUP '+p.rup+' duplikat di dalam file untuk OPD/tahun yang sama.');return;}
+    seen.add(key);
+    const old=existing.get(key);
+    const detail={rup:p.rup,nama:p.nama,opd:O(p.opd).singkat||O(p.opd).nama,tahun:p.tahun,pagu:p.pagu,status:old?(mode==='update'?'Perbarui':'Lewati'):'Baru'};
+    result.detail.push(detail);
+    if(old){if(mode==='update')result.updates.push({id:old.id,p});else result.skips++;}
+    else result.rows.push(p);
+  });
+  return result;
 }
-const rupPreview=r=>({errs:r.errs,rows:r.rows.map(p=>({rup:p.rup,nama:p.nama,opd:O(p.opd).singkat||O(p.opd).nama,tahun:p.tahun,sub:p.sub,bulan:p.bulanPelaksanaan,pagu:p.pagu,n:p.items.length}))});
+const rupPreview=r=>({errs:r.errs,rows:r.rows,updates:r.updates,skips:r.skips,warnings:r.warnings||[],detail:r.detail,total:r.total});
 function satriaBankRows(){
  const scope=activeCloudScope();return (S.rupBank||[]).filter(r=>(!scope||(scope.opdIds.includes(String(r.opd))&&scope.years.includes(Number(r.tahun))))&&(S.ui.opd==='all'||String(r.opd)===String(S.ui.opd))&&(!S.ui.rupSearch||[r.rup,r.nama,r.metodePemilihan].join(' ').toLowerCase().includes(S.ui.rupSearch.toLowerCase())));
 }
-function satriaBankRow(p){return {id:uid('rup'),rup:p.rup,nama:p.nama,opd:p.opd,tahun:p.tahun,pagu:p.pagu,sumber:p.sumber,bulanPelaksanaan:p.bulanPelaksanaan||'',metodePemilihan:p.metodePemilihan||'',jenisPengadaan:p.jenisPengadaan||'Barang',sub:p.sub||'',asal:'Impor JSON/CSV SiRUP',importedAt:new Date().toISOString()};}
+function satriaBankRow(p){return {id:uid('rup'),rup:p.rup,nama:p.nama,opd:p.opd,tahun:p.tahun,pagu:p.pagu,sumber:p.sumber,bulanPelaksanaan:p.bulanPelaksanaan||'',metodePemilihan:p.metodePemilihan||'',jenisPengadaan:p.jenisPengadaan||'Barang',sub:p.sub||'',masaHk:p.masaHk||7,lokasiPengiriman:p.lokasiPengiriman||'',items:Array.isArray(p.items)?p.items:[],asal:'Impor JSON/CSV SiRUP',importedAt:new Date().toISOString()};}
 /* SATRIA 3.0.42 — RUP manual unsaved draft protection.
    Never write an incomplete RUP to Bank RUP or cloud; restore only the UI draft. */
 const RUP_MANUAL_FIELD_IDS=['rupMCode','rupMName','rupMOpd','rupMYear','rupMBudget','rupMSource','rupMMethod','rupMType','rupMProvenance','rupMNotes'];
@@ -2336,10 +2404,17 @@ function vInputRup(){
  const filteredOpd=S.ui.opd!=='all'&&inOpds(S.ui.opd)?String(S.ui.opd):'';
  const draftOpd=rupManualDraftValue('rupMOpd',S.ui.rupManualOpd||'');
  const manualOpd=inOpds(draftOpd)?String(draftOpd):(filteredOpd||(opds.length===1?String(opds[0].id):''));
- const defOpd=inOpds(S.ui.rupDefOpd)?String(S.ui.rupDefOpd):(filteredOpd||String(opds[0].id));
+ const defOpd=inOpds(S.ui.rupDefOpd)?String(S.ui.rupDefOpd):(filteredOpd||(opds.length===1?String(opds[0].id):''));
  const pv=S.ui.rupPrev;
  const imported=(S.rupBank||[]),list=satriaBankRows();
- const preview=!pv?'':pv.errs.length?`<div class="card" role="alert"><b class="bad">${pv.errs.length} masalah impor — belum ada data disimpan.</b><ul>${pv.errs.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:`<div class="card"><b>Siap masuk Bank RUP: ${pv.rows.length} baris.</b><p class="mut">Periksa kode dan tahun, kemudian pilih Impor ke Bank RUP.</p></div>`;
+ const preview=!pv?'':`<section class="card" aria-live="polite" id="rupImportPreview">
+ <h3>Pratinjau impor — ${pv.total} baris</h3>
+ <p><b>Baru: ${pv.rows.length}</b> · <b>Perbarui: ${pv.updates.length}</b> · <b>Lewati: ${pv.skips}</b> · <b class="${pv.errs.length?'bad':'ok'}">Kesalahan: ${pv.errs.length}</b></p>
+ ${pv.errs.length?`<p class="bad"><b>Impor dibatalkan seluruhnya sampai semua kesalahan diperbaiki.</b></p><ul>${pv.errs.slice(0,25).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${pv.errs.length>25?`<small class="mut">Masih ada ${pv.errs.length-25} kesalahan lainnya. Periksa seluruh file.</small>`:''}`:
+ `<p class="mut">Tidak ada data yang disimpan saat pratinjau. Tekan Impor untuk konfirmasi dan menyimpan perubahan.</p>`}
+ ${(pv.warnings||[]).length?`<div role="status"><b>Perhatian:</b><ul>${pv.warnings.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
+ ${pv.detail.length?`<div style="overflow-x:auto"><table><thead><tr><th>Kode RUP</th><th>Nama paket</th><th>OPD / TA</th><th>Pagu</th><th>Tindakan</th></tr></thead><tbody>${pv.detail.slice(0,30).map(x=>`<tr><td>${esc(x.rup)}</td><td>${esc(x.nama)}</td><td>${esc(x.opd)} / ${x.tahun}</td><td>${rp(x.pagu)}</td><td>${esc(x.status)}</td></tr>`).join('')}</tbody></table></div>${pv.detail.length>30?`<small class="mut">Menampilkan 30 dari ${pv.detail.length} baris valid.</small>`:''}`:''}
+ </section>`;
  const manual=`<section class="card satria-rup-manual"><h3>Input RUP Manual — khusus konsolidasi / tidak tersedia di SiRUP</h3><p class="mut">Simpan RUP ke <b>Bank RUP</b> terlebih dahulu. Tidak langsung membuat Paket Pengadaan. Salin identitas RUP berdasarkan bukti/sumber yang Anda miliki.</p>
  <div class="satria-rup-form">
  <div class="fg"><label for="rupMCode">Kode RUP / Identitas referensi *</label><input id="rupMCode" autocomplete="off" value="${esc(rupManualDraftValue('rupMCode'))}" placeholder="Kode RUP resmi atau kode internal konsolidasi" required></div>
@@ -2353,11 +2428,14 @@ function vInputRup(){
  <div class="fg"><label for="rupMProvenance">Asal/bukti referensi *</label><input id="rupMProvenance" value="${esc(rupManualDraftValue('rupMProvenance'))}" placeholder="Misalnya: Dokumen konsolidasi nomor ..."></div>
  <div class="fg"><label for="rupMNotes">Keterangan</label><textarea id="rupMNotes" rows="2" placeholder="Alasan belum muncul di SiRUP dan keterangan tambahan">${esc(rupManualDraftValue('rupMNotes'))}</textarea></div>
  </div><div class="row" style="margin-top:12px"><button type="button" data-act="rupmanualsave">+ Simpan ke Bank RUP</button><button type="button" class="g" data-act="rupmanualclear">Bersihkan draf</button></div><p class="mut" aria-live="polite" style="margin-top:8px">Isi formulir dipertahankan saat berpindah kolom atau tampilan dimuat ulang di dalam aplikasi. Belum masuk Bank RUP sampai tombol Simpan ditekan.</p><p class="mut" style="margin-top:10px">Jika belum ada kode RUP resmi, gunakan identitas internal yang jelas dan tandai statusnya sebagai <b>perlu verifikasi</b>. Jangan menganggap kode internal sebagai kode SiRUP resmi.</p></section>`;
- return head+status+manual+`<div class="card"><h3>1. Impor daftar RUP</h3><p class="mut">Unggah JSON hasil ekspor SiRUP yang Anda miliki, atau CSV. Tempel JSON juga didukung. Contoh <code>aaData</code> adalah ilustrasi struktur impor, bukan jaminan format API SiRUP terbaru. Sistem tidak mengambil data langsung dari SiRUP/EXFATH dalam mode HTML lokal.</p>
- <div class="fg"><label>OPD tujuan untuk data tanpa kolom OPD</label><select id="rupDefOpd">${opds.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===defOpd?'selected':''}>${esc(o.singkat||o.nama)}</option>`).join('')}</select></div>
- <div class="row" style="margin:12px 0;gap:8px;flex-wrap:wrap"><input id="rupFile" type="file" accept=".json,.csv,application/json,text/csv,text/plain"><button type="button" class="g" id="rupCsvTemplate">Template CSV</button><button type="button" class="g" data-act="rupexample" data-kind="sirup">Contoh JSON aaData</button><button type="button" class="g" data-act="rupexample" data-kind="json">Contoh JSON objek</button></div>
+ return head+status+manual+`<div class="card"><h3>1. Impor daftar RUP</h3><p class="mut">Unggah JSON hasil ekspor SiRUP yang Anda miliki, atau CSV. Tempel JSON juga didukung. Format <code>aaData</code> 7 kolom (kode RUP, nama paket, pagu, metode, sumber dana, kode ulang, bulan/tahun) didukung. Contoh berdasarkan JSON SiRUP yang diberikan pengguna; format SiRUP dapat berubah. Sistem tidak mengambil data langsung dari SiRUP/EXFATH dalam mode HTML lokal.</p>
+ <div class="row" style="gap:8px;flex-wrap:wrap;margin:10px 0"><a class="btn g" href="https://sirup.inaproc.id/sirup/rekap/klpd/D209" target="_blank" rel="noopener noreferrer">Buka Rekap SiRUP D209 ↗</a><a class="btn g" href="https://sirup.inaproc.id/sirup/caripaketctr/index" target="_blank" rel="noopener noreferrer">Buka Cari Paket SiRUP ↗</a></div>
+ <small class="mut">Referensi situs resmi dibuka di tab baru. Untuk saat ini SATRIA <b>tidak</b> menarik data otomatis dari situs tersebut. Ambil JSON/CSV sesuai akses yang Anda miliki, lalu masukkan di bawah. Harap jangan memasukkan cookie, token, atau kata sandi SiRUP ke SATRIA. Tautan rekap D209 tidak menetapkan OPD tujuan secara otomatis.</small>
+ <div class="fg" style="margin-top:12px"><label for="rupDefOpd">OPD tujuan untuk data yang tidak memiliki kolom OPD</label><select id="rupDefOpd"><option value="" ${!defOpd?'selected':''}>— Pilih OPD tujuan (jika tidak ada pada JSON) —</option>${opds.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===defOpd?'selected':''}>${esc(o.singkat||o.nama)}</option>`).join('')}</select><small class="mut">Jika berisi lebih dari satu OPD, data akan mengikuti identitas OPD pada setiap baris. SATRIA tidak memilih OPD pertama secara diam-diam.</small></div>
+ <div class="fg" style="margin-top:10px"><label for="rupDupMode">Jika kode RUP + OPD + tahun sudah ada</label><select id="rupDupMode"><option value="skip" ${(S.ui.rupDupMode||'skip')==='skip'?'selected':''}>Lewati data lama (aman, disarankan)</option><option value="update" ${S.ui.rupDupMode==='update'?'selected':''}>Perbarui data Bank RUP yang lama</option></select><small class="mut">Perbarui hanya mengubah data Bank RUP, tidak menimpa paket pengadaan yang sudah dibuat.</small></div>
+ <div class="row" style="margin:12px 0;gap:8px;flex-wrap:wrap"><input id="rupFile" type="file" accept=".json,.csv,application/json,text/csv,text/plain"><button type="button" class="g" id="rupCsvTemplate">Template CSV</button><button type="button" class="g" data-act="rupclipboard">Tempel JSON dari clipboard</button><button type="button" class="g" data-act="rupexample" data-kind="sirup">Contoh JSON aaData</button><button type="button" class="g" data-act="rupexample" data-kind="json">Contoh JSON objek</button></div>
  <textarea id="rupJsonIn" spellcheck="false" style="min-height:150px;width:100%;font:12px/1.5 monospace" placeholder="Tempel JSON hasil ekspor di sini">${esc(S.ui.rupJson||'')}</textarea>
- <div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap"><button type="button" class="g" data-act="rupvalidate">Periksa data</button><button type="button" data-act="rupimport">Impor ke Bank RUP</button></div></div>${preview}
+ <div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap"><button type="button" class="g" data-act="rupvalidate">Periksa data</button><button type="button" data-act="rupimport">Impor ke Bank RUP</button></div><small class="mut">Impor maksimal 5 MB dan 10.000 RUP per berkas. Semua perubahan dilakukan sekaligus setelah konfirmasi, tanpa menghapus data lain.</small></div>${preview}
  <div class="card"><h3>2. Daftar RUP yang telah diimpor (${imported.length})</h3><p class="mut">RUP di sini tidak dihitung sebagai paket pengadaan, HPS, atau anggaran terkelola sampai dipilih untuk pembuatan paket.</p><input id="rupBankSearch" type="search" placeholder="Cari kode RUP / nama paket..." value="${esc(S.ui.rupSearch||'')}" style="width:100%;margin-bottom:12px">
  ${list.length?`<div class="satria-rup-grid">${list.map(r=>{const existing=S.paket.find(p=>String(p.rup)===String(r.rup)&&Number(p.tahun)===Number(r.tahun)&&String(p.opd)===String(r.opd));return `<article class="satria-rup-card"><div><small>RUP ${esc(r.rup)} · TA ${r.tahun} · ${esc(O(r.opd).singkat||O(r.opd).nama)}</small><h3>${esc(r.nama)}</h3><p><b>${rp(r.pagu)}</b> · ${esc(r.metodePemilihan||'Metode belum tercatat')}</p></div><div class="row" style="gap:8px;flex-wrap:wrap">${existing?`<button type="button" class="g" data-act="rupopen" data-id="${esc(existing.id)}">Buka paket</button>`:`<button type="button" data-act="rupcreate" data-id="${esc(r.id)}">Buat paket dari RUP</button>`}<button type="button" class="g" data-act="rupremove" data-id="${esc(r.id)}">Hapus dari bank</button></div></article>`}).join('')}</div>`:'<div class="satria-empty-state"><strong>Belum ada RUP pada daftar ini.</strong><p>Impor data SiRUP terlebih dahulu atau ubah filter OPD/pencarian.</p></div>'}</div>`;
 }
@@ -3796,15 +3874,47 @@ document.addEventListener('click',e=>{
    if(ok===null)return;
    S.ui.tahun=tahun;S.ui.opd=opd;rupManualClearDraft();S.ui.rupSearch=rup;toast('RUP manual masuk ke Bank RUP. Pilih Buat paket dari RUP ketika siap.');return render();
  }
+ if(a==='rupclipboard'){
+   if(!navigator.clipboard||typeof navigator.clipboard.readText!=='function'){
+     toast('Akses clipboard tidak tersedia pada browser ini. Tempel manual (Ctrl+V) ke kolom JSON.');$('#rupJsonIn')?.focus();return;
+   }
+   navigator.clipboard.readText().then(raw=>{
+     const txt=String(raw||'').replace(/^\uFEFF/,'').trim();
+     if(!txt){toast('Clipboard kosong. Salin JSON SiRUP terlebih dahulu.');return;}
+     if(txt.length>5*1024*1024){toast('Isi clipboard lebih dari 5 MB. Gunakan berkas yang lebih kecil.');return;}
+     try{JSON.parse(txt);}catch(_){toast('Clipboard bukan JSON valid. Salin isi JSON terlebih dahulu.');return;}
+     S.ui.rupJson=txt;S.ui.rupPrev=null;render();toast('JSON dimuat. Klik Periksa data untuk validasi dan pratinjau.');
+   }).catch(()=>{toast('Izin membaca clipboard ditolak. Tempel manual (Ctrl+V) ke kolom JSON.');$('#rupJsonIn')?.focus();});
+   return;
+ }
  if(a==='rupexample'){S.ui.rupJson=d.kind==='sirup'?RUP_SIRUP:RUP_TPL;S.ui.rupPrev=null;return render()}
  if(a==='rupvalidate'||a==='rupimport'){
-   const txt=$('#rupJsonIn')?.value??S.ui.rupJson??'';S.ui.rupJson=txt;const dop=$('#rupDefOpd')?.value||S.ui.rupDefOpd||'';S.ui.rupDefOpd=dop;const dsub=$('#rupDefSub')?.value||S.ui.rupDefSub||'';S.ui.rupDefSub=dsub;
-   const r=rupReadJson(txt,dop,dsub);
-   if(a==='rupvalidate'||r.errs.length){S.ui.rupPrev=rupPreview(r);toast(r.errs.length?'Ada '+r.errs.length+' kesalahan. Impor dibatalkan.':r.rows.length+' paket siap diimpor');return render()}
-   const ok=SATRIA.tx('paket','Impor '+r.rows.length+' entri Bank RUP',()=>{S.rupBank=S.rupBank||[];r.rows.forEach(p=>S.rupBank.push(satriaBankRow(p)))});
-   if(ok===null){S.ui.rupPrev=rupPreview({rows:[],errs:['Impor dibatalkan seluruhnya karena gagal validasi.']});return render()}
-   S.ui.rupJson='';S.ui.rupPrev=null;S.ui.tahun=r.rows[0].tahun;const ops=[...new Set(r.rows.map(p=>String(p.opd)))];S.ui.opd=ops.length===1?ops[0]:'all';
-   location.hash='#input';toast('RUP masuk ke Bank RUP. Buat paket hanya untuk RUP yang akan dikerjakan.');return render()
+   const txt=$('#rupJsonIn')?.value??S.ui.rupJson??'';S.ui.rupJson=txt;
+   const dop=$('#rupDefOpd')?.value??S.ui.rupDefOpd??'';S.ui.rupDefOpd=dop;
+   const mode=$('#rupDupMode')?.value==='update'?'update':'skip';S.ui.rupDupMode=mode;
+   const r=rupReadJson(txt,dop,S.ui.rupDefSub||'',mode);
+   S.ui.rupPrev=rupPreview(r);
+   if(a==='rupvalidate'||r.errs.length){toast(r.errs.length?'Ada '+r.errs.length+' kesalahan. Tidak ada data yang disimpan.':r.rows.length+' baru, '+r.updates.length+' diperbarui, '+r.skips+' dilewati.');return render()}
+   if(!r.rows.length&&!r.updates.length){toast('Seluruh RUP sudah ada di Bank RUP; tidak ada yang perlu disimpan.');return render()}
+   const msg='Impor '+r.rows.length+' RUP baru dan perbarui '+r.updates.length+' RUP di Bank? '+r.skips+' baris akan dilewati. '+(r.updates.length?'Paket pengadaan yang sudah dibuat TIDAK diubah. ':'')+'Pastikan data sudah benar.';
+   if(!confirm(msg))return render();
+   const ok=SATRIA.tx('paket','Impor '+r.rows.length+' baru, perbarui '+r.updates.length+' Bank RUP',()=>{
+     S.rupBank=S.rupBank||[];
+     const timestamp=new Date().toISOString();
+     for(const p of r.rows)S.rupBank.push(satriaBankRow(p));
+     for(const u of r.updates){
+       const old=S.rupBank.find(x=>x.id===u.id);
+       if(!old)throw new Error('RUP tujuan perbarui sudah tidak tersedia.');
+       const incoming=satriaBankRow(u.p);
+       Object.assign(old,{...incoming,id:old.id,asal:old.asal||incoming.asal,importedAt:old.importedAt||timestamp,updatedAt:timestamp});
+     }
+   });
+   if(ok===null){S.ui.rupPrev=rupPreview({...r,errs:['Transaksi dibatalkan. Periksa notifikasi validasi.']});return render()}
+   S.ui.rupJson='';S.ui.rupPrev=null;
+   const changed=[...r.rows,...r.updates.map(u=>u.p)];
+   S.ui.tahun=changed[0].tahun;
+   const ops=[...new Set(changed.map(p=>String(p.opd)))];S.ui.opd=ops.length===1?ops[0]:'all';
+   location.hash='#input';toast('Berhasil: '+r.rows.length+' RUP baru, '+r.updates.length+' diperbarui, '+r.skips+' dilewati.');return render();
  }
  if(a==='rupsave'){
    const g=k=>String($('#'+k)?.value??'').trim();
@@ -3833,7 +3943,7 @@ document.addEventListener('click',e=>{
    const existing=S.paket.find(p=>String(p.rup)===String(r.rup)&&+p.tahun===+r.tahun&&String(p.opd)===String(r.opd));
    if(existing){location.hash='#paket/'+existing.id;return render()}
    const scope=activeCloudScope();if(scope&&(!scope.opdIds.includes(String(r.opd))||!scope.years.includes(Number(r.tahun)))){toast('RUP di luar kewenangan akun.');return}
-   const p={id:uid('k'),tahun:+r.tahun,opd:r.opd,unit:(S.unit.find(u=>String(u.opd)===String(r.opd))||{}).id||'',seq:nextSeq(r.tahun,r.opd),nama:r.nama,rup:r.rup,pagu:+r.pagu,sumber:r.sumber,sub:satriaValidSubCode(r.sub)||'',bulanPelaksanaan:r.bulanPelaksanaan||'',metodePemilihan:r.metodePemilihan||'E-Purchasing dengan Negosiasi Harga',jenisPengadaan:r.jenisPengadaan||'Barang',ppk:pjId(r.opd,'PPK')||'',pp:pjId(r.opd,'PP')||'',kabid:pjId(r.opd,'Kabid')||'',masaHk:7,items:[],penawaran:[],pemenangId:null,rupBankId:r.id};
+   const p={id:uid('k'),tahun:+r.tahun,opd:r.opd,unit:(S.unit.find(u=>String(u.opd)===String(r.opd))||{}).id||'',seq:nextSeq(r.tahun,r.opd),nama:r.nama,rup:r.rup,pagu:+r.pagu,sumber:r.sumber,sub:satriaValidSubCode(r.sub)||'',bulanPelaksanaan:r.bulanPelaksanaan||'',metodePemilihan:r.metodePemilihan||'E-Purchasing dengan Negosiasi Harga',jenisPengadaan:r.jenisPengadaan||'Barang',ppk:pjId(r.opd,'PPK')||'',pp:pjId(r.opd,'PP')||'',kabid:pjId(r.opd,'Kabid')||'',masaHk:Number(r.masaHk)||7,lokasiPengiriman:r.lokasiPengiriman||O(r.opd).tempat||'',items:(Array.isArray(r.items)?r.items:[]).map(it=>({...it,id:uid('i')})),penawaran:[],pemenangId:null,rupBankId:r.id};
    const ok=SATRIA.tx('paket','Buat paket dari Bank RUP '+r.rup,()=>S.paket.push(p));if(ok===null)return;
    S.ui.tahun=p.tahun;S.ui.opd=p.opd;S.ui.ptab='data';location.hash='#paket/'+p.id;return render();
  }
@@ -3893,6 +4003,7 @@ document.addEventListener('click',e=>{
 });
 let paketSearchTimer=null;
 document.addEventListener('input',e=>{if(RUP_MANUAL_FIELD_IDS.includes(e.target?.id))rupManualCapture();});
+document.addEventListener('input',e=>{if(e.target?.id==='rupJsonIn'){S.ui.rupJson=e.target.value;S.ui.rupPrev=null;}});
 document.addEventListener('input',e=>{if(e.target?.id==='rupBankSearch'){const inp=e.target;S.ui.rupSearch=inp.value;const pos=inp.selectionStart;render();const next=$('#rupBankSearch');if(next){next.focus();try{next.setSelectionRange(pos,pos)}catch(_){}}}});
 document.addEventListener('input',event=>{
  const input=event.target;
@@ -3909,9 +4020,10 @@ document.addEventListener('input',event=>{
 });
 document.addEventListener('change',e=>{
  const t=e.target,d=t.dataset;
- if(t.id==='rupDefOpd'){S.ui.rupDefOpd=t.value;return}
+ if(t.id==='rupDefOpd'){S.ui.rupDefOpd=t.value;S.ui.rupPrev=null;return}
+ if(t.id==='rupDupMode'){S.ui.rupDupMode=t.value==='update'?'update':'skip';S.ui.rupPrev=null;return}
  if(RUP_MANUAL_FIELD_IDS.includes(t.id)){rupManualCapture();return}
- if(t.id==='rupFile'){const f=t.files[0];if(!f)return;if(f.size>2*1024*1024){toast('File maksimal 2 MB.');t.value='';return}const r=new FileReader();r.onload=()=>{try{const str=String(r.result||'').replace(/^\uFEFF/,'');S.ui.rupJson=/\.csv$/i.test(f.name)?JSON.stringify(satriaCSVtoRows(str),null,2):str;S.ui.rupPrev=null;toast('File dimuat. Klik Periksa data untuk memvalidasi sebelum impor.');render()}catch(err){toast('File tidak dapat dibaca: '+err.message)}};r.readAsText(f);return}
+ if(t.id==='rupFile'){const f=t.files[0];if(!f)return;if(f.size>5*1024*1024){toast('File maksimal 5 MB.');t.value='';return}const r=new FileReader();r.onload=()=>{try{const str=String(r.result||'').replace(/^\uFEFF/,'');S.ui.rupJson=/\.csv$/i.test(f.name)?JSON.stringify(satriaCSVtoRows(str),null,2):str;S.ui.rupPrev=null;toast('File dimuat. Klik Periksa data untuk memvalidasi sebelum impor.');render()}catch(err){toast('File tidak dapat dibaca: '+err.message)}};r.readAsText(f);return}
  if(t.id==='selEngine'){ENGINE=t.value==='dexie'&&DB?'dexie':'memory';clearTimeout(pTimer);if(ENGINE==='dexie')persistNow();toast(ENGINE==='dexie'?'Penyimpanan: IndexedDB (Dexie)':'Penyimpanan: memori sesi (hilang saat halaman ditutup)');return}
  if(t.id==='selTahun'){
    const scope=activeCloudScope(),year=Number(t.value);
