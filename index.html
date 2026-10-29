@@ -2235,7 +2235,7 @@ const RUP_TPL=`[
     ]
   }
 ]`;
-/* PATCH IMPOR RUP JSON — 2026-10-29. Bank RUP saja; tidak membuat paket otomatis. */
+/* PATCH IMPOR RUP JSON — 2026-10-29. Tambahan respons DataTables SiRUP data:[{id,paket,pagu,...}]. Bank RUP saja. */
 function uniqSumber(v){
   return [...new Set((Array.isArray(v)?v.join(','):String(v??'')).split(',').map(s=>s.trim()).filter(Boolean))].join(', ');
 }
@@ -2271,23 +2271,33 @@ function rupFromSirup(a){
   const bulan=BULAN[namaBulan]?(BULAN[namaBulan]+(yr?' '+yr[0]:'')):raw;
   return {rup:rupText(a[0]??a[5]),nama:rupText(a[1]),pagu:a[2],metodePemilihan:rupText(a[3]),sumber:uniqSumber(a[4]),tahun:yr?Number(yr[0]):undefined,bulan};
 }
-function rupParseRow(r,i,defTahun,defOpd,defSub){
+function rupOpdKey(s){return String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+function rupParseRow(r,i,defTahun,defOpd,defSub,allowSirupOpdFallback=true){
   const e=m=>({ok:false,err:'Data #'+(i+1)+': '+m});
   if(Array.isArray(r))r=rupFromSirup(r);
   if(!r||typeof r!=='object')return e('baris harus berupa objek JSON atau array aaData.');
   const get=(...names)=>rupField(r,names);
-  const rup=rupText(get('rup','kodeRup','kode_rup','noRup','nomorRup','kodePaket','idRup'));
+  // DataTables SiRUP bentuk objek: {data:[{id,paket,pagu,satuanKerja,pemilihan,...}]}.
+  // Jangan anggap setiap field `id` umum sebagai kode RUP kecuali bentuk SiRUP dikenali.
+  const isSirupRecord=get('id')!==undefined&&get('paket')!==undefined&&get('pagu')!==undefined;
+  const rup=rupText(get('rup','kodeRup','kode_rup','noRup','nomorRup','kodePaket','idRup')??(isSirupRecord?get('id'):undefined));
   if(!rup||rup.length>100)return e('kode RUP wajib diisi (maksimal 100 karakter).');
-  const nama=rupText(get('nama','namaPaket','nama_paket','namaPengadaan','namaRup','uraianPekerjaan'));
+  const nama=rupText(get('nama','namaPaket','nama_paket','namaPengadaan','namaRup','uraianPekerjaan')??(isSirupRecord?get('paket'):undefined));
   if(!nama||nama.length>1000)return e('nama paket wajib diisi (maksimal 1000 karakter).');
   const y=get('tahun','tahunAnggaran','tahun_anggaran','tahunPaket','ta');
-  const yearHint=rupText(get('bulan','bulanPelaksanaan','jadwalPelaksanaan','waktuPelaksanaan')).match(/(?:19|20)\d{2}/);
+  const yearHint=rupText(get('bulan','bulanPelaksanaan','jadwalPelaksanaan','waktuPelaksanaan','pemilihan')).match(/(?:19|20)\d{2}/);
   const tahun=Number(y===undefined?(yearHint?yearHint[0]:defTahun):y);
   if(!Number.isInteger(tahun)||!S.tahun.includes(tahun))return e('tahun anggaran '+String(y??defTahun)+' belum terdaftar di Pengaturan Sistem.');
-  const opdValue=get('opd','kodeOpd','idOpd','namaOpd','satker','namaSatker','perangkatDaerah','organisasi');
-  const ref=rupText(opdValue??defOpd).toLowerCase();
-  const od=ref&&(S.opd||[]).find(o=>[o.id,o.singkat,o.nama].some(v=>String(v||'').trim().toLowerCase()===ref));
-  if(!od)return e(ref?'OPD "'+rupText(opdValue??defOpd)+'" tidak ada di Data Master.':'OPD tidak ada pada baris; pilih OPD tujuan di atas sebelum impor.');
+  const opdValue=get('opd','kodeOpd','idOpd','namaOpd','satker','namaSatker','perangkatDaerah','organisasi','satuanKerja');
+  const opdKey=rupOpdKey(opdValue);
+  const selectedKey=rupOpdKey(defOpd);
+  const matches=key=>key&&(S.opd||[]).find(o=>[o.id,o.singkat,o.nama].some(v=>rupOpdKey(v)===key));
+  const direct=matches(opdKey),selected=matches(selectedKey);
+  // OPD yang disebut jelas di JSON selalu diutamakan. Jika nama SiRUP berbeda
+  // dari Data Master, operator HARUS memilih pemetaan di dropdown, dan UI memperingatkan.
+  // Fallback dilarang bila file berisi beberapa satuanKerja berbeda.
+  const od=direct||(!opdValue?selected:(isSirupRecord&&allowSirupOpdFallback?selected:undefined));
+  if(!od)return e(opdValue?'OPD SiRUP "'+rupText(opdValue)+'" tidak cocok dengan Data Master; pilih OPD tujuan yang benar sebelum impor.':'OPD tidak ada pada baris; pilih OPD tujuan di atas sebelum impor.');
   const opd=od.id;
   const scope=activeCloudScope();
   if(scope&&(!scope.opdIds.includes(String(opd))||!scope.years.includes(tahun)))return e('OPD/tahun di luar assignment akun Anda.');
@@ -2308,12 +2318,12 @@ function rupParseRow(r,i,defTahun,defOpd,defSub){
   }
   const unit=((S.unit||[]).find(u=>String(u.opd)===String(opd))||{}).id||'';
   return {ok:true,p:{id:uid('k'),tahun,opd,unit,seq:0,nama,rup,pagu,sumber:uniqSumber(get('sumber','sumberDana','sumber_dana','sumberAnggaran')??S.pemda.sumber??''),sub,
-    bulanPelaksanaan:rupText(get('bulan','bulanPelaksanaan','jadwalPelaksanaan','waktuPelaksanaan')),
+    bulanPelaksanaan:rupText(get('bulan','bulanPelaksanaan','jadwalPelaksanaan','waktuPelaksanaan','pemilihan')),
     ppk:pjId(opd,'PPK')||'',pp:pjId(opd,'PP')||'',kabid:pjId(opd,'Kabid')||'',
     masaHk:Number(get('masaHk'))||7,
     jenisPengadaan:rupText(get('jenisPengadaan','jenis_pengadaan','jenisBelanja'))||'Barang',
     metodePemilihan:rupText(get('metodePemilihan','metodePengadaan','metode_pemilihan','metode'))||'E-Purchasing dengan Negosiasi Harga',
-    lokasiPengiriman:rupText(get('lokasiPengiriman','lokasiPekerjaan'))||O(opd).tempat||O(opd).alamat||'',
+    lokasiPengiriman:rupText(get('lokasiPengiriman','lokasiPekerjaan','lokasi'))||O(opd).tempat||O(opd).alamat||'',
     tglSurvei:'',tglEvaluasi:'',tglNego:'',tglPenetapan:'',tglNodis:'',tglDpp:'',tglSppbj:'',tglBahp:'',batas:'',pemenangId:null,items,penawaran:[]}};
 }
 function rupListFromJson(data,depth=0){
@@ -2337,6 +2347,21 @@ function rupReadJson(text,defOpd,defSub,mode='skip'){
   if(!list||!list.length){result.errs.push('Tidak ditemukan daftar RUP. Gunakan array, aaData, paket, data, rows, atau results.');return result;}
   if(list.length>10000){result.errs.push('Maksimal 10.000 baris per impor. Pisahkan file menjadi beberapa bagian.');return result;}
   result.total=list.length;
+  // Catatan sumber khusus DataTables SiRUP; satu halaman bisa berisi < total rekap.
+  const sirupEntries=list.filter(x=>x&&!Array.isArray(x)&&typeof x==='object'&&rupField(x,['id'])!==undefined&&rupField(x,['paket'])!==undefined&&rupField(x,['pagu'])!==undefined);
+  const sirupSources=[...new Set(sirupEntries.map(x=>rupText(rupField(x,['satuanKerja']))).filter(Boolean))];
+  const allowSirupOpdFallback=sirupSources.length<=1;
+  if(sirupSources.length>1)result.warnings.push('Terdapat '+sirupSources.length+' satuan kerja berbeda; OPD harus cocok per baris dengan Data Master. Pemilihan OPD default tidak akan dipakai untuk pemetaan silang.');
+  if(sirupSources.length===1&&defOpd){
+    const key=rupOpdKey(sirupSources[0]);
+    const sourceExists=(S.opd||[]).some(o=>[o.id,o.nama,o.singkat].some(v=>rupOpdKey(v)===key));
+    const target=(S.opd||[]).find(o=>[o.id,o.nama,o.singkat].some(v=>rupOpdKey(v)===rupOpdKey(defOpd)));
+    if(!sourceExists&&target)result.warnings.push('Konfirmasi pemetaan satuan kerja SiRUP "'+sirupSources[0]+'" → OPD SATRIA "'+(target.nama||target.singkat||target.id)+'". Pilihan OPD ini ditentukan operator, bukan SiRUP.');
+  }
+  if(sirupEntries.length){
+    const years=[...new Set(sirupEntries.map(x=>rupText(rupField(x,['pemilihan'])).match(/(?:19|20)\d{2}/)?.[0]).filter(Boolean))];
+    if(years.length)result.warnings.push('Tahun '+years.join(', ')+' dibaca dari kolom jadwal pemilihan SiRUP. Pastikan sesuai tahun anggaran sebelum menyimpan.');
+  }
   if(data&&!Array.isArray(data)){
     const totalFound=rupField(data,['iTotalRecords','recordsTotal','iTotalDisplayRecords']);
     if(totalFound!==undefined&&Number.isFinite(Number(totalFound))&&Number(totalFound)>list.length){
@@ -2345,7 +2370,7 @@ function rupReadJson(text,defOpd,defSub,mode='skip'){
   }
   const seen=new Set(),existing=new Map((S.rupBank||[]).map(r=>[rupBankKey(r),r]));
   list.forEach((row,i)=>{
-    const x=rupParseRow(row,i,S.ui.tahun,defOpd,defSub);
+    const x=rupParseRow(row,i,S.ui.tahun,defOpd,defSub,allowSirupOpdFallback);
     if(!x.ok){result.errs.push(x.err);return;}
     const p=x.p,key=rupBankKey(p);
     if(seen.has(key)){result.errs.push('Data #'+(i+1)+': RUP '+p.rup+' duplikat di dalam file untuk OPD/tahun yang sama.');return;}
@@ -2428,10 +2453,10 @@ function vInputRup(){
  <div class="fg"><label for="rupMProvenance">Asal/bukti referensi *</label><input id="rupMProvenance" value="${esc(rupManualDraftValue('rupMProvenance'))}" placeholder="Misalnya: Dokumen konsolidasi nomor ..."></div>
  <div class="fg"><label for="rupMNotes">Keterangan</label><textarea id="rupMNotes" rows="2" placeholder="Alasan belum muncul di SiRUP dan keterangan tambahan">${esc(rupManualDraftValue('rupMNotes'))}</textarea></div>
  </div><div class="row" style="margin-top:12px"><button type="button" data-act="rupmanualsave">+ Simpan ke Bank RUP</button><button type="button" class="g" data-act="rupmanualclear">Bersihkan draf</button></div><p class="mut" aria-live="polite" style="margin-top:8px">Isi formulir dipertahankan saat berpindah kolom atau tampilan dimuat ulang di dalam aplikasi. Belum masuk Bank RUP sampai tombol Simpan ditekan.</p><p class="mut" style="margin-top:10px">Jika belum ada kode RUP resmi, gunakan identitas internal yang jelas dan tandai statusnya sebagai <b>perlu verifikasi</b>. Jangan menganggap kode internal sebagai kode SiRUP resmi.</p></section>`;
- return head+status+manual+`<div class="card"><h3>1. Impor daftar RUP</h3><p class="mut">Unggah JSON hasil ekspor SiRUP yang Anda miliki, atau CSV. Tempel JSON juga didukung. Format <code>aaData</code> 7 kolom (kode RUP, nama paket, pagu, metode, sumber dana, kode ulang, bulan/tahun) didukung. Contoh berdasarkan JSON SiRUP yang diberikan pengguna; format SiRUP dapat berubah. Sistem tidak mengambil data langsung dari SiRUP/EXFATH dalam mode HTML lokal.</p>
+ return head+status+manual+`<div class="card"><h3>1. Impor daftar RUP</h3><p class="mut">Unggah JSON hasil ekspor SiRUP yang Anda miliki, atau CSV. Tempel JSON juga didukung. Mendukung <code>aaData</code> 7 kolom dan <code>data</code> berisi objek SiRUP (<code>id</code>, <code>paket</code>, <code>pagu</code>, <code>satuanKerja</code>, <code>pemilihan</code>). Contoh berdasarkan JSON SiRUP yang diberikan pengguna; format SiRUP dapat berubah. Sistem tidak mengambil data langsung dari SiRUP/EXFATH dalam mode HTML lokal.</p>
  <div class="row" style="gap:8px;flex-wrap:wrap;margin:10px 0"><a class="btn g" href="https://sirup.inaproc.id/sirup/rekap/klpd/D209" target="_blank" rel="noopener noreferrer">Buka Rekap SiRUP D209 ↗</a><a class="btn g" href="https://sirup.inaproc.id/sirup/caripaketctr/index" target="_blank" rel="noopener noreferrer">Buka Cari Paket SiRUP ↗</a></div>
  <small class="mut">Referensi situs resmi dibuka di tab baru. Untuk saat ini SATRIA <b>tidak</b> menarik data otomatis dari situs tersebut. Ambil JSON/CSV sesuai akses yang Anda miliki, lalu masukkan di bawah. Harap jangan memasukkan cookie, token, atau kata sandi SiRUP ke SATRIA. Tautan rekap D209 tidak menetapkan OPD tujuan secara otomatis.</small>
- <div class="fg" style="margin-top:12px"><label for="rupDefOpd">OPD tujuan untuk data yang tidak memiliki kolom OPD</label><select id="rupDefOpd"><option value="" ${!defOpd?'selected':''}>— Pilih OPD tujuan (jika tidak ada pada JSON) —</option>${opds.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===defOpd?'selected':''}>${esc(o.singkat||o.nama)}</option>`).join('')}</select><small class="mut">Jika berisi lebih dari satu OPD, data akan mengikuti identitas OPD pada setiap baris. SATRIA tidak memilih OPD pertama secara diam-diam.</small></div>
+ <div class="fg" style="margin-top:12px"><label for="rupDefOpd">OPD tujuan untuk data yang tidak memiliki kolom OPD</label><select id="rupDefOpd"><option value="" ${!defOpd?'selected':''}>— Pilih OPD tujuan (jika tidak ada pada JSON) —</option>${opds.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===defOpd?'selected':''}>${esc(o.singkat||o.nama)}</option>`).join('')}</select><small class="mut">Untuk data SiRUP dengan <code>satuanKerja</code> berbeda dari nama OPD di Data Master, pilih OPD tujuannya secara sadar dan periksa peringatan pratinjau. Jika berisi lebih dari satu satuan kerja, data harus cocok per baris dengan Data Master; SATRIA tidak memaksakan satu OPD default.</small></div>
  <div class="fg" style="margin-top:10px"><label for="rupDupMode">Jika kode RUP + OPD + tahun sudah ada</label><select id="rupDupMode"><option value="skip" ${(S.ui.rupDupMode||'skip')==='skip'?'selected':''}>Lewati data lama (aman, disarankan)</option><option value="update" ${S.ui.rupDupMode==='update'?'selected':''}>Perbarui data Bank RUP yang lama</option></select><small class="mut">Perbarui hanya mengubah data Bank RUP, tidak menimpa paket pengadaan yang sudah dibuat.</small></div>
  <div class="row" style="margin:12px 0;gap:8px;flex-wrap:wrap"><input id="rupFile" type="file" accept=".json,.csv,application/json,text/csv,text/plain"><button type="button" class="g" id="rupCsvTemplate">Template CSV</button><button type="button" class="g" data-act="rupclipboard">Tempel JSON dari clipboard</button><button type="button" class="g" data-act="rupexample" data-kind="sirup">Contoh JSON aaData</button><button type="button" class="g" data-act="rupexample" data-kind="json">Contoh JSON objek</button></div>
  <textarea id="rupJsonIn" spellcheck="false" style="min-height:150px;width:100%;font:12px/1.5 monospace" placeholder="Tempel JSON hasil ekspor di sini">${esc(S.ui.rupJson||'')}</textarea>
