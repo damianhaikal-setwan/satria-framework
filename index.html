@@ -4051,6 +4051,8 @@ document.addEventListener('input',event=>{
 });
 document.addEventListener('change',e=>{
  const t=e.target,d=t.dataset;
+ // SMART SURVEY PRO owns these form controls. Do not rerender the entire page on selection change.
+ if(t.matches?.('[data-s59-field]')&&t.closest?.('[data-smart-panel]'))return;
  if(t.id==='rupDefOpd'){S.ui.rupDefOpd=t.value;S.ui.rupPrev=null;return}
  if(t.id==='rupDupMode'){S.ui.rupDupMode=t.value==='update'?'update':'skip';S.ui.rupPrev=null;return}
  if(RUP_MANUAL_FIELD_IDS.includes(t.id)){rupManualCapture();return}
