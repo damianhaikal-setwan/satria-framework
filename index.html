@@ -10564,7 +10564,7 @@ window.addEventListener('change',async ev=>{
  }
  const label=master?'Gambar '+master:opdKop?'Kop OPD':'Logo pemda';
  try{
-   if(!window.S?.pejabat)throw Error('Data Master belum siap.');
+   if(!Array.isArray(S?.pejabat))throw Error('Data Master belum siap.');
    const x=master?S.pejabat.find(r=>String(r.id)===String(t.dataset.id)):null;
    const o=opdKop?S.opd.find(r=>String(r.id)===String(opdKop)):null;
    if(master&&!x||opdKop&&!o)throw Error('Record pejabat/OPD tidak ditemukan.');
