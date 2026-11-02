@@ -2825,19 +2825,63 @@ function satriaDppPpkControl(p){
  </section>`;
 }
 
+/* SATRIA DPP 2026-11-02: format contoh per paket; tidak mengubah data HPS, RUP, atau dokumen lainnya. */
+function satriaDppOptions(p){
+ const f=p?.dppFormat&&typeof p.dppFormat==='object'&&!Array.isArray(p.dppFormat)?p.dppFormat:{};
+ const tableMode=f.tableMode==='lengkap'?'lengkap':'contoh';
+ const brandPolicy=['unreviewed','no_specific','reference','specific'].includes(f.brandPolicy)?f.brandPolicy:'unreviewed';
+ return {tableMode,brandPolicy,brandReason:String(f.brandReason||'').trim(),brandEvidence:String(f.brandEvidence||'').trim(),docNumber:String(f.docNumber||'').trim(),includePhotos:f.includePhotos!==false};
+}
+function satriaDppNumber(p){return satriaDppOptions(p).docNumber||nomor('DPP',p);}
+function satriaDppMetaLines(p,key){
+ const base={program:progOf(p),kegiatan:kegOf(p),subKeg:subOf(p)}[key]||'';
+ const values=[base];
+ const linked=[p?.rupBankId,...(Array.isArray(p?.rupBankIds)?p.rupBankIds:[])].filter(Boolean).map(String);
+ // Hanya referensi RUP tersambung dengan OPD & tahun paket yang sama; bukan data OPD lainnya.
+ const seenIds=new Set();
+ for(const id of linked){
+  if(seenIds.has(id))continue;seenIds.add(id);
+  const r=(S.rupBank||[]).find(x=>String(x.id)===id&&String(x.opd)===String(p.opd)&&Number(x.tahun)===Number(p.tahun));
+  if(!r)continue;
+  const subCode=String(r.subKegKode||r.sub||'').trim();
+  const bankKode=(S.kode||[]).find(x=>String(x.kode)===subCode);
+  const subName=String(r.subKegNama||bankKode?.nama||'').trim();
+  const extra=key==='subKeg'?(r.subKeg||(subCode&&subName?subCode+' - '+subName:subName||subCode)):(r[key]||bankKode?.[key]||'');
+  if(extra)values.push(String(extra));
+ }
+ const lines=[];const seen=new Set();
+ for(const value of values){
+  for(const part of String(value||'').split(/\r?\n/)){
+   const t=part.trim();if(!t||/^(?:-|KODE-DEMO-001|Program Demo|Kegiatan Simulasi)$/i.test(t)||/\b(?:instansi pemerintah demo|dana simulasi)\b/i.test(t))continue;
+   const k=t.toLocaleLowerCase('id-ID').replace(/\s+/g,' ');if(!seen.has(k)){seen.add(k);lines.push(t);}
+  }
+ }
+ return lines.length?lines.map(x=>esc(x)).join('<br>'):'<em>[Belum diisi]</em>';
+}
+function satriaDppBrandText(p){
+ const f=satriaDppOptions(p),reason=esc(f.brandReason),evidence=esc(f.brandEvidence);
+ const refs=(p.items||[]).filter(i=>String(i.merek||'').trim()).map(i=>esc(i.nama||'Barang')+': '+esc(i.merek));
+ const refText=refs.length?`<br><span class="satria-dpp-brand-refs">Merek/tipe yang tercatat dalam data barang: ${refs.join('; ')}.</span>`:'';
+ if(f.brandPolicy==='no_specific')return 'Tidak mensyaratkan merek tertentu. Penyebutan merek/model pada rincian, bila ada, bukan syarat merek tunggal; kesesuaian dinilai terhadap spesifikasi teknis yang ditetapkan.'+(reason?'<br>Catatan PPK: '+reason:'')+refText;
+ if(f.brandPolicy==='reference')return 'Merek/model yang disebut digunakan sebagai referensi karakteristik dan kompatibilitas; produk yang memenuhi spesifikasi teknis tetap dapat dievaluasi.'+(reason?'<br>Pertimbangan teknis PPK: '+reason:'')+refText;
+ if(f.brandPolicy==='specific')return 'Persyaratan merek/tipe tertentu memerlukan justifikasi teknis dan bukti pendukung yang disetujui PPK.'+(reason?'<br>Justifikasi PPK: '+reason:'<br><b>[Alasan teknis belum diisi]</b>')+(evidence?'<br>Dokumen pendukung: '+evidence:'<br><b>[Bukti pendukung belum diisi]</b>')+refText;
+ return '<b>[Status penggunaan merek belum ditetapkan PPK]</b> Tentukan status dan alasan melalui pengaturan DPP sebelum penerbitan resmi.'+refText;
+}
 function dpp(p){const o=OP(p),H=hps(p),dppSigner=satriaDppSigner(p);
 const TS=d=>d?new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}):'-';
 // Sumber dana hanya dari paket; jangan gabungkan nama default instansi yang bisa berisi Demo.
 const cleanSumber=String(p.sumber||'').trim();
 const dppFunding=(/\b(?:demo|contoh|dummy|simulasi|test)\b/i.test(cleanSumber)||!cleanSumber)?'':(cleanSumber+(String(p.tahun||'').trim()&&!/\bTA\s*\d{4}\b/i.test(cleanSumber)?' TA '+p.tahun:''));
-const subs=esc(subOf(p)).replace(/\n/g,'<br>');
+const fDpp=satriaDppOptions(p);
+const subs=satriaDppMetaLines(p,'subKeg');
+const five=fDpp.tableMode==='contoh';
 const P_=(n,t)=>`<p style="margin:4px 0;text-align:justify">${n}${t}</p>`;
 const L=(a,t)=>`<tr><td style="border:0;width:150px;vertical-align:top">${a}</td><td style="border:0;width:10px;vertical-align:top">:</td><td style="border:0">${t}</td></tr>`;
-const items=p.items.map((i,n)=>`<tr><td>${n+1}.</td><td>${itemLabel(i)}</td><td style="text-align:right">${vf(i.vol)}</td><td>${esc(i.satuan)}</td><td style="text-align:right">${nf(i.hs)}</td><td style="text-align:right">${nf((+i.vol||0)*(+i.hs||0))}</td></tr>`).join('');
+const items=p.items.map((i,n)=>`<tr><td>${n+1}.</td><td>${itemLabel(i)}</td><td style="text-align:right">${vf(i.vol)}</td><td>${esc(i.satuan)}</td><td style="text-align:right">${nf(i.hs)}</td>${five?'':`<td style="text-align:right">${nf((+i.vol||0)*(+i.hs||0))}</td>`}</tr>`).join('');
 return `${kop(p)}
 <p class="doc-title" style="text-align:center;margin:6px 0 12px"><u><b>DOKUMEN PERSIAPAN PENGADAAN (DPP) E-PURCHASING</b></u></p>
 <table class="tbl-letter-meta" style="border:0;margin-bottom:10px">
-${L('Nomor',esc(nomor('DPP',p)))}${L('Tanggal',TS(p.tglDpp))}${L('Program',esc(progOf(p)).replace(/\n/g,'<br>'))}${L('Kegiatan',esc(kegOf(p)).replace(/\n/g,'<br>'))}${L('Sub Kegiatan',subs)}${L('Lokasi penyerahan',esc(p.lokasiPengiriman||o.tempat||o.alamat||o.nama))}${L('Nama Paket Pengadaan',esc(p.nama))}${L('Sumber Dana',esc(dppFunding))}${L('Pagu Dana',rp(p.pagu))}${L('RUP',esc(p.rup))}</table>
+${L('Nomor',esc(satriaDppNumber(p)))}${L('Tanggal',TS(p.tglDpp))}${L('Program',satriaDppMetaLines(p,'program'))}${L('Kegiatan',satriaDppMetaLines(p,'kegiatan'))}${L('Sub Kegiatan',subs)}${L('Lokasi',esc(p.lokasiPengiriman||o.tempat||o.alamat||o.nama))}${L('Nama Paket Pengadaan',esc(p.nama))}${L('Sumber Dana',esc(dppFunding))}${L('Pagu Dana',rp(p.pagu))}${L('RUP',esc(p.rup))}</table>
 
 <p style="margin:10px 0 4px"><b>I. Spesifikasi Teknis</b></p>
 <p style="margin:4px 0">Penyusunan spesifikasi teknis telah menguraikan hal-hal sebagai berikut antara lain:</p>
@@ -2846,11 +2890,11 @@ ${['Kesesuaian spesifikasi teknis dengan kebutuhan;','Karakteristik: ukuran, dim
 </ol>
 <p style="margin:4px 0">Spesifikasi teknis paket pengadaan/pekerjaan adalah sebagai berikut:</p>
 <p class="doc-section-heading" style="margin:4px 0"><b>a. Spesifikasi Jenis, Mutu Barang/Bahan/Material, Jumlah, Satuan dan Harga</b></p>
-<table class="tbl-dpp-items"><thead><tr><th>No</th><th>Nama/Jenis Barang, Spesifikasi Mutu/Bahan/Material</th><th style="width:62px">Jumlah</th><th style="width:66px">Satuan</th><th style="width:100px">Harga Satuan (Rp)</th><th>Jumlah (Rp)</th></tr></thead><tbody>
+<table class="tbl-dpp-items ${five?'satria-dpp-example-five':'satria-dpp-six'}"><thead><tr><th>No</th><th>Nama/Jenis Barang, Spesifikasi Mutu/Bahan/Material</th><th>Jumlah</th><th>Satuan</th><th>Harga Satuan (Rp)</th>${five?'':'<th>Jumlah (Rp)</th>'}</tr></thead><tbody>
 ${items}
-<tr><th colspan="5" style="text-align:right">Total HPS</th><th style="text-align:right">${nf(H)}</th></tr>
+${five?'':`<tr><th colspan="5" style="text-align:right">Total HPS</th><th style="text-align:right">${nf(H)}</th></tr>`}
 </tbody></table>
-<p style="margin:6px 0 4px"><b>b. Justifikasi Teknis Dalam Penggunaan Merek (Jika ada)</b><br>${p.items.some(i=>String(i.merek||'').trim())?'Merek/tipe yang tercatat: '+p.items.filter(i=>String(i.merek||'').trim()).map(i=>esc(i.nama)+': '+esc(i.merek)).join('; ')+'. Justifikasi penggunaan merek harus dilengkapi sesuai kebutuhan dan ketentuan.':'Tidak ada justifikasi khusus merek yang tercatat dalam data paket.'}</p>
+<p style="margin:6px 0 4px"><b>b. Justifikasi Teknis Dalam Penggunaan Merek (Jika ada)</b><br>${satriaDppBrandText(p)}</p>
 <p style="margin:4px 0"><b>c. Spesifikasi Waktu</b><br>Pelaksanaan pekerjaan mulai dari diterbitkannya surat pesanan sampai dengan tanggal ${TS(p.batas)}.</p>
 <p class="satria594-spec-block" style="margin:4px 0"><b>d. Spesifikasi Tempat</b><br>Pengiriman sampai ke lokasi yaitu ${esc(p.lokasiPengiriman||o.tempat||o.alamat||o.nama||'-')}<br>Lokasi pengantaran: langsung ke tempat/lokasi tujuan.<br>Jarak dan akses lokasi diperhitungkan oleh penyedia tanpa biaya tambahan di luar harga satuan e-Katalog.</p>
 <p class="satria-dpp-service-block" style="margin:4px 0"><b>e. Spesifikasi Layanan</b><br>Penyedia wajib memenuhi tingkat layanan meliputi ketepatan waktu, kesesuaian spesifikasi, kualitas hasil, ketepatan jumlah, responsivitas, pengemasan dan pengiriman, jaminan/garansi, fleksibilitas layanan, kepatuhan administratif, serta standar keamanan dan kepatuhan. Penyedia juga wajib menindaklanjuti setiap ketidaksesuaian melalui perbaikan atau penggantian tanpa biaya tambahan sesuai ketentuan yang disepakati serta bertanggung jawab penuh atas pengadaan.</p>
@@ -2882,7 +2926,7 @@ ${P_('', 'Rancangan Kontrak menggunakan Surat Pesanan sesuai yang tertuang di ap
 <p style="margin:8px 0 4px"><b>VI. Rencana Metode Pemilihan Penyedia</b></p>
 ${P_('', 'Rencana metode pemilihan penyedia Katalog Elektronik menggunakan: <b>Negosiasi Harga</b>.')}
 
-<section class="satria594-closing-signature">
+<section class="satria594-closing-signature satria-dpp-closing">
 <p style="margin:8px 0 4px"><b>VII. Penutup</b></p>
 <p style="margin:4px 0;text-align:justify">Demikian Dokumen Persiapan e-Purchasing dibuat untuk dapat diketahui bersama sebagai acuan bagi pelaksanaan proses pengadaan barang/jasa bagi pihak terkait dan dibuat untuk digunakan sebagaimana mestinya.</p>
 <div class="satria-dpp-signature" style="width:330px;max-width:100%;margin:22px 0 0 auto;line-height:1.5;text-align:center;break-inside:avoid;page-break-inside:avoid">
@@ -3290,7 +3334,7 @@ ${(p.items||[]).length>8 ? (p.items||[]).map((it,index)=>`<tr class="satria35911
 <div class="spek-sign">${esc(satriaDppOfficialPlace(p))}, ${TS(p.tglDpp)}<br>Ditetapkan oleh :<br>Pejabat Pembuat Komitmen (PPKom)<br>${esc(o.nama||'')}<br><br><br><b>${esc(PJ(p.ppk).nama||'-')}</b><br>NIP. ${esc(PJ(p.ppk).nip||'-')}</div>
 </div>`;
 }
-function lamp(p){const H=hps(p);return `${kop(p)}<p class="doc-title" style="text-align:center"><b><u>LAMPIRAN REFERENSI HARGA KATALOG ELEKTRONIK</u></b><br>Nomor Lampiran: ${nomor('DPP',p)}</p>
+function lamp(p){const H=hps(p);return `${kop(p)}<p class="doc-title" style="text-align:center"><b><u>LAMPIRAN REFERENSI HARGA KATALOG ELEKTRONIK</u></b><br>Nomor Lampiran: ${satriaDppNumber(p)}</p>
 ${LT([['Nama Paket',p.nama],['Kode RUP',p.rup],['Tanggal dokumen',tg(p.tglDpp)],['Nilai HPS',rp(H)]])}
 ${p.penawaran.map((w,k)=>{const y=PY(w.pen),rows=p.items.map((i,n)=>({i,n,h:+w.harga[i.id]||0})).filter(x=>x.h>0);return `<p><b>Referensi Harga ${k+1}</b></p>${LT([['Penyedia',y.nama],['Alamat',y.alamat||'-'],['Status/Tipe',(y.status||'-')+' / '+(y.tipe||'-')],['Link toko',y.link||'Belum dicatat'],['Total harga tercatat',rp(totPw(p,w,false))]])}<table class="tbl-reference-items"><thead><tr><th>No</th><th>Nama Produk / Spesifikasi</th><th>Volume</th><th>Satuan</th><th class=n>Harga Satuan (Rp)</th><th class=n>Jumlah (Rp)</th></tr></thead><tbody>${rows.map(({i,n,h})=>`<tr><td>${n+1}</td><td>${itemLabel(i)}${(w.catalogRefs||{})[i.id]?.name?`<div class="satria-doc-subnote">Produk: ${esc(w.catalogRefs[i.id].name)}</div>`:''}${(w.catalogRefs||{})[i.id]?.link?`<div class="satria-doc-subnote">Tautan: ${esc(w.catalogRefs[i.id].link)}</div>`:''}${(w.catalogRefs||{})[i.id]?.date?`<div class="satria-doc-subnote">Tanggal referensi: ${esc(satriaDateId(w.catalogRefs[i.id].date))}</div>`:''}</td><td class=n>${vf(i.vol)}</td><td>${esc(i.satuan)}</td><td class=n>${nf(h)}</td><td class=n>${nf(i.vol*h)}</td></tr>`).join('')||'<tr><td colspan=6>Belum ada harga produk yang dicatat untuk penyedia ini.</td></tr>'}<tr><th colspan=5 style="text-align:right">Jumlah referensi</th><th class=n>${nf(sum(rows,r=>r.i.vol*r.h))}</th></tr></tbody></table>`}).join('')||'<p>Belum ada referensi harga yang dicatat.</p>'}
 <p><i>Catatan: tautan, harga tayang, tanggal akses, dan bukti pendukung perlu disimpan/diperiksa sebagai dasar audit.</i></p>`}
@@ -3438,7 +3482,7 @@ function vDok(){
       </div>
       <p class="mut" style="margin:10px 0 0;font-size:12px">Seluruh template dokumen diselaraskan dengan struktur contoh workbook. Data/bukti yang tidak tersedia ditandai untuk verifikasi. • Lazy load + virtual scroll aktif • Generated by SATRIA Framework</p>
     </div>
-    ${window.SATRIA_DOC_PPK?.panel?.(p,S.ui.dok)||''}${S.ui.dok==='dpp'?(window.SATRIA_DPP_PREFLIGHT?.panel?.(p)||''):''}
+    ${window.SATRIA_DOC_PPK?.panel?.(p,S.ui.dok)||''}${S.ui.dok==='dpp'?(window.SATRIA_DPP_PREFLIGHT?.panel?.(p)||''):''}${S.ui.dok==='dpp'?(window.SATRIA_DPP_FORMAT?.panel?.(p)||''):''}
     ${warnDoc(p)}
     <div id="dokLazyContainer" class="satria-doc-lazy-container">
       <div class="doc doc-${S.ui.dok} ${S.ui.dok==='rfi'?'doc-landscape':'doc-portrait'}" data-document-type="${esc(S.ui.dok)}" data-lazy="true">
@@ -7825,7 +7869,7 @@ function vDokOptimized(){
         <div class="dok-preview-heading no-print"><div><span class="dok-section-kicker">03 / LIVE PREVIEW</span><h3>Pratinjau dokumen</h3><p>${activeT[1]} · Paket ${esc(p.rup||'belum memiliki Kode RUP')}</p></div><span class="dok-preview-status ${currentMissing.length?'is-pending':'is-ready'}"><i></i>${currentMissing.length?currentMissing.length+' hal perlu dicek':'Isian dasar OK'}</span></div>
         ${docQualityHtml}
         ${satria35912WarningPanel(p,S.ui.dok)}
-        ${window.SATRIA_DOC_PPK?.panel?.(p,S.ui.dok)||''}${S.ui.dok==='dpp'?(window.SATRIA_DPP_PREFLIGHT?.panel?.(p)||''):''}
+        ${window.SATRIA_DOC_PPK?.panel?.(p,S.ui.dok)||''}${S.ui.dok==='dpp'?(window.SATRIA_DPP_PREFLIGHT?.panel?.(p)||''):''}${S.ui.dok==='dpp'?(window.SATRIA_DPP_FORMAT?.panel?.(p)||''):''}
         ${warnDoc(p)}
         <div class="dok-preview-frame" id="dokLazyContainer">
           <div class="dok-preview-caption no-print"><span><i></i> LIVE PREVIEW <b>·</b> FORMAT DOKUMEN RESMI</span><span>${docLandscape?'A4 LANDSCAPE':'A4 PORTRAIT'}</span></div>
@@ -10499,7 +10543,7 @@ window.SATRIA_SURVEY_PRO=Object.freeze({panel,afterMainSave,score,extrasTable,pa
   const baseDpp51=DOCS.dpp;
   DOCS.survei=p=>baseSurvei51(p)+appendix51(p,'survei');
   DOCS.rfi=p=>baseRfi51(p)+appendix51(p,'rfi');
-  DOCS.dpp=p=>baseDpp51(p)+appendix51(p,'dpp');
+  DOCS.dpp=p=>baseDpp51(p)+(satriaDppOptions(p).includePhotos?appendix51(p,'dpp'):'');
   window.SATRIA_PHOTO_DOCS=Object.freeze({
     count:p=>refList51(p).length,
     pages:p=>groups51(refList51(p),'dpp').length,
@@ -10899,6 +10943,13 @@ window.addEventListener('click',ev=>{
    if(!refs.length)warnings.push('Belum ada referensi produk katalog untuk paket ini.');
    else if(refs.some(r=>r.imageUrl&&!r.date))warnings.push('Tanggal survei pada sebagian referensi foto belum diisi.');
    if(p.docPpkSettings?.dpp?.showImages!==false&&signer&&(!signer.ttd||!signer.cap))warnings.push('Gambar TTD atau cap PPK belum lengkap; pastikan penandatanganan resmi dilakukan sesuai prosedur.');
+   const df=satriaDppOptions(p);
+   if(df.brandPolicy==='unreviewed')warnings.push('Status penggunaan merek belum ditetapkan oleh PPK pada pengaturan DPP.');
+   if(df.brandPolicy==='specific'&&!df.brandReason)blockers.push('Justifikasi teknis merek tertentu belum diisi.');
+   if(df.brandPolicy==='specific'&&!df.brandEvidence)blockers.push('Dokumen/bukti pendukung merek tertentu belum dicatat.');
+   const same=(S.paket||[]).filter(x=>x!==p&&String(x.opd)===String(p.opd)&&Number(x.tahun)===Number(p.tahun)&&satriaDppNumber(x)===satriaDppNumber(p));
+   if(same.length)warnings.push('Nomor DPP sama dengan '+same.length+' paket lain pada OPD/tahun ini. Periksa dan tentukan nomor unik sebelum diterbitkan.');
+   if(['program','kegiatan','subKeg'].some(k=>satriaDppMetaLines(p,k).includes('[Belum diisi]')))warnings.push('Ada klasifikasi program/kegiatan/subkegiatan yang belum tersedia dari paket atau RUP terkait.');
    return {blockers,warnings};
  }
  function panel(p){const a=checks(p);return `<div class="satria594-check-panel no-print" role="status" aria-label="Pemeriksaan cetak DPP"><strong>✦ Pemeriksaan DPP sebelum cetak</strong><p style="margin:5px 0">${a.blockers.length?`<span class="satria594-critical">${a.blockers.length} masalah wajib diperbaiki sebelum cetak resmi</span>`:'<span style="color:#13784e">Data wajib dasar terisi</span>'}${a.warnings.length?` · ${a.warnings.length} catatan untuk diverifikasi`:''}</p>${a.blockers.length?`<ul>${a.blockers.map(x=>`<li class="satria594-critical">${esc594(x)}</li>`).join('')}</ul>`:''}${a.warnings.length?`<ul>${a.warnings.map(x=>`<li class="satria594-warning">${esc594(x)}</li>`).join('')}</ul>`:''}<small>Periksa data pada menu Paket Pengadaan, Data Master, dan Pengaturan Sistem. SATRIA tidak mengisi atau mengarang data yang tidak tersedia.</small></div>`}
@@ -11770,4 +11821,75 @@ window.addEventListener('click',ev=>{
  .doc[data-document-type="sppbj"] .sppbj-letter-heading{grid-template-columns:minmax(0,3fr) minmax(0,2fr)!important;gap:8px!important}
 }
 </style>
+
+<style id="satria-dpp-example-print-20261102">
+/* Khusus DPP: tabel 5 kolom sesuai contoh; tidak mempengaruhi template lainnya. */
+.doc[data-document-type="dpp"] table.tbl-dpp-items.satria-dpp-example-five,
+#satria-print-root .doc[data-document-type="dpp"] table.tbl-dpp-items.satria-dpp-example-five{width:100%!important;table-layout:fixed!important;}
+#main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(1),#satria-print-root #main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(1){width:6%!important;text-align:center!important;}
+#main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(2),#satria-print-root #main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(2){width:52%!important;}
+#main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(3),#satria-print-root #main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(3){width:10%!important;text-align:right!important;}
+#main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(4),#satria-print-root #main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(4){width:12%!important;}
+#main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(5),#satria-print-root #main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(5){width:20%!important;text-align:right!important;}
+.doc[data-document-type="dpp"] .satria-dpp-example-five th{white-space:normal!important;}
+.satria-dpp-format-panel{border:1px solid var(--bd);border-radius:13px;padding:15px;margin:10px 0;background:var(--card-solid)}
+.satria-dpp-format-panel h3{font-size:14px;margin:0 0 6px}
+.satria-dpp-format-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.satria-dpp-format-panel label{display:block;font-size:11px;font-weight:700;margin-bottom:4px}
+.satria-dpp-format-panel :is(input,select,textarea){width:100%;max-width:100%;font-size:13px!important}
+.satria-dpp-format-panel textarea{height:78px;min-height:78px}
+.satria-dpp-format-panel .satria-dpp-wide{grid-column:1/-1}
+.satria-dpp-format-panel .satria-dpp-photo-option{display:flex;align-items:center;gap:8px}
+.satria-dpp-format-panel .satria-dpp-photo-option input{width:auto;height:auto}
+@media(max-width:650px){.satria-dpp-format-grid{grid-template-columns:1fr}}
+@media print{.satria-dpp-format-panel{display:none!important}}
+/* Hindari memisahkan judul Bab VII dari paragraf penutup; blok tanda tangan tetap utuh. */
+.doc[data-document-type="dpp"] .satria-dpp-closing>p:first-child,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-closing>p:first-child{break-after:avoid!important;page-break-after:avoid!important}
+.doc[data-document-type="dpp"] .satria-dpp-signature,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-signature{break-inside:avoid!important;page-break-inside:avoid!important;}
+</style>
+<script id="satria-dpp-example-controls-20261102">
+(function(){
+ const escD=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function panel(p){
+  const f=satriaDppOptions(p),w=typeof canWrite==='function'&&canWrite(),off=w?'':'disabled';
+  const options=[['unreviewed','Belum ditetapkan PPK'],['no_specific','Tidak mensyaratkan merek tertentu'],['reference','Merek sebagai referensi'],['specific','Merek/tipe tertentu (wajib justifikasi)']];
+  return `<section class="satria-dpp-format-panel no-print" data-dpp-format data-pid="${escD(p.id)}" aria-label="Pengaturan format dan justifikasi DPP">
+   <h3>✦ Format DPP sesuai contoh & justifikasi PPK</h3>
+   <p class="mut" style="font-size:11px;margin:0">Perubahan hanya berlaku untuk DPP paket ini. Data HPS, nomor dokumen lama, dan foto di Data Master tidak diubah.</p>
+   <div class="satria-dpp-format-grid">
+    <div><label>Mode tabel spesifikasi</label><select data-dpp-field="tableMode" ${off}><option value="contoh" ${f.tableMode==='contoh'?'selected':''}>Sesuai Contoh (5 kolom)</option><option value="lengkap" ${f.tableMode==='lengkap'?'selected':''}>Rincian Lengkap (6 kolom + total)</option></select></div>
+    <div><label>Status penggunaan merek (keputusan PPK)</label><select data-dpp-field="brandPolicy" ${off}>${options.map(([v,l])=>`<option value="${v}" ${f.brandPolicy===v?'selected':''}>${l}</option>`).join('')}</select></div>
+    <div class="satria-dpp-wide"><label>Alasan/pertimbangan teknis (ditulis PPK)</label><textarea data-dpp-field="brandReason" maxlength="2000" ${off} placeholder="Isikan pertimbangan yang benar-benar didukung kondisi kebutuhan">${escD(f.brandReason)}</textarea></div>
+    <div class="satria-dpp-wide"><label>Referensi dokumen/bukti pendukung (bukan mengunggah gambar)</label><input data-dpp-field="brandEvidence" maxlength="500" value="${escD(f.brandEvidence)}" ${off} placeholder="Nomor hasil pemeriksaan, berkas evaluasi, dsb."></div>
+    <div class="satria-dpp-wide"><label>Nomor DPP khusus paket (opsional; isi bila nomor otomatis sama pada paket berbagi RUP)</label><input data-dpp-field="docNumber" maxlength="120" value="${escD(f.docNumber)}" ${off} placeholder="Kosong: memakai nomor DPP lama dari penomoran sistem"></div>
+    <div class="satria-dpp-wide"><label class="satria-dpp-photo-option"><input type="checkbox" data-dpp-field="includePhotos" ${f.includePhotos?'checked':''} ${off}> Sertakan lampiran foto referensi produk dari Smart Survey</label></div>
+   </div>
+   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:11px"><button type="button" data-dpp-save ${off}>Simpan Pengaturan DPP</button><small data-dpp-status class="mut" role="status">Tersimpan per paket melalui mekanisme penyimpanan SATRIA.</small></div>
+  </section>`;
+ }
+ function read(box){const val=k=>box.querySelector(`[data-dpp-field="${k}"]`)?.value||'';
+  return {tableMode:val('tableMode'),brandPolicy:val('brandPolicy'),brandReason:val('brandReason').trim(),brandEvidence:val('brandEvidence').trim(),docNumber:val('docNumber').trim(),includePhotos:!!box.querySelector('[data-dpp-field="includePhotos"]')?.checked};}
+ document.addEventListener('click',ev=>{
+  const btn=ev.target.closest?.('[data-dpp-save]');if(!btn)return;
+  const box=btn.closest('[data-dpp-format]');if(!box)return;
+  ev.preventDefault();ev.stopImmediatePropagation();
+  const msg=box.querySelector('[data-dpp-status]'),p=P(box.dataset.pid);
+  if(!p||!canWrite()){if(msg)msg.textContent='Tidak memiliki izin perubahan paket.';return;}
+  const scope=typeof activeCloudScope==='function'?activeCloudScope():null;
+  if(scope&&(!scope.opdIds?.includes(String(p.opd))||!scope.years?.includes(Number(p.tahun)))){if(msg)msg.textContent='Paket di luar OPD/tahun penugasan akun Anda.';return;}
+  const f=read(box);
+  if(f.brandPolicy==='specific'&&(!f.brandReason||!f.brandEvidence)){if(msg)msg.textContent='Merek tertentu wajib memiliki alasan teknis dan referensi bukti.';return;}
+  if(f.docNumber&&(f.docNumber.length>120||/[\r\n<>]/.test(f.docNumber))){if(msg)msg.textContent='Nomor DPP mengandung karakter tidak valid.';return;}
+  const dup=(S.paket||[]).some(x=>x!==p&&String(x.opd)===String(p.opd)&&Number(x.tahun)===Number(p.tahun)&&satriaDppNumber(x)===(f.docNumber||nomor('DPP',p)));
+  if(dup&&f.docNumber){if(msg)msg.textContent='Nomor DPP khusus paket ini sudah dipakai paket lain dalam OPD/tahun yang sama.';return;}
+  p.dppFormat=f;
+  sync('paket','Pengaturan format DPP paket '+(p.rup||p.id)+' disimpan');render();
+ },true);
+ // Jangan biarkan handler change global menggambar ulang sebelum tombol Simpan ditekan.
+ document.addEventListener('change',ev=>{if(ev.target.closest?.('[data-dpp-format]'))ev.stopImmediatePropagation();},true);
+ window.SATRIA_DPP_FORMAT=Object.freeze({panel,read});
+})();
+</script>
 </body></html>
