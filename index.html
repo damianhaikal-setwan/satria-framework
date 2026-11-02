@@ -1869,6 +1869,23 @@ paket:[{id:'k1',tahun:2026,opd:'o1',unit:'unit-demo',seq:1,nama:'PAKET DEMO — 
 let S;
 function init(){S=JSON.parse(JSON.stringify(SEED));S.rupBank=[];normalizeData();S.ui={page:'dash',tahun:S.tahun[0],opd:'all',pid:null,dpid:'k1',dok:'nodis',ptab:'data',mtab:'ppk'};S.log=[];S.dirty=false;S.chat=[];S.chatCtx=null;S.ui.user=S.users[0].id}
 
+/* SATRIA 2026-11-02 — guard identitas resmi: nilai SEED/demo tidak boleh menjadi identitas dokumen.
+   Tidak mengubah state, snapshot cloud, atau data historis yang disimpan. */
+function satriaIdentityPlaceholder(value){
+ const v=String(value??'').trim();
+ return !v||/\b(?:demo|contoh|dummy|simulasi|testing)\b/i.test(v)||/^instansi pemerintah\b/i.test(v);
+}
+function satriaPemdaOfficial(field){
+ const v=String(S?.pemda?.[field]??'').trim();
+ return satriaIdentityPlaceholder(v)?'':v;
+}
+function satriaMasterScopeName(){
+ if(S?.ui?.opd&&S.ui.opd!=='all'){
+  const o=(S.opd||[]).find(x=>String(x.id)===String(S.ui.opd));
+  if(o&&!satriaIdentityPlaceholder(o.nama))return o.singkat||o.nama;
+ }
+ return satriaPemdaOfficial('nama')||'Semua OPD — identitas Pemda belum diatur';
+}
 /* ===== FILTER & SINKRONISASI ANTAR MENU ===== */
 function activeCloudScope(){
   if(!window.SATRIA_CLOUD_CONFIGURED||!window.SATRIA_CLOUD_ROLE||window.SATRIA_CLOUD_ROLE==='admin') return null;
@@ -2331,7 +2348,7 @@ function rupParseRow(r,i,defTahun,defOpd,defSub,allowSirupOpdFallback=true){
     items.push({id:uid('i'),nama:rupText(it.nama),spesifikasi:rupText(it.spesifikasi),merek:rupText(it.merek),pdn:'Perlu verifikasi',linkProduk:'',vol,satuan:rupText(it.satuan)||'Unit',hs});
   }
   const unit=((S.unit||[]).find(u=>String(u.opd)===String(opd))||{}).id||'';
-  return {ok:true,p:{id:uid('k'),tahun,opd,unit,seq:0,nama,rup,pagu,sumber:uniqSumber(get('sumber','sumberDana','sumber_dana','sumberAnggaran')??S.pemda.sumber??''),sub,
+  return {ok:true,p:{id:uid('k'),tahun,opd,unit,seq:0,nama,rup,pagu,sumber:uniqSumber(get('sumber','sumberDana','sumber_dana','sumberAnggaran')??satriaPemdaOfficial('sumber')),sub,
     bulanPelaksanaan:rupBulanNormal(get('bulan','bulanPelaksanaan','jadwalPelaksanaan','waktuPelaksanaan','pemilihan')),
     ppk:pjId(opd,'PPK')||'',pp:pjId(opd,'PP')||'',kabid:pjId(opd,'Kabid')||'',
     masaHk:Number(get('masaHk'))||7,
@@ -2506,7 +2523,7 @@ function vInputRup(){
  <div class="fg"><label for="rupMOpd">OPD tujuan RUP *</label><select id="rupMOpd" required>${!manualOpd?'<option value="" selected disabled>— Pilih OPD tujuan —</option>':''}${opds.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===manualOpd?'selected':''}>${esc(o.singkat||o.nama)}</option>`).join('')}</select><small class="mut">OPD ini menentukan kepemilikan RUP; pilihan tidak selalu sama dengan OPD saat impor JSON.</small></div>
  <div class="fg"><label for="rupMYear">Tahun anggaran *</label><select id="rupMYear">${S.tahun.filter(t=>!scope||scope.years.includes(Number(t))).map(t=>`<option value="${t}" ${Number(t)===Number(rupManualDraftValue('rupMYear',S.ui.tahun))?'selected':''}>${t}</option>`).join('')}</select></div>
  <div class="fg"><label for="rupMBudget">Pagu (Rp) *</label><input id="rupMBudget" type="number" min="1" step="1" inputmode="numeric" value="${esc(rupManualDraftValue('rupMBudget'))}" placeholder="Contoh: 75000000"></div>
- <div class="fg"><label for="rupMSource">Sumber dana</label><input id="rupMSource" placeholder="APBD / lainnya" value="${esc(rupManualDraftValue('rupMSource',S.pemda?.sumber||''))}"></div>
+ <div class="fg"><label for="rupMSource">Sumber dana</label><input id="rupMSource" placeholder="APBD / lainnya" value="${esc(rupManualDraftValue('rupMSource',satriaPemdaOfficial('sumber')))}"></div>
  <div class="fg"><label for="rupMMethod">Metode pemilihan</label><select id="rupMMethod">${['E-Purchasing dengan Negosiasi Harga','E-Purchasing','Pengadaan Langsung','Tender','Metode lainnya'].map(v=>`<option value="${esc(v)}" ${rupManualDraftValue('rupMMethod','E-Purchasing dengan Negosiasi Harga')===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div>
  <div class="fg"><label for="rupMType">Jenis pengadaan</label><select id="rupMType">${['Barang','Jasa Lainnya','Pekerjaan Konstruksi','Jasa Konsultansi'].map(v=>`<option value="${esc(v)}" ${rupManualDraftValue('rupMType','Barang')===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div>
  <div class="fg"><label for="rupMProvenance">Asal/bukti referensi *</label><input id="rupMProvenance" value="${esc(rupManualDraftValue('rupMProvenance'))}" placeholder="Misalnya: Dokumen konsolidasi nomor ..."></div>
@@ -2717,7 +2734,7 @@ const vf=n=>(+n||0).toLocaleString('id-ID',{maximumFractionDigits:2});
 const OP=p=>O(p.opd);
 const unitOf=p=>(S.unit||[]).find(u=>u.id===p.unit)||(S.unit||[]).find(u=>u.opd===p.opd)||{kode:'',bidang:''};
 const nomor=(t,p)=>`${S.penomoran?.[t]||'[KODE DOKUMEN]'}/${p.rup||'[KODE RUP]'}/${OP(p).singkat||'[SINGKATAN OPD]'}${unitOf(p).kode?'/'+unitOf(p).kode:''}`;
-const kop=p=>{const o=OP(p);if(o.kop)return `<div class="kop kop-image"><img src="${o.kop}" alt="Kop ${esc(o.singkat)}" style="width:100%;display:block;max-height:42mm;object-fit:contain"></div>`;return `<div class="kop kop-text" style="text-align:center;margin-bottom:10px">${S.pemda.logo?`<img src="${S.pemda.logo}" alt="Logo pemerintah daerah" style="height:56px;max-width:100%;object-fit:contain;margin-bottom:6px"><br>`:''}<div style="font-size:15px;font-weight:bold">${esc(S.pemda.nama)}</div><div style="font-size:14px;font-weight:bold">${esc(o.nama.toUpperCase())}</div><div style="font-size:11px;margin-top:4px">${esc(o.alamat)}</div><div style="font-size:11px">${esc(o.kontak||'')}</div><hr style="border:0;border-top:2.5px solid #000;margin:10px 0 4px"></div>`};
+const kop=p=>{const o=OP(p);if(o.kop)return `<div class="kop kop-image"><img src="${o.kop}" alt="Kop ${esc(o.singkat)}" style="width:100%;display:block;max-height:42mm;object-fit:contain"></div>`;const namaPemda=satriaPemdaOfficial('nama');return `<div class="kop kop-text" style="text-align:center;margin-bottom:10px">${S.pemda.logo?`<img src="${esc(S.pemda.logo)}" alt="Logo pemerintah daerah" style="height:56px;max-width:100%;object-fit:contain;margin-bottom:6px"><br>`:''}<div style="font-size:15px;font-weight:bold">${esc(namaPemda||'[Nama pemerintah daerah belum diatur]')}</div><div style="font-size:14px;font-weight:bold">${esc(satriaIdentityPlaceholder(o.nama)?'[Nama OPD belum diatur]':o.nama.toUpperCase())}</div><div style="font-size:11px;margin-top:4px">${esc(o.alamat)}</div><div style="font-size:11px">${esc(o.kontak||'')}</div><hr style="border:0;border-top:2.5px solid #000;margin:10px 0 4px"></div>`};
 const SATRIA_FOOTER='';
 const sig=(x,jab)=>`<div style="float:right;text-align:center;width:300px;margin-top:24px">${jab}<br>${(x.ttd||x.cap)?`<div style="height:70px">${x.ttd?`<img src="${x.ttd}" style="height:60px;vertical-align:middle">`:''}${x.cap?`<img src="${x.cap}" style="height:65px;vertical-align:middle;margin-left:-16px">`:''}</div>`:'<br><br><br>'}<b><u>${esc(x.nama)}</u></b><br>NIP. ${esc(x.nip)}</div><div style="clear:both"></div>`;
 const itemLabel=i=>esc(i.nama);
@@ -2768,7 +2785,7 @@ function satriaDppOfficialPlace(p){
   const opd=O(p.opd);
   const bad=v=>!v||/^(?:kota|lokasi|tempat|alamat|kabupaten|provinsi)\s+contoh\b|\b(?:demo|simulasi)\b/i.test(v.trim());
   const tempat=String(opd.tempat||'').trim();
-  const pemda=String(S.pemda?.kota||'').trim();
+  const pemda=satriaPemdaOfficial('kota');
   if(!bad(tempat))return tempat;
   if(!bad(pemda))return pemda;
   return '[Tempat belum diatur]';
@@ -2880,7 +2897,7 @@ function sppbj(p){
  const institution=String(o.nama||'').trim();
  const opdName=institution&&institution!=='-'&&!/\b(?:demo|dummy|contoh|simulasi)\b/i.test(institution)?institution:'[Nama OPD belum diisi]';
  const place=satriaDppOfficialPlace(p);
- const pemdaName=String(S.pemda?.nama||'').trim();
+ const pemdaName=satriaPemdaOfficial('nama');
  const pemdaSafe=pemdaName&&!/\b(?:demo|dummy|contoh|simulasi|instansi pemerintah)\b/i.test(pemdaName)?pemdaName:'';
  const orgKop=o.kop?kop(p):`<div class="kop kop-text" style="text-align:center;margin-bottom:10px">${S.pemda?.logo?`<img src="${esc(S.pemda.logo)}" alt="Logo pemerintah daerah" style="height:56px;max-width:100%;object-fit:contain;margin-bottom:6px"><br>`:''}${pemdaSafe?`<div style="font-size:15px;font-weight:bold">${esc(pemdaSafe)}</div>`:''}<div style="font-size:14px;font-weight:bold">${esc(opdName.toUpperCase())}</div><div style="font-size:11px;margin-top:4px">${esc(o.alamat||'')}</div><div style="font-size:11px">${esc(o.kontak||'')}</div><hr style="border:0;border-top:2.5px solid #000;margin:10px 0 4px"></div>`;
  const subject='Perintah Pengadaan Barang & Jasa';
@@ -2979,7 +2996,7 @@ function bahp(p){
  <div class="bahp-signatures"><div><span>Disetujui oleh,</span><span>PA / KPA / PPK</span>${satriaBahpSignerVisual(approver,p)}<b><u>${esc(approver.nama)}</u></b><span>NIP. ${esc(approver.nip||'-')}</span></div><div><span>Dipesan oleh,</span><span>Pejabat Pengadaan</span>${satriaBahpSignerVisual(officer,p)}<b><u>${esc(officer.nama)}</u></b><span>NIP. ${esc(officer.nip||'-')}</span></div></div></div>`;
 }
 const LT=rows=>`<table class="tbl-meta" style="border:0">${rows.map(([a,b])=>`<tr><td style="border:0;width:170px">${a}</td><td style="border:0">: ${esc(b)}</td></tr>`).join('')}</table>`;
-const KAB=()=>S.pemda.nama.replace(/^PEMERINTAH (KABUPATEN )?/,'');
+const KAB=()=>satriaPemdaOfficial('nama').replace(/^PEMERINTAH (KABUPATEN )?/,'');
 function idkb(p){
  // Pedoman Identifikasi Kebutuhan: formulir dua kolom pengesahan pada AKHIR dokumen.
  // Nilai berasal dari paket dan Data Master, tidak menyalin angka/nama pada foto pedoman.
@@ -3004,7 +3021,7 @@ function idkb(p){
  const jawaban=(p.idkbJabatanPenyusun||penyusun?.jabatan||penyusun?.namaJabatan||penyusun?.bidang||'').trim();
  const namaPenyusun=penyusun?.nama||'Belum ditentukan';
  const nipPenyusun=penyusun?.nip||'-';
- const province=titleCase(S.pemda?.nama||'Pemerintah Daerah');
+ const province=titleCase(satriaPemdaOfficial('nama')||'[Nama pemerintah daerah belum diatur]');
  const row=(key,val)=>`<tr><td class="idkb-label">${key}</td><td class="idkb-colon">:</td><td class="idkb-value">${val}</td></tr>`;
  const info=[
   row('Pemerintah Daerah',text(province)),
@@ -3092,7 +3109,7 @@ const asp=[
  ['Tidak sedang dikenakan Sanksi Daftar Hitam',(y,w)=>!y.daftarHitam||y.daftarHitam==='Perlu verifikasi'?null:(y.daftarHitam==='Tidak'?'Ya':'Tidak')],
  ['Status Penyedia Terdaftar aktif di katalog elektronik LKPP',(y,w)=>y.statusKatalog&&y.statusKatalog!=='Perlu verifikasi'?y.statusKatalog:null],
  ['Jenis Penyedia UMKM',(y,w)=>!y.tipe||y.tipe==='Perlu verifikasi'?null:(y.tipe==='UMKM'||y.tipe==='Koperasi'?'Ya':'Tidak')],
- ['Alamat penyedia sesuai wilayah instansi',(y,w)=>{const wilayah=String(S.pemda.kota||'').trim();if(!y.kabupaten||!wilayah)return null;return String(y.kabupaten).toLocaleLowerCase('id-ID').includes(wilayah.toLocaleLowerCase('id-ID'))?'Ya':'Tidak'}],
+ ['Alamat penyedia sesuai wilayah instansi',(y,w)=>{const wilayah=satriaPemdaOfficial('kota');if(!y.kabupaten||!wilayah)return null;return String(y.kabupaten).toLocaleLowerCase('id-ID').includes(wilayah.toLocaleLowerCase('id-ID'))?'Ya':'Tidak'}],
  ['Barang di Etalase minimal menampilkan (Nama produk, harga, no. KBKI, satuan produk, berat produk dan dimensi produk)',(y,w)=>null],
  ['Jenis Produk PDN',(y,w)=>y.pdn==='PDN'?'Ya':y.pdn==='Impor'?'Tidak':null],
  ['Spesifikasi',(y,w)=>p.items.length&&p.items.every(i=>String(i.spesifikasi||'').trim())?'Sesuai Kebutuhan':null],
@@ -3123,7 +3140,7 @@ const subKegiatanLines=value=>{
 };
 const dataUmum=[['Sub Kegiatan',subOf(p)||'-'],['Kode RUP',p.rup||'-'],['Pagu',money(p.pagu)],['Metode',p.metodePemilihan||'E-Purchasing dengan Negosiasi Harga'],['Nama Paket',p.nama||'-']].map(([a,b])=>{const value=a==='Sub Kegiatan'?subKegiatanLines(b):esc(b);return `<tr><td style="${NB};width:155px">${esc(a)}</td><td style="${NB};width:12px">:</td><td style="${NB}">${value}</td></tr>`}).join('');
 const supplierCount=W.filter(w=>p.items.some(i=>(+(((w||{}).harga||{})[i.id])||0)>0)).length;
-const kabupaten=String(S.pemda.nama||'').replace(/^PEMERINTAH (KABUPATEN |KOTA )?/,'').split(' ').filter(Boolean).map(w=>w[0]+w.slice(1).toLowerCase()).join(' ');
+const kabupaten=satriaPemdaOfficial('nama').replace(/^PEMERINTAH (KABUPATEN |KOTA )?/,'').split(' ').filter(Boolean).map(w=>w[0]+w.slice(1).toLowerCase()).join(' ');
 return `${kop(p)}<div class="bahepe-body">
 <p class="bahepe-title"><b><u>BERITA ACARA HASIL EVALUASI PENYEDIA E-PURCHASING</u></b></p>
 <p class="bahepe-number"><b>Nomor : ${esc(nomor('BAHEPE',p))}</b></p>
@@ -3149,7 +3166,7 @@ function metode(p){
  const tanggal=p.tglPenetapan||p.tglDpp||'';
  const tglRingkas=d=>d?new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}):'-';
  const h=s=>esc(s==null||String(s).trim()===''?'-':String(s)).replace(/\r\n?/g,'\n').replace(/\n/g,'<br>');
- const kepala=o.kop?`<div class=\"metode-letterhead-image\"><img src=\"${esc(o.kop)}\" alt=\"Kop surat OPD\"></div>`:`<table class=\"metode-kop-table\"><tbody><tr><td class=\"metode-kop-logo\">${S.pemda.logo?`<img src=\"${esc(S.pemda.logo)}\" alt=\"Logo pemerintah daerah\">`:''}</td><td class=\"metode-kop-text\"><div class=\"metode-kop-pemda\">${h(S.pemda.nama||'PEMERINTAH DAERAH')}</div><div class=\"metode-kop-opd\">${h(String(o.nama||'').toLocaleUpperCase('id-ID'))}</div><div class=\"metode-kop-address\">${h(o.alamat||'')}</div><div class=\"metode-kop-contact\">${h(o.kontak||'')}</div></td></tr></tbody></table><div class=\"metode-kop-rule\"></div>`;
+ const kepala=o.kop?`<div class=\"metode-letterhead-image\"><img src=\"${esc(o.kop)}\" alt=\"Kop surat OPD\"></div>`:`<table class=\"metode-kop-table\"><tbody><tr><td class=\"metode-kop-logo\">${S.pemda.logo?`<img src=\"${esc(S.pemda.logo)}\" alt=\"Logo pemerintah daerah\">`:''}</td><td class=\"metode-kop-text\"><div class=\"metode-kop-pemda\">${h(satriaPemdaOfficial('nama')||'[Nama pemerintah daerah belum diatur]')}</div><div class=\"metode-kop-opd\">${h(String(o.nama||'').toLocaleUpperCase('id-ID'))}</div><div class=\"metode-kop-address\">${h(o.alamat||'')}</div><div class=\"metode-kop-contact\">${h(o.kontak||'')}</div></td></tr></tbody></table><div class=\"metode-kop-rule\"></div>`;
  const pengadaan=String(p.jenisPengadaan||'Barang').trim();
  const pengadaanDisplay=/^pengadaan\s+/i.test(pengadaan)?pengadaan:'Pengadaan '+pengadaan;
  const pengadaanRingkas=pengadaan.replace(/^pengadaan\s+/i,'');
@@ -3163,7 +3180,7 @@ function metode(p){
    return h(parts.join('  '));
  };
  const metaRows=[
-  ['Pemerintah Daerah',S.pemda.nama||'-'],
+  ['Pemerintah Daerah',satriaPemdaOfficial('nama')||'[Nama pemerintah daerah belum diatur]'],
   ['PA/KPA/PPK *)',ppk.nama||'-',true],
   ['Sub Kegiatan',subOf(p)||'-',false],
   ['Masa Pelaksanaan',(p.masaHk||'-')+' Hari Kerja',true],
@@ -3270,7 +3287,7 @@ ${(p.items||[]).length>8 ? (p.items||[]).map((it,index)=>`<tr class="satria35911
 <tr><td class="no">4.</td><td>Tingkat Layanan</td><td colspan="2">Penyedia wajib memenuhi tingkat layanan meliputi ketepatan waktu, kesesuaian spesifikasi, kualitas hasil, ketepatan jumlah, responsivitas, pengemasan dan pengiriman, jaminan/garansi, fleksibilitas layanan, kepatuhan administratif, serta standar keamanan dan kepatuhan. Penyedia juga wajib menindaklanjuti setiap ketidaksesuaian melalui perbaikan atau penggantian tanpa biaya tambahan sesuai ketentuan yang disepakati serta bertanggung jawab penuh atas pengadaan.</td></tr>
 <tr><td colspan="4"><b>Link E-Catalog :</b><br>${catalog}<br><br>Di akses tanggal, &nbsp; ${TS(p.tglDpp)}</td></tr>
 </tbody></table>
-<div class="spek-sign">${esc(S.pemda.kota||'')}, ${TS(p.tglDpp)}<br>Ditetapkan oleh :<br>Pejabat Pembuat Komitmen (PPKom)<br>${esc(o.nama||'')}<br><br><br><b>${esc(PJ(p.ppk).nama||'-')}</b><br>NIP. ${esc(PJ(p.ppk).nip||'-')}</div>
+<div class="spek-sign">${esc(satriaDppOfficialPlace(p))}, ${TS(p.tglDpp)}<br>Ditetapkan oleh :<br>Pejabat Pembuat Komitmen (PPKom)<br>${esc(o.nama||'')}<br><br><br><b>${esc(PJ(p.ppk).nama||'-')}</b><br>NIP. ${esc(PJ(p.ppk).nip||'-')}</div>
 </div>`;
 }
 function lamp(p){const H=hps(p);return `${kop(p)}<p class="doc-title" style="text-align:center"><b><u>LAMPIRAN REFERENSI HARGA KATALOG ELEKTRONIK</u></b><br>Nomor Lampiran: ${nomor('DPP',p)}</p>
@@ -3509,6 +3526,13 @@ const SATRIA_MASTER_COLLECTIONS=['pejabat','unit','penyedia','akun'];
 const satMasterNorm=v=>String(v??'').trim().replace(/\s+/g,' ').toLocaleLowerCase('id-ID');
 function satMasterIssues(){
  const issues=[]; const add=(type,msg)=>issues.push({type,msg});
+ for(const [field,label] of [['nama','Nama pemerintah daerah'],['kota','Kota/tempat tanda tangan'],['provinsi','Provinsi'],['sumber','Sumber dana default']]){
+  if(!satriaPemdaOfficial(field))add('identitas',label+' kosong atau masih berupa data Demo/Contoh. Lengkapi melalui Pengaturan Sistem.');
+ }
+ for(const o of S.opd||[]){
+  if(satriaIdentityPlaceholder(o.nama)||satriaIdentityPlaceholder(o.singkat))add('identitas','Identitas OPD '+(o.id||'-')+' masih kosong atau contoh.');
+ }
+
  for(const type of SATRIA_MASTER_COLLECTIONS){
    const rows=S[type]||[], ids=new Set();
    for(const r of rows){
@@ -3595,6 +3619,7 @@ function vMaster(){
    : (masterScope?`<div class="satria-scope-card"><div class="scope-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><b>Scope Operator:</b> master PPK/KPA, Pejabat Pengadaan, Kepala Bidang, dan Unit/Bagian hanya untuk OPD yang ditugaskan. Penyedia dan Akun Anggaran adalah katalog bersama organisasi. Setiap perubahan disimpan otomatis sebagai delta per-record ke Supabase setelah jeda singkat; pengguna lain diberi notifikasi melalui Supabase Realtime.</div></div>`:'');
  return `
  ${scopeNote}
+ ${!satriaPemdaOfficial('nama')?`<div class="card no-print" role="alert" style="border:1px solid #e0a800;background:#fff9ed;color:#854d0e"><b>Identitas Pemerintah Daerah belum resmi.</b> Data Master dan dokumen tidak boleh memakai teks demo sebagai identitas instansi. Admin perlu membuka <a href="#settings">Pengaturan Sistem</a> → Identitas Pemerintah Daerah, mengisi nama, kota, provinsi, dan sumber dana yang benar. Data yang tersimpan tidak diubah otomatis.</div>`:''}
  ${satMasterDashboard()}
  <div class="satria-kpi-grid">
    ${kpi.map(([label,count,path,key])=>`
@@ -3607,7 +3632,7 @@ function vMaster(){
        </div>
        <div class="kpi-label">${label}</div>
        <div class="kpi-value">${count}</div>
-       <div class="kpi-foot"><span class="live-dot"></span> Data Master • ${esc(S.pemda?.nama||'Instansi')}</div>
+       <div class="kpi-foot"><span class="live-dot"></span> Data Master • ${esc(satriaMasterScopeName())}</div>
      </div>
    `).join('')}
  </div>
@@ -3644,10 +3669,10 @@ function kopEditor(o){
  <div class=mut>PNG/JPG, maks. 1 MB. Jika tersedia, kop gambar menjadi kop utama dan menggantikan kop teks otomatis (logo pemda tidak ditambahkan lagi). Gunakan gambar yang sudah memuat identitas resmi dan pastikan keterbacaan saat dicetak.</div></div>`}
 function vSet(){
  const k=S.opd[0],warns=[];
- if(!String(S.pemda?.nama||'').trim())warns.push('Nama pemerintah daerah wajib diisi.');
- if(!String(S.pemda?.kota||'').trim())warns.push('Kota tempat tanda tangan belum diisi.');
- if(!String(S.pemda?.provinsi||'').trim())warns.push('Provinsi belum diisi.');
- if(!String(S.pemda?.sumber||'').trim())warns.push('Sumber dana default belum diisi.');
+ if(!satriaPemdaOfficial('nama'))warns.push('Nama pemerintah daerah belum diisi atau masih menggunakan data Demo/Contoh.');
+ if(!satriaPemdaOfficial('kota'))warns.push('Kota tempat tanda tangan belum diisi atau masih data contoh.');
+ if(!satriaPemdaOfficial('provinsi'))warns.push('Provinsi belum diisi atau masih data contoh.');
+ if(!satriaPemdaOfficial('sumber'))warns.push('Sumber dana default belum diisi atau masih data simulasi.');
  if(!S.tahun.length)warns.push('Belum ada tahun anggaran.');
  if(new Set(S.tahun.map(Number)).size!==S.tahun.length)warns.push('Terdapat tahun anggaran duplikat.');
  if(!S.opd.length)warns.push('Belum ada OPD.');
@@ -3656,10 +3681,10 @@ function vSet(){
   const kur=['PPK','PP','Kabid'].filter(r=>!S.pejabat.some(x=>x.opd===o.id&&x.peran===r&&x.aktif!==false&&String(x.nama||'').trim()&&String(x.nip||'').trim()));if(kur.length)warns.push(`OPD ${o.singkat||''}: pejabat aktif dengan nama dan NIP lengkap belum ditetapkan untuk ${kur.join(', ')}.`)});
  [['NODIS','Nota Dinas'],['PPBJ','SPPBJ'],['DPP','DPP/Lampiran Referensi Harga'],['BAHR','BA Reviu DPP'],['BAHEPE','BA Evaluasi Penyedia'],['BAHP','BA Hasil Pemilihan'],['KKNEGO','Kertas Kerja Negosiasi']].forEach(([c,n])=>{if(!String(S.penomoran?.[c]||'').trim())warns.push(`Kode penomoran ${n} belum diisi.`)});
  const settingsCheck=()=>{const groups={identitas:[],referensi:[],dokumen:[],data:[]};const add=(g,msg)=>groups[g].push(msg);
-  if(!String(S.pemda?.nama||'').trim())add('identitas','Nama pemerintah daerah kosong');
-  if(!String(S.pemda?.kota||'').trim())add('identitas','Kota tempat tanda tangan kosong');
-  if(!String(S.pemda?.provinsi||'').trim())add('identitas','Provinsi kosong');
-  if(!String(S.pemda?.sumber||'').trim())add('identitas','Sumber dana default kosong');
+  if(!satriaPemdaOfficial('nama'))add('identitas','Nama pemerintah daerah kosong atau data contoh');
+  if(!satriaPemdaOfficial('kota'))add('identitas','Kota tempat tanda tangan kosong atau data contoh');
+  if(!satriaPemdaOfficial('provinsi'))add('identitas','Provinsi kosong atau data contoh');
+  if(!satriaPemdaOfficial('sumber'))add('identitas','Sumber dana default kosong atau data contoh');
   const rupKeys=new Set();(S.rupBank||[]).forEach(r=>{const tag=String(r.tahun)+'|'+String(r.opd)+'|'+String(r.rup||'').trim();if(rupKeys.has(tag))add('referensi','Kode RUP duplikat: '+(r.rup||'-'));rupKeys.add(tag);if(!S.opd.some(o=>o.id===r.opd))add('referensi','Bank RUP '+(r.rup||'-')+' merujuk OPD tidak dikenal');if(!S.tahun.includes(+r.tahun))add('referensi','Bank RUP '+(r.rup||'-')+' merujuk tahun tidak terdaftar');});
   (S.unit||[]).forEach(u=>{if(!S.opd.some(o=>o.id===u.opd))add('referensi','Unit '+(u.kode||u.id)+' merujuk OPD tidak dikenal')});
   (S.pejabat||[]).forEach(x=>{if(x.opd&&!S.opd.some(o=>o.id===x.opd))add('referensi','Pejabat '+(x.nama||x.id)+' merujuk OPD tidak dikenal')});
@@ -3721,7 +3746,11 @@ function findPaket(q){const m=q.match(/\b\d{6,}\b/);if(m)return S.paket.find(p=>
  const w=toks(q);if(!w.length)return null;let best=null,bs=0;
  S.paket.forEach(p=>{const n=nrm(p.nama);const c=w.filter(x=>n.includes(x)).length;if(c>bs){bs=c;best=p}});return bs>0?best:null}
 const findPenyedia=q=>S.penyedia.find(y=>nrm(y.nama).split(' ').filter(x=>x.length>=4).some(x=>q.includes(x)))||null;
-function docMiss(p,k){const m=[];if(!p.rup)m.push('Kode RUP');if(!p.items.length)m.push('rincian barang');if(!(p.pagu>0))m.push('pagu');
+function docMiss(p,k){const m=[];
+ const docOpd=OP(p);
+ if(!docOpd.kop&&!satriaPemdaOfficial('nama'))m.push('nama Pemerintah Daerah pada kop teks (Pengaturan Sistem)');
+ if(['idkb','metode'].includes(k)&&!satriaPemdaOfficial('nama')&&!m.some(x=>x.includes('Pemerintah Daerah')))m.push('nama Pemerintah Daerah pada metadata dokumen');
+ if(['dpp','spek'].includes(k)&&satriaDppOfficialPlace(p)==='[Tempat belum diatur]')m.push('tempat penandatanganan resmi');if(!p.rup)m.push('Kode RUP');if(!p.items.length)m.push('rincian barang');if(!(p.pagu>0))m.push('pagu');
  if(k==='nodis'&&!p.tglNodis)m.push('tanggal Nota Dinas');
  if(k==='sppbj'&&!p.tglSppbj)m.push('tanggal SPPBJ');
  if(k==='dpp'&&!p.tglDpp)m.push('tanggal DPP');
@@ -4220,7 +4249,7 @@ window.addEventListener('hashchange',route);window.addEventListener('beforeunloa
 /* ===== PENYIMPANAN: Dexie.js (IndexedDB) atau memori sesi ===== */
 let DB=null,ENGINE='memory',pTimer=null,persistRevision=0,lastPersistedRevision=0;
 function dbInit(){if(typeof Dexie==='undefined')return false;try{DB=new Dexie('satria-framework-db');DB.version(1).stores({kv:'k'});ENGINE='dexie';return true}catch(e){console.warn('Dexie gagal dibuka',e);return false}}
-function normalizeData(){S.rupBank=Array.isArray(S.rupBank)?S.rupBank:[];S.pemda={...SEED.pemda,...(S.pemda||{})};S.penomoran={...SEED.penomoran,...(S.penomoran||{})};S.opd=S.opd||[];S.paket=(S.paket||[]).map(p=>({...p,seq:(Number.isInteger(+p.seq)&&+p.seq>0)?+p.seq:0,items:(p.items||[]).map(i=>({spesifikasi:'',merek:'',pdn:'Perlu verifikasi',linkProduk:'',...i})),penawaran:(p.penawaran||[]).map(w=>({sumberHarga:'',tanggalHarga:'',ongkir:0,catatan:'',...w,harga:w.harga||{},nego:w.nego||{}})),jenisPengadaan:p.jenisPengadaan||'Barang',metodePemilihan:p.metodePemilihan||'E-Purchasing dengan Negosiasi Harga',lokasiPengiriman:p.lokasiPengiriman||O(p.opd).tempat||O(p.opd).alamat||'',tglSurvei:p.tglSurvei||'',tglEvaluasi:p.tglEvaluasi||'',tglNego:p.tglNego||'',tglPenetapan:p.tglPenetapan||''}));
+function normalizeData(){S.rupBank=Array.isArray(S.rupBank)?S.rupBank:[];S.pemda={nama:'',kota:'',provinsi:'',sumber:'',...(S.pemda||{})};S.penomoran={...SEED.penomoran,...(S.penomoran||{})};S.opd=S.opd||[];S.paket=(S.paket||[]).map(p=>({...p,seq:(Number.isInteger(+p.seq)&&+p.seq>0)?+p.seq:0,items:(p.items||[]).map(i=>({spesifikasi:'',merek:'',pdn:'Perlu verifikasi',linkProduk:'',...i})),penawaran:(p.penawaran||[]).map(w=>({sumberHarga:'',tanggalHarga:'',ongkir:0,catatan:'',...w,harga:w.harga||{},nego:w.nego||{}})),jenisPengadaan:p.jenisPengadaan||'Barang',metodePemilihan:p.metodePemilihan||'E-Purchasing dengan Negosiasi Harga',lokasiPengiriman:p.lokasiPengiriman||O(p.opd).tempat||O(p.opd).alamat||'',tglSurvei:p.tglSurvei||'',tglEvaluasi:p.tglEvaluasi||'',tglNego:p.tglNego||'',tglPenetapan:p.tglPenetapan||''}));
  const maxSeqByScope=new Map();for(const p of S.paket){const key=String(p.tahun)+'|'+String(p.opd);if(Number.isInteger(+p.seq)&&+p.seq>0)maxSeqByScope.set(key,Math.max(maxSeqByScope.get(key)||0,+p.seq));}
  for(const p of S.paket){if(!p.seq){const key=String(p.tahun)+'|'+String(p.opd);const next=(maxSeqByScope.get(key)||0)+1;p.seq=next;maxSeqByScope.set(key,next)}}
  S.penyedia=(S.penyedia||[]).map(y=>({statusKatalog:'Perlu verifikasi',pdn:'Perlu verifikasi',tipe:'Perlu verifikasi',kbliSesuai:'Perlu verifikasi',daftarHitam:'Perlu verifikasi',...y,aktif:y.aktif!==false}));S.akun=(S.akun||[]).map(x=>({...x,aktif:x.aktif!==false}));S.unit=(S.unit||[]).map(x=>({...x,aktif:x.aktif!==false}));S.pejabat=(S.pejabat||[]).map(x=>({...x,aktif:x.aktif!==false}));S.kode=S.kode||[];S.tahun=[...new Set([...(S.tahun||[]).map(Number),...S.paket.map(p=>+p.tahun).filter(Number.isFinite)])].filter(Number.isInteger).sort((a,b)=>a-b);if(!S.tahun.length)S.tahun=[new Date().getFullYear()];}
@@ -7766,6 +7795,7 @@ function vDokOptimized(){
         <div class="dok-hero-art" aria-hidden="true"><span class="dok-art-orbit"></span><span class="dok-art-chip">DOCS<br><b>01—14</b></span><span class="dok-art-spark dok-spark-a">✳</span><span class="dok-art-spark dok-spark-b">✦</span></div>
       </section>
 
+      ${!satriaPemdaOfficial('nama')?`<section class="card no-print" role="alert" style="border:1px solid #e0a800;background:#fff9ed;color:#854d0e"><b>Identitas Pemerintah Daerah belum diatur secara resmi.</b> Sebelum menerbitkan dokumen, admin harus memverifikasi identitas pada <a href="#settings">Pengaturan Sistem</a> → Identitas Pemerintah Daerah. Nilai Demo/Contoh tidak akan dicetak sebagai identitas resmi; bila belum tersedia, dokumen menampilkan penanda belum diatur. Kop gambar OPD yang sudah tersimpan tetap dipakai.</section>`:''}
       <section class="dok-metrics no-print" aria-label="Ringkasan paket">
         <article class="dok-metric dok-metric-progress"><div class="dok-metric-top"><span>CHECKLIST DOKUMEN</span><span class="dok-metric-glyph">↗</span></div><div class="dok-metric-value">${readyDocs}<small>/${T.length}</small></div><div class="dok-progress-track"><span style="width:${pct}%"></span></div><p>${pct}% template lolos pemeriksaan data aplikasi</p></article>
         <article class="dok-metric"><div class="dok-metric-top"><span>RINCIAN BARANG</span><span class="dok-metric-glyph">▦</span></div><div class="dok-metric-value">${p.items.length}</div><p>Item pada paket aktif</p></article>
@@ -10862,7 +10892,7 @@ window.addEventListener('click',ev=>{
    if(!Array.isArray(p.items)||!p.items.length)blockers.push('Rincian HPS belum tersedia.');
    else if(p.items.some(i=>!(+i.vol>0)||!(+i.hs>0)))blockers.push('Ada volume atau harga satuan HPS yang tidak valid.');
    if(!p.nama||bad594(p.nama))blockers.push('Nama paket belum valid atau mengandung data contoh.');
-   if((S.pemda?.nama||'')&&bad594(S.pemda.nama))warnings.push('Identitas Pemda dalam Pengaturan masih memuat kata Demo/Contoh; verifikasi kop surat dan data instansi.');
+   if(!satriaPemdaOfficial('nama'))warnings.push('Nama Pemda belum resmi: periksa Pengaturan Sistem, terutama jika DPP tidak memakai kop gambar OPD.');
    if(!p.items?.some(i=>String(i.merek||'').trim())&&p.items?.some(i=>/\b(?:epson|canon|hp|brother|samsung|lenovo|asus|acer)\b/i.test(String(i.nama||''))))warnings.push('Nama barang memuat merek, tetapi justifikasi merek belum dicatat secara khusus. Periksa relevansinya sesuai ketentuan.');
    const refs=(p.penawaran||[]).flatMap(w=>Object.values(w.catalogRefs||{}));
    if(refs.some(r=>r.imageUrl&&!String(r.spec||'').trim()))warnings.push('Sebagian foto referensi belum memiliki spesifikasi katalog; baris kosong disembunyikan dari lampiran.');
