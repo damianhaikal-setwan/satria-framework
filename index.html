@@ -877,6 +877,27 @@ main{overflow-anchor:none}
 #main .doc[data-document-type="bahepe"] table,.doc[data-document-type="bahepe"] table{border-collapse:collapse!important}
 #main .doc[data-document-type="bahepe"] th,#main .doc[data-document-type="bahepe"] td,.doc[data-document-type="bahepe"] th,.doc[data-document-type="bahepe"] td{border:1px solid #000!important;font-size:8.5pt!important;padding:2px 4px!important;line-height:1.2!important;box-shadow:none!important}
 #main .doc[data-document-type="bahepe"] table[style*="border:0"] td,.doc[data-document-type="bahepe"] table[style*="border:0"] td{border:0!important;font-size:10pt!important;padding:1px 0!important}
+/* Dashboard RUP: ringkasan pembacaan (read-only) */
+.satria-rup-dash-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;margin:16px 0}
+.satria-rup-dash-stats>div{border:1px solid var(--bd);border-radius:12px;background:var(--card-2);padding:13px 14px;min-width:0}
+.satria-rup-dash-stats span{display:block;font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);font-weight:800}
+.satria-rup-dash-stats b{display:block;font-size:19px;line-height:1.4;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.satria-rup-dash-stats small{font-size:11px;color:var(--mut)}
+.satria-rup-alerts{border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);margin:10px 0;padding:10px 2px}
+.satria-rup-alerts ul{margin:6px 0 4px;padding-left:22px}
+.satria-rup-alerts li{font-size:12px;line-height:1.5}
+.satria-rup-dash-link{display:inline-flex;font-weight:700;text-decoration:none;color:var(--acc);padding:8px 10px;border:1px solid var(--bd);border-radius:9px}
+.satria-rup-dash-table th,.satria-rup-dash-table td{white-space:normal;vertical-align:top}
+.satria-rup-dash-table td.n{white-space:nowrap}
+.satria-rup-dashboard{min-width:0;max-width:100%;overflow:hidden}
+.satria-overview .satria-metrics-row{grid-template-columns:repeat(4,minmax(0,1fr))!important;min-width:0}
+.satria-overview .satria-metrics-row>div{min-width:0;overflow-wrap:anywhere}
+@media(max-width:700px){.satria-overview .satria-metrics-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+.satria-rup-dashboard .table-wrap{display:block;width:100%;max-width:100%;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* Grafik Dashboard tidak memperlebar laman pada ponsel saat tabel dan SVG padat. */
+.chart-grid{grid-template-columns:repeat(12,minmax(0,1fr))!important;min-width:0}
+.chart-grid .chart-card{min-width:0;max-width:100%;overflow:hidden}
+@media(max-width:600px){.satria-rup-dash-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.satria-rup-dash-stats b{font-size:16px}}
 </style>
 
   <!-- PWA / AWA - SATRIA 3.0 Fixed v2 -->
@@ -1825,27 +1846,7 @@ header button[data-act="export"]{
   </div>
 </header>
 <nav id="nav"><a href="#dash" class="on" data-icon="dash">Ringkasan Utama</a><a href="#paket" class="" data-icon="paket">Paket Pengadaan</a><a href="#dok" class="" data-icon="dok">Dokumen Pengadaan</a><a href="#lap" class="" data-icon="lap">Laporan dan Analisis</a><a href="#panduan" class="" data-icon="panduan">Panduan Penggunaan</a><a href="#chat" class="" data-icon="chat">Asisten SATRIA</a></nav>
-<main id="main"><div class="satria-command-header"><div class="satria-command-title"><div class="satria-command-badge"><span class="dot"></span> RINGKASAN UTAMA</div><h2>Ringkasan Utama SATRIA</h2><p>Integrated Government Intelligence Platform • Strategic Analytics Overview • Framework Version 3.0.55</p></div><div class="satria-command-meta"><div class="satria-meta-card"><span>TA Aktif</span><b>2026</b></div><div class="satria-meta-card"><span>Entitas</span><b>0</b></div><div class="satria-meta-card"><span>Kepatuhan</span><b>0%</b></div></div></div>
- <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
-  <div class="card kpi satria-kpi" style="--kpi-accent:#0F766E"><div class="kpi-icon" style="background:linear-gradient(135deg,#0F766E 0%, color-mix(in srgb, #0F766E 70%, white) 100%)">🏛</div><div class="kpi-content"><span class="kpi-label">Jumlah Entitas</span><b class="kpi-value">0</b><span class="kpi-sub">Governance • Total Program</span></div><div class="kpi-glow"></div></div>
-  <div class="card kpi satria-kpi" style="--kpi-accent:#0891B2"><div class="kpi-icon" style="background:linear-gradient(135deg,#0891B2 0%, color-mix(in srgb, #0891B2 70%, white) 100%)">📊</div><div class="kpi-content"><span class="kpi-label">Anggaran Terkelola</span><b class="kpi-value">Rp 0</b><span class="kpi-sub">Analytics • Pagu Terkelola</span></div><div class="kpi-glow"></div></div>
-  <div class="card kpi satria-kpi" style="--kpi-accent:#14B8A6"><div class="kpi-icon" style="background:linear-gradient(135deg,#14B8A6 0%, color-mix(in srgb, #14B8A6 70%, white) 100%)">🧠</div><div class="kpi-content"><span class="kpi-label">Ringkasan Paket</span><b class="kpi-value">0%</b><span class="kpi-sub">Intelligence • Utilisasi Rp 0</span></div><div class="kpi-glow"></div></div>
-  <div class="card kpi satria-kpi" style="--kpi-accent:#10B981"><div class="kpi-icon" style="background:linear-gradient(135deg,#10B981 0%, color-mix(in srgb, #10B981 70%, white) 100%)">🔐</div><div class="kpi-content"><span class="kpi-label">Kelengkapan Administratif</span><b class="kpi-value">0%</b><span class="kpi-sub">Compliance • 0 Lengkap</span></div><div class="kpi-glow"></div></div>
-  <div class="card kpi satria-kpi" style="--kpi-accent:#2563EB"><div class="kpi-icon" style="background:linear-gradient(135deg,#2563EB 0%, color-mix(in srgb, #2563EB 70%, white) 100%)">⚡</div><div class="kpi-content"><span class="kpi-label">Indikator Data Paket</span><b class="kpi-value">Rp 0 • 0%</b><span class="kpi-sub">Performance • Efisiensi</span></div><div class="kpi-glow"></div></div>
- </div>
- <div class="card satria-overview"><h3 style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff">◈</span> Strategic Analytics Overview <span class="badge" style="margin-left:auto;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">SATRIA NEXT • Analitik Terintegrasi</span></h3><p class="mut">Ringkasan berdasarkan data Paket Pengadaan, filter tahun dan OPD. Nilai penetapan bukan pembayaran; selisih HPS–negosiasi bukan penghematan aktual. Grafik diperbarui setelah perubahan data.</p><div class="satria-metrics-row"><div><span>Efisiensi</span><b>Rp 0</b><small>0% dari pagu</small></div><div><span>Total HPS</span><b>Rp 0</b><small>Estimasi kebutuhan</small></div><div><span>Nilai Kontrak</span><b>Rp 0</b><small>Realisasi</small></div><div><span>Paket Lengkap</span><b>0/0</b><small>0% compliant</small></div></div></div>
- <div class="chart-grid">
-   <div class="chart-card wide"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2,#14B8A6)"></div><div class="chart-title">Strategic Performance Trend <span class="badge" style="background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">Tren Multi Tahun</span></div><div id="chartMultiYear" style="width:100%;height:340px"><div class="s348-empty">Menyiapkan grafik...</div></div><div class="d3-legend" id="legendMultiYear"></div><div class="d3-tooltip" id="tooltipMulti"></div></div>
-   <div class="chart-card half"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2)"></div><div class="chart-title">Budget Utilization</div><div id="chartDonut" style="width:100%;height:280px; display:grid; place-items:center"><div class="s348-empty">Menyiapkan grafik...</div></div><div class="d3-legend" id="legendDonut" style="justify-content:center"></div></div>
-   <div class="chart-card half"><div class="kh-accent" style="background:linear-gradient(90deg,#0891B2,#14B8A6)"></div><div class="chart-title">Efficiency Analytics</div><div id="chartBarPaket" style="width:100%;height:280px"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
-   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#10B981,#14B8A6)"></div><div class="chart-title">Governance Status</div><div id="chartStatus" style="width:100%;height:240px; display:grid; place-items:center"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
-   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#2563EB,#0891B2)"></div><div class="chart-title">Performance Matrix</div><div id="chartHpsPagu" style="width:100%;height:240px"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
-   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#14B8A6)"></div><div class="chart-title">Institution Analytics</div><div id="chartOpd" style="width:100%;height:240px"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
- </div>
- <div class="card" style="margin-top:14px"><h3>Strategic Analytics Overview • Multi Tahun</h3><div class="table-wrap"><table><tbody><tr><th>Tahun</th><th class="n">Entitas</th><th class="n">Anggaran</th><th class="n">Kontrak</th><th class="n">Efisiensi</th><th class="n">Kinerja</th></tr>
- <tr><td><b>2026</b></td><td class="n">0</td><td class="n">Rp 0</td><td class="n">Rp 0</td><td class="n">Rp 0</td><td class="n"><span class="pill" style="background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">0%</span></td></tr></tbody></table></div></div>
- <div class="card"><h3>Paket Pengadaan • TA 2026</h3><p class="mut">Belum ada paket pada filter ini.</p></div>
- <div class="card"><h3>Governance Intelligence • Aktivitas Sinkronisasi</h3><span class="mut">Belum ada perubahan. Ubah data program, rincian, atau penawaran untuk melihat sinkronisasi governance intelligence.</span></div></main>
+<main id="main"><section class="card" aria-live="polite" style="max-width:900px;margin:26px auto"><h2>Memuat Ringkasan Utama SATRIA…</h2><p class="mut">Data Dashboard dihitung setelah paket dan Bank RUP dimuat. Pagu RUP, penggunaan terhitung, penetapan, dan realisasi pembayaran merupakan indikator yang berbeda.</p></section></main>
 <footer class="satria-global-footer no-print"><div class="foot-brand"><b>SATRIA NEXT</b><span>Integrated Government Intelligence Platform</span><span style="font-size:10px;opacity:.8">NEXT · 3.0.59.18</span></div><div class="foot-links"><span>Smart • Adaptive • Transparent • Responsive • Integrated • Accountable</span><span style="opacity:.4">|</span><span>Generated by SATRIA Framework</span></div></footer>
 <div id="toast"></div>
 <style id="satria352-dpp-controls">
@@ -2241,6 +2242,7 @@ function vDash(){
  const L=filt(),pagu=sum(L,p=>p.pagu),k=sum(L,kontrak);
  const totalHps=sum(L,hps);
  const dashData=satriaDashboardMetrics(L);
+ const bankDash=satriaDashboardRupMetrics();
  const efisiensi=dashData.hpsGap;
  const pctEf=dashData.settledHps?((efisiensi/dashData.settledHps)*100).toFixed(1):0;
  const pctKontrak=pagu?((k/pagu)*100).toFixed(1):0;
@@ -2250,22 +2252,26 @@ function vDash(){
  return `<div class="satria-command-header"><div class="satria-command-title"><div class="satria-command-badge"><span class="dot"></span> RINGKASAN UTAMA</div><h2>Ringkasan Utama SATRIA</h2><p>Integrated Government Intelligence Platform • Strategic Analytics Overview • Framework Version 3.0.55</p></div><div class="satria-command-meta"><div class="satria-meta-card"><span>TA Aktif</span><b>${S.ui.tahun}</b></div><div class="satria-meta-card"><span>Paket</span><b>${L.length}</b></div><div class="satria-meta-card"><span>Kelengkapan data</span><b>${pctPatuh}%</b></div></div></div>
  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
   ${kpi('Jumlah Paket',L.length,'🏛','Paket sesuai filter tahun/OPD','#0F766E')}
-  ${kpi('Anggaran Terkelola',rp(pagu),'📊','Analytics • Pagu Terkelola','#0891B2')}
-  ${kpi('Ringkasan Paket',pctKontrak+'%','🧠','Nilai penetapan tervalidasi '+rp(k),'#14B8A6')}
+  ${kpi('Pagu Bank RUP (unik)',bankDash.validCount?rp(bankDash.pagu):'—','📚','Nilai Bank RUP tersimpan • unik per OPD/TA/kode','#0891B2')}
+  ${kpi('Penggunaan RUP Terhitung',bankDash.validCount?rp(bankDash.used):'—','📐','Estimasi rincian / cadangan / konsolidasi','#0F766E')}
+  ${kpi('Sisa Kapasitas RUP',bankDash.validCount?rp(bankDash.free):'—','🧮','Bukan sisa kas atau realisasi belanja','#14B8A6')}
+  ${kpi('Pagu Paket Tercatat',rp(pagu),'📊','Dapat berbeda dari penggunaan RUP','#0891B2')}
+  ${kpi('Penetapan / Pagu Paket',pctKontrak+'%','🧠','Penetapan tervalidasi '+rp(k)+' • bukan pembayaran','#14B8A6')}
   ${kpi('Kelengkapan Administratif',pctPatuh+'%','🔐','Pemeriksaan kelengkapan • '+lengkap+' lengkap','#10B981')}
   ${kpi('Selisih HPS–Negosiasi',rp(efisiensi)+' • '+pctEf+'%','⚡','Hanya paket yang telah ditetapkan','#2563EB')}
  </div>
- <div class="card satria-overview"><h3 style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff">◈</span> Strategic Analytics Overview <span class="badge" style="margin-left:auto;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">SATRIA NEXT • Analitik Terintegrasi</span></h3><p class="mut">Ringkasan berdasarkan data Paket Pengadaan, filter tahun dan OPD. Nilai penetapan bukan pembayaran; selisih HPS–negosiasi bukan penghematan aktual. Grafik diperbarui setelah perubahan data.</p><div class="satria-metrics-row"><div><span>Selisih HPS–Negosiasi</span><b>${rp(efisiensi)}</b><small>Bukan efisiensi kas</small></div><div><span>Total HPS</span><b>${rp(totalHps)}</b><small>Estimasi kebutuhan</small></div><div><span>Nilai Penetapan</span><b>${rp(k)}</b><small>Bukan realisasi pembayaran</small></div><div><span>Paket Lengkap</span><b>${lengkap}/${L.length}</b><small>Kelengkapan data administratif</small></div></div></div>
+ <div class="card satria-overview"><h3 style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff">◈</span> Strategic Analytics Overview <span class="badge" style="margin-left:auto;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">SATRIA NEXT • Analitik Terintegrasi</span></h3><p class="mut">Analitik paket mengikuti filter tahun, OPD dan status arsip. Kapasitas Bank RUP mengikuti tahun/OPD dan menghitung semua paket yang terhubung termasuk arsip, agar saldo sesuai menu Input RUP. Nilai penetapan bukan pembayaran; selisih HPS–negosiasi bukan penghematan aktual.</p><div class="satria-metrics-row"><div><span>Selisih HPS–Negosiasi</span><b>${rp(efisiensi)}</b><small>Bukan efisiensi kas</small></div><div><span>Total HPS</span><b>${rp(totalHps)}</b><small>Estimasi kebutuhan</small></div><div><span>Nilai Penetapan</span><b>${rp(k)}</b><small>Bukan realisasi pembayaran</small></div><div><span>Paket Lengkap</span><b>${lengkap}/${L.length}</b><small>Kelengkapan data administratif</small></div></div></div>
+ ${satriaDashboardRupOverview(bankDash)}
  <div class="chart-grid">
-   <div class="chart-card wide"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2,#14B8A6)"></div><div class="chart-title">Strategic Performance Trend <span class="badge" style="background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">Tren Multi Tahun</span></div><div id="chartMultiYear" style="width:100%;height:340px"><div class="s348-empty">Menyiapkan grafik...</div></div><div class="d3-legend" id="legendMultiYear"></div><div class="d3-tooltip" id="tooltipMulti"></div></div>
-   <div class="chart-card half"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2)"></div><div class="chart-title">Budget Utilization</div><div id="chartDonut" style="width:100%;height:280px; display:grid; place-items:center"><div class="s348-empty">Menyiapkan grafik...</div></div><div class="d3-legend" id="legendDonut" style="justify-content:center"></div></div>
+   <div class="chart-card wide"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2,#14B8A6)"></div><div class="chart-title">Tren Paket: Pagu Tercatat, HPS & Penetapan <span class="badge" style="background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">Tren Multi Tahun</span></div><div id="chartMultiYear" style="width:100%;height:340px"><div class="s348-empty">Menyiapkan grafik...</div></div><div class="d3-legend" id="legendMultiYear"></div><div class="d3-tooltip" id="tooltipMulti"></div></div>
+   <div class="chart-card half"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2)"></div><div class="chart-title">Kapasitas Pagu RUP</div><div id="chartDonut" style="width:100%;height:280px; display:grid; place-items:center"><div class="s348-empty">Menyiapkan grafik...</div></div><div class="d3-legend" id="legendDonut" style="justify-content:center"></div></div>
    <div class="chart-card half"><div class="kh-accent" style="background:linear-gradient(90deg,#0891B2,#14B8A6)"></div><div class="chart-title">Efficiency Analytics</div><div id="chartBarPaket" style="width:100%;height:280px"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
    <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#10B981,#14B8A6)"></div><div class="chart-title">Governance Status</div><div id="chartStatus" style="width:100%;height:240px; display:grid; place-items:center"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
    <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#2563EB,#0891B2)"></div><div class="chart-title">Performance Matrix</div><div id="chartHpsPagu" style="width:100%;height:240px"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
-   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#14B8A6)"></div><div class="chart-title">Institution Analytics</div><div id="chartOpd" style="width:100%;height:240px"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
+   <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#14B8A6)"></div><div class="chart-title">Analitik Pagu Paket per OPD</div><div id="chartOpd" style="width:100%;height:240px"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
  </div>
- <div class="card" style="margin-top:14px"><h3>Strategic Analytics Overview • Multi Tahun</h3><div class="table-wrap"><table><tr><th>Tahun</th><th class=n>Paket</th><th class=n>Anggaran</th><th class=n>Nilai Penetapan</th><th class=n>Selisih HPS–Nego</th><th class=n>Rasio Penetapan/Pagu</th></tr>
- ${S.tahun.map(t=>{const x=filt(t),data=satriaDashboardMetrics(x),pg=data.pagu,kt=data.committed,ef=data.hpsGap;const pct=pg?((kt/pg)*100).toFixed(1):0;return `<tr><td><b>${t}</b></td><td class=n>${x.length}</td><td class=n>${rp(pg)}</td><td class=n>${rp(kt)}</td><td class=n>${rp(ef)}</td><td class=n><span class="pill" style="background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">${pct}%</span></td></tr>`}).join('')}</table></div></div>
+ <div class="card" style="margin-top:14px"><h3>Perbandingan Bank RUP & Paket • Multi Tahun</h3><p class="mut">Pagu Bank RUP dihitung unik per OPD/tahun/kode. Terpakai adalah estimasi penggunaan RUP, sedangkan pagu paket merupakan nilai tercatat pada paket. Nilai di kolom ini tidak untuk dijumlahkan satu sama lain.</p><div class="table-wrap"><table><tr><th>Tahun</th><th class=n>Paket</th><th class=n>Pagu RUP unik</th><th class=n>Terpakai RUP</th><th class=n>Sisa RUP</th><th class=n>Pagu Paket Tercatat</th><th class=n>Nilai Penetapan</th><th class=n>Selisih HPS–Nego</th><th class=n>Rasio Penetapan/Pagu Paket</th></tr>
+ ${S.tahun.map(t=>{const x=filt(t),data=satriaDashboardMetrics(x),rd=satriaDashboardRupMetrics(t),pg=data.pagu,kt=data.committed,ef=data.hpsGap;const pct=pg?((kt/pg)*100).toFixed(1):0;return `<tr><td><b>${t}</b></td><td class=n>${x.length}</td><td class=n>${rd.validCount?rp(rd.pagu):'—'}</td><td class=n>${rd.validCount?rp(rd.used):'—'}</td><td class=n>${rd.validCount?rp(rd.free):'—'}</td><td class=n>${rp(pg)}</td><td class=n>${rp(kt)}</td><td class=n>${rp(ef)}</td><td class=n>${pct}%</td></tr>`}).join('')}</table></div></div>
  <div class="card"><h3>Paket Pengadaan • TA ${S.ui.tahun}</h3>${tabelPaket(L)}</div>
  <div class="card"><h3>Governance Intelligence • Aktivitas Sinkronisasi</h3>${S.log.length?S.log.map(l=>`<div style="padding:8px 0;border-bottom:1px solid var(--bd);display:flex;gap:12px"><span style="font-weight:700;color:#0F766E;min-width:120px">${l.t}</span><span>${esc(l.label)}</span><span class=pill style="margin-left:auto;background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">${l.mods.join(', ')}</span></div>`).join(''):'<span class=mut>Belum ada perubahan. Ubah data program, rincian, atau penawaran untuk melihat sinkronisasi governance intelligence.</span>'}</div>`;
 }
@@ -2507,6 +2513,102 @@ function satriaRupStatusAnggaran(r,excludeId='',state=S){
  const melebihi=linked.filter(p=>satriaRupLinks(p).length<=1&&satriaRupPenggunaanPaket(p).mode==='melebihi').length;
  return {batas,allocated,sisa:batas-allocated,linked,tidakTerbagi,otomatis,cadangan,melebihi,totalPaguPaket,
    valid:Number.isSafeInteger(batas)&&batas>0&&Number.isSafeInteger(allocated)&&allocated>=0};
+}
+/* SATRIA DASHBOARD 2026-11-03 — pembacaan Bank RUP TANPA MUTASI DATA.
+   Pagu RUP unik per OPD/TA/kode; penggunaan HARUS sama dengan Input RUP.
+   Semua paket terhubung (termasuk arsip) dihitung, supaya saldo bank tidak
+   berubah akibat filter lifecycle Dashboard. Tidak sama dengan realisasi kas.
+   Grup RUP duplikat / pagu tidak valid dikeluarkan dari angka total dan
+   diberi status pemeriksaan, bukan disatukan secara spekulatif. */
+function satriaDashboardRupMetrics(tahun=S.ui.tahun){
+ const year=Number(tahun),scope=activeCloudScope();
+ const allowedOpd=opd=>(S.ui.opd==='all'||String(opd)===String(S.ui.opd))&&(!scope||scope.opdIds.includes(String(opd)));
+ const allowedYear=Number.isInteger(year)&&(!scope||scope.years.includes(year));
+ const bank=allowedYear?(S.rupBank||[]).filter(r=>Number(r.tahun)===year&&allowedOpd(r.opd)):[];
+ const packages=allowedYear?(S.paket||[]).filter(p=>Number(p.tahun)===year&&allowedOpd(p.opd)):[];
+ // Indeks sekali untuk menghindari pemindaian seluruh paket pada setiap RUP.
+ // Tetap memakai satriaRupStatusAnggaran agar perhitungan persis sama dengan Input RUP.
+ const byRef=new Map(),byLegacy=new Map();
+ for(const p of (S.paket||[])){
+  const ids=satriaRupLinks(p);
+  if(ids.length){for(const id of ids){if(!byRef.has(id))byRef.set(id,[]);byRef.get(id).push(p)}}
+  else{const key=rupBankKey(p);if(!byLegacy.has(key))byLegacy.set(key,[]);byLegacy.get(key).push(p)}
+ }
+ const forRup=r=>[...(byRef.get(String(r.id))||[]),...(byLegacy.get(rupBankKey(r))||[])];
+ const groups=new Map();
+ for(const r of bank){const key=rupBankKey(r);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(r)}
+ const out={tahun:year,rupCount:groups.size,validCount:0,pagu:0,used:0,free:0,over:0,
+   shared:0,unused:0,draft:0,missingSplit:0,overDetail:0,needsAlign:0,
+   duplicated:0,invalid:0,excluded:0,unlinked:0,rows:[],packages:packages.length};
+ const linkedIds=new Set();
+ for(const group of groups.values()){
+  const r=group[0];
+  if(group.length>1){
+   out.duplicated++;out.excluded++;
+   out.rows.push({rup:r,status:'Duplikat Bank RUP',level:3,valid:false,pagu:null,used:null,free:null,linked:0,note:'Ada '+group.length+' entri dengan kode yang sama; tidak dimasukkan dalam total'});
+   for(const x of group)for(const p of forRup(x))linkedIds.add(String(p.id));
+   continue;
+  }
+  const x=satriaRupStatusAnggaran(r,'',{paket:forRup(r)});
+  if(!x.valid){
+   out.invalid++;out.excluded++;
+   out.rows.push({rup:r,status:'Nilai RUP tidak valid',level:3,valid:false,pagu:null,used:null,free:null,linked:x.linked.length,note:'Periksa nilai pagu/angka penggunaan'});
+   x.linked.forEach(p=>linkedIds.add(String(p.id)));
+   continue;
+  }
+  out.validCount++;out.pagu+=x.batas;out.used+=x.allocated;
+  out.free+=Math.max(0,x.sisa);out.over+=Math.max(0,-x.sisa);
+  if(x.linked.length>1)out.shared++;
+  if(!x.linked.length)out.unused++;
+  out.draft+=x.cadangan;out.missingSplit+=x.tidakTerbagi;
+  out.overDetail+=x.melebihi;
+  if(x.totalPaguPaket>x.batas)out.needsAlign++;
+  x.linked.forEach(p=>linkedIds.add(String(p.id)));
+  const issues=[];
+  if(x.sisa<0)issues.push('Melebihi pagu RUP');
+  if(x.tidakTerbagi)issues.push('Konsolidasi belum dibagi');
+  if(x.melebihi)issues.push('Rincian melampaui pagu paket');
+  if(x.totalPaguPaket>x.batas)issues.push('Pagu paket perlu rekonsiliasi');
+  if(x.cadangan)issues.push('Ada cadangan sementara');
+  out.rows.push({rup:r,status:issues[0]||(x.linked.length?'Terhitung':'Belum digunakan'),
+   level:x.sisa<0||x.tidakTerbagi||x.melebihi?3:issues.length?2:0,
+   valid:true,pagu:x.batas,used:x.allocated,free:x.sisa,
+   linked:x.linked.length,note:issues.join(' · ')});
+ }
+ // Paket tanpa referensi RUP tidak boleh dimasukkan ke alokasi Bank RUP diam-diam.
+ out.unlinked=packages.filter(p=>!linkedIds.has(String(p.id))).length;
+ out.rows.sort((a,b)=>b.level-a.level||(b.linked-a.linked)||String(a.rup.rup).localeCompare(String(b.rup.rup),'id'));
+ out.issueCount=out.duplicated+out.invalid+out.unlinked+out.rows.filter(r=>r.valid&&r.level>0).length;
+ return out;
+}
+function satriaDashboardRupOverview(m){
+ const rupAmount=m.validCount?rp(m.pagu):'—';
+ const rupUse=m.validCount?rp(m.used):'—';
+ const rupFree=m.validCount?rp(m.free):'—';
+ const alerts=[];
+ if(m.excluded)alerts.push(m.excluded+' RUP tidak bisa dimasukkan ke total (duplikat / nilai tidak valid)');
+ if(m.over)alerts.push('Penggunaan terhitung melewati pagu pada beberapa RUP sebesar '+rp(m.over));
+ if(m.missingSplit)alerts.push(m.missingSplit+' tautan konsolidasi membutuhkan pembagian alokasi per RUP');
+ if(m.draft)alerts.push(m.draft+' penggunaan RUP masih menggunakan cadangan pagu paket sementara');
+ if(m.needsAlign)alerts.push(m.needsAlign+' RUP mempunyai total pagu paket tercatat lebih besar dari pagu sumber; perlu rekonsiliasi');
+ if(m.unlinked)alerts.push(m.unlinked+' paket belum memiliki referensi Bank RUP yang cocok');
+ const top=m.rows.slice(0,12);
+ return `<div class="card satria-rup-dashboard" data-dash-rup-summary="1">
+   <div class="row" style="justify-content:space-between;gap:12px;align-items:center"><h3>Kontrol Pagu Bank RUP • TA ${esc(String(m.tahun))}</h3><a href="#input" class="satria-rup-dash-link">Buka Input RUP</a></div>
+   <p class="mut">Satu kode RUP dihitung satu kali per OPD dan tahun. Angka penggunaan mengikuti aturan Input RUP: rincian lengkap (volume × HPS satuan), cadangan untuk rincian belum lengkap, dan pembagian eksplisit konsolidasi multi-RUP. Semua paket yang terhubung, termasuk arsip, turut dihitung. Ini <b>bukan realisasi belanja</b>. Tampilan mengikuti data lokal/cloud yang terakhir dimuat, bukan validasi transaksi serentak di Supabase.</p>
+   <div class="satria-rup-dash-stats">
+     <div><span>Pagu RUP unik</span><b>${rupAmount}</b><small>${m.validCount} dari ${m.rupCount} referensi valid</small></div>
+     <div><span>Penggunaan terhitung</span><b>${rupUse}</b><small>HPS lengkap / cadangan / pembagian</small></div>
+     <div><span>Sisa kapasitas RUP</span><b>${rupFree}</b><small>Saldo masing-masing RUP, bukan kas</small></div>
+     <div><span>RUP dipakai berulang</span><b>${m.shared}</b><small>RUP dengan 2 paket atau lebih</small></div>
+     <div><span>RUP belum digunakan</span><b>${m.unused}</b><small>Termasuk dalam pagu RUP unik</small></div>
+     <div><span>Perlu pemeriksaan</span><b>${m.issueCount}</b><small>Indikator kualitas, bukan keputusan otomatis</small></div>
+   </div>
+   ${!m.rupCount?'<p class="mut">Belum ada Bank RUP pada OPD dan tahun yang dipilih. Pagu paket dan HPS tetap tersedia di analitik paket, tetapi saldo RUP tidak dapat disimpulkan.</p>':''}
+   ${alerts.length?`<div class="satria-rup-alerts"><b>Perlu perhatian operator:</b><ul>${alerts.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>`:'<p class="mut">Tidak ditemukan anomali berdasarkan pemeriksaan saldo Bank RUP lokal untuk filter ini.</p>'}
+   ${top.length?`<div class="table-wrap"><table class="satria-rup-dash-table"><thead><tr><th>RUP</th><th>Paket terkait</th><th class="n">Pagu RUP</th><th class="n">Terhitung</th><th class="n">Sisa</th><th>Status</th></tr></thead><tbody>${top.map(x=>`<tr><td><b>${esc(x.rup.rup||'-')}</b><small style="display:block;white-space:normal">${esc(x.rup.nama||'')}</small></td><td>${x.linked} paket</td><td class="n">${x.valid?rp(x.pagu):'—'}</td><td class="n">${x.valid?rp(x.used):'—'}</td><td class="n ${x.free<0?'bad':''}">${x.valid?rp(x.free):'—'}</td><td style="white-space:normal"><b class="${x.level===3?'bad':x.level===2?'warn':'mut'}">${esc(x.status)}</b>${x.note?`<small style="display:block">${esc(x.note)}</small>`:''}</td></tr>`).join('')}</tbody></table></div>
+   <p class="mut" style="margin-top:8px">Ditampilkan ${top.length} dari ${m.rows.length} RUP, mendahulukan yang perlu diperiksa. Periksa semua RUP dan ubah rincian melalui menu Input RUP / Paket Pengadaan. Dashboard tidak mengubah data.</p>`:''}
+ </div>`;
 }
 function satriaRupPeriksaAlokasiPaket(p,nominal,forcedMap){
  const amount=Number(nominal);
@@ -4664,21 +4766,32 @@ function satriaDashChartYears(el){
  const any=data.some(r=>r.count>0);if(!any){satriaDashEmpty(el,'Belum ada paket untuk OPD/tahun yang dapat Anda akses.');return}
  el.replaceChildren();const W=760,H=302,ml=76,mr=18,mt=24,mb=45,ih=H-mt-mb;
  const top=Math.max(1,...data.map(x=>Math.max(x.pagu,x.committed,x.hpsTotal)))*1.12;
- const svg=satriaDashSvg('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Grafik anggaran, HPS, dan nilai penetapan per tahun',preserveAspectRatio:'xMidYMid meet'});
+ const svg=satriaDashSvg('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Grafik pagu paket tercatat, HPS, dan nilai penetapan per tahun',preserveAspectRatio:'xMidYMid meet'});
  const scaleY=v=>mt+ih-Math.max(0,v)/top*ih;const cell=(W-ml-mr)/data.length;
  for(let i=0;i<=4;i++){const amount=top*i/4,cy=scaleY(amount);svg.append(satriaDashSvg('line',{x1:ml,y1:cy,x2:W-mr,y2:cy,stroke:'#d9deec','stroke-dasharray':'4 5'}));svg.append(satriaDashSvg('text',{x:ml-8,y:cy+4,'text-anchor':'end',class:'s348-axis'},satriaDashCompact(amount)))}
  const cols=['pagu','hpsTotal','committed'],colors=[SATRIA_CHART_COLORS.pagu,SATRIA_CHART_COLORS.hps,SATRIA_CHART_COLORS.set];
- data.forEach((d,i)=>{const base=ml+i*cell, bw=Math.min(25,cell/4-4), mid=base+cell/2;cols.forEach((key,k)=>{const xx=mid+(k-1)*(bw+3)-bw/2,y=scaleY(d[key]);const rect=satriaDashSvg('rect',{x:xx,y,width:bw,height:Math.max(0,H-mb-y),fill:colors[k],rx:3});rect.append(satriaDashSvg('title',{},`TA ${d.year} • ${['Pagu','HPS','Penetapan'][k]} ${satriaDashFormat(d[key])}`));svg.append(rect)});svg.append(satriaDashSvg('text',{x:mid,y:H-19,'text-anchor':'middle',class:'s348-axis'},d.year))});
- el.append(svg);satriaDashLegend('legendMultiYear',[['Pagu',colors[0]],['HPS',colors[1]],['Nilai penetapan',colors[2]]]);
+ data.forEach((d,i)=>{const base=ml+i*cell, bw=Math.min(25,cell/4-4), mid=base+cell/2;cols.forEach((key,k)=>{const xx=mid+(k-1)*(bw+3)-bw/2,y=scaleY(d[key]);const rect=satriaDashSvg('rect',{x:xx,y,width:bw,height:Math.max(0,H-mb-y),fill:colors[k],rx:3});rect.append(satriaDashSvg('title',{},`TA ${d.year} • ${['Pagu Paket','HPS','Penetapan'][k]} ${satriaDashFormat(d[key])}`));svg.append(rect)});svg.append(satriaDashSvg('text',{x:mid,y:H-19,'text-anchor':'middle',class:'s348-axis'},d.year))});
+ el.append(svg);satriaDashLegend('legendMultiYear',[['Pagu paket tercatat',colors[0]],['HPS',colors[1]],['Nilai penetapan',colors[2]]]);
 }
 function satriaDashLegend(id,items){const el=document.getElementById(id);if(!el)return;el.replaceChildren();items.forEach(([t,c])=>{const e=satriaDashE('span','s348-legend',t);e.style.setProperty('--s348-dot',c);el.append(e)})}
 function satriaDashChartBudget(el,m){
- if(!m.count){satriaDashEmpty(el,'Belum ada paket pada filter OPD/tahun aktif.');satriaDashLegend('legendDonut',[]);return}
- el.replaceChildren();const parts=[{label:'Nilai penetapan tervalidasi',value:Math.min(m.pagu,m.committed),color:SATRIA_CHART_COLORS.set},{label:'Sisa pagu paket ditetapkan',value:m.remainingSettled,color:SATRIA_CHART_COLORS.pagu},{label:'Pagu paket belum ditetapkan',value:m.unassigned,color:SATRIA_CHART_COLORS.pending}];
- const wrap=satriaDashE('div','s348-donut-wrap');const circle=satriaDashE('div','s348-donut');const center=satriaDashE('div','s348-donut-core');center.append(satriaDashE('small','','PAGU'),satriaDashE('b','',satriaDashCompact(m.pagu)));circle.append(center);
- if(m.pagu>0){let a=0;const arcs=parts.map(p=>{const start=a;a+=p.value/m.pagu*100;return `${p.color} ${Math.max(0,start).toFixed(3)}% ${Math.min(100,a).toFixed(3)}%`});circle.style.background=`conic-gradient(${arcs.join(',')})`}else circle.style.background='#d9deec';
- wrap.append(circle);el.append(wrap);satriaDashLegend('legendDonut',parts.map(p=>[`${p.label}: ${satriaDashFormat(p.value)}`,p.color]));
- if(m.overPagu>0)el.append(satriaDashE('p','s348-warning',`Peringatan: nilai penetapan melebihi pagu sebesar ${satriaDashFormat(m.overPagu)}.`));
+ const rup=satriaDashboardRupMetrics();
+ if(!rup.validCount){satriaDashEmpty(el,rup.rupCount?'Data Bank RUP perlu diperbaiki sebelum saldo ditampilkan.':'Belum ada Bank RUP pada tahun/OPD yang dipilih.');satriaDashLegend('legendDonut',[]);return}
+ el.replaceChildren();
+ // Bagi setiap RUP: total kapasitas terisi yang dapat diakui + sisa nonnegatif;
+ // kelebihan pada satu RUP tidak boleh mengurangi saldo RUP lainnya.
+ const within=Math.max(0,rup.pagu-rup.free);
+ const parts=[{label:'Terhitung di dalam batas RUP',value:within,color:SATRIA_CHART_COLORS.set},
+   {label:'Sisa kapasitas RUP',value:rup.free,color:SATRIA_CHART_COLORS.pagu}];
+ const wrap=satriaDashE('div','s348-donut-wrap');const circle=satriaDashE('div','s348-donut');
+ const center=satriaDashE('div','s348-donut-core');center.append(satriaDashE('small','','PAGU RUP'),satriaDashE('b','',satriaDashCompact(rup.pagu)));circle.append(center);
+ if(rup.pagu>0){let a=0;const arcs=parts.map(p=>{const start=a;a+=p.value/rup.pagu*100;return `${p.color} ${Math.max(0,start).toFixed(3)}% ${Math.min(100,a).toFixed(3)}%`});circle.style.background=`conic-gradient(${arcs.join(',')})`}
+ else circle.style.background='#d9deec';
+ wrap.append(circle);el.append(wrap);
+ satriaDashLegend('legendDonut',parts.map(p=>[`${p.label}: ${satriaDashFormat(p.value)}`,p.color]));
+ if(rup.over)el.append(satriaDashE('p','s348-warning',`Penggunaan melebihi pagu pada RUP tertentu: ${satriaDashFormat(rup.over)}. Tidak dikompensasikan dengan saldo RUP lain.`));
+ if(rup.excluded)el.append(satriaDashE('p','s348-warning',`${rup.excluded} referensi RUP duplikat / tidak valid dikecualikan dari total sementara.`));
+ if(rup.draft||rup.missingSplit)el.append(satriaDashE('p','s348-caption','Angka penggunaan bersifat estimasi dan mencakup cadangan sementara atau pembagian konsolidasi.'));
 }
 function satriaDashChartGap(el,m){
  const data=m.packages.filter(p=>p.approved&&p.hps>0).sort((a,b)=>b.gap-a.gap).slice(0,8);
@@ -4712,7 +4825,7 @@ function satriaDashChartOpd(el,m){
  if(!m.count){satriaDashEmpty(el,'Belum ada paket pada filter OPD/tahun aktif.');return}
  const by=new Map();for(const p of m.packages){if(!by.has(p.opd))by.set(p.opd,{name:O(p.opd).singkat||O(p.opd).nama||p.opd,pagu:0,amount:0,count:0});const o=by.get(p.opd);o.pagu+=p.pagu;o.amount+=p.amount;o.count++}
  const data=[...by.values()].sort((a,b)=>b.pagu-a.pagu).slice(0,8);const max=Math.max(1,...data.map(o=>o.pagu));el.replaceChildren();
- const caption=satriaDashE('p','s348-caption','Pagu (ungu) dan nilai penetapan tervalidasi (hijau) per OPD.');el.append(caption);
+ const caption=satriaDashE('p','s348-caption','Pagu paket tercatat (ungu) dan nilai penetapan tervalidasi (hijau) per OPD; bukan pagu unik Bank RUP.');el.append(caption);
  for(const rowdata of data){const row=satriaDashE('div','s348-bar-row');const head=satriaDashE('div','s348-bar-head');head.append(satriaDashE('span','',`${rowdata.name} • ${rowdata.count} paket`),satriaDashE('b','',satriaDashFormat(rowdata.pagu)));row.append(head);
   for(const [v,color] of [[rowdata.pagu,SATRIA_CHART_COLORS.pagu],[rowdata.amount,SATRIA_CHART_COLORS.set]]){const rail=satriaDashE('div','s348-bar-rail'),fill=satriaDashE('div','s348-bar-fill');fill.style.width=v/max*100+'%';fill.style.background=color;rail.append(fill);row.append(rail)}el.append(row)
  }
