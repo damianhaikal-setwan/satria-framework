@@ -2842,10 +2842,10 @@ function vInputRup(){
  ${list.length?`<div class="satria-rup-grid">${list.map(r=>{const status=satriaRupStatusAnggaran(r),linked=status.linked,existing=linked[0];const available=status.valid&&status.sisa>0;return `<article class="satria-rup-card"><div><small>RUP ${esc(r.rup)} · TA ${r.tahun} · ${esc(O(r.opd).singkat||O(r.opd).nama)}</small><h3>${esc(r.nama)}</h3><p><b>Pagu RUP ${rp(r.pagu)}</b> · ${esc(r.metodePemilihan||'Metode belum tercatat')}</p><div class="satria-rup-budget-status" role="status"><div><b>Terhitung terpakai: ${rp(status.allocated)}</b> · <b class="${status.sisa<0?'bad':available?'ok':'warn'}">Sisa berdasarkan rincian: ${rp(status.sisa)}</b></div><small>${linked.length} paket: ${status.otomatis} dihitung otomatis dari rincian, ${status.cadangan-status.linked.filter(satriaSpseIs).length} cadangan sementara, ${status.linked.filter(satriaSpseIs).length} monitoring SPSE${status.tidakTerbagi?', '+status.tidakTerbagi+' konsolidasi tanpa pembagian':''}.</small>${status.totalPaguPaket>status.batas?'<small class="warn">Pagu paket yang masih tercatat berjumlah '+rp(status.totalPaguPaket)+' (lebih tinggi dari pagu RUP). Periksa dan gunakan tombol Samakan pagu paket dengan rincian sebelum menerbitkan dokumen baru.</small>':''}${status.melebihi?'<small class="bad">Ada paket yang rincian/HPS-nya melebihi pagu paket. Periksa paket terkait.</small>':''}${status.sisa<0?'<small class="bad">Jumlah terpakai melebihi pagu RUP. Periksa rincian dan sumber anggaran.</small>':''}<small class="mut">Rincian HPS e-Purchasing adalah estimasi; alokasi SPSE adalah cadangan pagu monitoring. Keduanya bukan realisasi pembayaran. Pagu sumber Bank RUP tidak berubah.</small></div>${linked.length?`<div class="satria-rup-linked-list" style="margin-top:10px;border-top:1px solid var(--bd);padding-top:8px"><b style="font-size:12px">Paket yang memakai RUP ini:</b>${linked.map(p=>{const u=satriaRupPenggunaanPaket(p),v=satriaRupBagianPagu(p,r);const multi=satriaRupLinks(p).length>1;return `<div style="padding:7px 0;border-bottom:1px solid var(--bd);font-size:12px"><div><b>${esc(p.nama||p.id)}</b></div><div>Terhitung ${rp(v)} · ${multi?'Pembagian konsolidasi':satriaSpseIs(p)?'Monitoring SPSE (alokasi)':u.mode==='otomatis'?'Otomatis dari rincian lengkap':u.mode==='cadangan'?'Cadangan sementara (rincian belum lengkap)':'Rincian melebihi pagu paket'} · Pagu paket tercatat ${rp(p.pagu)}</div><div class="row" style="gap:5px;margin-top:5px"><button type="button" class="g" data-act="rupopen" data-id="${esc(p.id)}" style="height:31px;padding:0 10px">Buka rincian</button>${!multi&&u.mode==='otomatis'&&u.nilai!==Number(p.pagu)?`<button type="button" class="g" data-act="rupalign" data-id="${esc(p.id)}" style="height:31px;padding:0 10px">Samakan pagu paket dengan rincian</button>`:''}</div></div>`}).join('')}</div>`:''}</div><div class="satria-rup-create-budget" style="margin-top:10px"><label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px">Cadangan pagu paket baru (opsional, Rp)</label><input type="number" data-rup-budget-input="${esc(r.id)}" min="1" max="${Math.max(0,status.sisa)}" step="1" inputmode="numeric" placeholder="Kosongkan untuk memakai sisa ${esc(nf(Math.max(0,status.sisa)))}" aria-label="Cadangan pagu paket baru RUP ${esc(r.rup)}" ${available?'':'disabled'} style="width:100%;max-width:370px"><small class="mut" style="display:block;margin-top:5px">Saat rincian paket baru lengkap, penggunaan otomatis dihitung dari volume × HPS. Sebelum lengkap, cadangan pagu ini digunakan sementara.</small></div><div class="row" style="gap:8px;flex-wrap:wrap;margin-top:9px"><button type="button" data-act="rupcreate" data-id="${esc(r.id)}" ${available?'':'disabled'}>${existing?'Buat paket lagi':'Buat paket dari RUP'}</button>${existing?`<button type="button" class="g" data-act="rupopen" data-id="${esc(existing.id)}">Buka paket terkait (${linked.length})</button>`:''}<button type="button" class="g" data-act="rupremove" data-id="${esc(r.id)}">Hapus dari bank</button></div>${!available?'<small class="warn">Belum ada sisa RUP. Pastikan semua rincian paket telah lengkap dan sesuai; jangan mengurangi angka yang sudah disahkan tanpa pemeriksaan.</small>':''}</article>`}).join('')}</div>`:'<div class="satria-empty-state"><strong>Belum ada RUP pada daftar ini.</strong><p>Impor data SiRUP terlebih dahulu atau ubah filter OPD/pencarian.</p></div>'}</div>`;
 }
 
-function vPaket(){const demoJumlah=satriaSubDemoJumlah();const demoNotice=demoJumlah?`<div class="card satria-sub-demo-warning" role="alert"><b>Perlu koreksi: ${demoJumlah} referensi subkegiatan berisi kode contoh bawaan SATRIA.</b><p>Kode KODE-DEMO-001 bukan subkegiatan paket nyata. Sumber asli dan isian subkegiatan lain tetap dipertahankan.</p><button type="button" data-act="satriaFixDemoSub">Bersihkan kode contoh pada paket/Bank RUP</button></div>`:'';return `<div class="row satria-page-heading"><div><h2>Paket Pengadaan TA ${S.ui.tahun}</h2><p class="mut">Daftar paket mengikuti filter OPD dan tahun aktif.</p></div><button type="button" data-act="newpaket">+ Pilih RUP dari Bank</button></div>${demoNotice}<div class="card satria-paket-card"><div class="row satria-paket-toolbar"><label for="qPaket">Cari paket</label><input id="qPaket" type="search" autocomplete="off" placeholder="Cari kode RUP atau nama paket…" value="${esc(S.ui.q||'')}" aria-controls="paketTableResult"/><select id="pLife" aria-label="Filter kelengkapan data paket" style="max-width:200px">${[["all","Semua kelengkapan"],["draf","Draf · belum ada kode RUP"],["berjalan","Berjalan · data belum lengkap"],["lengkap","Lengkap"],["arsip","Diarsipkan"]].map(([v,l])=>`<option value="${v}" ${(S.ui.plife||"all")===v?"selected":""}>${l}</option>`).join("")}</select><span class="satria-result-count">${paketListForView().length} paket</span></div><div id="paketTableResult" aria-live="polite">${paketListMarkup()}</div></div>`}
+function vPaket(){const demoJumlah=satriaSubDemoJumlah();const demoNotice=demoJumlah?`<div class="card satria-sub-demo-warning" role="alert"><b>Perlu koreksi: ${demoJumlah} referensi subkegiatan berisi kode contoh bawaan SATRIA.</b><p>Kode KODE-DEMO-001 bukan subkegiatan paket nyata. Sumber asli dan isian subkegiatan lain tetap dipertahankan.</p><button type="button" data-act="satriaFixDemoSub">Bersihkan kode contoh pada paket/Bank RUP</button></div>`:'';return `<div class="row satria-page-heading"><div><h2>Paket Pengadaan TA ${S.ui.tahun}</h2><p class="mut">Daftar paket mengikuti filter OPD dan tahun aktif.</p></div><button type="button" data-act="newpaket">+ Pilih RUP dari Bank</button></div>${demoNotice}${satriaHumanPaketOverview()}<div class="card satria-paket-card"><div class="row satria-paket-toolbar"><label for="qPaket">Cari paket</label><input id="qPaket" type="search" autocomplete="off" placeholder="Cari kode RUP atau nama paket…" value="${esc(S.ui.q||'')}" aria-controls="paketTableResult"/><select id="pLife" aria-label="Filter kelengkapan data paket" style="max-width:200px">${[["all","Semua kelengkapan"],["draf","Draf · belum ada kode RUP"],["berjalan","Berjalan · data belum lengkap"],["lengkap","Lengkap"],["arsip","Diarsipkan"]].map(([v,l])=>`<option value="${v}" ${(S.ui.plife||"all")===v?"selected":""}>${l}</option>`).join("")}</select><span class="satria-result-count">${paketListForView().length} paket</span></div><div id="paketTableResult" aria-live="polite">${paketListMarkup()}</div></div>`}
 
 function readiness(p){const reuse=S.paket.filter(x=>x.id!==p.id&&rupBankKey(x)===rupBankKey(p)&&String(p.rup||'').trim()).length;const H=hps(p);
-const C=[['Kode RUP',!!p.rup],['Pagu',p.pagu>0],['Rincian barang',p.items.length>0],['HPS ≤ pagu',H>0&&H<=p.pagu],['Penawaran',p.penawaran.length>0],['Pemenang',!!pemenang(p)],['Tgl DPP',!!p.tglDpp],['PPK aktif',PJ(p.ppk).aktif!==false],['Tgl BA Hasil',!!p.tglBahp]];
+const C=[['Kode RUP',!!p.rup],['Pagu',p.pagu>0],['Rincian barang',p.items.length>0],['HPS ≤ pagu',H>0&&H<=p.pagu],['Penawaran',p.penawaran.length>0],['Pemenang',!!pemenang(p)],['Tgl DPP',!!p.tglDpp],['PPK aktif',!!p.ppk && S.pejabat.some(x=>String(x.id)===String(p.ppk)&&String(x.opd)===String(p.opd)&&x.aktif!==false)],['Tgl BA Hasil',!!p.tglBahp]];
 return `<div class=row style="margin-bottom:10px">${C.map(([t,ok])=>`<span class=pill style="background:${ok?'#dff5e8':'#fde3e0'}">${ok?'✔':'✖'} ${t}</span>`).join('')}</div>${reuse?'<p class=mut>ℹ Kode RUP ini juga digunakan '+reuse+' paket lain. Periksa alokasi pagu dan nomor dokumen tiap paket agar tidak dihitung/diterbitkan ganda.</p>':''}`}
 function vDetail(p){
  if(!p)return '<div class=card>Paket tidak ditemukan.</div>';
@@ -2863,7 +2863,7 @@ function vDetail(p){
  const tabs=[['data','Data Paket'],['rincian','Rincian Kebutuhan dan HPS'],['nego','Penawaran dan Negosiasi']];
  return `<div class="row satria342-detail-heading" style="justify-content:space-between"><div><a href="#paket">← Daftar paket</a><h2 style="margin:6px 0">${esc(p.nama)}</h2>${pill(p)} <span class=mut>TA ${p.tahun} · ${esc(O(p.opd).singkat)} · No. ${p.seq}</span></div>
  <div class=row><button class=g data-act="copy" data-id="${p.id}">Salin ke TA ${p.tahun+1}</button><button class=d data-act="delpaket" data-id="${p.id}">Hapus</button></div></div>
- <div class="card satria342-detail-workspace" style="margin-top:16px">${warn}${readiness(p)}${quickFix}<div class="row satria342-workflow-tabs" role="group" aria-label="Tahap pekerjaan paket">${tabs.map(([k,t])=>`<button type="button" class="${k===dl?'satria342-tab-current':'g'}" data-act="ptab" data-tab="${k}" data-step="${k}" aria-pressed="${k===dl}">${t}</button>`).join('')}</div><div class="satria342-stage-content">${body}</div></div>`;
+ <div class="card satria342-detail-workspace" style="margin-top:16px">${warn}${satriaHumanWorkflow(p)}<details class="satria-human-technical"><summary>Periksa kelengkapan teknis & data yang perlu diperbaiki</summary><div class="satria-human-technical-inner">${readiness(p)}${quickFix}</div></details><div class="row satria342-workflow-tabs" role="group" aria-label="Tahap pekerjaan paket">${tabs.map(([k,t])=>`<button type="button" class="${k===dl?'satria342-tab-current':'g'}" data-act="ptab" data-tab="${k}" data-step="${k}" aria-pressed="${k===dl}">${t}</button>`).join('')}</div><div class="satria342-stage-content">${body}</div></div>`;
 }
 function klfVal(pg,b){return {kode:pg[b+'Kode']??'',nama:pg[b+'Nama']??pg[b]??''}}
 function klfLines(kode,nama){const kd=String(kode).split('\n'),nm=String(nama).split('\n');const out=[];for(let i=0;i<Math.max(kd.length,nm.length);i++){const t=[(kd[i]||'').trim(),(nm[i]||'').trim()].filter(Boolean).join(' ');if(t)out.push(t)}return out}
@@ -12701,4 +12701,100 @@ function satriaOpsCsv(type){
 window.SATRIA_OPS_V2=Object.freeze({visiblePaket:satriaOpsVisiblePaket,alerts:satriaOpsAlerts,finances:satriaOpsFinances,health:satriaOpsHealth});
 
 </script>
+
+<style id="satria-human-first-20261103">
+/* Human-first 1.0. Baca saja; seluruh proses simpan, alokasi, dan dokumen tetap asli. */
+.satria-human-panel{border:1px solid var(--bd-strong);border-radius:15px;padding:16px 18px;margin:13px 0 18px;background:var(--card-solid);box-shadow:var(--shadow-xs);color:var(--ink)}
+.satria-human-head{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+.satria-human-head h3{font-size:15px;margin:0 0 4px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800}
+.satria-human-head p{font-size:12px;color:var(--mut);margin:0;line-height:1.5}
+.satria-human-progress{display:flex;align-items:center;gap:10px;min-width:145px;max-width:280px}
+.satria-human-progress strong{white-space:nowrap;font-size:12px;color:var(--ink)}
+.satria-human-track{height:9px;flex:1;background:var(--bg-3);border-radius:20px;overflow:hidden}
+.satria-human-track>span{display:block;height:100%;background:var(--acc);border-radius:20px}
+.satria-human-primary{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:12px 0 8px;padding:12px 13px;border-radius:12px;background:var(--card-2);flex-wrap:wrap}
+.satria-human-primary p{margin:4px 0 0;color:var(--mut);font-size:12px;line-height:1.45}
+.satria-human-primary button{height:auto;min-height:38px;padding:8px 12px;white-space:normal;text-align:center;flex:0 1 auto}
+.satria-human-steps{margin-top:9px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.satria-human-step{padding:9px 10px;border:1px solid var(--bd);border-radius:10px;min-width:0;display:flex;align-items:start;gap:8px}
+.satria-human-step span{font-size:16px;line-height:1.2}
+.satria-human-step b{font-size:11px;font-weight:700;display:block;line-height:1.4}
+.satria-human-step small{display:block;font-size:10px;color:var(--mut);line-height:1.35;margin-top:2px}
+.satria-human-note{margin-top:10px!important;color:var(--mut);font-size:11px!important;line-height:1.45!important}
+.satria-human-technical{margin:10px 0 15px;border:1px solid var(--bd);background:var(--card-2);border-radius:12px;padding:8px 12px}
+.satria-human-technical>summary{cursor:pointer;font-weight:700;font-size:12px;padding:5px 0;color:var(--ink-2)}
+.satria-human-technical-inner{padding-top:12px}
+.satria-human-overview{border-color:var(--bd);background:var(--card-solid)}
+.satria-human-overview-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.satria-human-overview-item{display:flex;flex-direction:column;gap:4px;padding:12px;border:1px solid var(--bd);border-radius:12px;text-decoration:none!important;color:var(--ink)!important;background:var(--card-2);min-width:0}
+.satria-human-overview-item:hover,.satria-human-overview-item:focus-visible{border-color:var(--acc)}
+.satria-human-overview-item b{font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.satria-human-overview-item small{font-size:11px;color:var(--mut);line-height:1.4}
+.satria-human-overview-item span{font-size:11px;color:var(--acc);font-weight:750}
+@media(max-width:760px){.satria-human-panel{padding:13px}.satria-human-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.satria-human-overview-list{grid-template-columns:1fr}.satria-human-primary button{width:100%}}
+@media print{.satria-human-panel,.satria-human-technical{display:none!important}}
+</style>
+
+<script id="satria-human-first-flow-20261103">
+/* Read-only workflow guidance. No new business fields, no cloud write, no automatic decisions. */
+function satriaHumanStage(p){
+  const items=Array.isArray(p?.items)?p.items:[];
+  const offers=Array.isArray(p?.penawaran)?p.penawaran:[];
+  const qty=items.length;
+  const itemValid=i=>String(i?.nama||'').trim()&&Number(i?.vol)>0&&Number(i?.hs)>0;
+  const identity=!!String(p?.nama||'').trim()&&!!String(p?.rup||'').trim()&&Number(p?.pagu)>0&&!!p?.opd;
+  const rincian=qty>0&&items.every(itemValid)&&hps(p)>0&&hps(p)<=Number(p.pagu||0);
+  const validPrice=(w,id)=>Number(w?.harga?.[id])>0;
+  const hasReference=(w,id)=>{
+    const ref=w?.catalogRefs?.[id];
+    return !!(ref&&Number(ref.displayPrice)>0&&String(ref.link||'').trim());
+  };
+  const coverage=qty&&items.filter(i=>offers.some(w=>hasReference(w,i.id))).length||0;
+  const survey=qty>0&&coverage===qty;
+  const ppk=(S.pejabat||[]).some(x=>String(x.id)===String(p?.ppk)&&String(x.opd)===String(p.opd)&&x.aktif!==false);
+  const dpp=!!String(p?.tglDpp||'').trim()&&ppk&&rincian;
+  const negotiated=qty>0&&offers.some(w=>items.every(i=>validPrice(w,i.id)&&Number(w?.nego?.[i.id])>0));
+  const award=!!pemenang(p);
+  const stages=[
+    {key:'identity',label:'Data Paket & RUP',done:identity,desc:identity?'Identitas dan pagu tercatat':'Periksa identitas, OPD, kode RUP, dan pagu',page:'paket',tab:'data',focus:!p?.rup?'rup':!(Number(p?.pagu)>0)?'pagu':''},
+    {key:'items',label:'Rincian & HPS',done:rincian,desc:rincian?'Rincian terisi; HPS dalam pagu':'Lengkapi barang, volume, dan HPS satuan',page:'paket',tab:'rincian'},
+    {key:'survey',label:'Referensi Harga',done:survey,desc:survey?`${coverage}/${qty} barang memiliki referensi bertaut`:`${coverage}/${qty} barang memiliki referensi bertaut`,page:'paket',tab:'nego'},
+    {key:'dpp',label:'Persiapan DPP',done:dpp,desc:dpp?'Tanggal dan PPK tercatat; periksa pratinjau':'Lengkapi tanggal DPP dan PPK, lalu periksa dokumen',page:(!ppk||!p.tglDpp)?'paket':'dok',tab:'data',focus:!ppk?'ppk':!p.tglDpp?'tglDpp':'',doc:'dpp'},
+    {key:'nego',label:'Harga Negosiasi',done:negotiated,desc:negotiated?'Harga hasil negosiasi tercatat':'Catat hasil nego, termasuk bila di atas HPS',page:'paket',tab:'nego'},
+    {key:'award',label:'Evaluasi & Penetapan',done:award,desc:award?'Pemenang memenuhi pemeriksaan aplikasi':'Tinjau kelayakan, jangan tetapkan otomatis',page:'paket',tab:'nego'}
+  ];
+  return {stages,done:stages.filter(x=>x.done).length,next:stages.find(x=>!x.done)||null};
+}
+function satriaHumanWorkflow(p){
+ if(!p||satriaSpseIs(p))return '';
+ const info=satriaHumanStage(p),step=info.next,count=info.stages.length;
+ const ctl=step?`<button type="button" data-human-nav="${esc(step.page)}" data-pid="${esc(p.id)}" data-tab="${esc(step.tab||'data')}" data-doc="${esc(step.doc||'')}" data-focus="${esc(step.focus||'')}">Buka ${esc(step.label)} →</button>`:'<span class="pill">Semua data indikator terisi</span>';
+ return `<section class="satria-human-panel" aria-label="Panduan pekerjaan paket"><div class="satria-human-head"><div><h3>✦ Lanjutkan pekerjaan paket ini</h3><p>Petunjuk dari data yang sudah ada. Tidak perlu mengisi ulang atau mengikuti langkah berurutan secara kaku.</p></div><div class="satria-human-progress"><strong>${info.done}/${count} indikator</strong><div class="satria-human-track" aria-label="${info.done} dari ${count} indikator" role="progressbar" aria-valuemin="0" aria-valuemax="${count}" aria-valuenow="${info.done}"><span style="width:${Math.round(100*info.done/count)}%"></span></div></div></div><div class="satria-human-primary"><div><b>${step?'Saran berikutnya: '+esc(step.label):'Data indikator telah terisi'}</b><p>${step?esc(step.desc):'Periksa bukti dan keputusan pejabat sebelum menerbitkan dokumen resmi.'}</p></div>${ctl}</div><div class="satria-human-steps">${info.stages.map(x=>`<div class="satria-human-step"><span aria-hidden="true">${x.done?'✓':'○'}</span><div><b>${esc(x.label)}</b><small>${esc(x.desc)}</small></div></div>`).join('')}</div><p class="satria-human-note">Indikator ini bukan persetujuan dokumen, verifikasi keabsahan katalog, realisasi pembayaran, atau keputusan pemenang. Harga di atas HPS boleh dicatat untuk evaluasi. Untuk SPSE gunakan Pusat Monitoring.</p></section>`;
+}
+function satriaHumanPaketOverview(){
+  const list=paketListForView().filter(p=>!satriaSpseIs(p)&&!p.arsip);
+  if(!list.length)return '';
+  const todo=[];for(const p of list){if(satriaHumanStage(p).next)todo.push(p);if(todo.length===4)break;}
+  return `<section class="satria-human-panel satria-human-overview" aria-label="Paket yang perlu ditindaklanjuti"><div class="satria-human-head"><div><h3>✦ Mulai dari pekerjaan yang perlu dilanjutkan</h3><p>Pilih paket di bawah. SATRIA menunjukkan data yang belum lengkap, bukan memutuskan hasil pengadaan.</p></div><span class="pill">${list.length} paket dalam filter</span></div>${todo.length?`<div class="satria-human-overview-list">${todo.map(p=>{const x=satriaHumanStage(p);return `<a class="satria-human-overview-item" href="#paket/${encodeURIComponent(p.id)}"><b>${esc(p.nama||p.rup||p.id)}</b><small>RUP ${esc(p.rup||'-')} · ${x.done}/${x.stages.length} indikator</small><span>Lanjutkan: ${esc(x.next.label)} →</span></a>`}).join('')}</div>`:`<p class="satria-human-note">Tidak ada indikator pekerjaan tertunda pada paket dalam filter. Tinjau dokumen dan bukti secara manual sebelum keputusan resmi.</p>`}</section>`;
+}
+document.addEventListener('click',function(e){
+ const el=e.target.closest?.('[data-human-nav]');if(!el)return;
+ e.preventDefault();
+ const pid=String(el.dataset.pid||'');const p=P(pid);
+ const scope=activeCloudScope();
+ if(!p||satriaSpseIs(p)||(scope&&(!scope.opdIds.includes(String(p.opd))||!scope.years.includes(Number(p.tahun))))){toast('Paket ini tidak tersedia dalam cakupan akun.');return;}
+ S.ui.tahun=Number(p.tahun);S.ui.opd=String(p.opd);
+ if(el.dataset.humanNav==='dok'){
+   S.ui.dpid=pid;S.ui.dok=el.dataset.doc||'dpp';S.ui.page='dok';
+   if(location.hash!=='#dok')location.hash='#dok';else render();
+ }else{
+   S.ui.pid=pid;S.ui.ptab=el.dataset.tab||'data';S.ui.page='paket';
+   const path='#paket/'+encodeURIComponent(pid);
+   if(location.hash!==path)location.hash=path;else render();
+   const f=el.dataset.focus||'';
+   if(f)setTimeout(()=>{const node=[...document.querySelectorAll('[data-col="paket"][data-f]')].find(x=>String(x.dataset.id)===pid&&x.dataset.f===f);if(node){node.scrollIntoView({block:'center'});node.focus({preventScroll:true})}},130);
+ }
+});
+</script>
+
 </body></html>
