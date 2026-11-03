@@ -12523,7 +12523,32 @@ function satriaSpseFields(root,attr){const data={};root.querySelectorAll(`[${att
 function satriaSpseNewModel(){return {schema:1,tenderCode:'',method:'Tender',phase:'Persiapan',source:'Input manual berdasarkan informasi SPSE',sourceAsOf:'',supplier:'',contractNo:'',contractDate:'',contractStart:'',contractEnd:'',contractValue:0,physicalProgress:null,addenda:[],payments:[],issues:[],stages:SATRIA_SPSE_STAGES.map(([key,title])=>({key,title,planStart:'',planEnd:'',actual:'',note:''})),updatedAt:'',updatedBy:'',auditTrail:[]}}
 function satriaSpseStatusBadge(label){const c=label==='Terlambat'?'bad':label==='Mendekati batas'?'warn':label==='Selesai'?'ok':'mut';return `<span class="spse-chip ${c}">${esc(label)}</span>`}
 function satriaSpseKpi(label,value,desc){return `<div class="spse-kpi"><small>${esc(label)}</small><strong>${esc(value)}</strong><span>${esc(desc)}</span></div>`}
-function satriaSpseSelectRup(){const scope=activeCloudScope(),year=Number(S.ui.tahun);return (S.rupBank||[]).filter(r=>Number(r.tahun)===year&&(S.ui.opd==='all'||String(S.ui.opd)===String(r.opd))&&(!scope||(scope.years.includes(year)&&scope.opdIds.includes(String(r.opd))))).map(r=>({r,b:satriaRupStatusAnggaran(r)})).filter(x=>x.b.valid&&x.b.sisa>0)}
+/* Indexed lookup: same satriaRupStatusAnggaran rules, without scanning every Paket for every RUP.
+   Build per invocation (not global cache), so edits, sync and multioperator snapshots are reflected. */
+function satriaSpseSelectRup(){
+ const scope=activeCloudScope(),year=Number(S.ui.tahun);
+ const bank=(S.rupBank||[]).filter(r=>Number(r.tahun)===year&&
+   (S.ui.opd==='all'||String(S.ui.opd)===String(r.opd))&&
+   (!scope||(scope.years.includes(year)&&scope.opdIds.includes(String(r.opd)))));
+ if(!bank.length)return [];
+ const byId=new Map(),byLegacy=new Map();
+ for(const p of (S.paket||[])){
+   const refs=satriaRupLinks(p);
+   if(refs.length){
+     for(const id of refs){let xs=byId.get(id);if(!xs){xs=[];byId.set(id,xs)}xs.push(p)}
+   }else{
+     const key=rupBankKey(p);let xs=byLegacy.get(key);if(!xs){xs=[];byLegacy.set(key,xs)}xs.push(p);
+   }
+ }
+ const result=[];
+ for(const r of bank){
+   const linked=[...(byId.get(String(r.id))||[]),...(byLegacy.get(rupBankKey(r))||[])];
+   // Preserve the original capacity calculation and conservative fallback for multi-RUP.
+   const b=satriaRupStatusAnggaran(r,'',{paket:linked});
+   if(b.valid&&b.sisa>0)result.push({r,b});
+ }
+ return result;
+}
 function satriaSpseListView(){const L=satriaSpseRows();const x=satriaSpseMetrics(L);const can=canWrite();const opts=satriaSpseSelectRup();const q=String(S.ui.spseSearch||'').trim().toLowerCase();const vis=!q?L:L.filter(p=>[p.nama,p.rup,p.spseMonitoring.tenderCode,p.spseMonitoring.method].some(v=>String(v||'').toLowerCase().includes(q)));
  return `<section class="spse-page"><div class="spse-hero"><div><b class="spse-eyebrow">✦ SATRIA • MONITORING SAJA</b><h2>Monitoring SPSE & Kontrak</h2><p>Catat informasi yang terjadi di SPSE. SATRIA tidak mengubah proses pemilihan, jadwal resmi, atau penetapan penyedia di SPSE.</p></div><a class="spse-hero-link" href="#brief">Executive Briefing ↗</a></div>
  <div class="spse-kpis">${satriaSpseKpi('Paket SPSE',String(x.count),'Berdasarkan filter tahun dan OPD')}${satriaSpseKpi('Alokasi dari RUP',rp(x.allocation),'Pagu paket monitoring; bukan pagu RUP unik')}${satriaSpseKpi('Nilai kontrak kini',rp(x.contract),'Kontrak awal + perubahan addendum')}${satriaSpseKpi('Pembayaran terverifikasi',rp(x.paid),'Dicatat manual, bukan otomatis dari SPSE')}${satriaSpseKpi('Tahapan terlambat',String(x.late),'Tanggal akhir rencana terlewati')}${satriaSpseKpi('Kendala terbuka',String(x.openIssues),'Untuk tindak lanjut operator')}</div>
