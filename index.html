@@ -1744,7 +1744,69 @@ header button[data-act="export"]{
  #satria-print-root .doc[data-document-type="bahp"] .bahp-reference-layout.bahp-many .bahp-info-line{font-size:8pt!important;line-height:1.09!important}
  #satria-print-root .doc[data-document-type="bahp"] .bahp-reference-layout.bahp-many .bahp-signatures{margin-top:3px!important}
 }
-</style></head>
+</style>
+<style id="satria-dpp-appendix-four-products-20261103">
+/* Khusus lampiran DPP: maksimal empat kartu per A4 dengan ruang teks adaptif.
+   Tidak memengaruhi DPP utama, lampiran RFI/Survei, Smart Survey, atau tanda tangan. */
+.doc[data-document-type="dpp"] .satria51-photo-grid,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-photo-grid {
+  gap:2mm!important;
+}
+.doc[data-document-type="dpp"] .satria51-photo-card,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-photo-card {
+  grid-template-columns:40mm minmax(0,1fr)!important;
+  column-gap:3mm!important;
+  padding:1.8mm!important;
+  min-height:0!important;
+  break-inside:avoid!important;
+  page-break-inside:avoid!important;
+}
+.doc[data-document-type="dpp"] img.satria51-product-image,
+#satria-print-root .doc[data-document-type="dpp"] img.satria51-product-image {
+  max-height:36mm!important;
+  max-width:40mm!important;
+}
+.doc[data-document-type="dpp"] .satria51-photo-caption,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-photo-caption {
+  font-size:7pt!important;
+  margin-top:1mm!important;
+}
+.doc[data-document-type="dpp"] .satria51-photo-fields .satria51-product-title,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-photo-fields .satria51-product-title {
+  font-size:8.2pt!important;
+  line-height:1.12!important;
+  margin-bottom:1.3mm!important;
+}
+.doc[data-document-type="dpp"] .satria51-photo-fields .satria51-field,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-photo-fields .satria51-field {
+  font-size:7.65pt!important;
+  line-height:1.13!important;
+  margin-bottom:0.55mm!important;
+}
+.doc[data-document-type="dpp"] .satria51-sheet-title,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-sheet-title {
+  margin-bottom:2mm!important;
+}
+.doc[data-document-type="dpp"] .satria51-sheet-meta,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-sheet-meta {
+  font-size:8pt!important;
+  margin-bottom:2mm!important;
+}
+.doc[data-document-type="dpp"] .satria51-appendix-note,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-appendix-note {
+  font-size:7.5pt!important;
+  margin-top:2mm!important;
+}
+@media print {
+  #satria-print-root .doc[data-document-type="dpp"] .satria51-sheet{
+    break-before:page!important;
+    page-break-before:always!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+  }
+}
+</style>
+</head>
 <body>
 <div class="bg-blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
 <div class="noise"></div>
@@ -10706,20 +10768,35 @@ window.SATRIA_SURVEY_SIMPLE=Object.freeze({getMode:()=>mode,summary:refresh,sess
     return rows;
   };
   const groups51 = (entries,mode='dpp') => {
-    // DPP A4 portrait: tiga kartu ringkas muat dalam satu lembar lampiran.
-    // RFI/Survei tetap dua kartu; entri yang panjang mendapat halaman sendiri
-    // agar teks/foto tidak terpotong saat cetak. Hanya tata letak yang berubah.
+    // DPP: maksimal empat referensi per lembar A4. Pengelompokan mempertimbangkan
+    // perkiraan panjang teks; entri yang panjang dipindahkan ke lembar berikutnya.
+    // RFI dan Survei tetap memakai aturan asli (dua referensi per lembar).
     const pages=[];
     let current=[];
-    const pageLimit=mode==='dpp'?3:2;
+    let estimatedMm=0;
+    const dppPageBudgetMm=238; // konservatif: ruang header, footer, catatan dan margin A4
+    const extraLines=(text,chars)=>Math.max(0,Math.ceil(String(text||'').length/chars)-1);
+    const dppCardMm=item=>{
+      const extra=extraLines(item.product,57)*2.7
+        +extraLines(item.item?.nama,79)*2.6
+        +extraLines(item.spec,125)*2.4
+        +extraLines(item.link,93)*2.5;
+      return 51+extra;
+    };
     for(const item of entries){
-      const long=mode==='dpp'
-        ? (String(item.spec||'').length>260||String(item.product||'').length>140||
-           String(item.link||'').length>190||String(item.item?.nama||'').length>140)
-        : (String(item.spec||'').length>250||String(item.product||'').length>125);
+      if(mode==='dpp'){
+        const cost=dppCardMm(item);
+        if(current.length&&(current.length>=4||estimatedMm+cost>dppPageBudgetMm)){
+          pages.push(current);current=[];estimatedMm=0;
+        }
+        current.push(item);estimatedMm+=cost;
+        if(current.length>=4){pages.push(current);current=[];estimatedMm=0;}
+        continue;
+      }
+      const long=String(item.spec||'').length>250||String(item.product||'').length>125;
       if(long&&current.length){pages.push(current);current=[];}
       current.push(item);
-      if(current.length>=pageLimit||long){pages.push(current);current=[];}
+      if(current.length>=2||long){pages.push(current);current=[];}
     }
     if(current.length)pages.push(current);
     return pages;
