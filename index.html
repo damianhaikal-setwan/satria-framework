@@ -1831,6 +1831,20 @@ header button[data-act="export"]{
 <style id="satria-spse-monitor-style">
 .spse-page{display:flex;flex-direction:column;gap:16px}.spse-hero{display:flex;justify-content:space-between;align-items:center;gap:15px;background:linear-gradient(115deg,#133c42,#0f766e,#075b7b);color:#fff;border-radius:18px;padding:24px}#main .spse-page .spse-hero h2{color:#fff!important;margin:6px 0 8px}.spse-hero p{font-size:12px;color:#d8f4f0;max-width:740px;margin:0}.spse-eyebrow{font-size:10px;letter-spacing:.12em;color:#cffafe}.spse-hero-link{color:#164e63!important;background:#fff;padding:10px 12px;border-radius:10px;font-size:12px;font-weight:800;white-space:nowrap}.spse-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}.spse-kpi{background:var(--card-solid);border:1px solid var(--bd);border-radius:12px;padding:14px;min-width:0;overflow-wrap:anywhere}.spse-kpi small,.spse-kpi span{display:block;font-size:10px;color:var(--mut);line-height:1.4}.spse-kpi strong{display:block;font:800 clamp(14px,1.6vw,21px)/1.35 system-ui;margin:6px 0;overflow-wrap:anywhere}.spse-formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin:14px 0}.spse-formgrid label{font-size:12px;font-weight:700;color:var(--ink-2);display:flex;flex-direction:column;gap:5px}.spse-formgrid input,.spse-formgrid select{width:100%;max-width:100%;min-width:0}.spse-tabs{display:flex;gap:8px;flex-wrap:wrap}.spse-tabs button{font-size:12px;height:auto;min-height:39px}.spse-tabs .spse-active{background:#0f766e;color:#fff;border:1px solid #0f766e}.spse-tablewrap{overflow-x:auto;max-width:100%;margin:12px 0;border:1px solid var(--bd);border-radius:12px}.spse-tablewrap table{width:100%;border-collapse:collapse;min-width:760px}.spse-tablewrap th,.spse-tablewrap td{white-space:normal;padding:9px;vertical-align:top;font-size:12px;line-height:1.35}.spse-tablewrap td small{display:block;color:var(--mut);margin:4px 0}.spse-tablewrap input{min-width:130px;max-width:220px;font-size:12px!important}.spse-tablewrap button{font-size:10px;padding:4px 8px;height:30px;margin:1px}.spse-chip{font-size:10px;font-weight:700;border-radius:9999px;background:var(--bg-2);color:var(--mut);padding:4px 7px;display:inline-block}.spse-chip.bad{color:#9f1239;background:#ffe4e6}.spse-chip.warn{color:#854d0e;background:#fef3c7}.spse-chip.ok{color:#065f46;background:#d1fae5}.spse-note,.spse-footer{font-size:11px;line-height:1.65;color:var(--mut);padding:10px 14px;background:var(--card-2);border:1px solid var(--bd);border-radius:10px}.spse-toolbar{display:flex;gap:9px;flex-wrap:wrap}.spse-page .card:hover{transform:none}.spse-page a{color:var(--acc)}@media(max-width:640px){.spse-hero{padding:17px;flex-direction:column;align-items:stretch}.spse-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.spse-formgrid{grid-template-columns:1fr}.spse-hero-link{align-self:flex-start}.spse-page{gap:12px}}
 </style>
+<style id="satria-laporan-integrasi-layout-20261103">
+/* Audit: KPI laporan tetap ringkas, terpisah dari grid dashboard lama. */
+.satria-lap-metrics{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important;margin:14px 0 18px!important}
+.satria-lap-metrics>.satria-lap-metric{min-width:0!important;min-height:118px!important;margin:0!important;padding:16px!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important;gap:7px!important;grid-column:auto!important}
+.satria-lap-metric .satria-lap-label{display:block;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--mut)}
+.satria-lap-metric .satria-lap-value{display:block;font-size:clamp(16px,1.7vw,23px);font-weight:800;line-height:1.3;overflow-wrap:anywhere;color:var(--ink)}
+.satria-lap-metric .satria-lap-note{display:block;font-size:11px;line-height:1.35;color:var(--mut)}
+.satria-lap-table-scroll{display:block!important;max-width:100%!important;overflow-x:auto!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}
+.satria-lap-table-scroll #lapTable{min-width:1720px!important;table-layout:auto!important;width:max-content!important}
+.satria-lap-table-scroll #lapTable :is(th,td){white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;padding:10px 12px!important}
+
+@media(max-width:1030px){.satria-lap-metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:640px){.satria-lap-metrics{grid-template-columns:minmax(0,1fr)!important}}
+</style>
 </head>
 <body>
 <div class="bg-blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
@@ -3779,24 +3793,81 @@ function vDok(){
   `;
 }
 
-function vLap(){
- let rows='';
- S.tahun.forEach(t=>S.opd.forEach(o=>{const x=S.paket.filter(p=>!satriaSpseIs(p)&&p.tahun==t&&p.opd===o.id);if(!x.length)return;
-  const pg=sum(x,p=>p.pagu),k=sum(x,kontrak);
-  rows+=`<tr><td>${t}</td><td>${esc(o.singkat)}</td><td class=n>${x.length}</td><td class=n>${rp(pg)}</td><td class=n>${rp(sum(x,hps))}</td><td class=n>${rp(k)}</td><td class=n>${rp(pg-k)}</td><td class=n>${pg?((pg-k)/pg*100).toFixed(2):0}%</td></tr>`}));
- const rowCount = (rows.match(/<tr>/g)||[]).length;
- return `<div class=card><div class=row style="justify-content:space-between;flex-wrap:wrap;gap:12px"><h3>Laporan dan Analisis • Multi OPD dan Multi Tahun</h3><div style="display:flex;gap:8px"><span class="count-badge">${rowCount} baris • ${rowCount>30?'virtual scroll aktif':''}</span><button class=g data-act="csv">Ekspor Laporan (CSV)</button></div></div>
- <div class="table-wrap" id="lapTableWrap" style="max-height:${rowCount>30?'min(68vh, 640px)':'none'};overflow:auto;contain:layout;-webkit-overflow-scrolling:touch">
- <table id="lapTable"><thead style="position:sticky;top:0;z-index:1;background:var(--bg-2)"><tr><th>TA</th><th>OPD</th><th class=n>Paket</th><th class=n>Pagu</th><th class=n>HPS</th><th class=n>Nilai Penetapan</th><th class=n>Selisih HPS–Nego</th><th class=n>%</th></tr></thead><tbody>${rows||'<tr><td colspan=8 class=mut>Belum ada data.</td></tr>'}</tbody></table>
- </div>
- ${rowCount>30?'<div class="satria-virtual-footer" style="margin-top:8px"><span>'+rowCount+' baris • virtual scroll aktif • hemat 80% di Android</span><span class="mut">Scroll untuk lihat semua</span></div>':''}
- </div>`;
+/* SATRIA AUDIT 2026-11-03 — Laporan & Analisis menggunakan indikator yang sejenis.
+   Pagu RUP unik tidak dijumlahkan ulang per paket. Penetapan e-Purchasing
+   bukan pembayaran SPSE; selisih HPS hanya dihitung untuk paket yang terpilih. */
+function satriaLaporanData(){
+ const byGroup=new Map();
+ const selectedOpd=String(S.ui.opd||'all');
+ const bankIds=new Set((S.rupBank||[]).map(r=>String(r.id)));
+ const bankKeys=new Set((S.rupBank||[]).map(r=>rupBankKey(r)));
+ const scope=activeCloudScope();
+ const allowed=(opd,year)=>(selectedOpd==='all'||String(opd)===selectedOpd)&&(!scope||(scope.opdIds.includes(String(opd))&&scope.years.includes(Number(year))));
+ function group(t,o){const id=String(t)+'|'+String(o);if(!byGroup.has(id))byGroup.set(id,{tahun:Number(t),opd:String(o),rup:0,terpakai:0,sisa:0,rupValid:0,rupPerluCek:0,ep:0,spse:0,paguPaket:0,hps:0,penetapan:0,hematHps:0,epTerpilih:0,nilaiKontrak:0,bayar:0,spseTerlambat:0,spseMasalah:0,paketTanpaRup:0,kontrakPerluCek:0});return byGroup.get(id)}
+ // Reuse the audited Bank RUP engine, including legacy links and multi-RUP splits.
+ const years=new Set([...(S.tahun||[]).map(Number),...(S.rupBank||[]).map(r=>Number(r.tahun)),...(S.paket||[]).map(p=>Number(p.tahun))]);
+ for(const year of years){if(!Number.isInteger(year))continue;
+  const metrics=satriaDashboardRupMetrics(year);
+  for(const item of metrics.rows){const r=item.rup;if(!r||!allowed(r.opd,year))continue;const g=group(year,r.opd);
+   if(!item.valid){g.rupPerluCek++;continue}
+   g.rupValid++;g.rup+=item.pagu;g.terpakai+=item.used;g.sisa+=item.free;
+   if(item.level>0)g.rupPerluCek++;
+  }
+ }
+ for(const p of S.paket||[]){if(!allowed(p.opd,p.tahun))continue;
+  const g=group(p.tahun,p.opd);g.paguPaket+=Number(p.pagu)||0;
+  const links=satriaRupLinks(p);if(links.length?!links.every(id=>bankIds.has(id)):!bankKeys.has(rupBankKey(p)))g.paketTanpaRup++;
+  if(satriaSpseIs(p)){
+    g.spse++;const m=p.spseMonitoring||{};
+    const cv=satriaSpseContractValue(m);
+    // Do not report a draft contract value as contracted without a contract number.
+    if(cv>0&&String(m.contractNo||'').trim())g.nilaiKontrak+=cv;
+    g.bayar+=satriaSpsePayments(m,true);
+    if((cv>0&&!String(m.contractNo||'').trim())||satriaSpsePayments(m,true)>Math.max(0,cv))g.kontrakPerluCek++;
+    g.spseTerlambat+=(m.stages||[]).filter(x=>satriaSpseStageAlert(x)==='Terlambat').length;
+    g.spseMasalah+=(m.issues||[]).filter(x=>x.status!=='Selesai').length;
+  }else{
+    g.ep++;const hp=hps(p);g.hps+=hp;
+    // This is an award/selected supplier estimate, not an executed contract.
+    const selected=pemenang(p);
+    if(selected){const val=Number(selected.t)||0;g.penetapan+=val;g.hematHps+=hp-val;g.epTerpilih++}
+  }
+ }
+ return [...byGroup.values()].sort((a,b)=>a.tahun-b.tahun||a.opd.localeCompare(b.opd,'id'));
 }
-
+function satriaLaporanCsvCell(value){
+ // Prevent CSV/spreadsheet formula injection in imported organization/package names.
+ let v=String(value??'').replace(/\r\n?/g,' ').replace(/\n/g,' ');
+ if(/^[\s\uFEFF]*[=+@-]/.test(v))v="'"+v;
+ return '"'+v.replace(/"/g,'""')+'"';
+}
+function satriaLaporanDownloadCsv(filename,headers,rows){
+ const lines=[headers,...rows].map(row=>row.map(satriaLaporanCsvCell).join(','));
+ const url=URL.createObjectURL(new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}));
+ const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+function vLap(){
+ const data=satriaLaporanData(), totals=data.reduce((a,g)=>{for(const k of ['rup','terpakai','sisa','ep','spse','paguPaket','hps','penetapan','hematHps','nilaiKontrak','bayar','rupPerluCek','paketTanpaRup','kontrakPerluCek'])a[k]=(a[k]||0)+g[k];return a},{});
+ const cards=[['Pagu RUP unik',totals.rup||0,'Tidak dijumlahkan berulang per paket'],['Penggunaan RUP terhitung',totals.terpakai||0,'Rincian HPS / cadangan / konsolidasi'],['Sisa kapasitas RUP',totals.sisa||0,'Bukan saldo kas / realisasi'],['Kontrak SPSE tercatat',totals.nilaiKontrak||0,'Nilai kontrak dan addendum dengan nomor kontrak'],['Pembayaran SPSE terverifikasi',totals.bayar||0,'Bukan progres fisik; tidak termasuk e-Purchasing'],['Nilai penetapan E-Purchasing',totals.penetapan||0,'Bukan nilai kontrak atau pembayaran']];
+ const rows=data.map(g=>`<tr><td>${g.tahun}</td><td>${esc(O(g.opd).singkat||g.opd)}</td><td class=n>${g.rupValid}</td><td class=n>${rp(g.rup)}</td><td class=n>${rp(g.terpakai)}</td><td class=n>${rp(g.sisa)}</td><td class=n>${g.ep}</td><td class=n>${g.spse}</td><td class=n>${rp(g.hps)}</td><td class=n>${rp(g.penetapan)}</td><td class=n>${rp(g.hematHps)}</td><td class=n>${rp(g.nilaiKontrak)}</td><td class=n>${rp(g.bayar)}</td><td class=n>${g.rupPerluCek}</td><td class=n>${g.spseTerlambat+g.spseMasalah}</td></tr>`).join('');
+ return `<section class="card" data-satria-laporan="integrated"><div class="row" style="justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><h3>Laporan dan Analisis • E-Purchasing + Monitoring SPSE</h3><div class="row" style="gap:8px"><button class="g" data-act="csv">Ekspor Ringkasan (CSV)</button><button class="g" data-act="csvDetail">Ekspor Paket (CSV)</button></div></div>
+ <p class="mut">Sumber: data SATRIA terakhir yang berhasil dimuat sesuai akses Anda, termasuk paket arsip. Nilai RUP adalah anggaran sumber, penggunaannya merupakan perhitungan HPS/cadangan, penetapan e-Purchasing bukan pembayaran, dan pembayaran SPSE hanya yang berstatus terverifikasi. Laporan tidak mengubah data. Informasi SPSE yang dicatat manual perlu dibandingkan dengan SPSE resmi.</p>
+ <div class="satria-lap-metrics">${cards.map(([l,v,d])=>`<div class="card satria-lap-metric"><span class="satria-lap-label">${esc(l)}</span><b class="satria-lap-value">${rp(v)}</b><small class="satria-lap-note">${esc(d)}</small></div>`).join('')}</div>
+ <p class="mut">Total ${totals.ep||0} paket e-Purchasing, ${totals.spse||0} paket SPSE, ${totals.rupPerluCek||0} kelompok RUP perlu perhatian, ${totals.paketTanpaRup||0} paket dengan referensi RUP tidak ditemukan, ${totals.kontrakPerluCek||0} catatan kontrak/pembayaran SPSE perlu periksa. Selisih HPS–penetapan hanya dihitung untuk paket e-Purchasing dengan pemenang terpilih; selisih negatif tetap dilaporkan. Total tidak digunakan sebagai bukti realisasi anggaran.</p>
+ <div class="table-wrap satria-lap-table-scroll" style="max-height:68vh;overflow:auto"><table id="lapTable"><thead><tr><th>TA</th><th>OPD</th><th>RUP valid</th><th>Pagu RUP unik</th><th>Terpakai terhitung</th><th>Sisa RUP</th><th>Paket E-P</th><th>Paket SPSE</th><th>HPS E-P</th><th>Penetapan E-P</th><th>Selisih HPS–penetapan</th><th>Kontrak SPSE</th><th>Bayar terverifikasi</th><th>RUP perlu cek</th><th>Isu/jadwal SPSE</th></tr></thead><tbody>${rows||'<tr><td colspan="15" class="mut">Belum ada paket atau Bank RUP untuk cakupan ini.</td></tr>'}</tbody></table></div><small class="mut">Geser tabel secara horizontal untuk melihat seluruh indikator kontrak dan pembayaran SPSE. Laporan dirinci menurut TA + OPD. Pagu Bank RUP unik mengikuti aturan Input RUP; duplikat dan pagu tidak valid dikecualikan serta ditandai untuk pemeriksaan.</small></section>`;
+}
 function csvExport(){
- const head=['TA','OPD','No','Nama paket','Sub kegiatan','Pagu','HPS','Kontrak','Status'];
- const body=S.paket.filter(p=>!satriaSpseIs(p)).map(p=>[p.tahun,O(p.opd).singkat,p.seq,p.nama,p.sub,p.pagu,hps(p),kontrak(p),stt(p)].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
- const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([[head.join(','),...body].join('\n')],{type:'text/csv'}));a.download='satria-business-intelligence.csv';a.click();
+ const rows=satriaLaporanData();
+ const fields=['tahun','opd','rupValid','rup','terpakai','sisa','ep','spse','hps','penetapan','hematHps','nilaiKontrak','bayar','rupPerluCek','spseTerlambat','spseMasalah','paketTanpaRup','kontrakPerluCek'];
+ const headers=['TA','OPD','RUP valid','Pagu RUP unik','Penggunaan terhitung','Sisa kapasitas RUP','Paket e-Purchasing','Paket SPSE','HPS e-Purchasing','Nilai penetapan e-Purchasing','Selisih HPS-penetapan','Kontrak SPSE tercatat','Pembayaran SPSE terverifikasi','RUP perlu cek','Tahapan SPSE terlambat','Kendala SPSE terbuka','Paket referensi RUP tidak ditemukan','Kontrak/pembayaran SPSE perlu periksa'];
+ satriaLaporanDownloadCsv('satria-laporan-ringkasan.csv',headers,rows.map(g=>fields.map(k=>k==='opd'?O(g.opd).singkat||g.opd:g[k])));
+}
+function satriaLaporanCsvDetail(){
+ const scope=activeCloudScope();
+ const list=(S.paket||[]).filter(p=>(S.ui.opd==='all'||String(p.opd)===String(S.ui.opd))&&(!scope||(scope.opdIds.includes(String(p.opd))&&scope.years.includes(Number(p.tahun)))));
+ const head=['TA','OPD','ID Paket','RUP','Jalur','Nama paket','Pagu paket tercatat','HPS e-Purchasing','Nilai penetapan e-Purchasing','Nilai kontrak SPSE','Bayar SPSE terverifikasi','Status'];
+ const rows=list.map(p=>{const sp=satriaSpseIs(p),m=p.spseMonitoring||{};return [p.tahun,O(p.opd).singkat||p.opd,p.id,p.rup,sp?'SPSE':'E-Purchasing',p.nama,p.pagu,sp?'':hps(p),sp?'':(pemenang(p)?kontrak(p):''),sp?satriaSpseContractValue(m):'',sp?satriaSpsePayments(m,true):'',sp?(m.status||'Belum diisi'):stt(p)]});
+ satriaLaporanDownloadCsv('satria-laporan-paket.csv',head,rows);
 }
 
 /* ===== MASTER & PENGATURAN ===== */
@@ -4512,6 +4583,7 @@ document.addEventListener('click',e=>{
  if(a==='reset'){if(!confirm('PERINGATAN: seluruh data aktif—paket, master, pengaturan, pengguna, dan penawaran—akan diganti dengan data awal. Unduh backup JSON terlebih dahulu. Lanjutkan?'))return;if(!confirm('Konfirmasi terakhir: ganti seluruh data aktif dengan data awal SATRIA?'))return;init();sync('settings','Data direset ke data awal');route();toast('Data awal dimuat ulang. Periksa konfigurasi dan unduh backup setelah pengisian.');return}
  if(a==='print')return window.print();
  if(a==='csv')return csvExport();
+ if(a==='csvDetail')return satriaLaporanCsvDetail();
  if(a==='export'){const o={...S};delete o.ui;delete o.log;delete o.dirty;delete o.chat;const u=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:'application/json'}));const l=document.createElement('a');l.href=u;l.download='SATRIA-backup-'+new Date().toISOString().slice(0,10)+'.json';l.click();S.dirty=false;return render()}
 });
 let paketSearchTimer=null;
@@ -4608,15 +4680,41 @@ document.addEventListener('change',e=>{
 window.addEventListener('hashchange',route);window.addEventListener('beforeunload',e=>{if(S.dirty){e.preventDefault();e.returnValue=''}});
 /* ===== PENYIMPANAN: Dexie.js (IndexedDB) atau memori sesi ===== */
 let DB=null,ENGINE='memory',pTimer=null,persistRevision=0,lastPersistedRevision=0;
+let satriaLocalBaseStamp=null,satriaLocalConflict=false;
 function dbInit(){if(typeof Dexie==='undefined')return false;try{DB=new Dexie('satria-framework-db');DB.version(1).stores({kv:'k'});ENGINE='dexie';return true}catch(e){console.warn('Dexie gagal dibuka',e);return false}}
 function normalizeData(){S.rupBank=Array.isArray(S.rupBank)?S.rupBank:[];S.pemda={nama:'',kota:'',provinsi:'',sumber:'',...(S.pemda||{})};S.penomoran={...SEED.penomoran,...(S.penomoran||{})};S.opd=S.opd||[];S.paket=(S.paket||[]).map(p=>({...p,seq:(Number.isInteger(+p.seq)&&+p.seq>0)?+p.seq:0,items:(p.items||[]).map(i=>({spesifikasi:'',merek:'',pdn:'Perlu verifikasi',linkProduk:'',...i})),penawaran:(p.penawaran||[]).map(w=>({sumberHarga:'',tanggalHarga:'',ongkir:0,catatan:'',...w,harga:w.harga||{},nego:w.nego||{}})),jenisPengadaan:p.jenisPengadaan||'Barang',metodePemilihan:p.metodePemilihan||'E-Purchasing dengan Negosiasi Harga',lokasiPengiriman:p.lokasiPengiriman||O(p.opd).tempat||O(p.opd).alamat||'',tglSurvei:p.tglSurvei||'',tglEvaluasi:p.tglEvaluasi||'',tglNego:p.tglNego||'',tglPenetapan:p.tglPenetapan||''}));
  const maxSeqByScope=new Map();for(const p of S.paket){const key=String(p.tahun)+'|'+String(p.opd);if(Number.isInteger(+p.seq)&&+p.seq>0)maxSeqByScope.set(key,Math.max(maxSeqByScope.get(key)||0,+p.seq));}
  for(const p of S.paket){if(!p.seq){const key=String(p.tahun)+'|'+String(p.opd);const next=(maxSeqByScope.get(key)||0)+1;p.seq=next;maxSeqByScope.set(key,next)}}
  S.penyedia=(S.penyedia||[]).map(y=>({statusKatalog:'Perlu verifikasi',pdn:'Perlu verifikasi',tipe:'Perlu verifikasi',kbliSesuai:'Perlu verifikasi',daftarHitam:'Perlu verifikasi',...y,aktif:y.aktif!==false}));S.akun=(S.akun||[]).map(x=>({...x,aktif:x.aktif!==false}));S.unit=(S.unit||[]).map(x=>({...x,aktif:x.aktif!==false}));S.pejabat=(S.pejabat||[]).map(x=>({...x,aktif:x.aktif!==false}));S.kode=S.kode||[];S.tahun=[...new Set([...(S.tahun||[]).map(Number),...S.paket.map(p=>+p.tahun).filter(Number.isFinite)])].filter(Number.isInteger).sort((a,b)=>a-b);if(!S.tahun.length)S.tahun=[new Date().getFullYear()];}
 const persistable=()=>{const o={...S};['ui','log','dirty','chat','chatCtx'].forEach(k=>delete o[k]);return o};
-async function persistNowRaw(){if(ENGINE!=='dexie'||!DB)return false;const writingRevision=persistRevision;try{await DB.kv.put({k:'main',v:persistable(),at:Date.now()});lastPersistedRevision=Math.max(lastPersistedRevision,writingRevision);if(S.persistError){S.persistError='';const el=$('#dirty');if(el)el.title='Data tersimpan di browser. Backup JSON tetap perlu diunduh berkala.'}return true}catch(e){S.persistError='Data gagal disimpan ke IndexedDB. Jangan tutup halaman; unduh backup JSON dan periksa ruang penyimpanan browser.';console.error('Gagal menyimpan ke IndexedDB',e);const el=$('#dirty');if(el){el.textContent='⚠ Gagal menyimpan';el.title=S.persistError;el.style.background='#FEE2E2';el.style.color='#991B1B'}toast('GAGAL MENYIMPAN. Unduh backup JSON sekarang.');return false}}
+async function persistNowRaw(){
+ if(ENGINE!=='dexie'||!DB||satriaLocalConflict)return false;
+ const writingRevision=persistRevision,copy=persistable(),stamp=uid('local');
+ try{
+  // Dexie rw transaction = compare and swap across every tab sharing this DB.
+  // Do not silently replace another tab's committed snapshot.
+  await DB.transaction('rw',DB.kv,async()=>{
+   const old=await DB.kv.get('main');
+   const actual=old?(old.localStamp||'legacy:'+old.at):null;
+   if(actual!==satriaLocalBaseStamp)throw new Error('SATRIA_LOCAL_CONFLICT');
+   await DB.kv.put({k:'main',v:copy,at:Date.now(),localStamp:stamp});
+  });
+  satriaLocalBaseStamp=stamp;
+  lastPersistedRevision=Math.max(lastPersistedRevision,writingRevision);
+  S.persistError='';
+  window.SATRIA_NOTIFY_LOCAL_PERSISTED?.(stamp);
+  return true;
+ }catch(e){
+  satriaLocalConflict=String(e?.message||'').includes('SATRIA_LOCAL_CONFLICT');
+  S.persistError=satriaLocalConflict?'Tab lain telah menyimpan versi berbeda di browser ini. PENYIMPANAN LOKAL DIHENTIKAN agar perubahan tidak tertimpa. Ekspor backup perubahan Anda sebelum reload; bandingkan dengan data tab lain.':'Data gagal disimpan ke IndexedDB. Jangan tutup halaman; unduh backup JSON dan periksa penyimpanan browser.';
+  console.error('Gagal menyimpan ke IndexedDB',e);
+  const el=$('#dirty');if(el){el.textContent='⚠ Gagal menyimpan';el.title=S.persistError;el.style.background='#FEE2E2';el.style.color='#991B1B'}
+  toast(satriaLocalConflict?'KONFLIK ANTARTAB — backup dahulu!':'GAGAL MENYIMPAN — backup dahulu!');
+  return false;
+ }
+}
 function schedulePersist(){if(ENGINE!=='dexie'||!DB||!S?.dirty||persistRevision<=lastPersistedRevision)return;clearTimeout(pTimer);pTimer=setTimeout(()=>{void persistNow()},350)}
-async function loadSaved(){try{const r=await DB.kv.get('main');if(r&&r.v&&r.v.paket&&r.v.opd){const ui=S.ui;Object.assign(S,r.v,{ui,log:[],dirty:false,chat:[],chatCtx:null});normalizeData();if(!S.users.some(u=>u.id===ui.user))ui.user=S.users[0].id;if(!S.tahun.includes(ui.tahun))ui.tahun=S.tahun[0]}}catch(e){console.warn('Gagal memuat dari IndexedDB',e)}}
+async function loadSaved(){try{const r=await DB.kv.get('main');satriaLocalBaseStamp=r?(r.localStamp||'legacy:'+r.at):null;satriaLocalConflict=false;if(r&&r.v&&r.v.paket&&r.v.opd){const ui=S.ui;Object.assign(S,r.v,{ui,log:[],dirty:false,chat:[],chatCtx:null});normalizeData();if(!S.users.some(u=>u.id===ui.user))ui.user=S.users[0].id;if(!S.tahun.includes(ui.tahun))ui.tahun=S.tahun[0]}}catch(e){console.warn('Gagal memuat dari IndexedDB',e)}}
 function setEngineSelect(){const s=$('#selEngine');s.innerHTML=(DB?'<option value="dexie">IndexedDB (Dexie)</option>':'')+'<option value="memory">Memori sesi</option>';s.value=ENGINE;if(!DB){s.disabled=true;s.title='Dexie.js tidak termuat, memakai memori sesi'}}
 async function boot(){
   init();
@@ -4624,8 +4722,8 @@ async function boot(){
   const dbReady=dbInit();
   if(dbReady&&!hasCloudConfig)await loadSaved();
   if(dbReady&&hasCloudConfig){
-    // Keep the prior local cache to avoid silent data loss, but never read/render it when cloud config exists.
-    // The first authenticated pull replaces it; non-admin pull failures clear the active cache fail-closed.
+    // Only read the local commit marker; do NOT render any cached data before cloud auth/scope.
+    try{const r=await DB.kv.get('main');satriaLocalBaseStamp=r?(r.localStamp||'legacy:'+r.at):null}catch(e){console.warn('Marker cache lokal tidak terbaca',e)}
   }
   if(hasCloudConfig){
     // Do not render a cached admin snapshot before the authenticated principal/scope is known.
@@ -8585,7 +8683,7 @@ sync = function(k, label){
   lastSnap = now; snapRev = persistRevision; snapPaketRef = S.paket;
   logEvent(k, label);
   schedulePersist();
-  postSync(k);
+  // Cross-tab notice is sent ONLY after IndexedDB transaction commits.
 };
 
 const _render = render;
@@ -8630,25 +8728,37 @@ window.persistNow = function(){
   return run;
 };
 
-/* [26] Multi-tab sync lewat BroadcastChannel */
-const TAB_ID = uid();
-let channel = null;
+/* [26] Multi-tab sync: notify after commit; no unsafe snapshot overwrite. */
+const TAB_ID=uid();
+let channel=null;
 if('BroadcastChannel' in window){
-  channel = new BroadcastChannel('satria-framework-sync');
-  channel.onmessage = ev => {
-    const m = ev.data || {};
-    if(m.from === TAB_ID) return;
-    setTimeout(async () => {
-      if(S.dirty){ toast('Data diubah di tab lain. Simpan dulu lalu muat ulang halaman untuk menyelaraskan.'); return; }
-      if(ENGINE !== 'dexie' || !DB) return;
-      await loadSaved();
-      lastSnap = snapshotJson(); snapRev = persistRevision; snapPaketRef = S.paket;
-      dataRev++; render();
-      toast('Data disinkronkan dari tab lain');
-    }, 600);
-  };
+ channel=new BroadcastChannel('satria-framework-sync');
+ channel.onmessage=ev=>{
+  const m=ev.data||{};
+  if(m.from===TAB_ID||m.kind!=='persisted')return;
+  // Cloud users must refresh through authenticated, scoped Supabase pull/realtime.
+  if(window.SATRIA_CLOUD_CONFIGURED)return;
+  void (async()=>{
+   if(ENGINE!=='dexie'||!DB)return;
+   if(satriaLocalConflict||persistRevision>lastPersistedRevision){
+    toast('Ada perubahan di tab lain. Cadangkan isian tab ini sebelum memuat ulang.');return;
+   }
+   try{
+    const before=satriaLocalBaseStamp;
+    const row=await DB.kv.get('main');
+    const latest=row?(row.localStamp||'legacy:'+row.at):null;
+    if(!row||latest===before)return;
+    // Recheck after awaited read; edits made during the read must not be lost.
+    if(persistRevision>lastPersistedRevision)return;
+    await loadSaved();
+    lastSnap=snapshotJson();snapRev=persistRevision;snapPaketRef=S.paket;dataRev++;render();
+    toast('Data terbaru dari tab lain telah dimuat.');
+   }catch(e){console.warn('Sinkron tab SATRIA gagal:',e)}
+  })();
+ };
 }
-function postSync(kind){ channel?.postMessage({from: TAB_ID, kind, at: Date.now()}); }
+function postSync(kind,stamp){if(kind==='persisted')channel?.postMessage({from:TAB_ID,kind,stamp,at:Date.now()});}
+window.SATRIA_NOTIFY_LOCAL_PERSISTED=stamp=>postSync('persisted',stamp);
 
 /* [27] Idempotency: klik ganda pada aksi yang sama diabaikan */
 const lastClick = new Map();
