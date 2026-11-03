@@ -8283,13 +8283,16 @@ function vDokOptimized(){
         <button type="button" data-act="print" class="dok-print-button"><span class="dok-print-icon">↗</span><span><b>Cetak / Simpan PDF</b><small>A4 • Arial • Seluruh tabel</small></span></button>
       </section>
 
+      ${satriaHumanDocGuide(p,S.ui.dok,currentMissing)}
       <div class="satria-integrity-strip no-print" role="status"><span class="satria-integrity-icon">✦</span><div><b>Kualitas relasi data</b><small>${relationHealth.issues.length ? relationHealth.issues.length+' temuan yang perlu diperiksa sebelum finalisasi' : 'Referensi paket dan data master terhubung'}</small></div><button type="button" data-act="satriaAudit">Periksa data →</button></div>
       <div class="dok-print-standard no-print" role="note"><strong>Standar keluaran</strong><span>ISO A4</span><span>Arial</span><span>Portrait / Landscape otomatis</span><span>Tabel lengkap, termasuk lebih dari 20 baris</span><span>Simpan PDF: Skala 100%, tanpa header/footer browser</span></div>
 
+      <details class="satria-human-doc-library no-print" id="satriaHumanDocLibrary"><summary>Semua 14 template dokumen dan pemeriksaan isian • Buka bila diperlukan</summary>
       <section class="dok-library no-print">
         <div class="dok-library-heading"><div><span class="dok-section-kicker">02 / DOCUMENT LIBRARY</span><h3>Pilih dokumen</h3><p>Pilih salah satu kartu untuk membuka pratinjau. Status merangkum pemeriksaan isian di aplikasi, bukan validasi hukum.</p></div><div class="dok-library-counter"><strong>14</strong><span>template</span></div></div>
         ${groupsHtml}
       </section>
+      </details>
 
       <section class="dok-preview-section">
         <div class="dok-preview-heading no-print"><div><span class="dok-section-kicker">03 / LIVE PREVIEW</span><h3>Pratinjau dokumen</h3><p>${activeT[1]} · Paket ${esc(p.rup||'belum memiliki Kode RUP')}</p></div><span class="dok-preview-status ${currentMissing.length?'is-pending':'is-ready'}"><i></i>${currentMissing.length?currentMissing.length+' hal perlu dicek':'Isian dasar OK'}</span></div>
@@ -12524,6 +12527,7 @@ function satriaSpseSelectRup(){const scope=activeCloudScope(),year=Number(S.ui.t
 function satriaSpseListView(){const L=satriaSpseRows();const x=satriaSpseMetrics(L);const can=canWrite();const opts=satriaSpseSelectRup();const q=String(S.ui.spseSearch||'').trim().toLowerCase();const vis=!q?L:L.filter(p=>[p.nama,p.rup,p.spseMonitoring.tenderCode,p.spseMonitoring.method].some(v=>String(v||'').toLowerCase().includes(q)));
  return `<section class="spse-page"><div class="spse-hero"><div><b class="spse-eyebrow">✦ SATRIA • MONITORING SAJA</b><h2>Monitoring SPSE & Kontrak</h2><p>Catat informasi yang terjadi di SPSE. SATRIA tidak mengubah proses pemilihan, jadwal resmi, atau penetapan penyedia di SPSE.</p></div><a class="spse-hero-link" href="#brief">Executive Briefing ↗</a></div>
  <div class="spse-kpis">${satriaSpseKpi('Paket SPSE',String(x.count),'Berdasarkan filter tahun dan OPD')}${satriaSpseKpi('Alokasi dari RUP',rp(x.allocation),'Pagu paket monitoring; bukan pagu RUP unik')}${satriaSpseKpi('Nilai kontrak kini',rp(x.contract),'Kontrak awal + perubahan addendum')}${satriaSpseKpi('Pembayaran terverifikasi',rp(x.paid),'Dicatat manual, bukan otomatis dari SPSE')}${satriaSpseKpi('Tahapan terlambat',String(x.late),'Tanggal akhir rencana terlewati')}${satriaSpseKpi('Kendala terbuka',String(x.openIssues),'Untuk tindak lanjut operator')}</div>
+ ${satriaHumanSpseOverview(L)}
  ${can?`<div class="card spse-create"><h3>+ Mulai monitoring paket SPSE dari Bank RUP</h3><p class="mut">Pilih satu RUP yang telah terdaftar. Satu RUP dapat digunakan beberapa paket; alokasi baru harus masih tersedia. Nilai RUP asli tidak berubah.</p><div class="spse-formgrid"><label>RUP dari Bank RUP<select data-spse-new-rup><option value="">— Pilih RUP —</option>${opts.map(({r,b})=>`<option value="${esc(r.id)}">${esc(r.rup)} • ${esc(r.nama)} • sisa ${esc(rp(b.sisa))}</option>`).join('')}</select></label><label>Alokasi paket monitoring (Rp)<input type="number" min="1" step="1" data-spse-new-budget placeholder="Isi sesuai kebutuhan, bukan pagu otomatis"></label></div><button data-spse-action="create" ${!opts.length?'disabled':''}>+ Buat catatan SPSE</button>${!opts.length?'<p class="warn">Belum ada RUP yang memiliki sisa alokasi pada filter ini.</p>':''}</div>`:''}
  <div class="card"><div class="row" style="justify-content:space-between"><h3>Daftar paket yang dimonitor (${vis.length})</h3><a href="#brief">Lihat bahan briefing ↗</a></div><input type="search" data-spse-search value="${esc(S.ui.spseSearch||'')}" placeholder="Cari nomor RUP, tender, atau nama paket" style="width:100%" /><div class="spse-tablewrap"><table><thead><tr><th>Paket / RUP</th><th>Metode</th><th>Tahap</th><th>Alokasi</th><th>Kontrak</th><th>Dibayar</th><th>Perhatian</th><th></th></tr></thead><tbody>${vis.map(p=>{const m=p.spseMonitoring;const overdue=(m.stages||[]).filter(s=>satriaSpseStageAlert(s)==='Terlambat').length;return `<tr><td><b>${esc(p.nama)}</b><small>RUP ${esc(p.rup)} • ${esc(O(p.opd).singkat)} • TA ${esc(p.tahun)}</small></td><td>${esc(m.method)}</td><td>${esc(m.phase)}</td><td class="n">${rp(p.pagu)}</td><td class="n">${rp(satriaSpseContractValue(m))}</td><td class="n">${rp(satriaSpsePayments(m,true))}</td><td>${overdue?satriaSpseStatusBadge(overdue+' terlambat'):m.issues.some(i=>i.status!=='Selesai')?satriaSpseStatusBadge('Kendala'):satriaSpseStatusBadge('Dipantau')}</td><td><a href="#spse/${encodeURIComponent(p.id)}">Buka ↗</a></td></tr>`}).join('')||'<tr><td colspan="8">Belum ada paket monitoring SPSE. Data e-Purchasing lama tidak berubah.</td></tr>'}</tbody></table></div></div></section>`;
 }
@@ -12535,7 +12539,7 @@ function satriaSpseDetail(p){const m=p.spseMonitoring,tab=S.ui.spseTab||'ringkas
  if(tab==='kontrak')content=`<div class="card"><h3>Data kontrak</h3><div class="spse-formgrid"><label>Nomor kontrak<input data-spse-contract="contractNo" value="${esc(m.contractNo)}" ${!access?'disabled':''}></label><label>Tanggal kontrak<input type="date" data-spse-contract="contractDate" value="${esc(m.contractDate)}" ${!access?'disabled':''}></label><label>Penyedia kontrak (teks pencatatan)<input data-spse-contract="supplier" value="${esc(m.supplier)}" ${!access?'disabled':''}></label><label>Nilai kontrak awal (Rp)<input type="number" min="0" step="1" data-spse-contract="contractValue" value="${Number(m.contractValue||0)}" ${!access?'disabled':''}></label><label>Mulai pelaksanaan<input type="date" data-spse-contract="contractStart" value="${esc(m.contractStart)}" ${!access?'disabled':''}></label><label>Akhir kontrak<input type="date" data-spse-contract="contractEnd" value="${esc(m.contractEnd)}" ${!access?'disabled':''}></label><label>Progres fisik bila diketahui (%)<input type="number" min="0" max="100" data-spse-contract="physicalProgress" value="${m.physicalProgress==null?'':Number(m.physicalProgress)}" ${!access?'disabled':''}></label></div><p><b>Nilai kontrak kini:</b> ${rp(cv)} • <b>Alokasi pagu:</b> ${rp(p.pagu)}${cv>p.pagu?' <span class="bad">Kontrak di atas alokasi: perlu evaluasi/pembaruan RUP resmi jika diperlukan.</span>':''}</p>${access?'<button data-spse-action="save-contract">Simpan Data Kontrak</button>':''}</div><div class="card"><h3>Riwayat addendum (nilai perubahan bersih)</h3><div class="spse-tablewrap"><table><thead><tr><th>Nomor</th><th>Tanggal</th><th>Perubahan nilai</th><th>Keterangan</th><th>Aksi</th></tr></thead><tbody>${(m.addenda||[]).map(x=>`<tr><td>${esc(x.no)}</td><td>${esc(satriaDateId(x.date))}</td><td class="n">${x.delta>=0?'+':'−'}${rp(Math.abs(x.delta))}</td><td>${esc(x.note||'-')}</td><td>${access?`<button class="g" data-spse-action="remove-addendum" data-id="${esc(x.id)}">Hapus</button>`:'—'}</td></tr>`).join('')||'<tr><td colspan="5">Belum ada addendum.</td></tr>'}</tbody></table></div>${access?`<div class="spse-formgrid"><label>Nomor addendum<input data-spse-add="no" placeholder="Nomor dokumen"></label><label>Tanggal<input type="date" data-spse-add="date"></label><label>Perubahan nilai (+/− rupiah)<input type="number" step="1" data-spse-add="delta" placeholder="Misal -1000000"></label><label>Catatan<input data-spse-add="note" placeholder="Alasan sesuai dokumen"></label></div><button data-spse-action="add-addendum">Catat Addendum</button>`:''}</div>`;
  if(tab==='pembayaran')content=`<div class="card"><h3>Realisasi pembayaran kontrak</h3><div class="spse-kpis">${satriaSpseKpi('Nilai kontrak kini',rp(cv),'Termasuk addendum')}${satriaSpseKpi('Pembayaran terverifikasi',rp(paid),'Dasar rasio pembayaran')}${satriaSpseKpi('Pembayaran tercatat',rp(satriaSpsePayments(m,false)),'Termasuk yang belum diverifikasi')}${satriaSpseKpi('Sisa kontrak',rp(cv-paid),'Bukan saldo kas pemerintah')}</div><div class="spse-tablewrap"><table><thead><tr><th>Tanggal</th><th>Nilai</th><th>Status</th><th>No bukti / termin</th><th>Keterangan</th><th>Aksi</th></tr></thead><tbody>${(m.payments||[]).map(x=>`<tr><td>${esc(satriaDateId(x.date))}</td><td class="n">${rp(x.amount)}</td><td>${satriaSpseStatusBadge(x.status)}</td><td>${esc(x.proof||'-')}</td><td>${esc(x.note||'-')}</td><td>${access?`${x.status!=='Terverifikasi'?`<button class="g" data-spse-action="verify-payment" data-id="${esc(x.id)}">Verifikasi</button>`:''}<button class="g" data-spse-action="remove-payment" data-id="${esc(x.id)}">Hapus</button>`:'—'}</td></tr>`).join('')||'<tr><td colspan="6">Belum ada pembayaran tercatat.</td></tr>'}</tbody></table></div>${access?`<div class="spse-formgrid"><label>Tanggal pembayaran<input type="date" data-spse-payment="date"></label><label>Nilai pembayaran (Rp)<input type="number" min="1" step="1" data-spse-payment="amount"></label><label>No bukti / termin<input data-spse-payment="proof" placeholder="Nomor SPM/SP2D/termin bila tersedia"></label><label>Keterangan<input data-spse-payment="note" placeholder="Catatan operator"></label></div><button data-spse-action="add-payment">Catat Pembayaran (belum diverifikasi)</button>`:''}<p class="mut">SATRIA tidak mengambil data dari SPSE atau sistem keuangan secara langsung. Hanya pembayaran berstatus Terverifikasi yang dihitung sebagai realisasi pembayaran.</p></div>`;
  if(tab==='kendala')content=`<div class="card"><h3>Kendala dan tindak lanjut</h3><div class="spse-tablewrap"><table><thead><tr><th>Prioritas</th><th>Kendala</th><th>Tindak lanjut</th><th>Penanggung jawab</th><th>Tenggat</th><th>Status</th><th></th></tr></thead><tbody>${(m.issues||[]).map(x=>`<tr><td>${esc(x.priority)}</td><td>${esc(x.note)}</td><td>${esc(x.action)}</td><td>${esc(x.owner||'-')}</td><td>${esc(satriaDateId(x.due))}</td><td>${satriaSpseStatusBadge(x.status)}</td><td>${access?`<button class="g" data-spse-action="toggle-issue" data-id="${esc(x.id)}">${x.status==='Selesai'?'Buka lagi':'Selesai'}</button>`:'—'}</td></tr>`).join('')||'<tr><td colspan="7">Tidak ada kendala tercatat.</td></tr>'}</tbody></table></div>${access?`<div class="spse-formgrid"><label>Prioritas<select data-spse-issue="priority">${satriaSpseOpt(SATRIA_SPSE_PRIORITY,'Sedang')}</select></label><label>Kendala<input data-spse-issue="note" placeholder="Apa hambatannya?"></label><label>Tindak lanjut yang diperlukan<input data-spse-issue="action" placeholder="Apa yang perlu dilakukan?"></label><label>Penanggung jawab<input data-spse-issue="owner" placeholder="Nama/jabatan"></label><label>Tenggat tindak lanjut<input type="date" data-spse-issue="due"></label></div><button data-spse-action="add-issue">Catat Kendala</button>`:''}</div>`;
- return `<section class="spse-page"><div class="spse-hero"><div><b class="spse-eyebrow">✦ MONITORING SPSE</b><h2>${esc(p.nama)}</h2><p>RUP ${esc(p.rup)} • ${esc(O(p.opd).nama)} • TA ${esc(p.tahun)} • Data terakhir diubah ${m.updatedAt?esc(satriaDateId(m.updatedAt.slice(0,10))):'belum dicatat'}</p></div><a class="spse-hero-link" href="#spse">← Daftar Paket</a></div><div class="spse-tabs">${nav}</div>${content}<div class="card"><details><summary><b>Riwayat perubahan monitoring (${(m.auditTrail||[]).length})</b></summary><div class="spse-tablewrap"><table><thead><tr><th>Waktu</th><th>Pengguna</th><th>Perubahan</th></tr></thead><tbody>${(m.auditTrail||[]).slice(-20).reverse().map(x=>`<tr><td>${esc(x.at||'')}</td><td>${esc(x.by||'')}</td><td>${esc(x.action||'')}</td></tr>`).join('')||'<tr><td colspan="3">Belum ada riwayat.</td></tr>'}</tbody></table></div></details></div><div class="spse-note">Monitoring hanya mencatat informasi operator. Jadwal dan nilai resmi tetap harus dicocokkan dengan SPSE, kontrak, serta bukti pembayaran. Perubahan lokal mengikuti sinkronisasi SATRIA yang sudah ada; periksa indikator Supabase sebelum meninggalkan halaman.</div></section>`;
+ return `<section class="spse-page"><div class="spse-hero"><div><b class="spse-eyebrow">✦ MONITORING SPSE</b><h2>${esc(p.nama)}</h2><p>RUP ${esc(p.rup)} • ${esc(O(p.opd).nama)} • TA ${esc(p.tahun)} • Data terakhir diubah ${m.updatedAt?esc(satriaDateId(m.updatedAt.slice(0,10))):'belum dicatat'}</p></div><a class="spse-hero-link" href="#spse">← Daftar Paket</a></div>${satriaHumanSpseDetail(p)}<div class="spse-tabs">${nav}</div>${content}<div class="card"><details><summary><b>Riwayat perubahan monitoring (${(m.auditTrail||[]).length})</b></summary><div class="spse-tablewrap"><table><thead><tr><th>Waktu</th><th>Pengguna</th><th>Perubahan</th></tr></thead><tbody>${(m.auditTrail||[]).slice(-20).reverse().map(x=>`<tr><td>${esc(x.at||'')}</td><td>${esc(x.by||'')}</td><td>${esc(x.action||'')}</td></tr>`).join('')||'<tr><td colspan="3">Belum ada riwayat.</td></tr>'}</tbody></table></div></details></div><div class="spse-note">Monitoring hanya mencatat informasi operator. Jadwal dan nilai resmi tetap harus dicocokkan dengan SPSE, kontrak, serta bukti pembayaran. Perubahan lokal mengikuti sinkronisasi SATRIA yang sudah ada; periksa indikator Supabase sebelum meninggalkan halaman.</div></section>`;
 }
 function vSpse(){const p=P(S.ui.pid);return p&&satriaSpseIs(p)&&satriaSpseRows().some(x=>x.id===p.id)?satriaSpseDetail(p):satriaSpseListView()}
 function satriaSpseBriefData(){const spse=satriaSpseRows(),s=satriaSpseMetrics(spse),ep=filt().filter(p=>!satriaSpseIs(p));const rup=satriaDashboardRupMetrics();const epCommitted=ep.reduce((a,p)=>a+kontrak(p),0);const priorities=[];for(const p of spse){const m=p.spseMonitoring;for(const t of m.stages||[]){if(satriaSpseStageAlert(t)==='Terlambat')priorities.push({p,reason:'Tahapan terlambat: '+t.title,action:t.note||'Periksa perkembangan dan jadwal di SPSE',kind:'Jadwal'});}for(const i of m.issues||[])if(i.status!=='Selesai')priorities.push({p,reason:'Kendala '+i.priority+': '+i.note,action:i.action||'Perlu ditentukan',kind:'Kendala'});if(satriaSpseContractValue(m)>Number(p.pagu||0))priorities.push({p,reason:'Nilai kontrak melampaui alokasi paket',action:'Periksa dasar perubahan kontrak dan RUP',kind:'Anggaran'});}return {spse,s,ep,epCommitted,rup,priorities:priorities.sort((a,b)=>a.kind==='Anggaran'?-1:b.kind==='Anggaran'?1:0)}}
@@ -12797,4 +12801,106 @@ document.addEventListener('click',function(e){
 });
 </script>
 
+<style id="satria-human-first-spse-dok-20261103">
+/* Tahap 2 Human First: no schema change, read-only guidance. */
+.satria-human-follow{margin:12px 0 15px;border:1px solid var(--bd-strong);border-radius:15px;padding:16px;background:var(--card-solid);box-shadow:var(--shadow-xs)}
+.satria-human-follow h3{font-size:15px!important;margin:0 0 5px!important;font-weight:800;line-height:1.4}
+.satria-human-follow p{font-size:12px;color:var(--mut);line-height:1.5;margin:5px 0}
+.satria-human-follow-cta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-radius:12px;background:var(--card-2);padding:12px;margin:11px 0}
+.satria-human-follow-cta b{font-size:13px}.satria-human-follow-cta a,.satria-human-follow-cta button{display:inline-flex;align-items:center;justify-content:center;min-height:37px;height:auto;padding:8px 12px;border-radius:9px;font-size:12px;font-weight:750;text-decoration:none!important;border:1px solid var(--bd);background:var(--card-solid);color:var(--ink)!important;cursor:pointer}
+.satria-human-follow-cta a:hover,.satria-human-follow-cta button:hover{border-color:var(--acc)}
+.satria-human-follow-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:8px;margin:12px 0 5px}
+.satria-human-follow-item{border:1px solid var(--bd);border-radius:10px;padding:10px;min-width:0}
+.satria-human-follow-item b{font-size:11px;display:block;color:var(--ink);line-height:1.4}.satria-human-follow-item small{font-size:11px;display:block;color:var(--mut);line-height:1.5;margin-top:4px}
+.satria-human-follow-shortcuts{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.satria-human-follow-shortcuts button{height:auto!important;min-height:34px;padding:7px 11px;font-size:12px;white-space:normal}
+.satria-human-follow-note{font-size:11px!important;line-height:1.5;color:var(--mut)}
+.satria-human-spse-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}.satria-human-spse-list a{display:block;text-decoration:none!important;border:1px solid var(--bd);border-radius:11px;padding:12px;background:var(--card-2);color:var(--ink)!important;min-width:0}.satria-human-spse-list a b,.satria-human-spse-list a small{display:block;overflow-wrap:anywhere}.satria-human-spse-list a b{font-size:12px}.satria-human-spse-list a small{font-size:11px;color:var(--mut);margin-top:4px}
+.satria-human-doc-library{margin:9px 0 16px;border:1px solid var(--bd);border-radius:12px;padding:10px 12px;background:var(--card-solid)}
+.satria-human-doc-library>summary{cursor:pointer;font-size:12px;font-weight:750;color:var(--ink-2);padding:6px 4px}.satria-human-doc-library[open]>summary{margin-bottom:12px}.satria-human-doc-library .dok-library{margin:0!important}
+@media(max-width:740px){.satria-human-follow{padding:12px}.satria-human-spse-list{grid-template-columns:1fr}.satria-human-follow-cta a,.satria-human-follow-cta button{width:100%}}
+@media print{.satria-human-follow,.satria-human-doc-library{display:none!important}}
+</style>
+<script id="satria-human-first-spse-dok-20261103">
+/* Human First for SPSE and Procurement Documents: derived advice only.
+   Existing transactions, docs, permissions, and official decisions remain untouched. */
+function satriaHumanSpseAdvice(p){
+ const m=p?.spseMonitoring||{};
+ const stages=Array.isArray(m.stages)?m.stages:[];
+ const overdue=stages.filter(x=>satriaSpseStageAlert(x)==='Terlambat');
+ const planned=stages.filter(x=>x.planStart||x.planEnd||x.actual).length;
+ const open=Array.isArray(m.issues)?m.issues.filter(x=>x.status!=='Selesai'):[];
+ const paid=Array.isArray(m.payments)?m.payments:[];
+ const contract=!!String(m.contractNo||'').trim()&&satriaSpseContractValue(m)>0;
+ const identity=!!String(m.tenderCode||'').trim()&&!!satriaSpseDate(m.sourceAsOf);
+ const asOf=satriaSpseDate(m.sourceAsOf);
+ const stale=!asOf||asOf<satriaSpseAgo(30);
+ const activeContract=['Berkontrak','Pelaksanaan','Selesai'].includes(m.phase);
+ const flags=[
+  {label:'Identitas & sumber data',text:identity?'Kode tender dan tanggal verifikasi tercatat':'Lengkapi kode tender dan tanggal pemeriksaan SPSE',tab:'ringkasan'},
+  {label:'Jadwal tahapan',text:overdue.length?overdue.length+' tahapan melewati tanggal rencana':planned?planned+' tahapan memiliki tanggal rencana/aktual':'Belum ada tanggal tahapan tercatat',tab:'jadwal'},
+  {label:'Kontrak & addendum',text:contract?'Kontrak tercatat; periksa addendum':'Kontrak belum lengkap atau belum pada tahapnya',tab:'kontrak'},
+  {label:'Pembayaran',text:paid.length?paid.length+' pembayaran tercatat (status verifikasi dapat berbeda)':'Belum ada pembayaran tercatat; ini bukan bukti keterlambatan',tab:'pembayaran'},
+  {label:'Kendala',text:open.length?open.length+' tindak lanjut masih terbuka':'Tidak ada kendala terbuka dalam catatan',tab:'kendala'}
+ ];
+ let next;
+ if(open.some(x=>x.priority==='Tinggi'))next={tab:'kendala',title:'Tindak lanjuti kendala prioritas tinggi',desc:'Periksa kendala, penanggung jawab, dan tenggat. Keputusan tetap di tangan petugas.'};
+ else if(overdue.length)next={tab:'jadwal',title:'Periksa tahapan yang terlambat',desc:'Cocokkan jadwal aktual dengan SPSE sebelum memperbarui catatan.'};
+ else if(!identity)next={tab:'ringkasan',title:'Lengkapi identitas dan sumber informasi',desc:'Catat nomor tender dan tanggal data terakhir diverifikasi.'};
+ else if(!planned)next={tab:'jadwal',title:'Catat jadwal tahapan yang tersedia',desc:'Isi hanya tahapan yang berlaku; jangan mengarang tanggal yang belum diketahui.'};
+ else if(activeContract&&!contract)next={tab:'kontrak',title:'Catat nomor dan nilai kontrak',desc:'Gunakan data kontrak resmi, bukan HPS atau pagu RUP sebagai nilai kontrak.'};
+ else if(stale)next={tab:'ringkasan',title:'Periksa keterkinian informasi',desc:'Bandingkan catatan dengan SPSE, lalu perbarui tanggal sumber jika sudah diperiksa.'};
+ else if(open.length)next={tab:'kendala',title:'Pantau tindak lanjut terbuka',desc:'Periksa tindakan dan tenggat yang masih berjalan.'};
+ else next={tab:'ringkasan',title:'Lanjutkan pemantauan berkala',desc:'Catatan sudah tersedia. Periksa perubahan resmi SPSE, kontrak, dan pembayaran sesuai kebutuhan.'};
+ return {flags,next,overdue:overdue.length,open:open.length,stale};
+}
+function satriaHumanSpseDetail(p){
+ if(!p||!satriaSpseIs(p))return '';
+ const a=satriaHumanSpseAdvice(p),n=a.next;
+ return `<section class="satria-human-follow no-print" aria-label="Panduan Monitoring SPSE"><h3>✦ Lanjutkan monitoring paket ini</h3><p>Ringkasan dari data yang sudah tersimpan. Tahapan tidak wajib diisi berurutan, dan catatan ini bukan data SPSE real-time.</p><div class="satria-human-follow-cta"><div><b>${esc(n.title)}</b><p>${esc(n.desc)}</p></div><button type="button" data-human-spse-nav="${esc(n.tab)}">Buka langkah ini →</button></div><div class="satria-human-follow-grid">${a.flags.map(f=>`<div class="satria-human-follow-item"><b>${esc(f.label)}</b><small>${esc(f.text)}</small></div>`).join('')}</div><p class="satria-human-follow-note">Data jadwal, kontrak, dan pembayaran tetap harus diverifikasi dari sumber resmi. Peringatan tidak mengubah jadwal atau status SPSE.</p></section>`;
+}
+function satriaHumanSpseOverview(L){
+ if(!Array.isArray(L)||!L.length)return '';
+ const rows=L.map(p=>({p,a:satriaHumanSpseAdvice(p)}));
+ const rank=x=>x.a.open?0:x.a.overdue?1:x.a.stale?2:3;
+ rows.sort((a,b)=>rank(a)-rank(b));
+ const top=rows.slice(0,4);
+ return `<section class="satria-human-follow no-print" aria-label="Paket SPSE perlu dipantau"><h3>✦ Paket yang perlu diperhatikan</h3><p>Mulai dari paket yang memiliki kendala, tahapan terlambat, atau data yang perlu diperiksa. Anda tetap bisa membuka paket mana pun dari tabel di bawah.</p><div class="satria-human-spse-list">${top.map(({p,a})=>`<a href="#spse/${encodeURIComponent(p.id)}"><b>${esc(p.nama||p.rup||p.id)}</b><small>RUP ${esc(p.rup)} · ${esc(a.next.title)} →</small></a>`).join('')}</div></section>`;
+}
+function satriaHumanDocGuide(p,doc,missing){
+ if(!p||satriaSpseIs(p))return '';
+ const names={dpp:'DPP',spek:'Spesifikasi Teknis',lamp:'Lampiran Referensi Harga',survei:'Survei Harga',bahepe:'BA Evaluasi Penyedia',hpsnego:'HPS & Negosiasi',bahp:'BA Hasil Pemilihan',nodis:'Nota Dinas',idkb:'Identifikasi Kebutuhan',rfi:'Permintaan Informasi',metode:'Penetapan E-Purchasing',sppbj:'Surat Perintah Pengadaan',reviu:'Reviu DPP',kknego:'Kertas Kerja Negosiasi'};
+ const count=Array.isArray(missing)?missing.length:0;
+ const shortcuts=[['dpp','DPP'],['spek','Spesifikasi'],['lamp','Lampiran Harga'],['survei','Survei Harga'],['bahp','BA Hasil']];
+ const active=names[doc]||'Dokumen';
+ return `<section class="satria-human-follow no-print" aria-label="Panduan Dokumen Pengadaan"><h3>✦ Siapkan dokumen tanpa mencari banyak menu</h3><p>Dokumen aktif: <b>${esc(active)}</b>. Data berasal dari paket yang dipilih, bukan diinput ulang ke generator.</p><div class="satria-human-follow-cta"><div><b>${count?count+' pemeriksaan isian untuk dokumen aktif':'Isian dasar dokumen terdeteksi tersedia'}</b><p>${count?'Perbaiki data sumber di Paket Pengadaan atau Data Master. Periksa daftar kualitas di bagian pratinjau.':'Tetap periksa nomor, bukti, redaksi, dan hasil cetak sebelum pengesahan.'}</p></div>${count?`<button type="button" data-human-nav="paket" data-pid="${esc(p.id)}" data-tab="data">Buka data paket →</button>`:`<button type="button" data-human-doc-preview="1">Periksa pratinjau →</button>`}</div><div class="satria-human-follow-shortcuts">${shortcuts.map(([k,t])=>`<button type="button" class="${doc===k?'':'g'}" data-act="dtype" data-tab="${k}" aria-pressed="${doc===k}">${esc(t)}${doc===k?' ✓':''}</button>`).join('')}</div><p class="satria-human-follow-note">Template lainnya tersedia pada “Semua 14 template” di bawah. Tombol cetak dan seluruh pemeriksaan DPP tetap seperti sebelumnya; indikator ini bukan persetujuan dokumen.</p></section>`;
+}
+
+document.addEventListener('click',function(ev){
+ const b=ev.target.closest?.('[data-human-doc-preview]');if(!b)return;
+ ev.preventDefault();ev.stopImmediatePropagation();
+ document.querySelector('#dokLazyContainer')?.scrollIntoView({block:'start',behavior:'smooth'});
+},true);
+/* Prevent a guidance shortcut from discarding an edited SPSE form. */
+document.addEventListener('click',function(ev){
+ const b=ev.target.closest?.('[data-human-spse-nav]');if(!b)return;
+ ev.preventDefault();ev.stopImmediatePropagation();
+ const tab=String(b.dataset.humanSpseNav||'');
+ if(!['ringkasan','jadwal','kontrak','pembayaran','kendala'].includes(tab))return;
+ const p=P(S.ui.pid);
+ if(!p||!satriaSpseIs(p)||!satriaSpseRows().some(x=>x.id===p.id)){toast('Paket monitoring tidak tersedia untuk akun ini.');return;}
+ if(S.ui.spseTab===tab){document.querySelector('.spse-tabs')?.nextElementSibling?.scrollIntoView({block:'start',behavior:'smooth'});return;}
+ const root=document.querySelector('.spse-page');
+ if(root){
+  const edited=[...root.querySelectorAll('input[data-spse-main],select[data-spse-main],input[data-spse-stage-field],input[data-spse-contract],input[data-spse-add],input[data-spse-payment],input[data-spse-issue],select[data-spse-issue]')].some(el=>{
+    if(el.disabled)return false;
+    if(el.tagName==='SELECT')return [...el.options].some(o=>o.selected!==o.defaultSelected);
+    return el.value!==el.defaultValue;
+  });
+  if(edited&&!confirm('Ada isian Monitoring SPSE yang belum disimpan. Pindah langkah tanpa menyimpan perubahan tersebut?'))return;
+ }
+ S.ui.spseTab=tab;render();
+ setTimeout(()=>document.querySelector('.spse-tabs')?.nextElementSibling?.scrollIntoView({block:'start',behavior:'smooth'}),60);
+},true);
+
+</script>
 </body></html>
