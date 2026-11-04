@@ -17,11 +17,11 @@ assert(offerHtml.includes('data-act="openOfferCalc"'),'Shortcut to calculator re
 // Simulate saving a fresh survey reference; price changes but negotiated gross/net/tax must survive.
 const smart=src.slice(src.indexOf('<script id="satria-smart-survey-code">')+'<script id="satria-smart-survey-code">'.length,src.indexOf('</script>',src.indexOf('<script id="satria-smart-survey-code">')));
 const listeners={},messages=[],events=[];
-const smartCtx={document:{addEventListener:(type,cb)=>{(listeners[type]||(listeners[type]=[])).push(cb)}},window:{},Number,Date,URL,FileReader:function(){},DOMParser:function(){},setTimeout,clearTimeout,
+const smartCtx={document:{addEventListener:(type,cb)=>{(listeners[type]||(listeners[type]=[])).push(cb)},dispatchEvent:()=>{}},CustomEvent:function(type,opts){return {type,detail:opts?.detail}},window:{},Number,Date,URL,FileReader:function(){},DOMParser:function(){},setTimeout,clearTimeout,
   P:id=>id==='pkg1'?p:null,PY:()=>({nama:'Penyedia A'}),S:state.S,
   satriaOfferNegoBreakdown:(w,iid)=>({verified:true,net:w.negoDetails[iid].beforeTax}),fNego:()=>'<main></main>',survei:()=>'',render:()=>{events.push('render')},sync:(type,msg)=>{events.push(type);messages.push(msg)},toast:msg=>messages.push(msg),confirm:()=>true,Error};
 vm.createContext(smartCtx);vm.runInContext(smart,smartCtx);
-const html=smartCtx.fNego(p);assert(html.includes('Smart Survey Harga e-Katalog'),'Survey has new title');assert(!html.includes('data-smart-field="negotiatedBase"'),'Duplicate base input gone');assert(!html.includes('data-smart-field="negotiatedTax"'),'Duplicate tax input gone');assert(!html.includes('data-smart-action="calculate"'),'Duplicate calc action gone');
+const html=smartCtx.fNego(p);assert(html.includes('SMART SURVEY SATRIA'),'Survey has new title');assert(!html.includes('data-smart-field="negotiatedBase"'),'Duplicate base input gone');assert(!html.includes('data-smart-field="negotiatedTax"'),'Duplicate tax input gone');assert(!html.includes('data-smart-action="calculate"'),'Duplicate calc action gone');
 const input={name:'Produk Baru',displayPrice:'1200000',beforeTax:'1081081',taxAmount:'118919',link:'https://katalog.inaproc.id/test/a',seller:'Penyedia A',unit:'pcs',date:'2026-10-28',imageUrl:'',spec:'Spesifikasi aktual'};
 const panel={dataset:{pid:'pkg1',wid:'pw1',iid:'i1'},querySelector(sel){let m=sel.match(/^\[data-smart-field="([^"]+)"\]$/);if(m)return {value:input[m[1]]||''};if(sel==='[data-smart-status]')return {set textContent(x){messages.push(x)}};return null;}};
 const btn={dataset:{smartAction:'save'},closest(sel){return sel==='[data-smart-panel]'?panel:null}};

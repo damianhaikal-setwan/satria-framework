@@ -1,21 +1,44 @@
-# SATRIA Framework 3.0.41 — Deployment dan migrasi cloud
+# Deployment SATRIA NEXT 3.0.59.21
 
-**Repositori ini berisi aplikasi HTML dan migrasi database. Memodifikasi ZIP/GitHub tidak otomatis mengubah Supabase produksi.**
+## 1. Backup dan verifikasi sumber
 
-## Urutan aman sebelum deploy
+1. Simpan backup JSON SATRIA yang terbaru dan backup Supabase sebelum melakukan pembaruan.
+2. Cocokkan berkas `index.html`, `manifest.json`, `sw.js`, serta ikon di root. Gunakan **seluruh isi arsip**, bukan mengunggah arsip ZIP sebagai satu file.
+3. Perbaikan Bank RUP 3.0.59.21 hanya mengubah alur tampilan dan interaksi klien. Membagikan ZIP atau commit GitHub **tidak mengubah isi database cloud**.
 
-1. Backup database Supabase dan unduh backup JSON SATRIA dari setiap lingkungan yang akan dipindahkan.
-2. Di **staging**, jalankan migrasi berurutan sesuai nama file. Untuk database baru, mulailah dengan `supabase/satria-supabase-staging-bootstrap.sql`, lalu migrasi 20261024* dan 20261024052900–20261024053400.
-3. Jalankan **migrasi baru** `supabase/migrations/20261028010000_satria_rup_bank_cloud_compat.sql` **setelah** migrasi delta 20261024053400.
-4. Verifikasi akses `admin`, `operator` OPD/tahun A, dan `viewer`. Khususnya, Bank RUP harus terbatas menurut OPD dan tahun di RPC `satria_get_scoped_state`.
-5. Deploy Edge Functions hanya dari `supabase/functions/{admin-list-users,admin-create-user,admin-update-user}` (salinan direktori legacy telah dibersihkan).
-6. Jalankan uji statis `python tools/security_static_check.py` dan `python tools/test_rup_bank_contract.py`. Uji database menggunakan `supabase/tests/rup_bank_cloud_assertions.sql` dan skenario manual di `docs/BANK_RUP_CLOUD_MIGRATION.md`.
-7. Setelah staging lolos, deploy ke produksi pada jendela pemeliharaan, terapkan migrasi, unggah `index.html` beserta aset PWA, dan lakukan smoke test.
+## 2. Uji aplikasi (staging dahulu)
 
-**Perubahan skema**: Bank RUP tetap disimpan dalam `satria_state.payload.rupBank` (array JSON) demi kompatibilitas; migrasi memperbarui RPC pembacaan berdasarkan OPD/tahun dan penyimpanan delta, serta validasi referensi dan duplikasi. Tidak memigrasikan data ke tabel relasional baru dan tidak otomatis memodifikasi isi snapshot yang sudah ada.
+- Aktifkan situs melalui HTTPS; untuk PWA jangan bergantung pada `file://`.
+- Hapus cache/perbarui service worker bila versi lama tetap muncul.
+- Pada Bank RUP, impor JSON lalu simpan RUP manual. Keduanya harus tampil sesuai **hak akses OPD dan tahun** akun.
+- Periksa filter Bank RUP, tombol **Tampilkan semua RUP**, status sinkronisasi cloud, serta hasil **reload** dan login ulang.
+- Pastikan Viewer tidak dapat mengubah data; Operator tidak melihat OPD/tahun yang tidak ditugaskan.
 
-Catatan: buka aplikasi melalui HTTPS yang di-host, bukan `file://`, untuk PWA/servis pekerja yang andal. Pastikan `ALLOWED_ORIGINS` Edge Functions mencakup origin aplikasi. Publishable key di HTML bukan kunci rahasia, tetapi hanya aman bila RLS/RPC server telah diuji.
+## 3. Supabase (hanya jika memakai Supabase)
 
+Untuk lingkungan baru, rencanakan bootstrap `supabase/satria-supabase-staging-bootstrap.sql` dan migrasi di `supabase/migrations/` **berdasarkan urutan dan dependensi**. Jangan menjalankan ulang migrasi tanpa memeriksa riwayat migrasi lingkungan yang aktif.
 
-## SATRIA NEXT 3.0.54 — Private media storage
-Baca `docs/SUPABASE_MEDIA_STORAGE_3.0.54.md`. Terapkan migrasi `20261028060000_satria_private_media_storage.sql` sesudah migrasi Bank RUP dan sebelum memakai unggah gambar. **Bucket privat**, gunakan kredensial Auth biasa, jangan memakai service_role di HTML.
+Migrasi dan dokumen utama:
+
+- `20261024052900` s.d. `20261024053400`: assignment OPD/tahun, akses scoped, master bersama, dan sinkronisasi delta.
+- `20261028010000_satria_rup_bank_cloud_compat.sql`: kompatibilitas Bank RUP dan RPC scoped; terapkan **setelah migrasi delta**.
+- `20261028060000_satria_private_media_storage.sql`: penyimpanan media privat; terapkan **sesudah kompatibilitas Bank RUP**.
+- `supabase/manual/SATRIA-3_0_59-WAJIB-Migrasi-Draft-Cloud.sql`: SQL cloud draft Smart Survey PRO, **manual**, bukan migrasi yang otomatis dijalankan; lihat keterangan di file.
+
+**Penting:** Ada juga migrasi `20261024_satria_user_creation_security.sql` yang dapat memiliki dependensi sendiri. Untuk instalasi lama, cocokkan terhadap daftar migrasi yang sudah diterapkan, jangan menganggap semua berkas belum pernah dijalankan. Detail lanjutan: `docs/SECURITY_SCOPE_HARDENING.md`, `docs/BANK_RUP_CLOUD_MIGRATION.md`, `docs/SUPABASE_MEDIA_STORAGE_3.0.54.md`.
+
+Edge Functions resmi berada hanya di `supabase/functions/`:
+
+```bash
+supabase functions deploy admin-list-users
+supabase functions deploy admin-create-user
+supabase functions deploy admin-update-user
+```
+
+Konfigurasi akses ada di `supabase/config.toml`. `ALLOWED_ORIGINS` harus mencakup origin aplikasi dan `verify_jwt` harus tetap aktif. Jangan menaruh kunci rahasia di HTML. Penerapan SQL, fungsi, dan validasi izin memerlukan akses admin yang sesuai ke proyek Supabase.
+
+## 4. Pemeriksaan sebelum produksi
+
+Jalankan semua pengujian pada `README.md`. Untuk database, jalankan assertion yang sesuai (`supabase/tests/`) pada staging sesuai hak akses dan instruksi SQL. Verifikasi backup sebelum melakukan perubahan produksi.
+
+Rencana deploy yang aman: **backup → staging → tes RUP + akses + dokumen → deploy GitHub/hosting → cek cache → cek Supabase → produksi**.
