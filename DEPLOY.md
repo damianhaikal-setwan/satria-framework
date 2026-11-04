@@ -1,10 +1,10 @@
-# Deployment SATRIA NEXT 3.0.59.21
+# Deployment SATRIA NEXT 3.0.59.22
 
 ## 1. Backup dan verifikasi sumber
 
 1. Simpan backup JSON SATRIA yang terbaru dan backup Supabase sebelum melakukan pembaruan.
 2. Cocokkan berkas `index.html`, `manifest.json`, `sw.js`, serta ikon di root. Gunakan **seluruh isi arsip**, bukan mengunggah arsip ZIP sebagai satu file.
-3. Perbaikan Bank RUP 3.0.59.21 hanya mengubah alur tampilan dan interaksi klien. Membagikan ZIP atau commit GitHub **tidak mengubah isi database cloud**.
+3. Perbaikan Bank RUP 3.0.59.22 memperbaiki tampilan dan kalkulasi lokal RUP/HPS/penetapan. Membagikan ZIP atau commit GitHub **tidak mengubah isi database cloud**.
 
 ## 2. Uji aplikasi (staging dahulu)
 
@@ -12,6 +12,8 @@
 - Hapus cache/perbarui service worker bila versi lama tetap muncul.
 - Pada Bank RUP, impor JSON lalu simpan RUP manual. Keduanya harus tampil sesuai **hak akses OPD dan tahun** akun.
 - Periksa filter Bank RUP, tombol **Tampilkan semua RUP**, status sinkronisasi cloud, serta hasil **reload** dan login ulang.
+- Uji RUP yang memiliki HPS lengkap dan pemenang valid: sisa setelah penetapan harus menggantikan HPS paket yang bersangkutan, bukan menguranginya dua kali.
+- Uji paket konsolidasi multi-RUP: penetapan tidak boleh otomatis dialokasikan ke masing-masing RUP tanpa dasar pembagian yang jelas.
 - Pastikan Viewer tidak dapat mengubah data; Operator tidak melihat OPD/tahun yang tidak ditugaskan.
 
 ## 3. Supabase (hanya jika memakai Supabase)

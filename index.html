@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>SATRIA NEXT 3.0.59.2 | Dashboard Analytics Terintegrasi</title>
+<title>SATRIA NEXT 3.0.59.22 | Dashboard Analytics Terintegrasi</title>
 <meta name="description" content="SATRIA Framework merupakan platform tata kelola digital pemerintah yang mengintegrasikan perencanaan, pelaporan, analitik, otomasi dokumen, serta pengambilan keputusan berbasis data.">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/4.0.8/dexie.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -2256,30 +2256,58 @@ function tabelPaket(L){
   `;
 }
 
+/* Status proses & tindak lanjut memakai filter Dashboard; tanpa menyimpan/mengubah data. */
+function satriaDashboardTindakLanjut(ep,bank){
+ const started=ep.filter(p=>(p.items||[]).length>0).length;
+ const awarded=ep.filter(p=>satriaRupPenetapanPaket(p)>0).length;
+ const waiting=ep.length-awarded;
+ const incomplete=ep.filter(p=>gaps(p).length>0).length;
+ const rupReview=bank.issueCount;
+ const monitoring=satriaSpseMetrics(satriaSpseRows());
+ return `<section class="card satria-dashboard-followup" aria-label="Status proses dan tindak lanjut">
+  <div class="row" style="justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><h3>Status Proses &amp; Tindak Lanjut</h3><a href="#quality">Periksa Kualitas Data</a></div>
+  <p class="mut">Khusus TA/OPD terpilih. Paket e-Purchasing mengikuti filter arsip Dashboard, sedangkan SPSE dipantau pada modul tersendiri. Angka ini berasal dari data SATRIA terakhir dimuat, bukan konfirmasi status resmi eksternal.</p>
+  <div class="satria-rup-dash-stats">
+   <div><span>Paket E-P dengan rincian</span><b>${started} / ${ep.length}</b><small>Sudah mempunyai item HPS</small></div>
+   <div><span>Paket E-P ditetapkan valid</span><b>${awarded}</b><small>Lolos validasi pemenang/negosiasi</small></div>
+   <div><span>Paket E-P belum ditetapkan</span><b>${waiting}</b><small>Periksa survei dan proses negosiasi</small></div>
+   <div><span>Administrasi E-P belum lengkap</span><b>${incomplete}</b><small>Butuh pemeriksaan kelengkapan</small></div>
+   <div><span>RUP perlu pemeriksaan</span><b>${rupReview}</b><small>Termasuk referensi RUP tak cocok</small></div>
+   <div><span>SPSE: tahapan terlambat</span><b>${monitoring.late}</b><small>${monitoring.count} paket monitoring SPSE</small></div>
+   <div><span>SPSE: pembayaran terverifikasi</span><b>${rp(monitoring.paid)}</b><small>Tidak termasuk E-Purchasing</small></div>
+  </div>
+  <p class="mut" style="margin-top:10px">Tindak lanjut: <a href="#input">periksa saldo Bank RUP</a> · <a href="#paket">lengkapi paket e-Purchasing</a> · <a href="#spse">periksa SPSE</a>. Penetapan, kontrak, dan pembayaran adalah peristiwa berbeda.</p>
+ </section>`;
+}
+
 function vDash(){
- const L=filt(),pagu=sum(L,p=>p.pagu),k=sum(L,kontrak);
- const totalHps=sum(L,hps);
+ const L=filt(),ep=L.filter(p=>!satriaSpseIs(p)),pagu=sum(L,p=>p.pagu),paguEp=sum(ep,p=>p.pagu),k=sum(ep,kontrak);
+ const totalHps=sum(ep,hps);
  const dashData=satriaDashboardMetrics(L);
  const bankDash=satriaDashboardRupMetrics();
  const efisiensi=dashData.hpsGap;
  const pctEf=dashData.settledHps?((efisiensi/dashData.settledHps)*100).toFixed(1):0;
- const pctKontrak=pagu?((k/pagu)*100).toFixed(1):0;
- const lengkap=L.filter(p=>gaps(p).length===0).length;
- const pctPatuh=L.length?((lengkap/L.length)*100).toFixed(0):0;
+ const pctKontrak=paguEp?((k/paguEp)*100).toFixed(1):0;
+ const lengkap=ep.filter(p=>gaps(p).length===0).length;
+ const pctPatuh=ep.length?((lengkap/ep.length)*100).toFixed(0):0;
  const kpi=(l,v,icon,sub,accent)=>`<div class="card kpi satria-kpi" style="--kpi-accent:${accent}"><div class="kpi-icon" style="background:linear-gradient(135deg,${accent} 0%, color-mix(in srgb, ${accent} 70%, white) 100%)">${icon}</div><div class="kpi-content"><span class="kpi-label">${l}</span><b class="kpi-value">${v}</b><span class="kpi-sub">${sub}</span></div><div class="kpi-glow"></div></div>`;
- return `<div class="satria-command-header"><div class="satria-command-title"><div class="satria-command-badge"><span class="dot"></span> RINGKASAN UTAMA</div><h2>Ringkasan Utama SATRIA</h2><p>Integrated Government Intelligence Platform • Strategic Analytics Overview • Framework Version 3.0.55</p></div><div class="satria-command-meta"><div class="satria-meta-card"><span>TA Aktif</span><b>${S.ui.tahun}</b></div><div class="satria-meta-card"><span>Paket</span><b>${L.length}</b></div><div class="satria-meta-card"><span>Kelengkapan data</span><b>${pctPatuh}%</b></div></div></div>
+ return `<div class="satria-command-header"><div class="satria-command-title"><div class="satria-command-badge"><span class="dot"></span> RINGKASAN UTAMA</div><h2>Ringkasan Utama SATRIA</h2><p>Integrated Government Intelligence Platform • Analitik RUP, HPS, Penetapan &amp; Monitoring • Framework Version 3.0.59.22</p></div><div class="satria-command-meta"><div class="satria-meta-card"><span>TA Aktif</span><b>${S.ui.tahun}</b></div><div class="satria-meta-card"><span>Paket</span><b>${L.length}</b></div><div class="satria-meta-card"><span>Kelengkapan data</span><b>${pctPatuh}%</b></div></div></div>
  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
   ${kpi('Jumlah Paket',L.length,'🏛','Paket sesuai filter tahun/OPD','#0F766E')}
   ${kpi('Pagu Bank RUP (unik)',bankDash.validCount?rp(bankDash.pagu):'—','📚','Nilai Bank RUP tersimpan • unik per OPD/TA/kode','#0891B2')}
-  ${kpi('Penggunaan RUP Terhitung',bankDash.validCount?rp(bankDash.used):'—','📐','Estimasi rincian / cadangan / konsolidasi','#0F766E')}
-  ${kpi('Sisa Kapasitas RUP',bankDash.validCount?rp(bankDash.free):'—','🧮','Bukan sisa kas atau realisasi belanja','#14B8A6')}
+  ${kpi('Alokasi RUP menurut HPS',bankDash.validCount?rp(bankDash.usedHps):'—','📐','Rincian HPS / cadangan / konsolidasi','#0F766E')}
+  ${kpi('Total Penetapan Bank RUP',bankDash.validCount?rp(bankDash.settled+bankDash.settledUnattributed):'—','🏅','Pemenang valid sekali per paket • multi-RUP belum dibagi','#0F766E')}
+  ${kpi('Cadangan / Alokasi Belum Final',bankDash.validCount?rp(bankDash.pending):'—','📋','Alokasi belum final termasuk konsolidasi','#F59E0B')}
+  ${kpi('Sisa RUP menurut HPS',bankDash.validCount?rp(bankDash.freeHps):'—','🧾','Sisa estimasi sebelum substitusi penetapan','#0891B2')}
+  ${kpi('Sisa RUP setelah Penetapan',bankDash.validCount?rp(bankDash.free):'—','🧮','Pagu dikurangi penetapan valid dan cadangan','#14B8A6')}
   ${kpi('Pagu Paket Tercatat',rp(pagu),'📊','Dapat berbeda dari penggunaan RUP','#0891B2')}
-  ${kpi('Penetapan / Pagu Paket',pctKontrak+'%','🧠','Penetapan tervalidasi '+rp(k)+' • bukan pembayaran','#14B8A6')}
-  ${kpi('Kelengkapan Administratif',pctPatuh+'%','🔐','Pemeriksaan kelengkapan • '+lengkap+' lengkap','#10B981')}
+  ${kpi('Penetapan / Pagu E-Purchasing',pctKontrak+'%','🧠','Penetapan valid '+rp(k)+' • denominator hanya paket e-P','#14B8A6')}
+  ${kpi('Kelengkapan E-Purchasing',pctPatuh+'%','🔐','Paket lengkap '+lengkap+'/'+ep.length+' • SPSE tidak dihitung','#10B981')}
   ${kpi('Selisih HPS–Negosiasi',rp(efisiensi)+' • '+pctEf+'%','⚡','Hanya paket yang telah ditetapkan','#2563EB')}
  </div>
- <div class="card satria-overview"><h3 style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff">◈</span> Strategic Analytics Overview <span class="badge" style="margin-left:auto;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">SATRIA NEXT • Analitik Terintegrasi</span></h3><p class="mut">Analitik paket mengikuti filter tahun, OPD dan status arsip. Kapasitas Bank RUP mengikuti tahun/OPD dan menghitung semua paket yang terhubung termasuk arsip, agar saldo sesuai menu Input RUP. Nilai penetapan bukan pembayaran; selisih HPS–negosiasi bukan penghematan aktual.</p><div class="satria-metrics-row"><div><span>Selisih HPS–Negosiasi</span><b>${rp(efisiensi)}</b><small>Bukan efisiensi kas</small></div><div><span>Total HPS</span><b>${rp(totalHps)}</b><small>Estimasi kebutuhan</small></div><div><span>Nilai Penetapan</span><b>${rp(k)}</b><small>Bukan realisasi pembayaran</small></div><div><span>Paket Lengkap</span><b>${lengkap}/${L.length}</b><small>Kelengkapan data administratif</small></div></div></div>
+ <div class="card satria-overview"><h3 style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#0F766E,#0891B2);display:grid;place-items:center;color:#fff">◈</span> Strategic Analytics Overview <span class="badge" style="margin-left:auto;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;border:0">SATRIA NEXT • Analitik Terintegrasi</span></h3><p class="mut">Analitik paket mengikuti filter tahun, OPD dan status arsip. Bank RUP dihitung per OPD/tahun, termasuk paket arsip agar konsisten dengan Input RUP. Dua saldo ditampilkan: menurut HPS/cadangan dan setelah mengganti HPS paket yang memiliki penetapan valid. Penetapan konsolidasi multi-RUP tidak diasumsikan tersebar otomatis. Penetapan bukan pembayaran; selisih HPS–negosiasi bukan penghematan kas.</p><div class="satria-metrics-row"><div><span>Selisih HPS–Negosiasi</span><b>${rp(efisiensi)}</b><small>Bukan efisiensi kas</small></div><div><span>Total HPS</span><b>${rp(totalHps)}</b><small>Estimasi kebutuhan</small></div><div><span>Nilai Penetapan</span><b>${rp(k)}</b><small>Bukan realisasi pembayaran</small></div><div><span>Paket E-P Lengkap</span><b>${lengkap}/${ep.length}</b><small>Administrasi e-Purchasing, bukan SPSE</small></div></div></div>
  ${satriaDashboardRupOverview(bankDash)}
+ ${satriaDashboardTindakLanjut(ep,bankDash)}
  ${satriaSpseDashboardWidget()}
  <div class="chart-grid">
    <div class="chart-card wide"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#0891B2,#14B8A6)"></div><div class="chart-title">Tren Paket: Pagu Tercatat, HPS & Penetapan <span class="badge" style="background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">Tren Multi Tahun</span></div><div id="chartMultiYear" style="width:100%;height:340px"><div class="s348-empty">Menyiapkan grafik...</div></div><div class="d3-legend" id="legendMultiYear"></div><div class="d3-tooltip" id="tooltipMulti"></div></div>
@@ -2289,10 +2317,10 @@ function vDash(){
    <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#2563EB,#0891B2)"></div><div class="chart-title">Performance Matrix</div><div id="chartHpsPagu" style="width:100%;height:240px"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
    <div class="chart-card third"><div class="kh-accent" style="background:linear-gradient(90deg,#0F766E,#14B8A6)"></div><div class="chart-title">Analitik Pagu Paket per OPD</div><div id="chartOpd" style="width:100%;height:240px"><div class="s348-empty">Menyiapkan grafik...</div></div></div>
  </div>
- <div class="card" style="margin-top:14px"><h3>Perbandingan Bank RUP & Paket • Multi Tahun</h3><p class="mut">Pagu Bank RUP dihitung unik per OPD/tahun/kode. Terpakai adalah estimasi penggunaan RUP, sedangkan pagu paket merupakan nilai tercatat pada paket. Nilai di kolom ini tidak untuk dijumlahkan satu sama lain.</p><div class="table-wrap"><table><tr><th>Tahun</th><th class=n>Paket</th><th class=n>Pagu RUP unik</th><th class=n>Terpakai RUP</th><th class=n>Sisa RUP</th><th class=n>Pagu Paket Tercatat</th><th class=n>Nilai Penetapan</th><th class=n>Selisih HPS–Nego</th><th class=n>Rasio Penetapan/Pagu Paket</th></tr>
- ${S.tahun.map(t=>{const x=filt(t),data=satriaDashboardMetrics(x),rd=satriaDashboardRupMetrics(t),pg=data.pagu,kt=data.committed,ef=data.hpsGap;const pct=pg?((kt/pg)*100).toFixed(1):0;return `<tr><td><b>${t}</b></td><td class=n>${x.length}</td><td class=n>${rd.validCount?rp(rd.pagu):'—'}</td><td class=n>${rd.validCount?rp(rd.used):'—'}</td><td class=n>${rd.validCount?rp(rd.free):'—'}</td><td class=n>${rp(pg)}</td><td class=n>${rp(kt)}</td><td class=n>${rp(ef)}</td><td class=n>${pct}%</td></tr>`}).join('')}</table></div></div>
+ <div class="card" style="margin-top:14px"><h3>Perbandingan Bank RUP & Paket • Multi Tahun</h3><p class="mut">Pagu Bank RUP unik per OPD/tahun/kode. Alokasi HPS memakai rincian atau cadangan; setelah penetapan valid pada paket RUP tunggal, nilai pemenang menggantikan alokasi estimasi. Sisa diperlihatkan dengan kedua pendekatan. Nilai pagu paket dan penetapan paket (seluruh paket terfilter) adalah indikator lain; jangan dijumlahkan ke pagu sumber.</p><div class="table-wrap"><table><tr><th>Tahun</th><th class=n>Paket</th><th class=n>Pagu RUP unik</th><th class=n>Alokasi HPS/cadangan RUP</th><th class=n>Sisa RUP menurut HPS</th><th class=n>Penetapan Bank RUP</th><th class=n>Sisa RUP setelah penetapan</th><th class=n>Pagu Paket Tercatat</th><th class=n>Nilai Penetapan</th><th class=n>Selisih HPS–Nego</th><th class=n>Rasio Penetapan/Pagu Paket</th></tr>
+ ${S.tahun.map(t=>{const x=filt(t),data=satriaDashboardMetrics(x),rd=satriaDashboardRupMetrics(t),pg=data.pagu,kt=data.committed,ef=data.hpsGap;const pct=pg?((kt/pg)*100).toFixed(1):0;return `<tr><td><b>${t}</b></td><td class=n>${x.length}</td><td class=n>${rd.validCount?rp(rd.pagu):'—'}</td><td class=n>${rd.validCount?rp(rd.usedHps):'—'}</td><td class=n>${rd.validCount?rp(rd.freeHps):'—'}</td><td class=n>${rd.validCount?rp(rd.settled):'—'}</td><td class=n>${rd.validCount?rp(rd.free):'—'}</td><td class=n>${rp(pg)}</td><td class=n>${rp(kt)}</td><td class=n>${rp(ef)}</td><td class=n>${pct}%</td></tr>`}).join('')}</table></div></div>
  <div class="card"><h3>Paket Pengadaan • TA ${S.ui.tahun}</h3>${tabelPaket(L)}</div>
- <div class="card"><h3>Governance Intelligence • Aktivitas Sinkronisasi</h3>${S.log.length?S.log.map(l=>`<div style="padding:8px 0;border-bottom:1px solid var(--bd);display:flex;gap:12px"><span style="font-weight:700;color:#0F766E;min-width:120px">${l.t}</span><span>${esc(l.label)}</span><span class=pill style="margin-left:auto;background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">${l.mods.join(', ')}</span></div>`).join(''):'<span class=mut>Belum ada perubahan. Ubah data program, rincian, atau penawaran untuk melihat sinkronisasi governance intelligence.</span>'}</div>`;
+ <div class="card"><h3>Governance Intelligence • Aktivitas Perubahan Data Lokal</h3>${S.log.length?S.log.map(l=>`<div style="padding:8px 0;border-bottom:1px solid var(--bd);display:flex;gap:12px"><span style="font-weight:700;color:#0F766E;min-width:120px">${l.t}</span><span>${esc(l.label)}</span><span class=pill style="margin-left:auto;background:rgba(15,118,110,.1);color:#0F766E;border:1px solid rgba(15,118,110,.15)">${l.mods.join(', ')}</span></div>`).join(''):'<span class=mut>Belum ada aktivitas perubahan data lokal. Log ini bukan bukti sinkronisasi berhasil ke Supabase.</span>'}</div>`;
 }
 
 function paketListForView(){
@@ -2515,23 +2543,44 @@ function satriaRupPetaAlokasiAwal(p){
  if(x.complete)return {...x.map};
  return Object.fromEntries(ids.map((id,i)=>[id,i===0?Number(p.pagu||0):0]));
 }
-function satriaRupBagianPagu(p,r){
+/* Perhitungan Bank RUP tidak mengubah data transaksi.
+   Penetapan tervalidasi mengganti, bukan menambah, estimasi HPS paket tunggal.
+   Konsolidasi multi-RUP tidak diasumsikan pembagian nilai penetapannya;
+   alokasi yang sudah diberikan tetap dicadangkan sambil menunggu atribusi resmi.
+   Monitoring SPSE tetap menggunakan alokasi, kontrak/pembayarannya ada di modul SPSE. */
+function satriaRupPenetapanPaket(p){
+ if(satriaSpseIs(p))return 0;
+ const amount=Number(kontrak(p)); // kontrak() hanya mengembalikan nilai pemenang yang lolos gate
+ return Number.isSafeInteger(amount)&&amount>0?amount:0;
+}
+function satriaRupBagianHps(p,r){
  if(!satriaRupLinked(p,r))return 0;
  const ids=satriaRupLinks(p);
  if(ids.length<=1)return satriaRupPenggunaanPaket(p).nilai;
  return Number(satriaRupAlokasiDetail(p).map[String(r.id)]||0);
 }
+function satriaRupBagianPagu(p,r){
+ if(!satriaRupLinked(p,r))return 0;
+ // Tanpa pembagian nilai akhir multi-RUP, gunakan alokasi eksplisit/cadangan.
+ if(satriaRupLinks(p).length>1)return satriaRupBagianHps(p,r);
+ return satriaRupPenetapanPaket(p)||satriaRupBagianHps(p,r);
+}
 function satriaRupStatusAnggaran(r,excludeId='',state=S){
  const linked=(state.paket||[]).filter(p=>String(p.id)!==String(excludeId||'')&&satriaRupLinked(p,r));
  const batas=Number(r.pagu);
+ const allocatedHps=linked.reduce((sum,p)=>sum+satriaRupBagianHps(p,r),0);
  const allocated=linked.reduce((sum,p)=>sum+satriaRupBagianPagu(p,r),0);
+ const penetapan=linked.reduce((sum,p)=>sum+(satriaRupLinks(p).length<=1?satriaRupPenetapanPaket(p):0),0);
+ const pending=allocated-penetapan;
+ const penetapanBelumTerbagi=linked.filter(p=>satriaRupLinks(p).length>1&&satriaRupPenetapanPaket(p)>0).length;
  const tidakTerbagi=linked.filter(p=>!satriaRupAlokasiDetail(p).complete).length;
- const totalPaguPaket=linked.reduce((sum,p)=>sum+(satriaRupLinks(p).length>1?satriaRupBagianPagu(p,r):Number(p.pagu||0)),0);
+ const totalPaguPaket=linked.reduce((sum,p)=>sum+(satriaRupLinks(p).length>1?satriaRupBagianHps(p,r):Number(p.pagu||0)),0);
  const otomatis=linked.filter(p=>satriaRupLinks(p).length<=1&&satriaRupPenggunaanPaket(p).mode==='otomatis').length;
  const cadangan=linked.filter(p=>satriaRupLinks(p).length<=1&&satriaRupPenggunaanPaket(p).mode==='cadangan').length;
  const melebihi=linked.filter(p=>satriaRupLinks(p).length<=1&&satriaRupPenggunaanPaket(p).mode==='melebihi').length;
- return {batas,allocated,sisa:batas-allocated,linked,tidakTerbagi,otomatis,cadangan,melebihi,totalPaguPaket,
-   valid:Number.isSafeInteger(batas)&&batas>0&&Number.isSafeInteger(allocated)&&allocated>=0};
+ const valid=Number.isSafeInteger(batas)&&batas>0&&[allocated,allocatedHps,penetapan,pending,totalPaguPaket].every(Number.isSafeInteger)&&allocated>=0&&allocatedHps>=0&&penetapan>=0&&pending>=0;
+ return {batas,allocated,allocatedHps,penetapan,pending,sisa:batas-allocated,sisaHps:batas-allocatedHps,
+   linked,tidakTerbagi,penetapanBelumTerbagi,otomatis,cadangan,melebihi,totalPaguPaket,valid};
 }
 /* SATRIA DASHBOARD 2026-11-03 — pembacaan Bank RUP TANPA MUTASI DATA.
    Pagu RUP unik per OPD/TA/kode; penggunaan HARUS sama dengan Input RUP.
@@ -2556,10 +2605,11 @@ function satriaDashboardRupMetrics(tahun=S.ui.tahun){
  const forRup=r=>[...(byRef.get(String(r.id))||[]),...(byLegacy.get(rupBankKey(r))||[])];
  const groups=new Map();
  for(const r of bank){const key=rupBankKey(r);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(r)}
- const out={tahun:year,rupCount:groups.size,validCount:0,pagu:0,used:0,free:0,over:0,
-   shared:0,unused:0,draft:0,missingSplit:0,overDetail:0,needsAlign:0,
-   duplicated:0,invalid:0,excluded:0,unlinked:0,rows:[],packages:packages.length};
- const linkedIds=new Set();
+ const out={tahun:year,rupCount:groups.size,validCount:0,pagu:0,used:0,usedHps:0,settled:0,pending:0,
+   free:0,freeHps:0,over:0,overHps:0,shared:0,unused:0,draft:0,missingSplit:0,
+   awardsUnassigned:0,settledUnattributed:0,overDetail:0,needsAlign:0,duplicated:0,invalid:0,excluded:0,
+   unlinked:0,rows:[],packages:packages.length};
+ const linkedIds=new Set(),uncountedMultiAwards=new Set();
  for(const group of groups.values()){
   const r=group[0];
   if(group.length>1){
@@ -2575,8 +2625,16 @@ function satriaDashboardRupMetrics(tahun=S.ui.tahun){
    x.linked.forEach(p=>linkedIds.add(String(p.id)));
    continue;
   }
-  out.validCount++;out.pagu+=x.batas;out.used+=x.allocated;
+  out.validCount++;out.pagu+=x.batas;out.used+=x.allocated;out.usedHps+=x.allocatedHps;
+  out.settled+=x.penetapan;out.pending+=x.pending;
   out.free+=Math.max(0,x.sisa);out.over+=Math.max(0,-x.sisa);
+  out.freeHps+=Math.max(0,x.sisaHps);out.overHps+=Math.max(0,-x.sisaHps);
+  out.awardsUnassigned+=x.penetapanBelumTerbagi;
+  for(const p of x.linked){
+   if(satriaRupLinks(p).length>1&&satriaRupPenetapanPaket(p)>0&&!uncountedMultiAwards.has(String(p.id))){
+    uncountedMultiAwards.add(String(p.id));out.settledUnattributed+=satriaRupPenetapanPaket(p);
+   }
+  }
   if(x.linked.length>1)out.shared++;
   if(!x.linked.length)out.unused++;
   out.draft+=x.cadangan;out.missingSplit+=x.tidakTerbagi;
@@ -2589,9 +2647,11 @@ function satriaDashboardRupMetrics(tahun=S.ui.tahun){
   if(x.melebihi)issues.push('Rincian melampaui pagu paket');
   if(x.totalPaguPaket>x.batas)issues.push('Pagu paket perlu rekonsiliasi');
   if(x.cadangan)issues.push('Ada cadangan sementara');
+  if(x.penetapanBelumTerbagi)issues.push('Penetapan konsolidasi multi-RUP belum diatribusikan');
   out.rows.push({rup:r,status:issues[0]||(x.linked.length?'Terhitung':'Belum digunakan'),
    level:x.sisa<0||x.tidakTerbagi||x.melebihi?3:issues.length?2:0,
-   valid:true,pagu:x.batas,used:x.allocated,free:x.sisa,
+   valid:true,pagu:x.batas,used:x.allocated,usedHps:x.allocatedHps,penetapan:x.penetapan,
+   pending:x.pending,free:x.sisa,freeHps:x.sisaHps,
    linked:x.linked.length,note:issues.join(' · ')});
  }
  // Paket tanpa referensi RUP tidak boleh dimasukkan ke alokasi Bank RUP diam-diam.
@@ -2604,6 +2664,10 @@ function satriaDashboardRupOverview(m){
  const rupAmount=m.validCount?rp(m.pagu):'—';
  const rupUse=m.validCount?rp(m.used):'—';
  const rupFree=m.validCount?rp(m.free):'—';
+ const rupHps=m.validCount?rp(m.usedHps):'—';
+ const rupAward=m.validCount?rp(m.settled):'—';
+ const rupAwardUnattributed=m.validCount?rp(m.settledUnattributed):'—';
+ const rupFreeHps=m.validCount?rp(m.freeHps):'—';
  const alerts=[];
  if(m.excluded)alerts.push(m.excluded+' RUP tidak bisa dimasukkan ke total (duplikat / nilai tidak valid)');
  if(m.over)alerts.push('Penggunaan terhitung melewati pagu pada beberapa RUP sebesar '+rp(m.over));
@@ -2611,21 +2675,26 @@ function satriaDashboardRupOverview(m){
  if(m.draft)alerts.push(m.draft+' penggunaan RUP masih menggunakan cadangan pagu paket sementara');
  if(m.needsAlign)alerts.push(m.needsAlign+' RUP mempunyai total pagu paket tercatat lebih besar dari pagu sumber; perlu rekonsiliasi');
  if(m.unlinked)alerts.push(m.unlinked+' paket belum memiliki referensi Bank RUP yang cocok');
+ if(m.awardsUnassigned)alerts.push(m.awardsUnassigned+' tautan paket konsolidasi dengan penetapan belum memiliki atribusi nilai akhir per RUP; sementara tetap dihitung menggunakan alokasi konservatif');
  const top=m.rows.slice(0,12);
  return `<div class="card satria-rup-dashboard" data-dash-rup-summary="1">
    <div class="row" style="justify-content:space-between;gap:12px;align-items:center"><h3>Kontrol Pagu Bank RUP • TA ${esc(String(m.tahun))}</h3><a href="#input" class="satria-rup-dash-link">Buka Input RUP</a></div>
-   <p class="mut">Satu kode RUP dihitung satu kali per OPD dan tahun. Angka penggunaan mengikuti aturan Input RUP: rincian lengkap (volume × HPS satuan), cadangan untuk rincian belum lengkap, dan pembagian eksplisit konsolidasi multi-RUP. Semua paket yang terhubung, termasuk arsip, turut dihitung. Ini <b>bukan realisasi belanja</b>. Tampilan mengikuti data lokal/cloud yang terakhir dimuat, bukan validasi transaksi serentak di Supabase.</p>
+   <p class="mut">Satu kode RUP dihitung satu kali per OPD/tahun. Ada <b>dua cara melihat saldo</b>: estimasi HPS/cadangan, dan sisa setelah penetapan valid. Paket yang sudah ditetapkan menggunakan nilai pemenang <b>menggantikan</b> HPS paket tersebut (tidak dikurangi dua kali); paket yang belum ditetapkan tetap memakai HPS lengkap atau cadangan. Konsolidasi multi-RUP tetap memakai alokasi yang tercatat sampai nilai akhir dapat diatribusikan dengan jelas. Termasuk paket arsip; <b>bukan realisasi pembayaran atau saldo kas</b>. Angka mengikuti data lokal/cloud terakhir dimuat.</p>
    <div class="satria-rup-dash-stats">
      <div><span>Pagu RUP unik</span><b>${rupAmount}</b><small>${m.validCount} dari ${m.rupCount} referensi valid</small></div>
-     <div><span>Penggunaan terhitung</span><b>${rupUse}</b><small>HPS lengkap / cadangan / pembagian</small></div>
-     <div><span>Sisa kapasitas RUP</span><b>${rupFree}</b><small>Saldo masing-masing RUP, bukan kas</small></div>
+     <div><span>Alokasi menurut HPS / cadangan</span><b>${rupHps}</b><small>Estimasi sebelum substitusi penetapan</small></div>
+     <div><span>Sisa menurut HPS</span><b>${rupFreeHps}</b><small>Tidak sama dengan sisa setelah penetapan</small></div>
+     <div><span>Total penetapan teratribusi</span><b>${rupAward}</b><small>Hanya pemenang valid paket RUP tunggal</small></div>
+     <div><span>Penetapan multi-RUP belum terbagi</span><b>${rupAwardUnattributed}</b><small>Dihitung sekali per paket; belum mengurangi saldo sebagai penetapan</small></div>
+     <div><span>Cadangan / alokasi belum final</span><b>${m.validCount?rp(m.pending):'—'}</b><small>Termasuk alokasi konsolidasi multi-RUP</small></div>
+     <div><span>Sisa setelah penetapan</span><b>${rupFree}</b><small>Saldo kapasitas, bukan pembayaran</small></div>
      <div><span>RUP dipakai berulang</span><b>${m.shared}</b><small>RUP dengan 2 paket atau lebih</small></div>
      <div><span>RUP belum digunakan</span><b>${m.unused}</b><small>Termasuk dalam pagu RUP unik</small></div>
      <div><span>Perlu pemeriksaan</span><b>${m.issueCount}</b><small>Indikator kualitas, bukan keputusan otomatis</small></div>
    </div>
    ${!m.rupCount?'<p class="mut">Belum ada Bank RUP pada OPD dan tahun yang dipilih. Pagu paket dan HPS tetap tersedia di analitik paket, tetapi saldo RUP tidak dapat disimpulkan.</p>':''}
    ${alerts.length?`<div class="satria-rup-alerts"><b>Perlu perhatian operator:</b><ul>${alerts.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>`:'<p class="mut">Tidak ditemukan anomali berdasarkan pemeriksaan saldo Bank RUP lokal untuk filter ini.</p>'}
-   ${top.length?`<div class="table-wrap"><table class="satria-rup-dash-table"><thead><tr><th>RUP</th><th>Paket terkait</th><th class="n">Pagu RUP</th><th class="n">Terhitung</th><th class="n">Sisa</th><th>Status</th></tr></thead><tbody>${top.map(x=>`<tr><td><b>${esc(x.rup.rup||'-')}</b><small style="display:block;white-space:normal">${esc(x.rup.nama||'')}</small></td><td>${x.linked} paket</td><td class="n">${x.valid?rp(x.pagu):'—'}</td><td class="n">${x.valid?rp(x.used):'—'}</td><td class="n ${x.free<0?'bad':''}">${x.valid?rp(x.free):'—'}</td><td style="white-space:normal"><b class="${x.level===3?'bad':x.level===2?'warn':'mut'}">${esc(x.status)}</b>${x.note?`<small style="display:block">${esc(x.note)}</small>`:''}</td></tr>`).join('')}</tbody></table></div>
+   ${top.length?`<div class="table-wrap"><table class="satria-rup-dash-table"><thead><tr><th>RUP</th><th>Paket terkait</th><th class="n">Pagu RUP</th><th class="n">HPS/cadangan</th><th class="n">Penetapan</th><th class="n">Sisa HPS</th><th class="n">Sisa setelah penetapan</th><th>Status</th></tr></thead><tbody>${top.map(x=>`<tr><td><b>${esc(x.rup.rup||'-')}</b><small style="display:block;white-space:normal">${esc(x.rup.nama||'')}</small></td><td>${x.linked} paket</td><td class="n">${x.valid?rp(x.pagu):'—'}</td><td class="n">${x.valid?rp(x.usedHps):'—'}</td><td class="n">${x.valid?rp(x.penetapan):'—'}</td><td class="n ${x.freeHps<0?'bad':''}">${x.valid?rp(x.freeHps):'—'}</td><td class="n ${x.free<0?'bad':''}">${x.valid?rp(x.free):'—'}</td><td style="white-space:normal"><b class="${x.level===3?'bad':x.level===2?'warn':'mut'}">${esc(x.status)}</b>${x.note?`<small style="display:block">${esc(x.note)}</small>`:''}</td></tr>`).join('')}</tbody></table></div>
    <p class="mut" style="margin-top:8px">Ditampilkan ${top.length} dari ${m.rows.length} RUP, mendahulukan yang perlu diperiksa. Periksa semua RUP dan ubah rincian melalui menu Input RUP / Paket Pengadaan. Dashboard tidak mengubah data.</p>`:''}
  </div>`;
 }
@@ -2865,7 +2934,7 @@ function vInputRup(){
  <button type="button" class="g" data-act="rupbankreset">Tampilkan semua RUP</button>
  </div>
  <input id="rupBankSearch" type="search" placeholder="Cari kode RUP, nama, metode, atau sumber..." value="${esc(S.ui.rupSearch||'')}" style="width:100%;margin-bottom:12px" aria-label="Pencarian Bank RUP">
- ${list.length?`<div class="satria-rup-grid">${list.map(r=>{const status=satriaRupStatusAnggaran(r),linked=status.linked,existing=linked[0];const available=status.valid&&status.sisa>0;return `<article class="satria-rup-card"><div><small>RUP ${esc(r.rup)} · TA ${r.tahun} · ${esc(O(r.opd).singkat||O(r.opd).nama)}</small><h3>${esc(r.nama)}</h3><p><b>Pagu RUP ${rp(r.pagu)}</b> · ${esc(r.metodePemilihan||'Metode belum tercatat')}</p><p class="mut" style="margin:3px 0;font-size:12px">Sumber: ${esc(r.asal||'Data lama / backup')}${r.statusVerifikasi?' · '+esc(r.statusVerifikasi):''}</p><div class="satria-rup-budget-status" role="status"><div><b>Terhitung terpakai: ${rp(status.allocated)}</b> · <b class="${status.sisa<0?'bad':available?'ok':'warn'}">Sisa berdasarkan rincian: ${rp(status.sisa)}</b></div><small>${linked.length} paket: ${status.otomatis} dihitung otomatis dari rincian, ${status.cadangan-status.linked.filter(satriaSpseIs).length} cadangan sementara, ${status.linked.filter(satriaSpseIs).length} monitoring SPSE${status.tidakTerbagi?', '+status.tidakTerbagi+' konsolidasi tanpa pembagian':''}.</small>${status.totalPaguPaket>status.batas?'<small class="warn">Pagu paket yang masih tercatat berjumlah '+rp(status.totalPaguPaket)+' (lebih tinggi dari pagu RUP). Periksa dan gunakan tombol Samakan pagu paket dengan rincian sebelum menerbitkan dokumen baru.</small>':''}${status.melebihi?'<small class="bad">Ada paket yang rincian/HPS-nya melebihi pagu paket. Periksa paket terkait.</small>':''}${status.sisa<0?'<small class="bad">Jumlah terpakai melebihi pagu RUP. Periksa rincian dan sumber anggaran.</small>':''}<small class="mut">Rincian HPS e-Purchasing adalah estimasi; alokasi SPSE adalah cadangan pagu monitoring. Keduanya bukan realisasi pembayaran. Pagu sumber Bank RUP tidak berubah.</small></div>${linked.length?`<div class="satria-rup-linked-list" style="margin-top:10px;border-top:1px solid var(--bd);padding-top:8px"><b style="font-size:12px">Paket yang memakai RUP ini:</b>${linked.map(p=>{const u=satriaRupPenggunaanPaket(p),v=satriaRupBagianPagu(p,r);const multi=satriaRupLinks(p).length>1;return `<div style="padding:7px 0;border-bottom:1px solid var(--bd);font-size:12px"><div><b>${esc(p.nama||p.id)}</b></div><div>Terhitung ${rp(v)} · ${multi?'Pembagian konsolidasi':satriaSpseIs(p)?'Monitoring SPSE (alokasi)':u.mode==='otomatis'?'Otomatis dari rincian lengkap':u.mode==='cadangan'?'Cadangan sementara (rincian belum lengkap)':'Rincian melebihi pagu paket'} · Pagu paket tercatat ${rp(p.pagu)}</div><div class="row" style="gap:5px;margin-top:5px"><button type="button" class="g" data-act="rupopen" data-id="${esc(p.id)}" style="height:31px;padding:0 10px">Buka rincian</button>${!multi&&u.mode==='otomatis'&&u.nilai!==Number(p.pagu)?`<button type="button" class="g" data-act="rupalign" data-id="${esc(p.id)}" style="height:31px;padding:0 10px">Samakan pagu paket dengan rincian</button>`:''}</div></div>`}).join('')}</div>`:''}</div><div class="satria-rup-create-budget" style="margin-top:10px"><label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px">Cadangan pagu paket baru (opsional, Rp)</label><input type="number" data-rup-budget-input="${esc(r.id)}" min="1" max="${Math.max(0,status.sisa)}" step="1" inputmode="numeric" placeholder="Kosongkan untuk memakai sisa ${esc(nf(Math.max(0,status.sisa)))}" aria-label="Cadangan pagu paket baru RUP ${esc(r.rup)}" ${available?'':'disabled'} style="width:100%;max-width:370px"><small class="mut" style="display:block;margin-top:5px">Saat rincian paket baru lengkap, penggunaan otomatis dihitung dari volume × HPS. Sebelum lengkap, cadangan pagu ini digunakan sementara.</small></div><div class="row" style="gap:8px;flex-wrap:wrap;margin-top:9px"><button type="button" data-act="rupcreate" data-id="${esc(r.id)}" ${available?'':'disabled'}>${existing?'Buat paket lagi':'Buat paket dari RUP'}</button>${existing?`<button type="button" class="g" data-act="rupopen" data-id="${esc(existing.id)}">Buka paket terkait (${linked.length})</button>`:''}<button type="button" class="g" data-act="rupremove" data-id="${esc(r.id)}">Hapus dari bank</button></div>${!available?'<small class="warn">Belum ada sisa RUP. Pastikan semua rincian paket telah lengkap dan sesuai; jangan mengurangi angka yang sudah disahkan tanpa pemeriksaan.</small>':''}</article>`}).join('')}</div>`:`<div class="satria-empty-state"><strong>${imported.length?'Tidak ada RUP yang cocok dengan filter Bank RUP.':'Belum ada RUP tersimpan pada akses akun ini.'}</strong><p>${imported.length?'Pilih Tampilkan semua RUP untuk melihat kembali hasil input manual dan impor JSON.':'Simpan RUP manual atau impor JSON/CSV untuk menambah data Bank RUP.'}</p></div>`}</div>`;
+ ${list.length?`<div class="satria-rup-grid">${list.map(r=>{const status=satriaRupStatusAnggaran(r),linked=status.linked,existing=linked[0];const available=status.valid&&status.sisa>0;return `<article class="satria-rup-card"><div><small>RUP ${esc(r.rup)} · TA ${r.tahun} · ${esc(O(r.opd).singkat||O(r.opd).nama)}</small><h3>${esc(r.nama)}</h3><p><b>Pagu RUP ${rp(r.pagu)}</b> · ${esc(r.metodePemilihan||'Metode belum tercatat')}</p><p class="mut" style="margin:3px 0;font-size:12px">Sumber: ${esc(r.asal||'Data lama / backup')}${r.statusVerifikasi?' · '+esc(r.statusVerifikasi):''}</p><div class="satria-rup-budget-status" role="status"><div><b>HPS / cadangan: ${rp(status.allocatedHps)}</b> · Sisa HPS: <b class="${status.sisaHps<0?'bad':'mut'}">${rp(status.sisaHps)}</b></div><div><b>Total penetapan valid: ${rp(status.penetapan)}</b> · <b>Alokasi belum final: ${rp(status.pending)}</b></div><div><b class="${status.sisa<0?'bad':available?'ok':'warn'}">Sisa setelah penetapan: ${rp(status.sisa)}</b></div><small>${linked.length} paket: ${status.otomatis} dihitung otomatis dari rincian, ${status.cadangan-status.linked.filter(satriaSpseIs).length} cadangan sementara, ${status.linked.filter(satriaSpseIs).length} monitoring SPSE${status.tidakTerbagi?', '+status.tidakTerbagi+' konsolidasi tanpa pembagian':''}${status.penetapanBelumTerbagi?', '+status.penetapanBelumTerbagi+' penetapan multi-RUP belum teratribusi':''}.</small>${status.totalPaguPaket>status.batas?'<small class="warn">Pagu paket yang masih tercatat berjumlah '+rp(status.totalPaguPaket)+' (lebih tinggi dari pagu RUP). Periksa dan gunakan tombol Samakan pagu paket dengan rincian sebelum menerbitkan dokumen baru.</small>':''}${status.melebihi?'<small class="bad">Ada paket yang rincian/HPS-nya melebihi pagu paket. Periksa paket terkait.</small>':''}${status.sisa<0?'<small class="bad">Jumlah terpakai melebihi pagu RUP. Periksa rincian dan sumber anggaran.</small>':''}<small class="mut">Nilai penetapan tervalidasi menggantikan HPS untuk paket RUP tunggal, tidak dijumlahkan dua kali. Penetapan konsolidasi multi-RUP belum dialokasikan otomatis. SPSE tetap memakai cadangan alokasi; nilai kontraknya ditampilkan terpisah. Ini bukan realisasi pembayaran; pagu RUP sumber tidak berubah.</small></div>${linked.length?`<div class="satria-rup-linked-list" style="margin-top:10px;border-top:1px solid var(--bd);padding-top:8px"><b style="font-size:12px">Paket yang memakai RUP ini:</b>${linked.map(p=>{const u=satriaRupPenggunaanPaket(p),v=satriaRupBagianPagu(p,r);const multi=satriaRupLinks(p).length>1;return `<div style="padding:7px 0;border-bottom:1px solid var(--bd);font-size:12px"><div><b>${esc(p.nama||p.id)}</b></div><div>Terhitung ${rp(v)} · ${multi?'Pembagian konsolidasi':satriaSpseIs(p)?'Monitoring SPSE (alokasi)':satriaRupPenetapanPaket(p)>0?'Nilai penetapan valid (pengganti HPS)':u.mode==='otomatis'?'Otomatis dari rincian lengkap':u.mode==='cadangan'?'Cadangan sementara (rincian belum lengkap)':'Rincian melebihi pagu paket'} · HPS ${rp(hps(p))} · ${satriaRupPenetapanPaket(p)>0?'Penetapan '+rp(satriaRupPenetapanPaket(p))+' · ':''}Pagu paket tercatat ${rp(p.pagu)}</div><div class="row" style="gap:5px;margin-top:5px"><button type="button" class="g" data-act="rupopen" data-id="${esc(p.id)}" style="height:31px;padding:0 10px">Buka rincian</button>${!multi&&u.mode==='otomatis'&&u.nilai!==Number(p.pagu)?`<button type="button" class="g" data-act="rupalign" data-id="${esc(p.id)}" style="height:31px;padding:0 10px">Samakan pagu paket dengan rincian</button>`:''}</div></div>`}).join('')}</div>`:''}</div><div class="satria-rup-create-budget" style="margin-top:10px"><label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px">Cadangan pagu paket baru (opsional, Rp)</label><input type="number" data-rup-budget-input="${esc(r.id)}" min="1" max="${Math.max(0,status.sisa)}" step="1" inputmode="numeric" placeholder="Kosongkan untuk memakai sisa ${esc(nf(Math.max(0,status.sisa)))}" aria-label="Cadangan pagu paket baru RUP ${esc(r.rup)}" ${available?'':'disabled'} style="width:100%;max-width:370px"><small class="mut" style="display:block;margin-top:5px">Sebelum penetapan valid: rincian HPS lengkap atau cadangan pagu. Sesudah penetapan valid: nilai akhir pemenang menggantikan estimasi paket tunggal. Penetapan multi-RUP tetap memerlukan atribusi per RUP.</small></div><div class="row" style="gap:8px;flex-wrap:wrap;margin-top:9px"><button type="button" data-act="rupcreate" data-id="${esc(r.id)}" ${available?'':'disabled'}>${existing?'Buat paket lagi':'Buat paket dari RUP'}</button>${existing?`<button type="button" class="g" data-act="rupopen" data-id="${esc(existing.id)}">Buka paket terkait (${linked.length})</button>`:''}<button type="button" class="g" data-act="rupremove" data-id="${esc(r.id)}">Hapus dari bank</button></div>${!available?'<small class="warn">Belum ada sisa RUP. Pastikan semua rincian paket telah lengkap dan sesuai; jangan mengurangi angka yang sudah disahkan tanpa pemeriksaan.</small>':''}</article>`}).join('')}</div>`:`<div class="satria-empty-state"><strong>${imported.length?'Tidak ada RUP yang cocok dengan filter Bank RUP.':'Belum ada RUP tersimpan pada akses akun ini.'}</strong><p>${imported.length?'Pilih Tampilkan semua RUP untuk melihat kembali hasil input manual dan impor JSON.':'Simpan RUP manual atau impor JSON/CSV untuk menambah data Bank RUP.'}</p></div>`}</div>`;
 }
 
 function vPaket(){const demoJumlah=satriaSubDemoJumlah();const demoNotice=demoJumlah?`<div class="card satria-sub-demo-warning" role="alert"><b>Perlu koreksi: ${demoJumlah} referensi subkegiatan berisi kode contoh bawaan SATRIA.</b><p>Kode KODE-DEMO-001 bukan subkegiatan paket nyata. Sumber asli dan isian subkegiatan lain tetap dipertahankan.</p><button type="button" data-act="satriaFixDemoSub">Bersihkan kode contoh pada paket/Bank RUP</button></div>`:'';return `<div class="row satria-page-heading"><div><h2>Paket Pengadaan TA ${S.ui.tahun}</h2><p class="mut">Daftar paket mengikuti filter OPD dan tahun aktif.</p></div><button type="button" data-act="newpaket">+ Pilih RUP dari Bank</button></div>${demoNotice}${satriaHumanPaketOverview()}<div class="card satria-paket-card"><div class="row satria-paket-toolbar"><label for="qPaket">Cari paket</label><input id="qPaket" type="search" autocomplete="off" placeholder="Cari kode RUP atau nama paket…" value="${esc(S.ui.q||'')}" aria-controls="paketTableResult"/><select id="pLife" aria-label="Filter kelengkapan data paket" style="max-width:200px">${[["all","Semua kelengkapan"],["draf","Draf · belum ada kode RUP"],["berjalan","Berjalan · data belum lengkap"],["lengkap","Lengkap"],["arsip","Diarsipkan"]].map(([v,l])=>`<option value="${v}" ${(S.ui.plife||"all")===v?"selected":""}>${l}</option>`).join("")}</select><span class="satria-result-count">${paketListForView().length} paket</span></div><div id="paketTableResult" aria-live="polite">${paketListMarkup()}</div></div>`}
@@ -2905,7 +2974,7 @@ function fData(p){
  const pj=peran=>S.pejabat.filter(x=>x.opd===p.opd&&x.peran===peran&&(x.aktif!==false||[p.ppk,p.pp,p.kabid].includes(x.id))).map(x=>[x.id,x.nama+(x.aktif===false?' (nonaktif)':'')]);
  return `<div class="grid satria342-data-form" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
  <div class="satria342-section-head"><span>01</span><div><b>Identitas & Anggaran</b><small>Informasi dari Bank RUP dan rincian pelaksanaan</small></div></div>
- ${F('Nama paket',I('nama'))}${F('Kode RUP',I('rup'))}${F('Pagu (Rp)',`<div style="display:flex;align-items:center;gap:8px"><span style="font-weight:700;color:var(--mut)">Rp</span><input data-cur="1" data-col="paket" data-id="${p.id}" data-f="pagu" inputmode="numeric" value="${nf(p.pagu)}" style="flex:1;text-align:right;font-variant-numeric:tabular-nums"></div>`)}${F2('Kontrol alokasi pagu Bank RUP',`<div class="satria-rup-budget-detail">${satriaRupRelated(p).map(r=>{const s=satriaRupStatusAnggaran(r,p.id);const own=satriaRupBagianPagu(p,r);return `<div><b>RUP ${esc(r.rup)}</b> · Pagu RUP ${rp(s.batas)} · Penggunaan terhitung ${rp(own)} · Paket lain ${rp(s.allocated)} · <b class="${s.sisa<0?'bad':'mut'}">Sisa untuk paket ini / lainnya ${rp(s.sisa)}</b></div>`}).join('')||'<span class="mut">Paket belum terhubung ke Bank RUP.</span>'}<small class="mut">RUP tunggal: jika semua rincian lengkap, penggunaan dihitung otomatis dari Volume × HPS; jika belum lengkap, pagu paket dicadangkan. Pagu Bank RUP tetap. Konsolidasi multi-RUP membutuhkan pembagian manual.</small></div>`)}${F('Bulan pelaksanaan (dari SiRUP)',I('bulanPelaksanaan'))}${F('Sumber dana',SEL('sumber',[...new Set(['APBD','APBN','DAK','DAU','DBH','PAD','Lainnya',p.sumber].filter(Boolean))].map(x=>[x,x])))}
+ ${F('Nama paket',I('nama'))}${F('Kode RUP',I('rup'))}${F('Pagu (Rp)',`<div style="display:flex;align-items:center;gap:8px"><span style="font-weight:700;color:var(--mut)">Rp</span><input data-cur="1" data-col="paket" data-id="${p.id}" data-f="pagu" inputmode="numeric" value="${nf(p.pagu)}" style="flex:1;text-align:right;font-variant-numeric:tabular-nums"></div>`)}${F2('Kontrol alokasi pagu Bank RUP',`<div class="satria-rup-budget-detail">${satriaRupRelated(p).map(r=>{const s=satriaRupStatusAnggaran(r,p.id);const own=satriaRupBagianPagu(p,r);return `<div><b>RUP ${esc(r.rup)}</b> · Pagu RUP ${rp(s.batas)} · Penggunaan terhitung ${rp(own)} · Paket lain ${rp(s.allocated)} · <b class="${s.sisa<0?'bad':'mut'}">Sisa untuk paket ini / lainnya ${rp(s.sisa)}</b></div>`}).join('')||'<span class="mut">Paket belum terhubung ke Bank RUP.</span>'}<small class="mut">RUP tunggal: rincian HPS atau cadangan dipakai sebelum penetapan valid, dan nilai penetapan menggantikannya setelah valid. Nilai penetapan multi-RUP tidak boleh dibagi otomatis. Pagu Bank RUP sumber tetap.</small></div>`)}${F('Bulan pelaksanaan (dari SiRUP)',I('bulanPelaksanaan'))}${F('Sumber dana',SEL('sumber',[...new Set(['APBD','APBN','DAK','DAU','DBH','PAD','Lainnya',p.sumber].filter(Boolean))].map(x=>[x,x])))}
  ${F('OPD',SEL('opd',S.opd.map(o=>[o.id,o.singkat])))}${F('Unit/Bagian',SEL('unit',S.unit.filter(u=>u.opd===p.opd&&(u.aktif!==false||String(u.id)===String(p.unit))).map(u=>[u.id,u.kode+' — '+u.bidang+(u.aktif===false?' (nonaktif)':'')])))}${F('Nomor urut (otomatis)',`<input value="${esc(p.seq||nextSeq(p.tahun,p.opd))}" readonly aria-readonly="true" title="Dikelola otomatis oleh sistem">`)}
  ${F2('Keterkaitan RUP & Konsolidasi',`<div class="satria-rup-link-manager"><p class="mut">Satu RUP dapat digunakan pada banyak paket. Untuk paket konsolidasi, hubungkan lebih dari satu RUP dengan OPD dan tahun yang sama; identitas dan HPS paket tidak ikut berubah otomatis.</p><div class="row" style="gap:8px;flex-wrap:wrap">${(S.rupBank||[]).filter(r=>satriaRupLinks(p).includes(String(r.id))).map(r=>`<span class="pill">RUP ${esc(r.rup)} ${String(r.id)===String(p.rupBankId)?'(utama)':''} <button type="button" class="g" data-act="rupunlink" data-id="${esc(p.id)}" data-rup="${esc(r.id)}" style="min-height:28px;height:28px;padding:0 9px" title="Lepas referensi, tidak menghapus RUP">Lepas</button></span>`).join('')||'<span class="mut">Belum ditautkan eksplisit ke Bank RUP (paket lama tetap dapat menggunakan kode RUP yang sama).</span>'}</div><div class="row" style="margin-top:8px;gap:8px"><select id="rupLinkAdd" style="max-width:420px"><option value="">— Pilih RUP untuk ditautkan —</option>${(S.rupBank||[]).filter(r=>String(r.opd)===String(p.opd)&&Number(r.tahun)===Number(p.tahun)&&!satriaRupLinks(p).includes(String(r.id))).map(r=>`<option value="${esc(r.id)}">${esc(r.rup+' — '+r.nama)}</option>`).join('')}</select><button type="button" data-act="ruplink" data-id="${esc(p.id)}">Tautkan RUP</button></div>${satriaRupLinks(p).length>1?`<div style="border:1px solid var(--bd);border-radius:10px;padding:12px;margin:10px 0"><b>Pembagian pagu paket untuk konsolidasi multi-RUP</b><p class="mut" style="margin:4px 0">Jumlah alokasi seluruh RUP harus tepat ${rp(p.pagu)}. Satu paket dihitung sebesar alokasinya pada tiap RUP, bukan seluruh pagunya pada setiap RUP.</p><div class="row" style="gap:10px;flex-wrap:wrap">${satriaRupLinks(p).map(rid=>{const x=(S.rupBank||[]).find(y=>String(y.id)===rid);const m=satriaRupPetaAlokasiAwal(p);return `<label style="display:flex;flex-direction:column;gap:5px"><small>RUP ${esc(x?.rup||rid)}</small><input type="number" min="0" step="1" inputmode="numeric" data-rup-split="${esc(rid)}" value="${esc(m[rid]||0)}" style="max-width:180px"></label>`}).join('')}</div><button type="button" data-act="rupallocsave" data-id="${esc(p.id)}" style="margin-top:9px">Simpan pembagian RUP</button>${satriaRupAlokasiDetail(p).complete?'':'<p class="warn">Pembagian konsolidasi lama belum tersimpan. Sistem memakai perhitungan konservatif hingga disimpan.</p>'}</div>`:''}<small class="mut">Pagu Bank RUP tetap sebagai referensi resmi. Untuk konsolidasi beberapa RUP, gunakan pembagian alokasi agar tidak dihitung ganda; dokumen saat ini memakai kode RUP utama.</small></div>`)}
  <div class="satria342-section-head"><span>02</span><div><b>Program, Kegiatan & Subkegiatan</b><small>Isi per baris agar susunan tetap rapi di dokumen</small></div></div>
@@ -3874,10 +3943,10 @@ function satriaLaporanDownloadCsv(filename,headers,rows){
 }
 function vLap(){
  const data=satriaLaporanData(), totals=data.reduce((a,g)=>{for(const k of ['rup','terpakai','sisa','ep','spse','paguPaket','hps','penetapan','hematHps','nilaiKontrak','bayar','rupPerluCek','paketTanpaRup','kontrakPerluCek'])a[k]=(a[k]||0)+g[k];return a},{});
- const cards=[['Pagu RUP unik',totals.rup||0,'Tidak dijumlahkan berulang per paket'],['Penggunaan RUP terhitung',totals.terpakai||0,'Rincian HPS / cadangan / konsolidasi'],['Sisa kapasitas RUP',totals.sisa||0,'Bukan saldo kas / realisasi'],['Kontrak SPSE tercatat',totals.nilaiKontrak||0,'Nilai kontrak dan addendum dengan nomor kontrak'],['Pembayaran SPSE terverifikasi',totals.bayar||0,'Bukan progres fisik; tidak termasuk e-Purchasing'],['Nilai penetapan E-Purchasing',totals.penetapan||0,'Bukan nilai kontrak atau pembayaran']];
+ const cards=[['Pagu RUP unik',totals.rup||0,'Tidak dijumlahkan berulang per paket'],['Penggunaan RUP terhitung',totals.terpakai||0,'Nilai penetapan valid atau HPS/cadangan non-final'],['Sisa kapasitas RUP',totals.sisa||0,'Bukan saldo kas / realisasi'],['Kontrak SPSE tercatat',totals.nilaiKontrak||0,'Nilai kontrak dan addendum dengan nomor kontrak'],['Pembayaran SPSE terverifikasi',totals.bayar||0,'Bukan progres fisik; tidak termasuk e-Purchasing'],['Nilai penetapan E-Purchasing',totals.penetapan||0,'Bukan nilai kontrak atau pembayaran']];
  const rows=data.map(g=>`<tr><td>${g.tahun}</td><td>${esc(O(g.opd).singkat||g.opd)}</td><td class=n>${g.rupValid}</td><td class=n>${rp(g.rup)}</td><td class=n>${rp(g.terpakai)}</td><td class=n>${rp(g.sisa)}</td><td class=n>${g.ep}</td><td class=n>${g.spse}</td><td class=n>${rp(g.hps)}</td><td class=n>${rp(g.penetapan)}</td><td class=n>${rp(g.hematHps)}</td><td class=n>${rp(g.nilaiKontrak)}</td><td class=n>${rp(g.bayar)}</td><td class=n>${g.rupPerluCek}</td><td class=n>${g.spseTerlambat+g.spseMasalah}</td></tr>`).join('');
  return `<section class="card" data-satria-laporan="integrated"><div class="row" style="justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><h3>Laporan dan Analisis • E-Purchasing + Monitoring SPSE</h3><div class="row" style="gap:8px"><button class="g" data-act="csv">Ekspor Ringkasan (CSV)</button><button class="g" data-act="csvDetail">Ekspor Paket (CSV)</button></div></div>
- <p class="mut">Sumber: data SATRIA terakhir yang berhasil dimuat sesuai akses Anda, termasuk paket arsip. Nilai RUP adalah anggaran sumber, penggunaannya merupakan perhitungan HPS/cadangan, penetapan e-Purchasing bukan pembayaran, dan pembayaran SPSE hanya yang berstatus terverifikasi. Laporan tidak mengubah data. Informasi SPSE yang dicatat manual perlu dibandingkan dengan SPSE resmi.</p>
+ <p class="mut">Sumber: data SATRIA terakhir yang berhasil dimuat sesuai akses Anda, termasuk paket arsip. Nilai RUP adalah anggaran sumber, penggunaannya merupakan perhitungan HPS/cadangan sebelum penetapan dan nilai pemenang tervalidasi setelah penetapan paket RUP tunggal; penetapan e-Purchasing bukan pembayaran, dan pembayaran SPSE hanya yang berstatus terverifikasi. Laporan tidak mengubah data. Informasi SPSE yang dicatat manual perlu dibandingkan dengan SPSE resmi.</p>
  <div class="satria-lap-metrics">${cards.map(([l,v,d])=>`<div class="card satria-lap-metric"><span class="satria-lap-label">${esc(l)}</span><b class="satria-lap-value">${rp(v)}</b><small class="satria-lap-note">${esc(d)}</small></div>`).join('')}</div>
  <p class="mut">Total ${totals.ep||0} paket e-Purchasing, ${totals.spse||0} paket SPSE, ${totals.rupPerluCek||0} kelompok RUP perlu perhatian, ${totals.paketTanpaRup||0} paket dengan referensi RUP tidak ditemukan, ${totals.kontrakPerluCek||0} catatan kontrak/pembayaran SPSE perlu periksa. Selisih HPS–penetapan hanya dihitung untuk paket e-Purchasing dengan pemenang terpilih; selisih negatif tetap dilaporkan. Total tidak digunakan sebagai bukti realisasi anggaran.</p>
  <div class="table-wrap satria-lap-table-scroll" style="max-height:68vh;overflow:auto"><table id="lapTable"><thead><tr><th>TA</th><th>OPD</th><th>RUP valid</th><th>Pagu RUP unik</th><th>Terpakai terhitung</th><th>Sisa RUP</th><th>Paket E-P</th><th>Paket SPSE</th><th>HPS E-P</th><th>Penetapan E-P</th><th>Selisih HPS–penetapan</th><th>Kontrak SPSE</th><th>Bayar terverifikasi</th><th>RUP perlu cek</th><th>Isu/jadwal SPSE</th></tr></thead><tbody>${rows||'<tr><td colspan="15" class="mut">Belum ada paket atau Bank RUP untuk cakupan ini.</td></tr>'}</tbody></table></div><small class="mut">Geser tabel secara horizontal untuk melihat seluruh indikator kontrak dan pembayaran SPSE. Laporan dirinci menurut TA + OPD. Pagu Bank RUP unik mengikuti aturan Input RUP; duplikat dan pagu tidak valid dikecualikan serta ditandai untuk pemeriksaan.</small></section>`;
