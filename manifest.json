@@ -1,7 +1,7 @@
 {
   "name": "SATRIA NEXT — Government Procurement Workspace",
   "short_name": "SATRIA NEXT",
-  "description": "SATRIA NEXT 3.0.59.22 — Ringkasan Utama RUP, HPS, nilai penetapan, sisa anggaran pasca penetapan, dan status pengadaan",
+  "description": "SATRIA NEXT 3.0.59.23 — Ringkasan Utama RUP, HPS, nilai penetapan, sisa anggaran, dan review evaluasi total HPS historis",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f4f2fb",
