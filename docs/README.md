@@ -15,3 +15,7 @@ Dokumentasi operasional dan riwayat disimpan terpisah dari file aplikasi sehingg
 ## Catatan versi sebelumnya
 
 Dokumen pengembangan versi sebelumnya tetap berada dalam folder `docs/` untuk audit teknis. Catatan lama yang dahulu berada di root disimpan dalam [history/](history/). Contoh hasil cetak DPP berada di [assets/](assets/). Catatan ini tidak menggantikan panduan deploy aktif.
+
+- [Hasil verifikasi ZIP GitHub terbaru (5 November 2026)](VERIFIKASI-ZIP-GITHUB-TERBARU-2026-11-05.md)
+
+- [Ringkasan Utama SATRIA: HPS, Penetapan &amp; Sisa RUP 3.0.59.22](RINGKASAN-UTAMA-RUP-PENETAPAN-3.0.59.22.md)

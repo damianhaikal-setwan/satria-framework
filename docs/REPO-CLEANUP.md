@@ -1,6 +1,6 @@
 # Catatan perapian repositori SATRIA NEXT 3.0.59.21
 
-**Dasar:** paket `SATRIA-NEXT-3.0.59.21-Hotfix-Bank-RUP.zip` yang sudah berfungsi. Perapian **tidak mengubah** `index.html`, `sw.js`, `manifest.json`, ikon, RLS/RPC SQL, atau versi Edge Function aktif. Skrip uji lama diperbarui agar sesuai struktur sekarang.
+**Dasar:** paket `SATRIA-NEXT-3.0.59.21-Hotfix-Bank-RUP.zip` yang sudah berfungsi, serta verifikasi terhadap `satria-framework-main.zip` terbaru dari pengguna (5 November 2026). Perapian **tidak mengubah** `index.html`, `sw.js`, `manifest.json`, ikon, RLS/RPC SQL, atau versi Edge Function aktif. Skrip uji lama diperbarui agar sesuai struktur sekarang.
 
 ## Yang dihilangkan karena duplikat/kedaluwarsa
 
@@ -26,3 +26,9 @@
 ## Di luar cakupan
 
 Tidak menghapus/memindahkan data pengguna di Supabase, tidak menerapkan migrasi, tidak memindahkan server, tidak melakukan force-push atau menghapus history Git. Pengujian cloud produksi dan login pengguna tetap harus dilakukan setelah deploy.
+
+## Verifikasi terhadap unduhan terbaru GitHub
+
+Lihat [laporan perbandingan SHA-256](VERIFIKASI-ZIP-GITHUB-TERBARU-2026-11-05.md). File kode dan migrasi produksi terbaru tidak diubah; hanya penataan repo, dokumentasi, dan skrip uji yang disesuaikan.
+
+> Perhatian: catatan perapian ini mengacu pada basis 3.0.59.21. Pembaruan tampilan dan kalkulasi versi 3.0.59.22 dijelaskan pada [catatan Ringkasan Utama](RINGKASAN-UTAMA-RUP-PENETAPAN-3.0.59.22.md).
