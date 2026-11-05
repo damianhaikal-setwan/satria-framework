@@ -1,0 +1,17 @@
+'use strict';
+const fs=require('fs'),path=require('path'),assert=require('assert/strict');
+const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const mod=fs.readFileSync(path.join(__dirname,'..','frontend','satria-price-analysis.js'),'utf8');
+const audit=html.match(/<script id="satria-document-quality-engine-v340">([\s\S]*?)<\/script>/);
+assert(audit,'QA print capture module missing');
+new Function(audit[1]);
+assert(audit[1].includes("'analisa'"),'15th document must be present in QA registry');
+assert(audit[1].includes('manualChecks'),'separate human verification from programmatic failures');
+assert(audit[1].includes('String(x.id)===id'),'selector value must compare ID as string');
+assert(audit[1].includes("k!=='analisa'"),'draft analysis print should not require an additional blocking confirmation');
+assert(html.includes("docMiss=(p,k)=>docReqs(p,k).filter(r=>!r.ok&&!r.manual)"),'manual check must not permanently fail input completeness');
+assert(html.includes("analisa:'Analisis Kewajaran Harga & Bukti'"),'active guide should name the analysis document');
+assert(mod.includes('manual:true'),'the human verification requirement must remain explicit');
+const sw=fs.readFileSync(path.join(__dirname,'..','sw.js'),'utf8');
+assert(sw.includes('3.0.59.34'),'cache key must be invalidated for hotfix');
+console.log('PASS Document QA 3.0.59.34: 15 registered types, matching ID, manual/automatic checks separated, no blocking draft confirmation, SW cache');
