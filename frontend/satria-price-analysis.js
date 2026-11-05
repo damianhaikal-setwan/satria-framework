@@ -278,16 +278,12 @@ function exampleProviders(a){
 }
 function reportOwnOffer(f){return (f.offers||[]).find(o=>o.offerId===f.chosenOfferId)||null;}
 function reportPeers(f){return (f.offers||[]).filter(o=>o.offerId!==f.chosenOfferId);}
-function exampleCompareStatus(f){
- const peers=reportPeers(f).filter(o=>o.listed!==null);
- if(f.selfTayang===null)return 'Harga belum lengkap';
- if(f.hpsDelta<0)return 'Di atas HPS; perlu alasan';
- if(f.chosenSpecWarnings?.length)return 'Produk target perlu diperiksa';
- if(!f.chosenHasMetadata)return 'Bukti harga target perlu diperiksa';
- if(!peers.length)return 'Pembanding belum tersedia';
- if(peers.some(o=>o.specWarnings?.length))return 'Spesifikasi pembanding perlu diperiksa';
- if(peers.some(o=>!o.canCompare))return 'Bukti pembanding perlu diperiksa';
- return 'Indikasi kompetitif; verifikasi akhir';
+// Status di dokumen adalah hasil perbandingan HARGA TAYANG antarpenyedia
+// untuk barang yang sama, bukan perbandingan terhadap HPS atau harga nego.
+function priceTayangStatus(target, pembanding){
+ if(target===null||target===undefined)return 'Harga belum lengkap';
+ if(!pembanding.length||pembanding.some(h=>h===null||h===undefined))return 'Pembanding belum lengkap';
+ return pembanding.every(h=>target<=h)?'Wajar':'Lebih tinggi dari pembanding';
 }
 // Harga tayang pembanding tetap digunakan untuk selisih pada tabel IV; catatan tambahan di bawah tabel tidak dicetak.
 function exampleCompareTable(a){
@@ -299,46 +295,12 @@ function exampleCompareTable(a){
   const target=priceFor(first),peer=priceFor(second);
   const x=target?.listedUnit??null,y=peer?.listedUnit??null;
   const deviation=x===null||y===null?null:money(y-x);
-  let status='Perlu verifikasi';
-  if(x===null)status='Harga belum lengkap';
-  else if(f.hpsUnit>0&&x>f.hpsUnit)status='Di atas HPS';
-  else if(!second||y===null)status='Pembanding belum lengkap';
-  else if(target?.specWarnings?.length||peer?.specWarnings?.length||!target?.comparisonEligible||!peer?.comparisonEligible)status='Perlu verifikasi';
-  else status='Dapat dipertimbangkan';
+  const semuaHargaPembanding=ordered.slice(1).map(o=>priceFor(o)?.listedUnit??null);
+  const status=priceTayangStatus(x,semuaHargaPembanding);
   const extra=ordered.slice(2).map(o=>{const r=priceFor(o);return `<span class="spha-extra-peer">${escLocal(o.name)}: ${fmtPaperNumber(r?.listedUnit)}</span>`;}).join('');
   return `<tr><td class="spha-center">${i+1}</td><td><span class="spha-item-name">${escLocal(f.name)}</span>${f.spec&&f.spec!=='Spesifikasi belum dirinci'&&normalize(f.spec)!==normalize(f.name)?`<span class="spha-item-spec">Spesifikasi: ${escLocal(f.spec)}</span>`:''}</td><td class="spha-number">${fmtPaperNumber(x)}</td><td class="spha-number">${fmtPaperNumber(y)}${extra}</td><td class="spha-number">${deviation===null?'—':(deviation<0?'−':'')+fmtPaperNumber(Math.abs(deviation))}</td><td class="spha-status">${escLocal(status)}</td></tr>`;
  }).join('');
  return `<table class="spha-example-compare"><colgroup><col style="width:6%"><col style="width:35%"><col style="width:16%"><col style="width:16%"><col style="width:12%"><col style="width:15%"></colgroup><thead><tr><th>No.</th><th>Item Barang</th><th>Harga<br>${escLocal(label(first))}</th><th>Harga<br>${escLocal(label(second))}</th><th>Selisih / Deviasi</th><th>Status Kewajaran</th></tr></thead><tbody>${rows||'<tr><td colspan="6">Barang belum tersedia.</td></tr>'}</tbody></table>`;
-}
-function exampleItemAnalysis(f){
- const own=reportOwnOffer(f),unit=f.unit||'satuan';
- if(!own||own.listed===null)return 'Harga target belum dicatat, sehingga perbandingan belum dapat dilakukan.';
- const parts=[];
- if(f.hpsUnit>0){
-  const diff=money(f.hpsUnit-own.listed);
-  parts.push(`Terhadap HPS satuan ${rpLocal(f.hpsUnit)}, harga tayang ${diff===0?'sama':`${rpLocal(Math.abs(diff))} ${diff>0?'lebih rendah':'lebih tinggi'}`}.`);
- }
- for(const peer of reportPeers(f)){
-  if(peer.listed===null){parts.push(`Harga ${peer.supplier} belum tersedia.`);continue;}
-  const gap=money(peer.listed-own.listed);
-  parts.push(`Dibandingkan ${peer.supplier} (${rpLocal(peer.listed)} per ${unit}), penawaran ${f.chosenName} ${gap===0?'sama besar':`${rpLocal(Math.abs(gap))} ${gap>0?'lebih murah':'lebih mahal'}`}.`);
-  if(peer.specWarnings?.length)parts.push(`Terdapat indikasi perbedaan produk: ${peer.specWarnings.join('; ')}.`);
-  else if(!peer.canCompare)parts.push('Bukti atau kesetaraan spesifikasi pembanding belum cukup untuk menyatakan perbandingan setara.');
- }
- if(f.chosenBasis==='negosiasi penyedia ditetapkan')parts.push(`Harga hasil negosiasi tercatat ${rpLocal(f.chosenValue)} per ${unit}; perbedaan terhadap harga tayang tidak dicampur dengan selisih antarpembanding.`);
- if(!reportPeers(f).length)parts.push('Penawaran pembanding untuk barang ini belum tersedia.');
- if(f.chosenSpecWarnings?.length)parts.push(`Produk target perlu diklarifikasi: ${f.chosenSpecWarnings.join('; ')}.`);
- return parts.join(' ');
-}
-function exampleItemConclusion(f){
- const peers=reportPeers(f).filter(o=>o.listed!==null);
- if(f.chosenValue===null||f.selfTayang===null)return 'Belum dapat dinilai; harga dan bukti perlu dilengkapi.';
- if(f.hpsDelta<0)return 'Perlu evaluasi lebih lanjut karena harga satuan hasil negosiasi/penawaran di atas HPS.';
- if(f.chosenSpecWarnings?.length)return 'Perlu klarifikasi kesesuaian produk penyedia yang dikaji.';
- if(!f.chosenHasMetadata)return 'Perlu melengkapi dan memeriksa bukti harga penyedia yang dikaji.';
- if(!peers.length)return 'Perlu referensi harga tambahan atau justifikasi tertulis.';
- if(peers.some(o=>!o.canCompare))return 'Perlu verifikasi kesetaraan produk dan sumber pembanding.';
- return 'Harga dapat dipertimbangkan; keputusan wajar memerlukan verifikasi Pejabat Pengadaan.';
 }
 function exampleItemNarratives(a){
  const ordered=a.winner?[a.winner,...a.offers.filter(o=>o.id!==a.winner.id)]:a.offers;
@@ -352,7 +314,7 @@ function exampleItemNarratives(a){
    if(gap===0)return `Penawaran ${selected.name} sama dengan ${peer.name} di E-Katalog.`;
    return `Penawaran ${selected.name} ${gap>0?'lebih murah':'lebih mahal'} ${rpLocal(Math.abs(gap))} per ${unit} dibandingkan ${peer.name} di E-Katalog.`;
   });
-  const canAccept=price!==null&&f.hpsUnit>0&&price<=f.hpsUnit&&d?.comparisonEligible&&peers.length>0&&peers.every(x=>x.detail?.comparisonEligible&&x.detail.listedUnit!==null&&x.detail.listedUnit!==undefined&&x.detail.listedUnit>=price);
+  const canAccept=priceTayangStatus(price,peers.map(x=>x.detail?.listedUnit??null))==='Wajar';
   const spec=f.spec&&f.spec!=='Spesifikasi belum dirinci'&&normalize(f.spec)!==normalize(f.name)?` Spesifikasi: ${escLocal(f.spec)}`:'';
   return `<article class="spha-example-item"><h4><span class="spha-item-index">${i+1}.</span><span>${escLocal(f.name)}${spec} — ${escLocal(f.qty)} ${escLocal(unit)}</span></h4><ul><li><b>Harga Penawaran ${escLocal(selected?.name||'—')}:</b> ${rpLocal(price)} / ${escLocal(unit)}</li><li><b>Analisis:</b> ${escLocal(analyses.join(' ')||'—')}</li><li><b>Kesimpulan:</b> ${canAccept?'Harga Diterima / Wajar.':'—'}</li></ul></article>`;
  }).join('')}</div>`;
@@ -368,7 +330,7 @@ function exampleConclusion(a,p){
  const perItemOK=!!w&&a.productFindings.length>0&&a.productFindings.every(f=>{
   const target=w.detail.find(d=>d.id===f.id);
   const peers=a.offers.filter(o=>o.id!==w.id).map(o=>o.detail.find(d=>d.id===f.id));
-  return target?.listedUnit!==null&&target?.listedUnit!==undefined&&target.comparisonEligible&&f.hpsUnit>=target.listedUnit&&peers.length>0&&peers.every(peer=>peer?.comparisonEligible&&peer.listedUnit>=target.listedUnit);
+  return priceTayangStatus(target?.listedUnit??null,peers.map(peer=>peer?.listedUnit??null))==='Wajar';
  });
  const original=(p.penawaran||[]).find(o=>String(o.id)===w?.id);
  const specOK=!!w&&a.productFindings.length>0&&a.productFindings.every(f=>{
