@@ -148,3 +148,57 @@
 }
 
 .spha-example-paper .spha-example-item p{margin:2px 0!important}.spha-example-paper .spha-example-item b{font-weight:700}
+
+/* Perbaikan dokumen no. 15 sesuai struktur contoh analisa.pdf (A4 portrait, 7 bagian). */
+.spha-example-paper .spha-doc-title{text-decoration:underline!important;text-underline-offset:2px;font-size:13px!important;font-weight:700!important;margin:13px 0 18px!important}
+.spha-example-paper .spha-example-identity{width:100%;margin:12px 0 16px!important}
+.spha-example-paper .spha-example-identity th,.spha-example-paper .spha-example-identity td{font-size:10px!important;line-height:1.55!important;overflow-wrap:anywhere;word-break:normal!important}
+.spha-example-paper .spha-example-identity th{width:auto!important;white-space:normal}
+.spha-example-paper .spha-example-identity .spha-identity-colon{width:3%!important;text-align:center!important}
+.spha-example-paper h3{font-weight:700!important;margin:17px 0 8px!important}
+.spha-example-paper .spha-example-needs th,.spha-example-paper .spha-example-compare th{background:#fff!important;color:#111!important;text-align:center;font-weight:700}
+.spha-example-paper .spha-example-needs :is(td,th),.spha-example-paper .spha-example-compare :is(td,th){border:1px solid #333!important;white-space:normal!important}
+.spha-example-paper .spha-example-total :is(th,td){font-weight:700!important;background:#fff!important}
+.spha-example-paper .spha-example-peer{line-height:1.25;margin-bottom:3px}
+.spha-example-paper .spha-example-peer b{font-weight:400}
+.spha-example-paper .spha-example-peer span{display:block}
+.spha-example-paper .spha-example-item{padding:4px 0!important;border:0!important;break-inside:avoid-page;page-break-inside:avoid}
+.spha-example-paper .spha-example-item ul{margin:3px 0 4px!important;padding-left:22px!important}
+.spha-example-paper .spha-example-item li{margin:3px 0!important;line-height:1.46}
+.spha-example-paper .spha-example-recap{padding-left:23px;margin:5px 0 7px}
+.spha-example-paper .spha-example-recap li{padding-left:3px;margin:5px 0;line-height:1.5}
+.spha-example-paper .spha-example-footnote{font-size:8.5px!important;color:#444!important;margin:5px 0 9px!important}
+.spha-example-paper .spha-sign p{margin:4px 0!important}
+.spha-example-paper .spha-sign-space{height:54px}
+@page satriaPriceExample{size:A4 portrait;margin:13mm 15mm 14mm 15mm}
+@media print{
+ #satria-print-root .doc[data-document-type="analisa"]{page:satriaPriceExample!important;font:10pt/1.35 Arial,Helvetica,sans-serif!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper{font:9.5pt/1.35 Arial,Helvetica,sans-serif!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-doc-title{font-size:11pt!important;margin:10px 0 13px!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper h3{font-size:9.5pt!important;margin:11px 0 6px!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-identity th,
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-identity td{font-size:9pt!important;padding:2px 3px!important;line-height:1.43!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper :is(.spha-example-needs,.spha-example-compare) :is(th,td){font-size:8pt!important;line-height:1.24!important;padding:3px 4px!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper :is(p,li){font-size:9pt!important;line-height:1.42!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-item :is(h4,li){font-size:9pt!important;line-height:1.36!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-footnote{font-size:8pt!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-needs thead,
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-compare thead{display:table-header-group!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-item{break-inside:avoid!important;page-break-inside:avoid!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-sign-space{height:16mm!important}
+}
+
+/* Koreksi spesifik terhadap style cetak global dokumen SATRIA. */
+#main .doc[data-document-type="analisa"] .spha-example-paper .spha-doc-title,
+#satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-doc-title{text-align:center!important;text-decoration:underline!important;font-weight:700!important}
+#main .doc[data-document-type="analisa"] .spha-example-paper .spha-example-identity,
+#satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-identity{border:0!important;border-collapse:collapse!important}
+#main .doc[data-document-type="analisa"] .spha-example-paper .spha-example-identity :is(th,td),
+#satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-identity :is(th,td){border:0!important;background:#fff!important;box-shadow:none!important;text-align:left!important;font-weight:400!important}
+#main .doc[data-document-type="analisa"] .spha-example-paper .spha-example-identity .spha-identity-colon,
+#satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-identity .spha-identity-colon{text-align:center!important}
+#main .doc[data-document-type="analisa"] .spha-example-paper .spha-example-peer :is(b,span,small),
+#satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-peer :is(b,span,small){font-size:9px!important;line-height:1.26!important;display:block!important}
+#satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-needs :is(th,td),
+#satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-compare :is(th,td){border:1px solid #333!important}
+#satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-compare :is(th,td){vertical-align:top!important}
