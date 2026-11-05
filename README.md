@@ -1,8 +1,8 @@
-## SATRIA NEXT 3.0.59.36 — Analisis harga produk + rujukan PBJ
+## SATRIA NEXT 3.0.59.38 — Kertas kerja perbandingan harga produk & lampiran foto
 
 Perubahan inti pada dokumen ke-15 adalah **analisis harga tiap produk**: HPS satuan, harga tayang, hasil negosiasi, calon referensi lain, selisih nominal/persentase, alasan perbandingan dan indikator sementara. Struktur laporan mengikuti kertas kerja praktis: kebutuhan, metode, tabel, pertimbangan per produk, rekap, kesimpulan, lampiran bukti.
 
-Peraturan LKPP 2/2026 diberlakukan 1 September 2026 (menggantikan 9/2021), sehingga laporan menandai tanggal fase pengadaan yang tercatat dan **tidak berlaku surut**. Tidak ada kewajiban universal tiga referensi, tidak ada tarif PPN 11% yang ditambahkan otomatis, dan tidak ada penetapan harga wajar otomatis. Lihat `docs/ANALISIS-HARGA-PRODUK-PBJ-3.0.59.36.md`.
+Kertas kerja analisis harga versi 3.0.59.38 menampilkan perbandingan pemenang dengan semua harga penyedia lain dan lampiran foto yang benar-benar tersimpan. Tautan toko e-Katalog bukan bukti harga produk. Untuk rincian update lihat `docs/PANDUAN-UPDATE-3.0.59.38.md`.
 
 Tidak mengubah skema Supabase, data transaksi, atau keputusan pemenang. Jalankan pengujian lokal dan uji cloud dengan akun Anda setelah deployment.
 
@@ -42,7 +42,7 @@ Perbaikan ini memperbaiki error render pada Executive Briefing, membersihkan pat
 
 # SATRIA NEXT — Framework Pengadaan
 
-**Versi aplikasi: 3.0.59.36** · Ringkasan Utama HPS dan penetapan · Bank RUP manual dan impor JSON/CSV · Supabase (opsional sesuai konfigurasi instansi)
+**Versi aplikasi: 3.0.59.38** · Ringkasan Utama HPS dan penetapan · Bank RUP manual dan impor JSON/CSV · Supabase (opsional sesuai konfigurasi instansi)
 
 Versi ini menambahkan **Executive Briefing 3.0** (e-Purchasing, SPSE, gabungan), briefing per paket, cetak A4/PDF, daftar risiko, analisis penetapan dan penyedia, ringkasan per OPD, serta CSV. Lihat [panduan fitur](docs/EXECUTIVE-BRIEFING-3.0.59.27.md).
 
@@ -112,3 +112,8 @@ Jika operator salah memilih identitas penyedia dan data penawaran/negosiasi yang
 ### Koreksi nama penyedia tayang — v3.0.59.26
 
 Jika identitas penyedia penawaran dikoreksi, kolom **Nama penyedia tayang (verifikasi manual)** pada Smart Survey tetap mempertahankan data katalog yang tersimpan. Untuk rincian yang masih berbeda dengan penyedia penawaran, tersedia tombol **Koreksi nama penyedia tayang (nama saja)** dengan konfirmasi dan rujukan bukti. Perubahan ini hanya menyentuh `catalogRefs[itemId].seller`, menyimpan riwayat di `surveyHistory[itemId]`, dan tidak memodifikasi harga, HPS, hasil negosiasi, pemenang, tautan, atau barang lain. Jika tautan katalog jelas masih milik penyedia lama, koreksi nama ditahan sampai referensinya diperbarui.
+
+
+## Cara mencatat harga beberapa penyedia
+
+Pada setiap penyedia di Penawaran & Negosiasi, simpan produk yang ditawarkan pada setiap rincian barang. Pilihan lama **Referensi Utama** berarti **produk aktif untuk penyedia tersebut**, bukan penyedia pemenang atau referensi utama seluruh paket. Gunakan **Produk alternatif tambahan** hanya untuk variasi produk tambahan, bukan untuk mengganti penawaran Penyedia 2/3. Penyedia terpilih tetap ditentukan di bagian Penetapan. Laporan harga menampilkan seluruh penawaran dan menjelaskan bila produk belum dapat dibandingkan.

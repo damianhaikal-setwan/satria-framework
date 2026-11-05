@@ -1,4 +1,6 @@
-## SATRIA NEXT 3.0.59.36 — Analisis Harga Produk (pembaruan dari 3.0.59.34)
+> **Pembaruan saat ini:** dari 3.0.59.37 ganti 5 file: `index.html`, `sw.js`, `manifest.json`, `frontend/satria-price-analysis.js`, `frontend/satria-price-analysis.css`. Tidak ada migrasi Supabase. Rincian: `docs/PANDUAN-UPDATE-3.0.59.38.md`.
+
+## SATRIA NEXT 3.0.59.38 — Kertas Kerja Analisis Harga (pembaruan dari 3.0.59.37)
 
 Pembaruan dari versi yang terakhir dibagikan ke pengguna (3.0.59.34): ekstrak ZIP UPDATE-336 dan **ganti semua file sesuai struktur folder**. Jangan menghapus file lain dalam repo, dan jangan upload ZIP sebagai satu berkas GitHub tanpa mengekstraknya. Pembaruan termasuk penyempurnaan tampilan bukti 3.0.59.35 yang belum dibagikan terpisah.
 
