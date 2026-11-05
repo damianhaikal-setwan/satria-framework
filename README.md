@@ -1,3 +1,7 @@
+## SATRIA NEXT 3.0.59.39 — Analisis kewajaran mengikuti contoh PDF Pejabat Pengadaan
+
+Dokumen ke-15 kini mengikuti susunan I–VII sesuai contoh PDF pengguna, **A4 potret**, menampilkan sumber harga dari setiap penyedia, analisis per barang dengan bahasa manusia, rekap selisih HPS/negosiasi, dan lampiran foto produk yang memang tersimpan. Nama penyedia/akun/program/angka dihitung dari paket terpilih—tidak disalin dari contoh. Tetap baca-saja, tanpa persetujuan berjenjang atau migrasi Supabase. Baca `docs/PANDUAN-UPDATE-3.0.59.39.md`.
+
 ## SATRIA NEXT 3.0.59.38 — Kertas kerja perbandingan harga produk & lampiran foto
 
 Perubahan inti pada dokumen ke-15 adalah **analisis harga tiap produk**: HPS satuan, harga tayang, hasil negosiasi, calon referensi lain, selisih nominal/persentase, alasan perbandingan dan indikator sementara. Struktur laporan mengikuti kertas kerja praktis: kebutuhan, metode, tabel, pertimbangan per produk, rekap, kesimpulan, lampiran bukti.
@@ -42,7 +46,7 @@ Perbaikan ini memperbaiki error render pada Executive Briefing, membersihkan pat
 
 # SATRIA NEXT — Framework Pengadaan
 
-**Versi aplikasi: 3.0.59.38** · Ringkasan Utama HPS dan penetapan · Bank RUP manual dan impor JSON/CSV · Supabase (opsional sesuai konfigurasi instansi)
+**Versi aplikasi: 3.0.59.39** · Ringkasan Utama HPS dan penetapan · Bank RUP manual dan impor JSON/CSV · Supabase (opsional sesuai konfigurasi instansi)
 
 Versi ini menambahkan **Executive Briefing 3.0** (e-Purchasing, SPSE, gabungan), briefing per paket, cetak A4/PDF, daftar risiko, analisis penetapan dan penyedia, ringkasan per OPD, serta CSV. Lihat [panduan fitur](docs/EXECUTIVE-BRIEFING-3.0.59.27.md).
 

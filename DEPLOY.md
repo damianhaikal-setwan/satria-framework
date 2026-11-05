@@ -1,3 +1,7 @@
+# Rilis 3.0.59.39 — Perubahan Dokumen Analisis Harga
+
+Perbarui 5 file aplikasi dari 3.0.59.38. Tidak ada migrasi SQL. Gunakan branch uji dan lihat `docs/PANDUAN-UPDATE-3.0.59.39.md` untuk langkah deployment dan pemeriksaan PDF.
+
 > **Pembaruan saat ini:** dari 3.0.59.37 ganti 5 file: `index.html`, `sw.js`, `manifest.json`, `frontend/satria-price-analysis.js`, `frontend/satria-price-analysis.css`. Tidak ada migrasi Supabase. Rincian: `docs/PANDUAN-UPDATE-3.0.59.38.md`.
 
 ## SATRIA NEXT 3.0.59.38 — Kertas Kerja Analisis Harga (pembaruan dari 3.0.59.37)
