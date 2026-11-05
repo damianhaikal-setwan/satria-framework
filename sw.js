@@ -1,4 +1,4 @@
-const CACHE_NAME='satria-v3.0.59.36-product-price-comparison-v1';
+const CACHE_NAME='satria-v3.0.59.37-product-price-comparison-v1';
 self.addEventListener('install', e=>{ e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(['./','./index.html','./frontend/satria-next4.css','./frontend/satria-next4.js','./frontend/satria-operator-studio.css','./frontend/satria-operator-studio.js','./frontend/satria-price-analysis.js','./frontend/satria-price-analysis.css']).catch(()=>{}))); self.skipWaiting(); });
 self.addEventListener('activate', e=>{ e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE_NAME).map(x=>caches.delete(x))))); self.clients.claim(); });
 self.addEventListener('fetch', e=>{
