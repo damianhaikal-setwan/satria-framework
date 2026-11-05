@@ -42,8 +42,10 @@ const withoutWinner=analyze({...packet,pemenangId:null},{suppliers:{PRIMA:'PRIMA
 assert.equal(withoutWinner.winner,null);
 assert.match(withoutWinner.productFindings[0].chosenBasis,/belum ada penetapan/);
 const js=fs.readFileSync(path.join(__dirname,'../frontend/satria-price-analysis.js'),'utf8');
-assert(js.includes('IV. Tabel Analisis Beda Harga Per Item'));
-assert(js.includes('productPriceTable(a)'));
-assert(js.includes('productNarrative(f)'));
-assert(js.indexOf('IV. Tabel Analisis Beda Harga Per Item')<js.indexOf('IX. Lampiran B — Daftar Sumber Referensi Harga'));
+assert(js.includes('IV. TABEL ANALISA BEDA HARGA PER ITEM'));
+assert(js.includes('exampleCompareTable(a)'));
+assert(js.includes('exampleItemNarratives(a)'));
+assert(js.indexOf('II. DAFTAR KEBUTUHAN BARANG')<js.indexOf('VII. KESIMPULAN &amp; REKOMENDASI'));
+assert(js.includes('Harga tayang pembanding')||js.includes('harga tayang pembanding'));
+assert(!js.includes('Penghematan Anggaran (Efisiensi): Rp 199.700 (4,55%)')); 
 console.log('PASS v3.0.59.36: HPS & negotiation 7 items, per-item savings/overage, peer suitability, draft without winner, read-only, print sections');
