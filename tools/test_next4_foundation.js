@@ -24,9 +24,9 @@ assert.match(js,/const p=visible\(\)\.find/,'360 detail must not use arbitrary P
 assert.doesNotMatch(js,/\b(?:supabase|\.rpc\(|\.from\(|\.insert\(|\.update\(|\.delete\(|sync\(|S\.paket\s*=|S\.rupBank\s*=)/,'Presentation module must not mutate cloud/state');
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
 assert.match(css,/\.s4-module-head/);
-assert.match(sw,/satria-v3\.0\.59\.34/);
+assert.match(sw,/satria-v3\.0\.59\.36/);
 assert.match(sw,/satria-next4\.css/);
 assert.match(sw,/satria-next4\.js/);
-assert.match(manifest.description,/3\.0\.59\.34/);
+assert.match(manifest.description,/3\.0\.59\.36/);
 assert.equal((html.match(/frontend\/satria-next4\.js/g)||[]).length,1);
 console.log('PASS — '+scripts.length+' inline scripts parse; scoped 360, design assets, roles, module render, reduced motion, PWA cache, read-only guard');

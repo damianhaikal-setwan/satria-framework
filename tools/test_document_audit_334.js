@@ -13,5 +13,5 @@ assert(html.includes("docMiss=(p,k)=>docReqs(p,k).filter(r=>!r.ok&&!r.manual)"),
 assert(html.includes("analisa:'Analisis Kewajaran Harga & Bukti'"),'active guide should name the analysis document');
 assert(mod.includes('manual:true'),'the human verification requirement must remain explicit');
 const sw=fs.readFileSync(path.join(__dirname,'..','sw.js'),'utf8');
-assert(sw.includes('3.0.59.34'),'cache key must be invalidated for hotfix');
-console.log('PASS Document QA 3.0.59.34: 15 registered types, matching ID, manual/automatic checks separated, no blocking draft confirmation, SW cache');
+assert(sw.includes('3.0.59.36'),'cache key must be invalidated for hotfix');
+console.log('PASS Document QA 3.0.59.36: 15 registered types, matching ID, manual/automatic checks separated, no blocking draft confirmation, SW cache');
