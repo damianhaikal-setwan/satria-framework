@@ -1,0 +1,26 @@
+SATRIA NEXT 3.0.59.36 — Analisis Perbandingan Harga Produk (PBJ)
+
+DASAR PEMBARUAN: Rilis 3.0.59.34 yang terakhir Anda pasang.
+
+LANGKAH UPLOAD GITHUB
+1. Buat backup repository dan export data SATRIA dahulu.
+2. Ekstrak ZIP ini di komputer (JANGAN unggah ZIP sebagai satu file ke repository GitHub).
+3. Upload seluruh isi ZIP ke root repository, PERTAHANKAN jalur/folder (misalnya frontend/... dan tools/...).
+4. Jangan hapus file lain yang tidak ada dalam ZIP. Tidak diperlukan SQL baru di Supabase.
+5. Deploy lewat branch staging/pengujian, lalu muat ulang Chrome Cmd+Shift+R / Ctrl+F5.
+6. Pastikan SATRIA menunjukkan 3.0.59.36.
+7. Buka Paket Pengadaan → Penawaran & Negosiasi → Analisis Harga → Dokumen Pengadaan ke-15 → Cetak PDF.
+8. Cocokkan HPS, negosiasi, ongkir, tanggal/sumber harga dan bukti fisik untuk paket RUP 67122699.
+
+FOKUS v3.0.59.36
+* Analisis harga PER ITEM dibanding HPS satuan, harga tayang dan harga referensi penyedia lain.
+* Uraian numerik per barang dengan selisih Rp dan persentase.
+* Deteksi awal model/ukuran yang berbeda (misalnya Staples 10 vs 24/6).
+* Rujukan regulasi berdasarkan fase pengadaan yang tercatat; bukan keputusan hukum otomatis.
+* Kertas kerja 10 bagian: isi utama 7 bagian, diikuti 3 lampiran.
+* Tidak menambah input harga kedua kali, tidak ada approval dan tidak mengubah data tersimpan.
+
+BATAS UJI
+Pengujian offline menggunakan data simulasi; koneksi Supabase produksi dan kelayakan akhir dokumen BPK tetap harus diverifikasi pada akun Anda.
+
+Lihat docs/ANALISIS-HARGA-PRODUK-PBJ-3.0.59.36.md untuk formula dan dasar rujukan.

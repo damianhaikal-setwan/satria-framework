@@ -1,7 +1,7 @@
 {
   "name": "SATRIA NEXT — Government Procurement Workspace",
   "short_name": "SATRIA NEXT",
-  "description": "SATRIA NEXT 3.0.59.34 — Operator Studio dan Smart Analisis Kewajaran Harga per paket; referensi harga, analisis per item, rekap negosiasi, dan laporan pemeriksaan A4/PDF. Perbaikan cetak dokumen analisis dan audit 15 template.",
+  "description": "SATRIA NEXT 3.0.59.36 — Operator Studio dan Smart Analisis Kewajaran Harga per paket; referensi harga, analisis per item, rekap negosiasi, dan laporan pemeriksaan A4/PDF. Analisis selisih HPS/negosiasi dan calon pembanding produk per item, dengan verifikasi bukti asli.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f4f2fb",
