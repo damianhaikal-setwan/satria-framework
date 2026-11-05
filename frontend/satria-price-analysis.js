@@ -1,4 +1,4 @@
-/* SATRIA NEXT 3.0.59.38 — Smart Analisis Kewajaran Harga & Audit Evidence.
+/* SATRIA NEXT 3.0.59.39 — Smart Analisis Kewajaran Harga & Audit Evidence.
  * Read-only calculation. No edits to packet, offer, catalog references or winner data.
  * Historical evidence is never created or assigned an earlier date by this module.
  */
@@ -243,26 +243,118 @@ function page(){const p=current();if(!p)return `<section class="spha-page"><div 
  const a=getAnalysis(p),n=narrative(a),list=packetList();
  return `<section class="spha-page"><div class="spha-hero"><div><span class="spha-kicker">✦ SATRIA NEXT • SMART PRICE ANALYSIS</span><h2>Analisis harga tiap produk.<br><em>Langsung jelas selisihnya.</em></h2><p>Bandingkan HPS, harga tayang, negosiasi, dan referensi produk lain per barang. SATRIA menyusun alasan dan dokumen otomatis tanpa input ulang.</p><div class="spha-hero-tags"><span>TA ${escLocal(p.tahun)}</span><span>RUP ${escLocal(p.rup||'—')}</span><span>${escLocal(O(p.opd).singkat)}</span></div></div><div class="spha-hero-art">↗<small>PRICE<br>INSIGHT</small></div></div><div class="spha-toolbar"><label>Paket yang dianalisis<select data-spha-select>${list.map(q=>`<option value="${escLocal(q.id)}" ${q.id===p.id?'selected':''}>${escLocal(q.rup||'—')} · ${escLocal(q.nama)}</option>`).join('')}</select></label><a class="spha-btn muted" href="#paket/${encodeURIComponent(p.id)}">Kembali ke paket</a><button type="button" class="spha-btn" data-spha-action="document" data-pid="${escLocal(p.id)}">Pratinjau dokumen & PDF</button></div><div class="spha-foot"><b>Cara membaca:</b> setiap penyedia mencatat produk dan harga yang ditawarkannya sendiri. Penyedia 1, 2, dan seterusnya sama-sama menjadi sumber perbandingan harga; penyedia terpilih ditentukan setelah evaluasi dan negosiasi. Produk alternatif tambahan tidak menggantikan penawaran penyedia lain.</div>${summary(a)}<div class="spha-two"><section class="spha-card"><div class="spha-cardhead"><h3>Perbandingan total paket</h3><span>Harga lengkap</span></div>${barCompare(a)}<p class="spha-hint">Harga termasuk ongkir tercatat. Negosiasi parsial tidak dihitung sebagai total akhir. Nilai PPN tidak ditambahkan lagi dari harga bruto.</p></section><section class="spha-card"><div class="spha-cardhead"><h3>Pertimbangan hasil perbandingan</h3><span>Periksa bukti</span></div><div class="spha-assessment">${escLocal(a.assessment)}</div><p>${escLocal(n.status)}</p><p class="spha-hint">${escLocal(n.caveat)}</p></section></div><section class="spha-card spha-focus"><div class="spha-cardhead"><h3>Analisis beda harga per item & pertimbangan</h3><span>Fokus utama</span></div><p>Perbandingan disusun dari HPS satuan, harga yang ditawarkan, hasil negosiasi, dan harga produk yang dicatat dari penyedia lain. <b>Harga yang terlihat lebih murah belum otomatis wajar.</b> Ongkir berada pada perhitungan total paket.</p>${productPriceTable(a)}${productAnalysis(a)}</section><section class="spha-card"><h3>Daftar harga yang ditawarkan setiap penyedia</h3><p>Semua penawaran harga tetap ditampilkan. Harga dari produk yang berbeda ukuran, jenis, atau satuan perlu dijelaskan sebelum digunakan sebagai pembanding.</p>${matrix(a)}</section><section class="spha-card"><h3>Rekap penawaran dan negosiasi</h3>${resultTable(a)}</section><section class="spha-card"><h3>Daftar sumber harga dan bukti pendukung</h3><p>Tautan yang tercatat dapat menuju toko e-Katalog, bukan halaman produk. Untuk bukti harga setiap produk, gunakan catatan penawaran dan dokumen/screenshot asli pada waktu pengadaan.</p>${evidenceTable(a)}</section><section class="spha-card"><h3>Daftar cek bukti yang perlu ditinjau</h3><p>Rincian yang perlu dicocokkan kembali dengan bukti asli, terutama apabila ukuran, merek, atau satuan produk berbeda.</p>${evidenceActionList(a)}</section><section class="spha-card"><h3>Barang dan sumber harga yang perlu diperiksa</h3>${issueList(a)}</section><div class="spha-foot">Perhitungan mengikuti penawaran yang tersimpan saat laporan dibuka. Untuk kebutuhan BPK, cocokkan URL/screenshot dan bukti asli; hasil otomatis bukan penilaian final kewajaran atau pengesahan transaksi.</div></section>`;
 }
+// Dokumen resmi mengikuti susunan kertas kerja contoh pengguna.
+// Data dihitung dari paket/penawaran aktif pada saat laporan dibuka, tanpa menyimpan ulang.
+const valueText=v=>clean(v)||'Belum dicatat';
+function docIdentity(p){
+ const akun=(S.akun||[]).find(x=>String(x.id)===String(p.akunId||''));
+ const row=(label,value)=>`<tr><th>${escLocal(label)}</th><td>${escLocal(valueText(value)).replace(/\n/g,'<br>')}</td></tr>`;
+ const program=typeof progOf==='function'?progOf(p):p.program;
+ const kegiatan=typeof kegOf==='function'?kegOf(p):p.kegiatan;
+ const subRaw=typeof subOf==='function'?subOf(p):(p.subKeg||p.sub);
+ const sub=/KODE-DEMO-001|Kegiatan Simulasi/i.test(clean(subRaw))?'':subRaw;
+ const kode=akun?[akun.kode,akun.nama].filter(Boolean).join(' — '):'';
+ return `<table class="spha-example-identity"><tbody>
+ ${row('Program',program)}${row('Kegiatan',kegiatan)}${row('Sub Kegiatan',sub)}${row('Akun Belanja',kode)}
+ ${row('Kode RUP',p.rup)}${row('Nama Paket',p.nama)}
+ <tr><th>Pagu Anggaran</th><td>${rpLocal(p.pagu)}</td></tr>
+ ${row('Metode Pengadaan',p.metodePemilihan||'E-Purchasing (Katalog Elektronik)')}
+ </tbody></table>`;
+}
+function exampleNeedTable(a){return `<div class="spha-scroll"><table class="spha-table spha-example-needs"><thead><tr><th>No.</th><th>Nama Barang / Spesifikasi</th><th>Vol.</th><th>Satuan</th><th>HPS per Unit (Rp)</th><th>Jumlah HPS (Rp)</th></tr></thead><tbody>${a.productFindings.map((f,i)=>`<tr><td>${i+1}</td><td><b>${escLocal(f.name)}</b>${f.spec&&f.spec!==f.name&&f.spec!=='Spesifikasi belum dirinci'?`<small>${escLocal(f.spec)}</small>`:''}</td><td class="n">${escLocal(f.qty)}</td><td>${escLocal(f.unit)}</td><td class="n">${rpLocal(f.hpsUnit)}</td><td class="n">${rpLocal(money(f.hpsUnit*f.qty))}</td></tr>`).join('')}<tr><th colspan="5" style="text-align:right">Jumlah HPS</th><th class="n">${rpLocal(a.packet.hps)}</th></tr></tbody></table></div>`;}
+function exampleProviders(a){
+ const ordered=a.winner?[a.winner,...a.offers.filter(x=>x.id!==a.winner.id)]:a.offers;
+ if(!ordered.length)return '<p>Belum terdapat penawaran penyedia yang dicatat untuk paket ini.</p>';
+ return `<p>Perbandingan harga dilakukan terhadap ${ordered.length} penyedia yang telah dicatat dalam Penawaran &amp; Negosiasi, yaitu:</p><ol class="spha-example-sources">${ordered.map((o,i)=>`<li><b>${escLocal(o.name)}</b> — ${a.winner?(a.winner.id===o.id?'penyedia terpilih':'penyedia pembanding'):(i===0?'penawaran yang sedang dikaji':'penyedia pembanding')}${o.source?` (${escLocal(o.source)})`:''}.</li>`).join('')}</ol><p>Harga yang dibandingkan adalah harga tayang per satuan yang tercatat. Hasil negosiasi penyedia terpilih juga digunakan untuk menilai nilai pembelian. Perbedaan merek, model, ukuran, satuan, pajak, pengiriman, atau layanan diperiksa sebelum harga dianggap sebanding.</p>`;
+}
+function exampleCompareStatus(f){
+ const offered=(f.offers||[]).filter(x=>x.supplier!==f.chosenName&&x.listed!==null);
+ if(f.chosenValue===null)return 'Harga belum lengkap';
+ if(f.hpsDelta<0)return 'Harga satuan melebihi HPS; perlu alasan';
+ if(!offered.length)return 'Belum ada harga pembanding';
+ if(offered.some(x=>x.specWarnings?.length))return 'Kesetaraan produk perlu diperiksa';
+ if(offered.some(x=>!x.canCompare))return 'Periksa rincian barang dan sumber harga';
+ return 'Harga dapat dipertimbangkan setelah pemeriksaan barang';
+}
+function exampleCompareTable(a){
+ return `<div class="spha-scroll"><table class="spha-table spha-example-compare"><colgroup><col style="width:5%"><col style="width:24%"><col style="width:16%"><col style="width:25%"><col style="width:13%"><col style="width:17%"></colgroup><thead><tr><th>No.</th><th>Item Barang</th><th>Harga Tayang ${a.winner?'Penyedia Terpilih':'Penawaran yang Dikaji'}</th><th>Harga Penyedia Pembanding</th><th>Selisih Harga Satuan</th><th>Hasil Perbandingan</th></tr></thead><tbody>${a.productFindings.map((f,i)=>{
+ const own=(f.offers||[]).find(o=>o.supplier===f.chosenName);
+ const ownPrice=own?.listed??null;
+ const others=(f.offers||[]).filter(o=>o.supplier!==f.chosenName);
+ const comparisons=others.map(o=>{const product=o.refName&&normalize(o.refName)!==normalize(f.name)?`<small>Produk: ${escLocal(o.refName)}</small>`:'';return `<div class="spha-example-peer"><b>${escLocal(o.supplier)}</b><small>${rpLocal(o.listed)}${o.specWarnings?.length?' · Periksa kesetaraan':''}</small>${product}</div>`;}).join('')||'Tidak ada penyedia lain';
+ const diffs=others.map(o=>{if(ownPrice===null||o.listed===null)return '<div>—</div>';const d=money(o.listed-ownPrice);return `<div class="spha-example-peer">${d===0?'Sama':rpLocal(Math.abs(d))+' '+(d>0?'lebih rendah':'lebih tinggi')}</div>`;}).join('')||'—';
+ return `<tr><td>${i+1}</td><td><b>${escLocal(f.name)}</b><small>${escLocal(f.qty)} ${escLocal(f.unit)}</small></td><td class="n"><b>${rpLocal(ownPrice)}</b><small>${escLocal(f.chosenName||'Belum ditetapkan')}</small></td><td>${comparisons}</td><td>${diffs}</td><td>${escLocal(exampleCompareStatus(f))}</td></tr>`;
+ }).join('')}</tbody></table></div>`;
+}
+function exampleItemAnalysis(f){
+ const unit=f.unit||'satuan';
+ const chosenOffer=(f.offers||[]).find(x=>x.supplier===f.chosenName);
+ if(!chosenOffer||chosenOffer.listed===null)return `Harga penawaran ${f.name} belum tercatat lengkap. Perbandingan dan pertimbangan harga baru dapat disusun setelah data tersedia.`;
+ const listPrice=chosenOffer.listed;
+ let sentences='';
+ if(f.chosenBasis==='negosiasi penyedia ditetapkan')sentences+=`Setelah negosiasi, harga ${f.chosenName} menjadi ${rpLocal(f.chosenValue)} per ${unit}.`;
+ if(f.hpsDelta!==null)sentences+=` Dibandingkan HPS sebesar ${rpLocal(f.hpsUnit)} per ${unit}, harga hasil ${f.chosenBasis==='negosiasi penyedia ditetapkan'?'negosiasi':'penawaran'} ${priceGapText(f.hpsDelta,f.hpsDeltaPct)}.`;
+ const comparisons=(f.offers||[]).filter(o=>o.supplier!==f.chosenName);
+ if(!comparisons.length)sentences+=' Belum terdapat penyedia lain yang dicatat sebagai pembanding.';
+ for(const c of comparisons){
+  if(c.listed===null){sentences+=` Harga penawaran ${c.supplier} belum tersedia.`;continue;}
+  const delta=money(c.listed-listPrice);
+  sentences+=` ${c.supplier} mencantumkan harga ${rpLocal(c.listed)} per ${unit}`;
+  sentences+=delta===0?', sama dengan harga tayang penyedia yang dikaji.':`, ${rpLocal(Math.abs(delta))} ${delta>0?'lebih tinggi':'lebih rendah'} dibandingkan harga tayang ${f.chosenName}.`;
+  if(c.specWarnings?.length)sentences+=` Akan tetapi, produk yang ditawarkan mempunyai perbedaan yang perlu diteliti (${c.specWarnings.join('; ')}), sehingga selisih tersebut belum dapat dijadikan dasar pembanding yang setara.`;
+  else if(!c.canCompare)sentences+=' Keterangan produk dan bukti harga masih perlu dicocokkan sebelum digunakan sebagai pembanding langsung.';
+  else sentences+=' Harga tersebut menjadi bahan pertimbangan, dengan tetap memastikan kesamaan spesifikasi dan biaya pengiriman.';
+ }
+ if(f.chosenSpecWarnings?.length)sentences+=` Produk penyedia yang dipilih juga perlu dicocokkan dengan kebutuhan (${f.chosenSpecWarnings.join('; ')}).`;
+ if(f.hpsDelta<0)sentences+=' Harga hasil negosiasi di atas HPS satuan memerlukan penjelasan tersendiri berdasarkan kondisi dan bukti yang sebenarnya.';
+ return sentences.trim();
+}
+function exampleItemConclusion(f){
+ const comparators=(f.offers||[]).filter(o=>o.supplier!==f.chosenName&&o.listed!==null);
+ if(f.chosenValue===null)return 'Harga belum dapat dinilai karena hasil penawaran atau negosiasi belum lengkap.';
+ if(f.hpsDelta<0)return 'Harga satuan melebihi HPS; alasan dan bukti pendukung perlu ditelaah sebelum dinyatakan dapat diterima.';
+ if(!comparators.length)return 'Belum tersedia penawaran pembanding dalam paket ini; kewajaran harga perlu dipertimbangkan berdasarkan informasi harga lain yang tersedia.';
+ if(comparators.some(o=>o.specWarnings?.length))return 'Penawaran pembanding berbeda produk atau ukuran; selisih harga tidak cukup untuk menyatakan barang telah sebanding.';
+ return 'Harga dapat menjadi bahan pertimbangan setelah kesetaraan barang, biaya dan bukti harga dipastikan.';
+}
+function exampleItemNarratives(a){return `<div class="spha-example-narratives">${a.productFindings.map((f,i)=>{
+ const own=f.offers.find(o=>o.supplier===f.chosenName);
+ return `<article class="spha-example-item"><h4>${i+1}. ${escLocal(f.name)} — ${escLocal(f.qty)} ${escLocal(f.unit)}</h4>
+ <p><b>Harga penawaran:</b> ${rpLocal(own?.listed)} per ${escLocal(f.unit||'satuan')} (${escLocal(f.chosenName||'penyedia belum ditentukan')}).</p>
+ <p><b>Analisis:</b> ${escLocal(exampleItemAnalysis(f))}</p>
+ <p><b>Kesimpulan:</b> ${escLocal(exampleItemConclusion(f))}</p></article>`;
+ }).join('')}</div>`;}
+function exampleEfficiency(a){
+ const w=a.winner;
+ return `<div class="spha-example-summary"><p>1. Total HPS paket: <b>${rpLocal(a.packet.hps)}</b>.</p><p>2. Nilai hasil negosiasi ${w?escLocal(w.name):'penyedia terpilih'} termasuk ongkos kirim: <b>${rpLocal(w?.negoTotal)}</b>${w?'': ' (belum tersedia nilai final)'}.</p><p>3. Selisih terhadap HPS: <b>${a.delta===null?'Belum dapat dihitung':`${rpLocal(Math.abs(a.delta))} atau ${fmtPercent(a.packet.hps?Math.abs(a.delta)/a.packet.hps*100:NaN)} ${a.delta>=0?'lebih rendah daripada HPS':'lebih tinggi daripada HPS'}`}</b>.</p></div><p>Selisih terhadap HPS menggambarkan perbedaan antara perkiraan biaya dan hasil negosiasi; bukan dengan sendirinya bukti bahwa seluruh harga satuan sudah wajar. Pajak atau ongkos kirim tidak ditambahkan dua kali apabila sudah termasuk dalam harga yang tercatat.</p>`;
+}
+function exampleConclusion(a,p){
+ const who=a.winner?.name||'penyedia yang sedang dipertimbangkan';
+ const history=validDate(p?.tglPenetapan)||validDate(p?.tglBahp)||!!a.winner;
+ const intro=`Berdasarkan hasil perbandingan terhadap ${a.productFindings.length} jenis barang dan harga yang dicatat dari ${a.offers.length} penyedia, ${who} ${a.winner?'merupakan penyedia yang telah ditetapkan dalam catatan paket.':'masih memerlukan penetapan sesuai hasil evaluasi pengadaan.'}`;
+ const value=a.winner?` Nilai hasil negosiasi ${rpLocal(a.winner.negoTotal)} ${a.delta!==null?(a.delta>=0?'lebih rendah':'lebih tinggi')+' dari HPS sebesar '+rpLocal(Math.abs(a.delta))+'.':''}`:'';
+ const caution=`Perbedaan harga tersebut perlu disertai pemeriksaan kesamaan spesifikasi, satuan barang, pajak, biaya pengiriman, tanggal penawaran, dan bukti pendukung.`;
+ const rec=history?'Kertas kerja ini digunakan untuk menjelaskan dasar pertimbangan harga pada paket yang telah dicatat, dengan mencocokkan kembali bukti pengadaan aslinya.':'Hasil perbandingan dapat digunakan sebagai bahan pertimbangan sebelum melanjutkan proses e-Purchasing, setelah kelengkapan dan kesesuaian produk dipastikan.';
+ return `<ol class="spha-example-conclusion"><li>${escLocal(intro+value)}</li><li>${escLocal(caution)}</li><li>${escLocal(rec)}</li></ol><p class="spha-example-history">Dokumen ini disusun dari catatan yang tersedia pada tanggal penerbitan. Apabila pengadaan telah selesai, dokumen ini bukan bukti bahwa analisis yang sama telah disusun sebelum pelaksanaan transaksi.</p>`;
+}
 function documentHTML(p){
- const a=getAnalysis(p),n=narrative(a),stamp=today();
- const doc=`<div class="spha-doc spha-audit-paper" data-spha-document="true">${typeof kop==='function'?kop(p):''}
- <p class="spha-doc-title">ANALISIS KEWAJARAN HARGA PENGADAAN BARANG</p>
- <p class="spha-doc-subtitle">Kertas kerja perbandingan harga e-Purchasing<br>Tanggal penyusunan: ${escLocal(stamp)}</p>
- <h3>I. Identitas Paket dan Tujuan Analisis</h3>
- <table class="spha-doc-info"><tbody><tr><th>Kode RUP</th><td>${escLocal(p.rup||'—')}</td><th>Tahun Anggaran</th><td>${escLocal(p.tahun)}</td></tr><tr><th>Nama paket</th><td colspan="3">${escLocal(p.nama||'—')}</td></tr><tr><th>Unit Kerja</th><td colspan="3">${escLocal(O(p.opd).nama)}</td></tr><tr><th>Pagu Paket</th><td>${rpLocal(a.packet.pagu)}</td><th>Total HPS</th><td>${rpLocal(a.packet.hps)}</td></tr><tr><th>Tanggal referensi (catatan)</th><td>${prettyDate(p.tglSurvei)}</td><th>Tanggal negosiasi (catatan)</th><td>${prettyDate(p.tglNego)}</td></tr></tbody></table>
- <p>Analisis ini disusun sebagai bahan pertimbangan Pejabat Pengadaan dengan membandingkan harga setiap barang terhadap HPS, penawaran penyedia lain, dan hasil negosiasi. Perbandingan dilakukan dengan memperhatikan kesesuaian jenis, spesifikasi, satuan, pajak, biaya pengiriman, serta kondisi pembelian. Pertimbangan ini mengikuti prinsip efisien, efektif, transparan, dan akuntabel dalam pengadaan barang/jasa pemerintah, dengan memperhatikan ketentuan yang berlaku ketika pengadaan dilaksanakan.</p>
- <h3>II. Analisis Beda Harga Per Item dan Pertimbangan</h3>
- ${productPriceTable(a)}${productAnalysis(a)}
- <h3>III. Matriks Harga Per Barang — Penyedia Terpilih dan Pembanding</h3>
- <p>Harga tayang dan hasil negosiasi setiap penyedia disajikan sebagaimana tercatat pada paket ini. Harga penyedia pembanding yang berbeda jenis atau spesifikasi tetap ditampilkan disertai keterangan.</p>${printMatrix(a)}
- <h3>IV. Rekap Penawaran dan Hasil Negosiasi</h3>${printRecap(a)}${efficiencyBox(a)}
- <h3>V. Kesimpulan dan Pertimbangan Pejabat Pengadaan</h3>
- <p>${escLocal(n.status)}</p><p>Perbandingan ini menunjukkan ${a.comparisonSummary.belowHps} harga satuan ${a.winner?'hasil negosiasi':'yang dicatat'} di bawah HPS, ${a.comparisonSummary.equalHps} sama dengan HPS, dan ${a.comparisonSummary.aboveHps} di atas HPS. Perbedaan harga antarpenyedia telah dijelaskan menurut setiap barang, termasuk jika jenis dan spesifikasinya masih perlu dicocokkan.</p>
- <p>Harga yang berada di bawah HPS maupun di bawah penawaran lain belum dengan sendirinya membuktikan kewajaran harga pasar. Penilaian akhir dilakukan dengan mempertimbangkan bukti harga pada waktu pengadaan, kesamaan produk, serta biaya dan layanan yang tercakup.</p>
- <p><b>Catatan penyusunan:</b> Apabila paket telah selesai dilaksanakan, laporan ini merupakan penjelasan berdasarkan data yang masih tersedia dan disusun pada tanggal sebagaimana tercantum di atas, bukan bukti bahwa laporan yang sama sudah dibuat sebelum transaksi. Tautan yang disimpan menuju toko e-Katalog tidak dengan sendirinya menjadi bukti harga tayang untuk setiap produk; bukti harga asli perlu disimpan terpisah bila diminta pemeriksa.</p>
- <div class="spha-conclusion"><div class="spha-sign"><p>Pejabat Pengadaan,</p><div class="spha-sign-space"></div><p><b>${escLocal(PJ(p.pp).nama||'Nama Pejabat Pengadaan perlu diperiksa')}</b></p><p>NIP ${escLocal(PJ(p.pp).nip||'—')}</p></div></div>
- ${productPhotoAppendix(a)}</div>`;
- return doc;
+ const a=getAnalysis(p),stamp=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+ const datePlace=clean(O(p.opd)?.tempat)||'';
+ return `<div class="spha-doc spha-audit-paper spha-example-paper" data-spha-document="true">
+ ${typeof kop==='function'?kop(p):''}
+ <p class="spha-doc-title">DOKUMEN ANALISIS KEWAJARAN HARGA E-PURCHASING</p>
+ ${docIdentity(p)}
+ <h3>I. LATAR BELAKANG</h3>
+ <p>Analisis ini dibuat sebagai kertas kerja Pejabat Pengadaan untuk menilai kewajaran harga per barang pada pengadaan melalui Katalog Elektronik. Penilaian dilakukan dengan membandingkan harga yang ditawarkan, harga dari penyedia lain, HPS, dan hasil negosiasi, dengan memperhatikan kesesuaian kebutuhan serta manfaat penggunaan anggaran.</p>
+ <h3>II. DAFTAR KEBUTUHAN BARANG</h3>${exampleNeedTable(a)}
+ <h3>III. METODE REFERENSI DAN HARGA PEMBANDING</h3>${exampleProviders(a)}
+ <h3>IV. TABEL ANALISIS BEDA HARGA PER ITEM</h3>${exampleCompareTable(a)}
+ <h3>V. ANALISIS DAN PERTIMBANGAN KEWAJARAN HARGA</h3>${exampleItemNarratives(a)}
+ <h3>VI. REKAPITULASI PROSES E-PURCHASING DAN EFISIENSI ANGGARAN</h3>${exampleEfficiency(a)}
+ <h3>VII. KESIMPULAN DAN REKOMENDASI</h3>${exampleConclusion(a,p)}
+ <div class="spha-conclusion"><div class="spha-sign"><p>${datePlace?escLocal(datePlace)+', ':''}${escLocal(stamp)}</p><p>Pejabat Pengadaan,</p><div class="spha-sign-space"></div><p><b>${escLocal(PJ(p.pp).nama||'Nama Pejabat Pengadaan belum dicatat')}</b></p><p>NIP. ${escLocal(PJ(p.pp).nip||'—')}</p></div></div>
+ ${productPhotoAppendix(a)}
+ </div>`;
 }
 function docChecks(p){const a=getAnalysis(p);return [
  {id:'rup',label:'Kode RUP tersedia',tab:'data',f:'rup',ok:!!p.rup},
