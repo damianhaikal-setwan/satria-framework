@@ -1,4 +1,4 @@
-/* SATRIA NEXT 3.0.59.33 — standalone, scoped price analysis interface */
+/* SATRIA NEXT 3.0.59.34 — standalone, scoped price analysis interface */
 .spha-page{display:grid;gap:16px;max-width:100%;padding-bottom:24px}
 .spha-hero{display:flex;justify-content:space-between;gap:20px;align-items:center;overflow:hidden;position:relative;padding:25px;border-radius:25px;color:#fff;background:linear-gradient(120deg,#0f172a 0%,#312e81 37%,#2563eb 67%,#0d9488 100%);box-shadow:0 20px 50px rgba(30,41,59,.2)}
 #main .spha-page .spha-hero h2{font-size:clamp(26px,3vw,41px);letter-spacing:-.045em;line-height:1.07;color:#fff!important;margin:12px 0 10px;font-weight:850}#main .spha-page .spha-hero h2 em{font-style:normal;color:#c4f85b!important}
@@ -13,4 +13,4 @@
 @media(max-width:850px){.spha-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.spha-two{grid-template-columns:1fr}.spha-hero-art{display:none}}
 @media(max-width:520px){.spha-summary{grid-template-columns:1fr 1fr}.spha-hero{padding:20px}.spha-card{padding:12px}.spha-metric{padding:12px}.spha-metric b{font-size:15px}.spha-toolbar .spha-btn{width:100%}}
 @media(prefers-reduced-motion:reduce){.spha-bar-rail i{animation:none!important}}
-@media print{.spha-page,.spha-quick{display:none!important}.spha-doc{font-size:10px!important}.spha-doc h3{page-break-after:avoid}.spha-doc tr{break-inside:avoid}.spha-doc a{color:#111}.spha-doc .spha-table td,.spha-doc .spha-table th{padding:4px}}
+@media print{.spha-page,.spha-quick{display:none!important}.spha-doc{font-size:10px!important}.spha-doc h3{page-break-after:avoid;break-after:avoid}.spha-doc p,.spha-doc li{page-break-inside:avoid;break-inside:avoid}.spha-doc tr{break-inside:avoid}.spha-doc a{color:#111}.spha-doc .spha-table td,.spha-doc .spha-table th{padding:4px}}
