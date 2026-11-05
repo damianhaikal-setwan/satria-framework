@@ -73,3 +73,40 @@
 .spha-efficiency{padding:10px 13px;border:1px solid #dbeafe;background:#f8fbff;border-radius:8px;line-height:1.65;break-inside:avoid}
 .spha-efficiency .spha-note{font-size:10px;color:#475569;margin:7px 0 0}
 @media print{.spha-doc .spha-needs{min-width:0}.spha-doc .spha-rules{background:transparent;border-color:#aaa}.spha-doc .spha-efficiency{background:transparent;border-color:#bbb}}
+
+/* SATRIA NEXT 3.0.59.38 — Kertas kerja harga untuk pemeriksaan */
+.spha-audit-paper .spha-doc-subtitle{text-align:center;font-size:10px;margin:0 0 12px}
+.spha-audit-paper .spha-recap{min-width:0;table-layout:fixed}
+.spha-audit-paper .spha-recap th:first-child{width:25%}
+.spha-audit-paper .spha-recap th:nth-child(2){width:22%}
+.spha-audit-paper .spha-recap th:nth-child(3){width:23%}
+.spha-audit-paper .spha-recap th:nth-child(4){width:30%}
+.spha-audit-paper .spha-peer-line{padding:1px 0 4px;border-bottom:1px solid #eee}
+.spha-audit-paper .spha-peer-line:last-child{border-bottom:0}
+.spha-audit-paper .spha-peer-line b{font-size:9px}
+.spha-audit-paper .spha-conclusion{break-inside:avoid;page-break-inside:avoid;min-height:80px}
+.spha-audit-paper .spha-sign{display:block;width:43%;max-width:320px;margin-left:auto;text-align:left;margin-top:8px}
+.spha-audit-paper .spha-sign-space{height:54px}
+.spha-audit-paper .spha-photo-sheet{break-before:page;page-break-before:always;break-inside:avoid;page-break-inside:avoid}
+.spha-audit-paper .spha-photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.spha-audit-paper .spha-photo-card{border:1px solid #aaa;break-inside:avoid;page-break-inside:avoid;padding:7px;display:flex;flex-direction:column;min-width:0}
+.spha-audit-paper .spha-photo-frame{height:120px;display:flex;justify-content:center;align-items:center;min-width:0;overflow:hidden;background:#f8fafc}
+.spha-audit-paper .spha-photo-frame img{max-width:100%;max-height:115px;object-fit:contain;display:block}
+.spha-audit-paper .spha-photo-frame.spha-photo-missing:before{content:'Foto tidak dapat ditampilkan. Periksa kembali file tersimpan.';font-size:9px;text-align:center;color:#555}
+.spha-audit-paper .spha-photo-info{display:grid;gap:4px;margin-top:7px;line-height:1.25}
+.spha-audit-paper .spha-photo-info b{font-size:10px;overflow-wrap:anywhere}
+.spha-audit-paper .spha-photo-info span{font-size:9.5px}
+.spha-audit-paper .spha-photo-info small{font-size:9px;color:#475569}
+@media screen and (max-width:660px){.spha-audit-paper .spha-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media print {
+ #satria-print-root .doc[data-document-type="analisa"] .spha-doc-title{font-size:13pt!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-price-detail{table-layout:fixed!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-price-detail :is(th,td){font-size:8pt!important;line-height:1.2!important;padding:4px!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-recap :is(th,td){font-size:8.5pt!important;line-height:1.25!important;padding:4px!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-photo-sheet{break-before:page!important;page-break-before:always!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-photo-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:3mm!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-photo-card{padding:2mm!important;break-inside:avoid!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-photo-frame{height:40mm!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-photo-frame img{max-height:38mm!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-sign-space{height:17mm!important}
+}
