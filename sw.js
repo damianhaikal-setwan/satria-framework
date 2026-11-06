@@ -1,5 +1,5 @@
 /* SATRIA PWA: network-first, precache all refactored assets for offline use. */
-const CACHE_NAME = 'satria-v3.0.59.39-care-center-20261106';
+const CACHE_NAME = 'satria-v3.0.59.40-safe-maint-20261106';
 const APP_ASSETS = [
   "./",
   "./index.html",
