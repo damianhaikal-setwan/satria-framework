@@ -43,13 +43,26 @@
         checked:health.records?.length ?? null
       });
     } catch (_) { /* Laporan tidak tersedia; jangan menampilkan angka nol palsu. */ }
+    // Hanya status sync klien. Tidak ada ping/SQL, tidak pernah menganggap RLS cloud sudah benar.
+    let sync=null;
+    try {
+      const health=window.SATRIA_SYNC_HEALTH?.inspect?.();
+      if(health)sync=Object.freeze({
+        configured:Boolean(health.configured),authenticated:Boolean(health.authenticated),
+        baselineLoaded:Boolean(health.baselineLoaded),online:health.online===null?null:Boolean(health.online),
+        pending:Boolean(health.pending),conflict:Boolean(health.conflict),
+        inFlight:Boolean(health.inFlight),retryScheduled:Boolean(health.retryScheduled),
+        lastConfirmedAt:health.lastConfirmedAt||null,lastErrorAt:health.lastErrorAt||null
+      });
+    } catch (_) { /* Belum dapat diperiksa bukan berarti tersinkron. */ }
     const persistFailed=typeof S!=='undefined' && Boolean(S?.persistError);
     const rtBad=runtimeUnavailable||!runtime||runtime.errorCount>0||runtime.stylesLoaded!==runtime.stylesExpected||!runtime.coreReady||!runtime.priceAnalysisReady;
     const issues=Math.max(config?.count||0,config?.incomplete||0)+(data?.count||0)+(runtime?.errorCount||0)+(persistFailed?1:0);
+    const syncAttention=Boolean(window.SATRIA_CLOUD_CONFIGURED && (!sync || !sync.authenticated || !sync.baselineLoaded || sync.pending || sync.conflict || sync.online===false));
     const complete=Boolean(runtime && data && (!isAdmin || config));
     return Object.freeze({
       checkedAt:new Date().toISOString(),
-      version:'3.0.59.39',
+      version:'3.0.59.40',
       admin:isAdmin,
       config,
       data,
@@ -62,10 +75,11 @@
         priceAnalysisReady:Boolean(runtime.priceAnalysisReady)
       }) : null,
       runtimeUnavailable,
+      sync,
       persistFailed,
       complete,
       issues,
-      attention:rtBad||persistFailed||issues>0||!complete,
+      attention:rtBad||persistFailed||issues>0||!complete||syncAttention,
       // Kesehatan cloud tidak disimpulkan dari pemeriksaan lokal.
       cloudConfigured:Boolean(window.SATRIA_CLOUD_CONFIGURED)
     });
@@ -90,6 +104,9 @@
     const runtimeContent=tile('Error dan aset aplikasi',rt ? `${rt.errorCount} error tercatat`:'Belum dapat diperiksa',
       rt ? `CSS termuat ${rt.stylesLoaded}/${rt.stylesExpected}. Inti aplikasi: ${rt.coreReady?'termuat':'perlu dicek'}. Analisa Harga: ${rt.priceAnalysisReady?'termuat':'perlu dicek'}.` : 'Pencatatan diagnostik tidak tersedia pada sesi ini.',
       '<button type="button" class="satria-care-button secondary" data-care-action="diagnostic">Unduh Diagnostik</button>',rt?.errorCount?'warn':'');
+    const syncContent=tile('Sinkronisasi cloud',!s.cloudConfigured?'Tidak dikonfigurasi':!s.sync?'Belum terverifikasi':s.sync.conflict?'Konflik perlu tinjau':s.sync.pending?'Ada perubahan tertunda':!s.sync.authenticated?'Belum login':!s.sync.baselineLoaded?'Belum memuat data':s.sync.online===false?'Browser offline':'Terhubung (klien)',
+      !s.cloudConfigured?'Mode tanpa konfigurasi cloud; pemeriksaan server tidak dilakukan.':s.sync?`Login: ${s.sync.authenticated?'ya':'tidak'}. Data cloud dimuat: ${s.sync.baselineLoaded?'ya':'tidak'}. Perubahan tertunda: ${s.sync.pending?'ya':'tidak'}. Retry: ${s.sync.retryScheduled?'dijadwalkan':'tidak'}.`:'Status sinkronisasi belum tersedia pada sesi ini.',
+      '<button type="button" class="satria-care-button secondary" data-care-action="scan">Periksa Status</button>',s.sync?.conflict||s.sync?.pending?'warn':'');
     return `<section class="satria-care-page" aria-label="Perawatan SATRIA">
       <div class="satria-care-hero"><div><span class="satria-care-eyebrow">SATRIA NEXT · Pusat Perawatan</span><h2>Perawatan SATRIA</h2><p>Pemeriksaan konfigurasi, kualitas data, dan error aplikasi di satu tempat.</p></div>
         <div class="satria-care-hero-actions"><button type="button" class="satria-care-button primary" data-care-action="scan">Periksa Ulang</button><button type="button" class="satria-care-button ghost" data-care-action="report">Unduh Ringkasan</button></div>
@@ -104,10 +121,10 @@
         ${kpi('Error terpantau',rt?.errorCount ?? '—','Sejak aplikasi dibuka pada tab ini',rt?.errorCount?'warn':'')}
         ${kpi('Penyimpanan lokal',s.persistFailed?'Bermasalah':'Tidak ada gagal tercatat','Tidak menguji seluruh data cloud',s.persistFailed?'warn':'')}
       </div>
-      <div class="satria-care-tiles">${configContent}${qualityContent}${runtimeContent}</div>
+      <div class="satria-care-tiles">${configContent}${qualityContent}${runtimeContent}${syncContent}</div>
       <div class="satria-care-bottom">
         <section class="satria-care-panel"><h3>Diagnostik dan pemeriksaan teknis</h3><p>Pantau informasi browser dan rekam error tanpa menampilkan atau mengirim isi data paket maupun kredensial.</p>
-          <ul class="satria-care-checks"><li><span>JavaScript inti</span><b>${rt?.coreReady?'Termuat':'Belum terverifikasi'}</b></li><li><span>Modul Analisa Harga</span><b>${rt?.priceAnalysisReady?'Termuat':'Belum terverifikasi'}</b></li><li><span>Aset CSS</span><b>${rt ? `${rt.stylesLoaded} / ${rt.stylesExpected}`:'—'}</b></li><li><span>Sinkronisasi Supabase</span><b>Periksa indikator cloud di header</b></li></ul>
+          <ul class="satria-care-checks"><li><span>JavaScript inti</span><b>${rt?.coreReady?'Termuat':'Belum terverifikasi'}</b></li><li><span>Modul Analisa Harga</span><b>${rt?.priceAnalysisReady?'Termuat':'Belum terverifikasi'}</b></li><li><span>Aset CSS</span><b>${rt ? `${rt.stylesLoaded} / ${rt.stylesExpected}`:'—'}</b></li><li><span>Sinkronisasi Supabase</span><b>${s.sync?s.sync.conflict?'Konflik perlu tinjau':s.sync.pending?'Belum tersinkron':s.sync.authenticated&&s.sync.baselineLoaded?'Tidak ada perubahan tertunda (klien)':'Belum terverifikasi':'Status belum tersedia'}</b></li></ul>
           <div class="satria-care-actions"><button type="button" class="satria-care-button secondary" data-care-action="diagnostic">Unduh Laporan Error</button>${s.admin?'<button type="button" class="satria-care-button secondary" data-care-action="debug">Buka SATRIA Debug</button>':''}</div>
         </section>
         <section class="satria-care-panel"><h3>Backup dan pemulihan</h3><p>Backup disimpan sebagai berkas JSON di perangkat Anda. Pemeriksaan ini tidak menjalankan reset, impor, atau perbaikan otomatis.</p>
@@ -125,6 +142,7 @@
       catatan:'Ringkasan pemeriksaan lokal. Bukan jaminan bebas error, audit kepatuhan atau verifikasi cloud.',
       kualitasData:s.data,konfigurasi:s.config,diagnostik:s.runtime,
       penyimpananLokalBermasalah:s.persistFailed,
+      statusSinkronisasiKlien:s.sync,
       pemeriksaanLengkap:s.complete,
       supabase:'Status sinkronisasi harus diperiksa pada indikator cloud aplikasi.'
     };
