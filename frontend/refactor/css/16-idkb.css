@@ -1,0 +1,115 @@
+/* Sebelum refactor: index.html baris 12524; id: satria-35916-idkb-approval-guard */
+
+/* Identifikasi Kebutuhan: identitas paket di atas, pengesahan hanya di tabel penutup.
+   Tidak mengubah PPK yang tercatat pada baris metadata PA/KPA/PPK. */
+.doc[data-document-type="idkb"] table.satria-idkb-info-table .satria914-images,
+#satria-print-root .doc[data-document-type="idkb"] table.satria-idkb-info-table .satria914-images,
+.doc[data-document-type="idkb"] table.satria-idkb-info-table .sig-legacy,
+#satria-print-root .doc[data-document-type="idkb"] table.satria-idkb-info-table .sig-legacy{display:none!important}
+
+
+/* Sebelum refactor: index.html baris 12533; id: satria-35917-idkb-reference-layout */
+
+/* Pedoman identifikasi kebutuhan: only Document #2, print A4/Arial, one-pixel rules. */
+/* Izinkan tabel isi tanpa garis pada browser dan cetak; aturan ID khusus
+   mengalahkan CSS grid umum SATRIA tanpa mempengaruhi tabel pengesahan. */
+#main .doc[data-document-type="idkb"] .satria-idkb-form :is(.satria-idkb-info-table,.idkb-quantity-table,.idkb-extra-table) :is(th,td),
+#satria-print-root .doc[data-document-type="idkb"] .satria-idkb-form :is(.satria-idkb-info-table,.idkb-quantity-table,.idkb-extra-table) :is(th,td){
+  border:0!important;border-width:0!important;box-shadow:none!important;
+}
+#main .doc[data-document-type="idkb"] .satria-idkb-form :is(.satria-idkb-info-table,.idkb-quantity-table,.idkb-extra-table),
+#satria-print-root .doc[data-document-type="idkb"] .satria-idkb-form :is(.satria-idkb-info-table,.idkb-quantity-table,.idkb-extra-table){
+  border:0!important;border-spacing:0!important;outline:none!important;
+}
+
+.doc[data-document-type="idkb"] .satria-idkb-form{
+  font: 9.6pt/1.25 Arial,Helvetica,sans-serif!important;color:#000!important;
+  max-width:100%!important;overflow:visible!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-form *{font-family:Arial,Helvetica,sans-serif!important}
+.doc[data-document-type="idkb"] .satria-idkb-title{
+  text-align:center!important;font-size:11pt!important;line-height:1.2!important;
+  margin:0 0 14px!important;font-weight:700!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-sheet{
+  border:1px solid #000!important;padding:9px 11px!important;
+  margin:0!important;overflow:visible!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-form table{
+  margin:0!important;border-spacing:0!important;border-collapse:collapse!important;
+  width:100%!important;table-layout:fixed!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-form table:not(.satria-idkb-sign-table),
+.doc[data-document-type="idkb"] .satria-idkb-form table:not(.satria-idkb-sign-table) tr,
+.doc[data-document-type="idkb"] .satria-idkb-form table:not(.satria-idkb-sign-table) td{
+  border:0!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-form table td{
+  background:#fff!important;padding:2px 3px!important;font-size:9.4pt!important;
+  line-height:1.22!important;vertical-align:top!important;overflow-wrap:break-word!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-info-table .idkb-label{width:22%!important}
+.doc[data-document-type="idkb"] .satria-idkb-info-table .idkb-colon{width:2.7%!important;text-align:center!important}
+.doc[data-document-type="idkb"] .satria-idkb-info-table .idkb-value{width:75.3%!important}
+.doc[data-document-type="idkb"] .satria-idkb-info-table{margin:0 0 9px!important}
+.doc[data-document-type="idkb"] .satria-idkb-section{margin:8px 0 0!important;break-inside:auto!important}
+.doc[data-document-type="idkb"] .satria-idkb-section h3{
+  font-size:9.7pt!important;line-height:1.2!important;margin:0 0 3px!important;
+  font-weight:700!important;break-after:avoid!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-section p{
+  font-size:9.4pt!important;line-height:1.25!important;margin:1px 0 3px 20px!important;
+  text-align:left!important;orphans:2;widows:2;
+}
+.doc[data-document-type="idkb"] .satria-idkb-section .idkb-subhead{
+  font-size:9.4pt!important;line-height:1.25!important;margin:2px 0 1px 20px!important;
+  break-after:avoid!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-section ol{
+  margin:0 0 5px 48px!important;padding:0!important;
+  font-size:9.4pt!important;line-height:1.28!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-section li{padding:0!important;margin:0 0 2px!important;font-size:9.4pt!important;line-height:1.28!important;break-inside:avoid!important}
+.doc[data-document-type="idkb"] .satria-idkb-section .idkb-suppliers{margin-left:42px!important}
+.doc[data-document-type="idkb"] .satria-idkb-section .idkb-link{
+  font-size:8.4pt!important;overflow-wrap:anywhere!important;word-break:break-word!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-section .idkb-muted{font-size:8.5pt!important}
+.doc[data-document-type="idkb"] .idkb-quantity-table{margin:1px 0 3px 45px!important;width:calc(100% - 45px)!important}
+.doc[data-document-type="idkb"] .idkb-quantity-table .idkb-desc{width:68%!important}
+.doc[data-document-type="idkb"] .idkb-quantity-table .idkb-eq{width:4%!important;text-align:center!important}
+.doc[data-document-type="idkb"] .idkb-quantity-table .idkb-vol{width:28%!important}
+.doc[data-document-type="idkb"] .idkb-extra-table{margin:3px 0 0 22px!important;width:calc(100% - 22px)!important}
+.doc[data-document-type="idkb"] .idkb-extra-table .idkb-label{width:58%!important}
+.doc[data-document-type="idkb"] .idkb-extra-table .idkb-colon{width:4%!important;text-align:center!important}
+.doc[data-document-type="idkb"] .idkb-extra-table .idkb-value{width:38%!important}
+.doc[data-document-type="idkb"] .satria-idkb-sign-table{
+  margin:0!important;border:1px solid #000!important;
+  border-top:0!important;border-collapse:collapse!important;width:100%!important;
+  table-layout:fixed!important;break-inside:avoid!important;page-break-inside:avoid!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-sign-table tr{border:0!important}
+.doc[data-document-type="idkb"] .satria-idkb-sign-table td{
+  width:50%!important;border:1px solid #000!important;
+  font-size:9.5pt!important;line-height:1.25!important;
+  padding:4px 8px!important;vertical-align:top!important;
+}
+.doc[data-document-type="idkb"] .satria-idkb-sign-table .idkb-date-row td{padding:3px 8px!important}
+.doc[data-document-type="idkb"] .satria-idkb-sign-table .idkb-date-row td:last-child{text-align:center!important}
+.doc[data-document-type="idkb"] .satria-idkb-sign-table .idkb-approval-row td{height:37mm!important;position:relative!important}
+.doc[data-document-type="idkb"] .idkb-sig-media,
+.doc[data-document-type="idkb"] .idkb-preparer-space{
+  display:block!important;min-height:20mm!important;height:20mm!important;margin:1mm 0 0!important;
+}
+.doc[data-document-type="idkb"] .idkb-sig-media .satria914-images{margin:0!important}
+.doc[data-document-type="idkb"] .idkb-sig-media img{object-fit:contain!important}
+.doc[data-document-type="idkb"] .idkb-sign-identity{margin:0!important;font-size:9.6pt!important;line-height:1.2!important}
+.doc[data-document-type="idkb"] .idkb-sign-identity b{font-size:9.6pt!important}
+@media print{
+ /* Paket >18 rincian: tarik bagian prioritas ke halaman pengesahan agar tidak ada halaman khusus TTD. */
+ #satria-print-root .doc[data-document-type="idkb"] .satria-idkb-form.idkb-long .satria-idkb-section:last-child{
+  break-before:page!important;page-break-before:always!important;
+ }
+ #satria-print-root .doc[data-document-type="idkb"] .satria-idkb-form{font-size:9.4pt!important}
+ #satria-print-root .doc[data-document-type="idkb"] .satria-idkb-sign-table{break-inside:avoid!important;page-break-inside:avoid!important}
+}

@@ -1,0 +1,30 @@
+/* Sebelum refactor: index.html baris 13111; id: satria-exec-brief-327 */
+
+/* SATRIA NEXT 3.0.59.39 — Executive briefing 3.0, screen visual only */
+.brief-page,.brief-package{max-width:100%;padding-bottom:28px}
+.brief-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:12px 0 20px}
+.brief-toolbar button{min-height:39px;height:auto;white-space:normal}
+.brief-ep,.brief-section{min-width:0}
+.brief-card{margin:12px 0;padding:16px!important}
+.brief-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.brief-kpi{border:1px solid var(--bd, #d6dde7);border-radius:12px;padding:13px;background:var(--card-solid, #fff);min-width:0;display:flex;flex-direction:column;gap:6px}
+.brief-kpi small{font-size:11px;color:var(--mut, #64748b);font-weight:650}
+.brief-kpi strong{font-size:clamp(15px,1.5vw,21px);letter-spacing:-.02em;overflow-wrap:anywhere;color:var(--ink, #172431)}
+.brief-kpi span{font-size:11px;color:var(--mut, #64748b);line-height:1.35}
+.brief-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+.brief-table{border-collapse:collapse;width:100%;min-width:640px;font-size:12px}
+.brief-table th{background:var(--card-2,#edf5f5);font-weight:700;text-align:left}
+.brief-table td,.brief-table th{padding:9px;border-bottom:1px solid var(--bd,#dce4e6);vertical-align:top;overflow-wrap:anywhere}
+.brief-table td small{display:block;color:var(--mut,#64748b);font-size:11px;margin-top:3px}
+.brief-risk{border-radius:100px;padding:4px 8px;font-weight:700;font-size:11px;white-space:nowrap}
+.brief-high{background:#fee2e2;color:#991b1b}.brief-medium{background:#fff1cd;color:#7c4a03}.brief-ok{background:#e0f2ed;color:#065f46}
+.brief-filters{display:flex;flex-wrap:wrap;align-items:end;gap:9px;margin:12px 0}
+.brief-filters label{display:flex;flex-direction:column;gap:4px;min-width:155px;font-size:12px;flex:1 1 170px}
+.brief-filters input,.brief-filters select{width:100%;min-height:38px}
+.brief-filters button{min-height:38px;height:auto;white-space:normal}
+.brief-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.brief-facts div{display:flex;flex-direction:column;gap:5px;border-bottom:1px solid var(--bd,#dce4e6);padding:8px}
+.brief-facts span{overflow-wrap:anywhere}
+.brief-foot,.brief-disclaimer{font-size:11px;color:var(--mut,#64748b);line-height:1.55}
+@media(max-width:650px){.brief-card{padding:11px!important}.brief-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.brief-kpi{padding:10px}.brief-kpi strong{font-size:15px}.brief-filters label{flex:1 1 100%}.brief-toolbar button{flex:1 1 auto}}
+@media print{.brief-toolbar,.no-print{display:none!important}.brief-card,.brief-kpi{box-shadow:none!important}}

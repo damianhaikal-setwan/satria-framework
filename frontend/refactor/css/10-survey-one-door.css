@@ -1,0 +1,58 @@
+/* Sebelum refactor: index.html baris 10457; id: satria-survey-one-door-v1 */
+
+/* Presentation-only simplification. Legacy inputs remain mounted for preservation and existing save paths. */
+.smart-survey-wrap[data-smart-panel]{--ss-teal:#0f766e;position:relative;padding:18px!important;border:1px solid var(--bd-strong)!important;border-radius:18px!important;background:var(--card-solid)!important}
+.smart-survey-wrap .satria-survey-one-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin:0 0 13px}
+.smart-survey-wrap .satria-survey-one-head h3{margin:3px 0!important;font-size:20px!important;font-weight:800!important;color:var(--ink)!important}
+.smart-survey-wrap .satria-survey-one-head p{margin:0;font-size:12px;color:var(--mut)}
+.smart-survey-wrap .satria-survey-eyebrow{font-size:10px;font-weight:800;letter-spacing:.07em;color:var(--ss-teal)}
+.smart-survey-wrap .satria-survey-mode{display:inline-flex;gap:5px;padding:5px;border:1px solid var(--bd);border-radius:12px;background:var(--card-2)}
+.smart-survey-wrap .satria-survey-mode button{min-height:36px!important;height:auto!important;padding:8px 13px!important;animation:none!important;background:transparent!important;color:var(--ink)!important;border:0!important;border-radius:8px!important;box-shadow:none!important}
+.smart-survey-wrap .satria-survey-mode button[aria-pressed=true]{background:var(--ss-teal)!important;color:white!important}
+.smart-survey-wrap .satria-survey-context{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:5px 0 16px}
+.smart-survey-wrap .satria-survey-context>div{display:flex;flex-direction:column;gap:3px;background:var(--card-2);padding:11px 13px;border-radius:12px;border:1px solid var(--bd);min-width:0}
+.smart-survey-wrap .satria-survey-context small{font-size:10px;color:var(--mut);font-weight:700;letter-spacing:.045em}
+.smart-survey-wrap .satria-survey-context b{font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+.smart-survey-wrap .satria-survey-context span{font-size:11px;color:var(--ink-2);overflow-wrap:anywhere}
+.smart-survey-wrap .satria-survey-steps,.smart-survey-wrap .satria-survey-price-label{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin:10px 0 4px;font-size:13px}
+.smart-survey-wrap .satria-survey-steps span,.smart-survey-wrap .satria-survey-price-label span{font-size:11px;color:var(--mut)}
+.smart-survey-wrap [data-satria-legacy-actions] [data-smart-action="save"],
+.smart-survey-wrap [data-s59-action="add-candidate"]{display:none!important}
+.smart-survey-wrap .satria59-featurehead{margin:0 0 8px}
+.smart-survey-wrap .satria59-suite{margin:12px 0 0!important;border:1px solid var(--bd)!important;box-shadow:none!important;background:var(--card-2)!important}
+.smart-survey-wrap .satria-survey-workflow{display:grid;gap:12px;margin:15px 0 0;padding-top:14px;border-top:1px solid var(--bd)}
+.smart-survey-wrap .satria-survey-summary{padding:12px;border-radius:12px;background:var(--card-2);border:1px solid var(--bd);font-size:12px;line-height:1.6}
+.smart-survey-wrap .satria-survey-summary[data-over="true"]{border-color:#f0b55e;background:#fff7e8;color:#744012}
+.smart-survey-wrap .satria-survey-progress{display:grid;gap:8px;font-size:12px}
+.smart-survey-wrap .satria-survey-progress>div{display:flex;gap:6px;flex-wrap:wrap}
+.smart-survey-wrap .satria-survey-item-state{font-size:11px;border:1px solid var(--bd);background:var(--card-2);padding:5px 9px;border-radius:8px}
+.smart-survey-wrap .satria-survey-save{display:flex;align-items:end;flex-wrap:wrap;gap:8px}
+.smart-survey-wrap .satria-survey-save label{min-width:180px;flex:1;display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700}
+.smart-survey-wrap .satria-survey-save select{width:100%;height:42px}
+.smart-survey-wrap .satria-survey-save button{height:auto!important;min-height:42px!important;padding:8px 13px!important;white-space:normal;text-align:center}
+.smart-survey-wrap .satria-survey-drafts{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.smart-survey-wrap .satria-survey-drafts button{height:auto;min-height:36px;padding:6px 11px;font-size:11px}
+.smart-survey-wrap .satria-survey-drafts small{font-size:10px;color:var(--mut)}
+.smart-survey-wrap .satria-survey-message{font-size:12px;color:var(--ink-2);margin:0}
+.smart-survey-wrap[data-satria-survey-mode="simple"] .smart-survey-grid>.fg:has([data-smart-field="unit"]),
+.smart-survey-wrap[data-satria-survey-mode="simple"] .smart-survey-grid>.fg:has([data-smart-field="date"]),
+.smart-survey-wrap[data-satria-survey-mode="simple"] .smart-survey-grid>.fg:has([data-smart-field="spec"]),
+.smart-survey-wrap[data-satria-survey-mode="simple"] .smart-survey-grid>.fg:has([data-smart-field="imageUrl"]),
+.smart-survey-wrap[data-satria-survey-mode="simple"] .smart-survey-grid>.fg:has([data-smart-photo]),
+.smart-survey-wrap[data-satria-survey-mode="simple"] .smart-hint,
+.smart-survey-wrap[data-satria-survey-mode="simple"] .satria355-paste-details,
+.smart-survey-wrap[data-satria-survey-mode="simple"] .satria353-photo-toolbar,
+.smart-survey-wrap[data-satria-survey-mode="simple"] [data-satria-legacy-actions],
+.smart-survey-wrap[data-satria-survey-mode="simple"] .smart-survey-preview,
+.smart-survey-wrap[data-satria-survey-mode="simple"] .smart-note,
+.smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-featurehead,
+.smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-detail:not([data-s59-ocr]):not([data-satria-evaluation]){display:none!important}
+.smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-detail[data-satria-evaluation] .satria59-grid>label:not(:has([data-s59-field="suitability"])){display:none!important}
+.smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-detail[data-satria-evaluation] .satria59-grid{display:block!important}
+.smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-detail[data-satria-evaluation] .satria59-grid>label{display:flex;flex-direction:column;gap:6px}
+.smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-detail[data-satria-evaluation] .satria59-info{display:none!important}
+.smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-detail[data-s59-ocr] textarea,
+.smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-detail[data-s59-ocr] p{font-size:11px}
+.smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-suite>.satria59-status{display:none!important}
+@media(max-width:720px){.smart-survey-wrap .satria-survey-context{grid-template-columns:1fr}.smart-survey-wrap .satria-survey-save{flex-direction:column;align-items:stretch}.smart-survey-wrap .satria-survey-save label,.smart-survey-wrap .satria-survey-save button{width:100%}}
+@media print{.satria-survey-one-head,.satria-survey-context,.satria-survey-workflow{display:none!important}}

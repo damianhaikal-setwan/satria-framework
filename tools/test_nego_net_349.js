@@ -1,9 +1,10 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const file=require('path').join(__dirname,'..','index.html');
-const src=fs.readFileSync(file,'utf8');
+const src=require('./legacy_index_source.cjs').readIndex();
 const code=src.slice(src.indexOf('function satriaOfferNegoBreakdown('),src.indexOf('/* ===== DOKUMEN OTOMATIS ===== */'));
 const context={S:{penyedia:[{id:'pa',nama:'Penyedia A'},{id:'pb',nama:'Penyedia B'}]},KN:{lastSaved:null},PY:id=>({nama:id==='pa'?'Penyedia A':'Penyedia B'}),hps:p=>p.items.reduce((n,i)=>n+i.hs*i.vol,0),rp:n=>'Rp '+n,esc:s=>String(s),nf:n=>Number(n).toLocaleString('id-ID'),pemenang:()=>null,kandidat:()=>null,satriaOfferGate:()=>({ready:false,errors:['Belum final']}),evalPw:p=>p.penawaran.map(w=>({w,t:0,st:'Negosiasi parsial',lengkap:false,negoLengkap:false,negoCount:Object.keys(w.nego).length})),totPw:(p,w,nego=false)=>p.items.reduce((total,i)=>total+i.vol*Number((nego?w.nego[i.id]:w.harga[i.id])||0),0),knStr:x=>String(x),Number,Date,Set,String};
 vm.createContext(context);
+vm.runInContext(src.slice(src.indexOf('const satriaHpsReviewDrafts=new Map();'),src.indexOf('function evalPw(p){')),context);
 vm.runInContext(src.slice(src.indexOf('function satriaWriteNegotiatedItems('),src.indexOf('function knSave(items)')),context);
 vm.runInContext(code,context);
 const p={id:'p-1',pagu:6000000,items:[{id:'item-a',nama:'Barang A',hs:1000000,vol:2},{id:'item-b',nama:'Barang B',hs:250000,vol:4}],penawaran:[]};

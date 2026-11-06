@@ -3,7 +3,7 @@ from pathlib import Path
 import re, subprocess, tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
-html=(ROOT/'index.html').read_text()
+html=__import__('legacy_index_source').read_index()
 sql=(ROOT/'supabase/migrations/20261028010000_satria_rup_bank_cloud_compat.sql').read_text()
 checks={
     'delta RPC protects user membership and expected version': 'Active organization membership required' in sql and 'Version conflict:' in sql,

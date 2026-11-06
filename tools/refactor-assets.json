@@ -1,0 +1,495 @@
+{
+  "styles": [
+    {
+      "file": "./frontend/refactor/css/01-base-design.css",
+      "source_lines": [
+        13,
+        13
+      ],
+      "blocks": 1,
+      "ids": []
+    },
+    {
+      "file": "./frontend/refactor/css/02-legacy-theme-print.css",
+      "source_lines": [
+        920,
+        1837
+      ],
+      "blocks": 34,
+      "ids": [
+        "satriaMobileHeaderFix",
+        "satria-dok-genz-redesign",
+        "bahepe-pdf-reference-overrides",
+        "metode-pdf-reference-overrides",
+        "satria-reviu-pdf-reference",
+        "satria-bahp-reference-2026",
+        "satria-document-print-standard-v31",
+        "satria335-integrated-mobile",
+        "satria336-rup-nego",
+        "satria-337-bank-rup",
+        "satria-338-settings",
+        "satria-master-039-style",
+        "satria-document-quality-v340",
+        "satria-rup-manual-402",
+        "satriaSettingsDesktop412",
+        "satriaRupDraft413",
+        "satria343-subkegiatan-screen",
+        "satria-kalkulator-negosiasi-344",
+        "satria-kalkulator-hps-pagu-345",
+        "satria-350-navigation-award-design",
+        "satria-347-nego-bridge",
+        "satria-348-analytics",
+        "satria-349-nego-net-ui",
+        "satria35911-spek-styles",
+        "satria35911-audit-print-polish",
+        "satria35911-print-pagination-fixes",
+        "satria35911-long-spek-print",
+        "satria35911-bahp-many-pagination",
+        "satria-dpp-appendix-four-products-20261103",
+        "satria-spse-monitor-style",
+        "satria-laporan-integrasi-layout-20261103"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/03-dpp-control-panel.css",
+      "source_lines": [
+        1873,
+        1873
+      ],
+      "blocks": 1,
+      "ids": [
+        "satria352-dpp-controls"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/04-cloud-bridge.css",
+      "source_lines": [
+        5273,
+        5273
+      ],
+      "blocks": 1,
+      "ids": []
+    },
+    {
+      "file": "./frontend/refactor/css/05-shell-mobile.css",
+      "source_lines": [
+        8714,
+        8800
+      ],
+      "blocks": 3,
+      "ids": [
+        "satriaShellGov",
+        "satriaMobileCompact",
+        "satriaMobileCompact2"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/06-genz-design.css",
+      "source_lines": [
+        9505,
+        9505
+      ],
+      "blocks": 1,
+      "ids": [
+        "satria-genz-v32"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/07-mobile-navigation.css",
+      "source_lines": [
+        9607,
+        9607
+      ],
+      "blocks": 1,
+      "ids": [
+        "satria-mobile-334"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/08-smart-survey-and-theme.css",
+      "source_lines": [
+        9669,
+        10147
+      ],
+      "blocks": 4,
+      "ids": [
+        "satria-smart-survey-css",
+        "satria-genz-unified-341",
+        "satria355-smart-survey-price-style",
+        "satria-359-smart-survey-pro-css"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/09-seller-ui.css",
+      "source_lines": [
+        10278,
+        10278
+      ],
+      "blocks": 1,
+      "ids": [
+        "satria326-seller-style"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/10-survey-one-door.css",
+      "source_lines": [
+        10457,
+        10457
+      ],
+      "blocks": 1,
+      "ids": [
+        "satria-survey-one-door-v1"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/11-branding-photo.css",
+      "source_lines": [
+        10652,
+        11310
+      ],
+      "blocks": 3,
+      "ids": [
+        "satria-genz-type-workspace-342",
+        "satria-next-brand-346",
+        "satria-351-photo-appendix-style"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/12-photo-controls.css",
+      "source_lines": [
+        11507,
+        11507
+      ],
+      "blocks": 1,
+      "ids": [
+        "satria-353-print-and-photo-controls"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/13-dpp-layout-and-print.css",
+      "source_lines": [
+        11732,
+        11815
+      ],
+      "blocks": 2,
+      "ids": [
+        "satria-3596-dpp-signature-layout",
+        "satria-3594-dpp-smart-print-css"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/14-dpp-pagination.css",
+      "source_lines": [
+        11925,
+        12042
+      ],
+      "blocks": 3,
+      "ids": [
+        "satria-3595-dpp-pagination-spec-only",
+        "satria-3598-dpp-photo-appendix-layout",
+        "satria-3597-dpp-signature-control-css"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/15-dpp-quality-and-ppk.css",
+      "source_lines": [
+        12166,
+        12418
+      ],
+      "blocks": 6,
+      "ids": [
+        "satria-3599-dpp-hps-thin-grid-clarity",
+        "satria-35910-dpp-final-typography",
+        "satria-35912-quality-print",
+        "satria-35912-metode-pagination",
+        "satria-35913-bahp-signature-dpp-parity",
+        "satria35914-ppk-studio-style"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/16-idkb.css",
+      "source_lines": [
+        12524,
+        12533
+      ],
+      "blocks": 2,
+      "ids": [
+        "satria-35916-idkb-approval-guard",
+        "satria-35917-idkb-reference-layout"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/17-bahp-and-dpp-example.css",
+      "source_lines": [
+        12667,
+        12776
+      ],
+      "blocks": 2,
+      "ids": [
+        "satria-35919-bahp-title-sppbj-letter",
+        "satria-dpp-example-print-20261102"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/18-ops.css",
+      "source_lines": [
+        12979,
+        12979
+      ],
+      "blocks": 1,
+      "ids": [
+        "satria-ops-v2-style"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/19-executive-briefing.css",
+      "source_lines": [
+        13111,
+        13111
+      ],
+      "blocks": 1,
+      "ids": [
+        "satria-exec-brief-327"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/20-human-first.css",
+      "source_lines": [
+        13285,
+        13285
+      ],
+      "blocks": 1,
+      "ids": [
+        "satria-human-first-20261103"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/21-human-first-docs.css",
+      "source_lines": [
+        13380,
+        13380
+      ],
+      "blocks": 1,
+      "ids": [
+        "satria-human-first-spse-dok-20261103"
+      ]
+    },
+    {
+      "file": "./frontend/refactor/css/22-briefing-visual.css",
+      "source_lines": [
+        13482,
+        13482
+      ],
+      "blocks": 1,
+      "ids": [
+        "satria-brief-hotfix-329"
+      ]
+    }
+  ],
+  "scripts": [
+    {
+      "file": "./frontend/refactor/js/01-app-core.js",
+      "line": 1886,
+      "id": "",
+      "bytes": 374470
+    },
+    {
+      "file": "./frontend/refactor/js/02-premium-ui.js",
+      "line": 5059,
+      "id": "",
+      "bytes": 3603
+    },
+    {
+      "file": "./frontend/refactor/js/03-analytics-dashboard.js",
+      "line": 5144,
+      "id": "",
+      "bytes": 12516
+    },
+    {
+      "file": "./frontend/refactor/js/05-cloud-sync.js",
+      "line": 5583,
+      "id": "",
+      "bytes": 196219
+    },
+    {
+      "file": "./frontend/refactor/js/06-pwa-startup.js",
+      "line": 8669,
+      "id": "",
+      "bytes": 2416
+    },
+    {
+      "file": "./frontend/refactor/js/07-cloud-config-bridge.js",
+      "line": 8703,
+      "id": "",
+      "bytes": 86
+    },
+    {
+      "file": "./frontend/refactor/js/08-satriaheaderheightsync.js",
+      "line": 8705,
+      "id": "satriaHeaderHeightSync",
+      "bytes": 272
+    },
+    {
+      "file": "./frontend/refactor/js/09-architecture-32-concepts.js",
+      "line": 8820,
+      "id": "",
+      "bytes": 18849
+    },
+    {
+      "file": "./frontend/refactor/js/10-lifecycle-table.js",
+      "line": 9229,
+      "id": "",
+      "bytes": 1141
+    },
+    {
+      "file": "./frontend/refactor/js/11-access-guard.js",
+      "line": 9254,
+      "id": "",
+      "bytes": 2493
+    },
+    {
+      "file": "./frontend/refactor/js/12-document-field-navigation.js",
+      "line": 9311,
+      "id": "",
+      "bytes": 8504
+    },
+    {
+      "file": "./frontend/refactor/js/13-data-validation.js",
+      "line": 9427,
+      "id": "",
+      "bytes": 584
+    },
+    {
+      "file": "./frontend/refactor/js/14-satria-document-print-engine-v31.js",
+      "line": 9442,
+      "id": "satria-document-print-engine-v31",
+      "bytes": 2865
+    },
+    {
+      "file": "./frontend/refactor/js/15-satria-integrity-v32.js",
+      "line": 9544,
+      "id": "satria-integrity-v32",
+      "bytes": 5890
+    },
+    {
+      "file": "./frontend/refactor/js/16-satria-mobile-menu-334.js",
+      "line": 9654,
+      "id": "satria-mobile-menu-334",
+      "bytes": 1196
+    },
+    {
+      "file": "./frontend/refactor/js/17-satria-smart-survey-code.js",
+      "line": 10167,
+      "id": "satria-smart-survey-code",
+      "bytes": 23149
+    },
+    {
+      "file": "./frontend/refactor/js/18-satria326-seller-correction.js",
+      "line": 10282,
+      "id": "satria326-seller-correction",
+      "bytes": 4409
+    },
+    {
+      "file": "./frontend/refactor/js/19-satria-359-smart-survey-pro.js",
+      "line": 10336,
+      "id": "satria-359-smart-survey-pro",
+      "bytes": 27779
+    },
+    {
+      "file": "./frontend/refactor/js/20-satria-survey-one-door-v1.js",
+      "line": 10515,
+      "id": "satria-survey-one-door-v1",
+      "bytes": 7764
+    },
+    {
+      "file": "./frontend/refactor/js/21-satria-document-quality-engine-v340.js",
+      "line": 10564,
+      "id": "satria-document-quality-engine-v340",
+      "bytes": 4897
+    },
+    {
+      "file": "./frontend/refactor/js/22-satria-genz-shell-341.js",
+      "line": 10626,
+      "id": "satria-genz-shell-341",
+      "bytes": 1265
+    },
+    {
+      "file": "./frontend/refactor/js/23-satria-351-photo-appendix-script.js",
+      "line": 11342,
+      "id": "satria-351-photo-appendix-script",
+      "bytes": 9858
+    },
+    {
+      "file": "./frontend/refactor/js/24-satria-354-cloud-media.js",
+      "line": 11542,
+      "id": "satria-354-cloud-media",
+      "bytes": 13931
+    },
+    {
+      "file": "./frontend/refactor/js/25-satria-3594-dpp-validation.js",
+      "line": 11873,
+      "id": "satria-3594-dpp-validation",
+      "bytes": 5322
+    },
+    {
+      "file": "./frontend/refactor/js/26-satria-3597-dpp-signature-controls.js",
+      "line": 12110,
+      "id": "satria-3597-dpp-signature-controls",
+      "bytes": 7621
+    },
+    {
+      "file": "./frontend/refactor/js/27-satria35914-doc-ppk-control.js",
+      "line": 12442,
+      "id": "satria35914-doc-ppk-control",
+      "bytes": 14206
+    },
+    {
+      "file": "./frontend/refactor/js/28-satria35917-idkb-preparer-control.js",
+      "line": 12638,
+      "id": "satria35917-idkb-preparer-control",
+      "bytes": 3060
+    },
+    {
+      "file": "./frontend/refactor/js/29-satria-dpp-example-controls-20261102.js",
+      "line": 12803,
+      "id": "satria-dpp-example-controls-20261102",
+      "bytes": 4796
+    },
+    {
+      "file": "./frontend/refactor/js/30-satria-spse-monitor-v1.js",
+      "line": 12846,
+      "id": "satria-spse-monitor-v1",
+      "bytes": 37863
+    },
+    {
+      "file": "./frontend/refactor/js/31-satria-ops-v2.js",
+      "line": 12984,
+      "id": "satria-ops-v2",
+      "bytes": 21723
+    },
+    {
+      "file": "./frontend/refactor/js/32-satria-exec-brief-327.js",
+      "line": 13141,
+      "id": "satria-exec-brief-327",
+      "bytes": 26090
+    },
+    {
+      "file": "./frontend/refactor/js/33-satria-human-first-flow-20261103.js",
+      "line": 13318,
+      "id": "satria-human-first-flow-20261103",
+      "bytes": 6512
+    },
+    {
+      "file": "./frontend/refactor/js/34-satria-human-first-spse-dok-20261103.js",
+      "line": 13399,
+      "id": "satria-human-first-spse-dok-20261103",
+      "bytes": 8620
+    },
+    {
+      "file": "./frontend/refactor/js/35-satria-brief-hotfix-329-script.js",
+      "line": 13537,
+      "id": "satria-brief-hotfix-329-script",
+      "bytes": 26131
+    }
+  ]
+}

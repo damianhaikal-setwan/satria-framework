@@ -1,0 +1,266 @@
+/* Sebelum refactor: index.html baris 5273; id: (tanpa id) */
+
+/* SATRIA single-file migration bridge */
+.satria-cloud-btn{height:38px;padding:0 13px;border:1px solid var(--bd-strong);border-radius:11px;background:var(--card-solid);color:var(--ink);font-weight:700;cursor:pointer}
+.satria-cloud-btn:hover{background:var(--acc-soft);border-color:var(--acc)}
+#satriaCloudModal[hidden]{display:none!important}
+#satriaCloudModal{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:18px;background:rgba(2,6,23,.62);backdrop-filter:blur(6px)}
+#satriaCloudModal .sc-dialog{width:min(760px,100%);max-height:min(92vh,900px);overflow:auto;background:var(--card-solid);color:var(--ink);border:1px solid var(--bd);border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.35);padding:22px}
+#satriaCloudModal h2{margin:0 0 6px;font:800 20px 'Plus Jakarta Sans',sans-serif}
+#satriaCloudModal h3{margin:18px 0 8px;font-size:14px}
+#satriaCloudModal .sc-note{padding:11px 13px;border:1px solid var(--bd);border-radius:10px;background:var(--card-2);font-size:12px;line-height:1.55;margin:12px 0}
+#satriaCloudModal .sc-warning{border-color:#f59e0b;background:rgba(245,158,11,.10)}
+#satriaCloudModal .sc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#satriaCloudModal label{display:block;font-size:11px;font-weight:700;color:var(--mut)}
+#satriaCloudModal input{display:block;width:100%;margin-top:4px;padding:10px;border:1px solid var(--bd-strong);border-radius:8px;background:var(--bg);color:var(--ink);font:13px system-ui}
+#satriaCloudModal .sc-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+#satriaCloudModal button{padding:9px 12px;border:1px solid var(--bd-strong);border-radius:9px;background:var(--card-2);color:var(--ink);font-weight:700;cursor:pointer}
+#satriaCloudModal button.primary{background:var(--acc);color:white;border-color:var(--acc)}
+#satriaCloudModal button.danger{color:#b91c1c}
+#satriaCloudModal button:disabled{opacity:.55;cursor:not-allowed}
+#satriaCloudModal .sc-status{min-height:24px;padding:8px 10px;border-radius:8px;background:var(--bg-2);font-size:12px;overflow-wrap:anywhere}
+#satriaCloudModal .sc-status[data-kind="error"]{color:#991b1b;background:#fee2e2}
+#satriaCloudModal .sc-status[data-kind="ok"]{color:#065f46;background:#d1fae5}
+#satriaCloudModal .sc-recovery[hidden]{display:none!important}
+#satriaCloudModal .sc-recovery{border:1px solid var(--bd);border-radius:10px;padding:12px;margin:10px 0;background:var(--card-2)}
+#satriaCloudModal .sc-recovery-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+#satriaCloudModal .sc-recovery input{box-sizing:border-box}
+#satriaCloudModal pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-height:170px;overflow:auto;background:#0f172a;color:#e2e8f0;padding:12px;border-radius:8px}
+@media(max-width:680px){#satriaCloudModal .sc-grid{grid-template-columns:1fr}#satriaCloudModal .sc-dialog{padding:16px}.satria-cloud-btn{padding:0 9px;font-size:11px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ===== SATRIA DATA MASTER PERFECTED - Lead Dev Patch 24 Okt 2026 ===== */
+.satria-scope-card{display:flex;gap:14px;padding:16px 18px;border-radius:16px;border:1px solid var(--bd);background:linear-gradient(135deg, rgba(15,118,110,.06), rgba(14,165,233,.05));position:relative;overflow:hidden;margin-bottom:18px}
+.satria-scope-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--acc-grad-kh)}
+.satria-scope-card.scope-admin{background:linear-gradient(135deg, rgba(37,99,235,.06), rgba(15,118,110,.06))}
+.satria-scope-card .scope-icon{width:36px;height:36px;border-radius:10px;background:var(--acc-soft);color:var(--acc);display:grid;place-items:center;flex-shrink:0}
+.satria-scope-card .scope-icon svg{width:20px;height:20px}
+.satria-scope-card b{color:var(--ink)}
+.satria-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+@media(max-width:1180px){.satria-kpi-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.satria-kpi-grid{grid-template-columns:1fr}}
+.satria-kpi-card{background:var(--card);backdrop-filter:blur(16px) saturate(160%);border:1px solid var(--bd);border-radius:20px;padding:18px 20px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:all .26s var(--ease);min-height:132px;display:flex;flex-direction:column;justify-content:space-between}
+.satria-kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-kh);opacity:.9}
+.satria-kpi-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--bd-strong)}
+.satria-kpi-card .kpi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.satria-kpi-card .kpi-icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg, var(--acc-soft), var(--acc-soft-2));color:var(--acc);display:grid;place-items:center;border:1px solid var(--bd)}
+.satria-kpi-card .kpi-icon svg{width:20px;height:20px}
+.satria-kpi-card .kpi-badge{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);background:var(--acc-soft);border:1px solid var(--bd);padding:4px 8px;border-radius:9999px;display:flex;align-items:center;gap:5px}
+.satria-kpi-card .kpi-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--acc-ring);animation:pulseDot 2s infinite}
+.satria-kpi-card .kpi-label{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
+.satria-kpi-card .kpi-value{font-size:32px;font-weight:800;line-height:1;color:var(--ink);letter-spacing:-.03em}
+.satria-kpi-card .kpi-foot{margin-top:12px;font-size:11.5px;color:var(--mut);display:flex;align-items:center;gap:6px}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#10B981;box-shadow:0 0 0 3px rgba(16,185,129,.18);position:relative}
+.live-dot::after{content:'';position:absolute;inset:0;border-radius:50%;background:#10B981;animation:pulseDot 2s infinite}
+@keyframes pulseDot{0%{box-shadow:0 0 0 0 var(--acc-ring)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.satria-master-nav-card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:14px;box-shadow:var(--shadow-sm);margin-bottom:18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.master-tabs{display:flex;flex-wrap:wrap;gap:8px}
+.master-tab{height:38px;padding:0 16px;border-radius:9999px;border:1px solid var(--bd);background:var(--card-solid);color:var(--ink-2);font-size:13px;font-weight:600;transition:all .18s var(--ease);cursor:pointer}
+.master-tab:hover{background:var(--bg-2);color:var(--ink);transform:translateY(-1px)}
+.master-tab.active{background:var(--acc-grad-kh);color:white;border-color:transparent;box-shadow:0 6px 18px rgba(15,118,110,.28);transform:translateY(-1px)}
+.master-search-wrap{position:relative;flex:1;min-width:280px;max-width:420px}
+.master-search-wrap .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--mut-2);pointer-events:none}
+.master-search{width:100%;height:42px;padding:0 14px 0 38px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--ink);font-size:13.5px;transition:all .18s var(--ease)}
+.master-search:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 4px var(--acc-ring);background:var(--card-solid)}
+.satria-form-card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:22px;box-shadow:var(--shadow-sm);margin-bottom:18px;position:relative;overflow:hidden}
+.satria-form-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-soft);opacity:.8}
+.form-card-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.form-card-head .title-accent{width:4px;height:18px;border-radius:3px;background:var(--acc-grad-kh);box-shadow:0 2px 6px rgba(15,118,110,.3)}
+.form-card-head h3{margin:0;font-size:15px;font-weight:800;letter-spacing:-.01em}
+.satria-shared-note{display:flex;gap:12px;padding:12px 14px;border-radius:12px;background:#fef3c7;border:1px solid #fde68a;color:#92400e;font-size:13px;margin-bottom:16px}
+.satria-shared-note .shared-icon{width:28px;height:28px;border-radius:8px;background:#fff7ed;color:#f59e0b;display:grid;place-items:center;flex-shrink:0}
+.satria-form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:1024px){.satria-form-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.satria-form-grid{grid-template-columns:1fr}}
+.fg label{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);display:flex;align-items:center;gap:6px}
+.fg label::before{content:'';width:3px;height:10px;border-radius:2px;background:var(--acc);display:inline-block}
+.satria-input,.satria-select{height:44px !important;padding:0 14px !important;border-radius:12px !important;border:1px solid var(--bd) !important;background:var(--card-solid) !important;transition:all .18s var(--ease) !important}
+.satria-input:focus,.satria-select:focus{outline:none !important;border-color:var(--acc) !important;box-shadow:0 0 0 4px var(--acc-ring) !important}
+.form-actions{display:flex;justify-content:flex-end;margin-top:18px}
+.satria-btn-primary{height:42px;padding:0 20px;border-radius:9999px;background:var(--acc-grad-kh);color:white;border:none;font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 20px rgba(15,118,110,.28);cursor:pointer;transition:all .18s var(--ease)}
+.satria-btn-primary:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(15,118,110,.35)}
+.satria-btn-primary:active{transform:translateY(0) scale(.98)}
+.satria-table-card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:0;box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:18px}
+.table-card-head{padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.table-card-head .table-title{display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px}
+.table-card-head .title-accent{width:4px;height:16px;border-radius:3px;background:var(--acc-grad-kh)}
+.count-badge{background:var(--bg-2);border:1px solid var(--bd);padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:700;color:var(--mut)}
+.satria-table-card .table-wrap{margin:0;border:none;box-shadow:none;border-radius:0}
+.satria-master-note{font-size:12.5px;color:var(--mut);padding:0 4px;margin-top:4px}
+
+
+/* ===== SATRIA GLOBAL PERFORMANCE OPTIMIZATION - Lead Dev 24 Okt 2026 ===== */
+/* Goal: ringan di desktop, Android, iPhone tanpa hilangkan premium look */
+
+/* 1. Reduce heavy effects on all devices, disable on mobile */
+@media (max-width: 768px){
+  .bg-blobs, .blob, .noise, body::before{display:none !important}
+  .card, .satria-kpi-card, .satria-form-card, .satria-table-card{backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+  :root{--shadow-sm:0 2px 8px rgba(15,23,42,.06);--shadow-md:0 6px 16px rgba(15,23,42,.08);--shadow-lg:0 12px 24px rgba(15,23,42,.10);--shadow-glow:0 4px 12px rgba(15,118,110,.14)}
+  .card:hover, .satria-kpi-card:hover{transform:none !important}
+}
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
+  .bg-blobs, .blob{display:none !important}
+}
+
+/* 2. Optimize header & nav for mobile */
+header{backdrop-filter:blur(12px) saturate(140%) !important;-webkit-backdrop-filter:blur(12px) saturate(140%) !important}
+@media (max-width: 768px){
+  :root{--header-h:64px;--nav-h:52px}
+  header{padding:0 12px !important;gap:8px !important}
+  #nav{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:sticky;top:var(--header-h);z-index:9;background:var(--bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd)}
+  #nav::-webkit-scrollbar{display:none}
+  .nav-track{flex-wrap:nowrap !important;overflow:visible !important}
+  main{padding:16px 12px !important}
+  .satria-kpi-grid{grid-template-columns:1fr 1fr !important;gap:12px !important}
+  .satria-form-grid{grid-template-columns:1fr !important}
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:600px}
+  .row{flex-wrap:wrap}
+  input, select, textarea, button{min-height:44px} /* Apple HIG & Android touch target */
+}
+
+/* 3. Ultra-light cards on mobile, premium on desktop */
+.card, .satria-kpi-card, .satria-form-card, .satria-table-card, .satria-master-nav-card, .satria-scope-card{
+  will-change:auto; /* remove will-change heavy */
+  contain:layout style; /* CSS containment for performance */
+}
+@media (min-width: 769px){
+  .card:hover{transform:translateY(-2px)}
+}
+
+/* 4. Optimize fonts & rendering */
+html{font-display:swap}
+body{content-visibility:auto;contain-intrinsic-size:1px 1000px}
+*{-webkit-tap-highlight-color:rgba(15,118,110,.15)}
+input, select, textarea, button{font-size:16px !important} /* Prevent iOS zoom on focus - 16px minimum */
+@media (min-width: 769px){
+  input, select, textarea{font-size:14px !important}
+}
+
+/* 5. Optimize images & media */
+img{max-width:100%;height:auto;content-visibility:auto}
+svg{flex-shrink:0}
+
+/* 6. Sticky header optimization */
+header{position:sticky;top:0;z-index:100;will-change:transform;transform:translateZ(0)}
+
+/* 7. Table performance */
+.table-wrap{contain:layout}
+table{border-collapse:collapse;table-layout:auto}
+th, td{white-space:nowrap}
+@media (max-width: 768px){
+  th, td{white-space:normal;word-break:break-word}
+}
+
+/* 8. Button & interactive optimization */
+button, [data-act]{touch-action:manipulation;user-select:none;-webkit-user-select:none}
+button:active{transform:scale(.97)}
+
+/* 9. Reduce paint areas */
+.satria-kpi-card::before, .card::before, .card::after{pointer-events:none}
+
+/* 10. Dark mode mobile optimization */
+:root[data-theme="dark"] .bg-blobs{display:none}
+:root[data-theme="dark"] .card{backdrop-filter:none}
+
+/* 11. Loading & skeleton optimization */
+.mut{will-change:auto}
+
+/* 12. Form optimization for mobile */
+.fg{min-width:0 !important;flex:1 1 100%}
+@media (min-width: 640px){.fg{min-width:220px !important;flex:1 !important}}
+
+/* 13. Optimize scroll */
+html{scroll-behavior:smooth}
+@media (max-width: 768px){html{scroll-behavior:auto}}
+main{overflow-anchor:none}
+
+/* 14. Critical CSS: make first paint fast */
+#main{animation:fadeIn .24s var(--ease-out)}
+
+/* 15. iOS safe area */
+@supports (padding: max(0px)){
+  body{padding-left:max(0px, env(safe-area-inset-left));padding-right:max(0px, env(safe-area-inset-right))}
+  header{padding-left:max(12px, env(safe-area-inset-left));padding-right:max(12px, env(safe-area-inset-right))}
+}
+
+
+/* ===== VIRTUAL SCROLL FOR PAKET & HPS - Lead Dev Patch ===== */
+.satria-virtual-table{background:var(--card);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.satria-virtual-header{display:grid;grid-template-columns:56px 140px 1fr 160px 120px 120px 120px 120px;gap:0;background:var(--bg-2);border-bottom:1px solid var(--bd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);padding:0 4px;position:sticky;top:0;z-index:2}
+.satria-virtual-header > div{padding:12px 10px;display:flex;align-items:center}
+.satria-virtual-header .n{justify-content:flex-end}
+.satria-virtual-viewport{overflow:auto;-webkit-overflow-scrolling:touch;position:relative;background:var(--card-solid);contain:layout}
+.satria-virtual-viewport::-webkit-scrollbar{width:8px;height:8px}
+.satria-virtual-viewport::-webkit-scrollbar-thumb{background:var(--bd-strong);border-radius:9999px}
+.satria-virtual-row{display:grid;grid-template-columns:56px 140px 1fr 160px 120px 120px 120px 120px;gap:0;border-bottom:1px solid var(--bg-2);background:var(--card-solid);transition:background .12s;align-items:center;min-height:56px}
+.satria-virtual-row:hover{background:var(--bg)}
+.satria-virtual-row > div{padding:10px;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.satria-virtual-row > div.n{justify-content:flex-end;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.satria-virtual-row a{color:var(--acc-vivid);font-weight:600;text-decoration:none}
+.satria-virtual-row a:hover{text-decoration:underline}
+.satria-virtual-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-2);border-top:1px solid var(--bd);font-size:11px;color:var(--mut);font-weight:600}
+.satria-virtual-footer .mut{color:var(--mut-2)}
+/* HPS virtual */
+.hps-virtual-table{background:var(--card);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.hps-virtual-header{display:grid;grid-template-columns:1fr 110px 110px 150px 140px 56px;gap:0;background:var(--bg-2);border-bottom:1px solid var(--bd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);position:sticky;top:0;z-index:2}
+.hps-virtual-header > div{padding:11px 10px}
+.hps-virtual-header .n{text-align:right}
+.hps-virtual-viewport{overflow:auto;max-height:520px;-webkit-overflow-scrolling:touch;background:var(--card-solid);contain:layout}
+.hps-virtual-row{display:grid;grid-template-columns:1fr 110px 110px 150px 140px 56px;gap:0;border-bottom:1px solid var(--bg-2);align-items:center;background:var(--card-solid);min-height:52px;transition:background .12s}
+.hps-virtual-row:hover{background:var(--bg)}
+.hps-virtual-row > div{padding:6px 8px}
+.hps-virtual-row input{height:36px !important;font-size:13px !important}
+.hps-virtual-row .n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+@media(max-width:768px){
+  .satria-virtual-header, .satria-virtual-row{grid-template-columns:48px 110px 1fr 90px 90px;gap:0}
+  .satria-virtual-header > div:nth-child(4), .satria-virtual-row > div:nth-child(4),
+  .satria-virtual-header > div:nth-child(7), .satria-virtual-row > div:nth-child(7),
+  .satria-virtual-header > div:nth-child(8), .satria-virtual-row > div:nth-child(8){display:none}
+  .hps-virtual-header, .hps-virtual-row{grid-template-columns:1fr 80px 70px 90px 56px}
+  .hps-virtual-header > div:nth-child(2), .hps-virtual-row > div:nth-child(2){display:none}
+  .satria-virtual-viewport{height:60vh !important;max-height:60vh !important}
+  .hps-virtual-viewport{max-height:50vh !important}
+}
+
+
+/* ===== DOKUMEN PENGADAAN - LAZY LOAD + VIRTUAL SCROLL ===== */
+.satria-dok-toolbar{position:sticky;top:var(--header-h);z-index:20;background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
+.satria-dok-toolbar .row{flex-wrap:nowrap;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+.satria-dok-toolbar .row::-webkit-scrollbar{display:none}
+.satria-dok-toolbar select#selPaket{min-width:280px;max-width:420px;flex-shrink:0}
+.doc-tabs-scroll{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:4px 0;flex-wrap:nowrap;flex:1}
+.doc-tabs-scroll::-webkit-scrollbar{display:none}
+.doc-tabs-scroll button{scroll-snap-align:start;white-space:nowrap;flex-shrink:0;height:36px;padding:0 14px;border-radius:9999px;font-size:12.5px;font-weight:600}
+.satria-doc-lazy-container{position:relative;min-height:400px}
+.satria-doc-skeleton{display:grid;place-items:center;min-height:400px;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:40px;color:var(--mut);font-size:14px}
+.satria-doc-skeleton .spinner{width:32px;height:32px;border:3px solid var(--bd);border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.doc{content-visibility:auto;contain-intrinsic-size:0 800px;background:var(--card-solid);border:1px solid var(--bd);border-radius:16px;padding:24px;box-shadow:var(--shadow-sm);overflow:hidden;position:relative}
+.doc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-kh);opacity:.8}
+.doc.doc-landscape{overflow-x:auto}
+.doc table{border-collapse:collapse;width:100%;table-layout:auto}
+.doc table th, .doc table td{border:1px solid var(--bd);padding:8px 10px;font-size:12.5px}
+.doc table th{background:var(--bg-2);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.doc img{max-width:100%;height:auto;content-visibility:auto}
+.doc img[loading="lazy"]{background:var(--bg-2)}
+/* Virtual scroll for large doc tables */
+.doc-virtual-table{border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:var(--card-solid);margin:12px 0}
+.doc-virtual-header{display:grid;background:var(--bg-2);border-bottom:1px solid var(--bd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);position:sticky;top:0;z-index:1}
+.doc-virtual-viewport{overflow:auto;max-height:420px;-webkit-overflow-scrolling:touch;contain:layout}
+.doc-virtual-row{display:grid;border-bottom:1px solid var(--bg-2);align-items:center;min-height:44px;background:var(--card-solid);transition:background .12s}
+.doc-virtual-row:hover{background:var(--bg)}
+.doc-virtual-row > div{padding:7px 10px;font-size:12.5px;overflow:hidden;text-overflow:ellipsis}
+.doc-virtual-footer{padding:8px 12px;background:var(--bg-2);border-top:1px solid var(--bd);font-size:11px;color:var(--mut);display:flex;justify-content:space-between}
+@media(max-width:768px){
+  .satria-dok-toolbar{top:56px;padding:10px;border-radius:12px}
+  .satria-dok-toolbar .row{flex-direction:column;align-items:stretch}
+  .satria-dok-toolbar select#selPaket{max-width:100%;width:100%}
+  .doc{padding:14px;border-radius:12px}
+  .doc table{font-size:11px;min-width:500px;display:block;overflow-x:auto;white-space:nowrap}
+  .doc table th, .doc table td{white-space:normal;word-break:break-word}
+  .doc-virtual-viewport{max-height:50vh}
+}
+

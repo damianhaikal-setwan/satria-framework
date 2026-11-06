@@ -2,7 +2,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 import re
 root=Path(__file__).resolve().parents[1]
-html=(root/'index.html').read_text()
+html=__import__('legacy_index_source').read_index()
 # The sandbox blocks file:// and 127.0.0.1 navigation. Assemble an offline
 # document with only bundled assets, then run it in Chromium about:blank.
 html=re.sub(r'<script\s+src="https?://[^\"]+"\s*>\s*</script>','',html)

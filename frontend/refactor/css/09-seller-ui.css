@@ -1,0 +1,4 @@
+/* Sebelum refactor: index.html baris 10278; id: satria326-seller-style */
+
+.satria326-seller-notice{background:var(--card-2);border:1px solid #dfad59;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.6}
+.satria326-seller-notice button{display:block;margin-top:8px;min-height:36px;padding:6px 11px;height:auto;white-space:normal}

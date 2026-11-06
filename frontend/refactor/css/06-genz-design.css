@@ -1,0 +1,39 @@
+/* Sebelum refactor: index.html baris 9505; id: satria-genz-v32 */
+
+/* SATRIA 3.0.32 · Design system for application UI; official documents are not restyled. */
+:root{--gz-accent:#6257f5;--gz-blue:#2563eb;--gz-lime:#caff69;--gz-dark:#17182e;--gz-muted:#6f7490;--gz-border:#e4e6f1;--gz-surface:#fff;--gz-bg:#f5f6fc;--gz-round:18px}
+:root[data-theme="dark"]{--gz-bg:#0f1423;--gz-surface:#182238;--gz-border:#34415c;--gz-dark:#edf0ff;--gz-muted:#a4aecb;--gz-lime:#cbef73}
+body{background:var(--gz-bg)!important;color:var(--gz-dark)}
+body::before{display:none!important}
+header{background:var(--gz-surface)!important;border-bottom:1px solid var(--gz-border)!important;box-shadow:0 4px 22px #17182e09!important}
+header::after{background:linear-gradient(90deg,#6257f5,#2563eb,#12bca5,#caff69)!important}
+#bLogoRow::before{background:linear-gradient(140deg,#655afa,#3e8ef7)!important;box-shadow:0 7px 20px #6257f52f!important;border-radius:16px!important}
+#hPemda{color:var(--gz-dark)!important}
+nav,#nav{background:var(--gz-surface)!important;border-bottom:1px solid var(--gz-border)!important;box-shadow:none!important}
+nav a.on,#nav a.on{background:var(--gz-accent)!important;box-shadow:0 6px 20px #6257f52e!important;color:#fff!important}
+#main{max-width:1500px!important;padding:24px!important}
+#main .card:not(.doc),#main .chart-card,#main .satria-table-card,#main .satria-form-card,#main .satria-master-nav-card{border-color:var(--gz-border)!important;border-radius:var(--gz-round)!important;box-shadow:0 6px 24px #17182e08!important}
+#main .card h3::before,#main .chart-title::before{background:var(--gz-accent)!important}
+#main .satria-command-header{background:linear-gradient(115deg,#25224d,#4a3db9 62%,#6257f5)!important;border:0!important;border-radius:22px!important;padding:27px!important}
+#main .satria-command-header h2,#main .satria-command-header p,#main .satria-command-header .satria-command-badge{color:#fff!important}
+#main .satria-command-header .satria-command-badge{background:#ffffff25!important;border-color:#ffffff40!important}
+#main .satria-command-header .satria-meta-card{background:#ffffffed!important;border-color:#ffffff70!important}
+#main .satria-kpi-card::before,#main .kpi::before{background:linear-gradient(90deg,#6257f5,#7ccefd,#caff69)!important}
+#main button:not(.g):not(.d):not(.dok-type-card):not(.dok-print-button):not(.master-tab):not(.theme-btn):not(.dok-package-control button):not([data-act="print"]),.satria-btn-primary{background:var(--gz-accent)!important;border-color:var(--gz-accent)!important;color:#fff!important;animation:none!important;box-shadow:0 5px 15px #6257f52b!important}
+#main button.g,#main button.master-tab:not(.active){border-color:var(--gz-border)!important;background:var(--gz-surface)!important;color:var(--gz-dark)!important;box-shadow:none!important}
+#main .master-tab.active{background:var(--gz-accent)!important;border-color:var(--gz-accent)!important;color:#fff!important}
+#main th{background:#f0efff;color:#3e397b}
+:root[data-theme="dark"] #main th{background:#292c50;color:#e8e6ff}
+#main input:focus,#main select:focus,#main textarea:focus{border-color:var(--gz-accent)!important;box-shadow:0 0 0 3px #6257f520!important}
+.satria-integrity-strip{display:flex;align-items:center;gap:13px;border:1px solid #dad7ff;border-radius:15px;background:#f5f4ff;color:#302970;padding:12px 16px}
+.satria-integrity-strip>div{display:flex;flex-direction:column;flex:1;gap:2px}.satria-integrity-strip b{font-size:12px}.satria-integrity-strip small{font-size:11px;color:#676192}.satria-integrity-icon{border-radius:11px;background:#e8e5ff;padding:9px 12px;color:#6257f5;font-weight:900}
+.satria-integrity-strip button{background:#6257f5!important;color:#fff!important;border:0!important;font-size:12px!important}
+.satria-audit-modal{position:fixed;inset:0;background:#0c1029b8;z-index:11000;display:grid;place-items:center;padding:18px}
+.satria-audit-content{width:min(720px,100%);max-height:85vh;overflow:auto;background:#fff;color:#191936;border-radius:22px;box-shadow:0 20px 70px #0005;padding:25px}
+.satria-audit-head{display:flex;justify-content:space-between;gap:15px;align-items:center}.satria-audit-head h2{font-size:19px;margin:0}.satria-audit-head button{background:#eeeeff;color:#342c86;border:0;border-radius:12px;min-width:42px}
+.satria-audit-content ul{padding-left:20px;line-height:1.6}.satria-audit-content li{padding:5px 0;border-bottom:1px solid #ececf4;font-size:12px}
+.satria-audit-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.satria-audit-actions button{background:#6257f5;color:#fff;border:0}.satria-audit-actions button.g{background:#f0efff;color:#352b84}
+:root[data-theme="dark"] .satria-integrity-strip{background:#241f47;border-color:#5c4d9c;color:#f3f0ff}:root[data-theme="dark"] .satria-integrity-strip small{color:#d0c7fa}
+@media(max-width:760px){#main{padding:12px!important}.satria-integrity-strip{flex-wrap:wrap}.satria-integrity-strip>div{flex:1 1 180px}.satria-integrity-strip button{width:100%}.satria-command-header{padding:18px!important}}
+@media print{.satria-integrity-strip,.satria-audit-modal{display:none!important}/* Document print profiles are owned by the existing SATRIA print engine. */}

@@ -1,0 +1,55 @@
+/* Sebelum refactor: index.html baris 13482; id: satria-brief-hotfix-329 */
+
+/* SATRIA NEXT 3.0.59.39 — Executive Briefing Visual Stable */
+.brief-visual-shell{display:grid;gap:16px;margin:12px 0 18px}
+.brief-hero-pro{position:relative;overflow:hidden;padding:22px;border-radius:26px;color:#fff;background:linear-gradient(135deg,#0f172a 0%,#1d4ed8 42%,#0891b2 74%,#22c55e 100%);box-shadow:0 18px 52px rgba(15,23,42,.20);border:1px solid rgba(255,255,255,.08)}
+.brief-hero-pro:before,.brief-hero-pro:after{content:'';position:absolute;border-radius:999px;pointer-events:none;opacity:.55;filter:blur(10px)}
+.brief-hero-pro:before{width:240px;height:240px;right:-60px;top:-110px;background:radial-gradient(circle,rgba(255,255,255,.34),transparent 70%)}
+.brief-hero-pro:after{width:220px;height:220px;left:-70px;bottom:-120px;background:radial-gradient(circle,rgba(34,211,238,.30),transparent 70%)}
+.brief-hero-row{position:relative;z-index:1;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.brief-hero-copy{max-width:780px}
+.brief-hero-copy h3{margin:12px 0 8px;font-size:clamp(31px,4vw,48px);line-height:1.03;letter-spacing:-.06em;color:#fff;font-family:'Plus Jakarta Sans',sans-serif}
+.brief-hero-copy p{margin:0;max-width:660px;color:rgba(255,255,255,.86);font-size:13px;line-height:1.62}
+.brief-hero-kicker{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:900;opacity:.95}
+.brief-hero-kicker i,.brief-live-dot{width:10px;height:10px;border-radius:999px;display:inline-block;background:#bef264;box-shadow:0 0 0 0 rgba(190,242,100,.55);animation:briefPulse 1.9s infinite}
+.brief-hero-meta{display:inline-flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:15px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.12);backdrop-filter:blur(12px);font-size:11px}
+.brief-hero-orb{display:grid;place-items:center;min-width:160px}
+.brief-hero-orb .orb{width:132px;height:132px;border-radius:34px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(255,255,255,.24),rgba(255,255,255,.05));backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.16);transform:rotate(8deg);box-shadow:10px 14px 0 rgba(2,6,23,.16);animation:briefFloat 5.5s ease-in-out infinite alternate}
+.brief-hero-orb b{display:block;font-size:34px;line-height:1;letter-spacing:-.06em}.brief-hero-orb small{display:block;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.08em;opacity:.88;margin-top:6px}
+.brief-chip-grid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}
+.brief-chip{padding:14px;border-radius:18px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(15px)}
+.brief-chip span{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:850;opacity:.78}.brief-chip b{display:block;margin-top:8px;font-size:clamp(18px,2vw,28px);line-height:1.03;letter-spacing:-.04em}.brief-chip small{display:block;margin-top:6px;font-size:11px;color:rgba(255,255,255,.78);line-height:1.4}
+.brief-vgrid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
+.brief-vcard{grid-column:span 6;position:relative;overflow:hidden;padding:18px;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(248,250,252,.98));border:1px solid rgba(148,163,184,.18);box-shadow:0 16px 44px rgba(15,23,42,.08)}
+.brief-vcard.wide{grid-column:span 12}.brief-vcard.third{grid-column:span 4}.brief-vcard:after{content:'';position:absolute;right:-30px;bottom:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(99,102,241,.09),transparent 68%)}
+.brief-vhead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:12px}.brief-vhead h3{margin:0;font-size:14px;line-height:1.25;font-family:'Plus Jakarta Sans',sans-serif}.brief-vhead p{margin:4px 0 0;font-size:11px;color:var(--mut);line-height:1.45}
+.brief-vbadge{padding:6px 10px;border-radius:999px;background:#ecfeff;color:#0f766e;border:1px solid #a5f3fc;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;white-space:nowrap}
+.brief-score-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.brief-score{padding:14px;border-radius:16px;background:linear-gradient(135deg,#0f172a,#1d4ed8);color:#fff;position:relative;overflow:hidden}.brief-score.alt{background:linear-gradient(135deg,#164e63,#0f766e)}.brief-score b{display:block;font-size:24px;letter-spacing:-.05em;line-height:1.02}.brief-score span{display:block;font-size:11px;opacity:.82;margin-top:5px}.brief-score small{display:block;font-size:10px;opacity:.72;margin-top:8px;line-height:1.45}
+.brief-pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.brief-pill-row span{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;background:#f8fafc;border:1px solid rgba(148,163,184,.22);font-size:11px;color:#334155}.brief-pill-row b{font-size:12px;color:#0f172a}
+.brief-chart{min-height:200px}.brief-chart svg{width:100%;height:100%;display:block}.brief-line{height:220px}.brief-donut,.brief-radar,.brief-funnel,.brief-bubble{height:220px}
+.brief-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.brief-legend span{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:var(--mut)}.brief-legend i{width:10px;height:10px;border-radius:999px;display:block}
+.brief-bars{display:flex;flex-direction:column;gap:12px}.brief-bar-row{display:grid;gap:6px}.brief-bar-meta{display:flex;justify-content:space-between;gap:10px;font-size:11px;font-weight:700;color:#1e293b}.brief-bar-meta span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.brief-bar-track{height:12px;border-radius:999px;background:#e2e8f0;overflow:hidden}.brief-bar-fill{height:100%;border-radius:999px;transform-origin:left center;transform:scaleX(0);animation:briefGrow 1.2s cubic-bezier(.2,.8,.2,1) forwards;background:linear-gradient(90deg,#6366f1,#06b6d4,#22c55e)}
+.brief-stack{height:18px;border-radius:999px;background:#e2e8f0;overflow:hidden;display:flex}.brief-stack i{display:block;height:100%;transform-origin:left center;animation:briefGrow .9s cubic-bezier(.2,.8,.2,1) forwards}.brief-mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.brief-mini{padding:12px;border-radius:16px;background:#fff;border:1px solid rgba(148,163,184,.24)}.brief-mini b{display:block;font-size:20px;line-height:1.05;letter-spacing:-.04em;color:#0f172a}.brief-mini span{display:block;font-size:11px;color:#64748b;margin-top:4px}
+.brief-clean-list{display:grid;gap:9px;margin-top:4px}.brief-clean-list div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px dashed rgba(148,163,184,.38)}.brief-clean-list div:last-child{border-bottom:0;padding-bottom:0}.brief-clean-list b{font-size:12px;color:#0f172a}.brief-clean-list span{font-size:11px;color:#64748b;text-align:right}
+.brief-note{margin-top:12px;font-size:11px;color:#64748b;line-height:1.55}
+.brief-live-timer{font-weight:700}
+@keyframes briefPulse{0%{box-shadow:0 0 0 0 rgba(190,242,100,.45)}70%{box-shadow:0 0 0 10px rgba(190,242,100,0)}100%{box-shadow:0 0 0 0 rgba(190,242,100,0)}}
+@keyframes briefFloat{to{transform:rotate(12deg) translateY(-6px)}}
+@keyframes briefGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media(max-width:1100px){.brief-chip-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.brief-vcard.third{grid-column:span 6}}
+@media(max-width:760px){.brief-hero-pro{padding:18px;border-radius:22px}.brief-hero-copy h3{font-size:32px}.brief-hero-orb{display:none}.brief-chip-grid{grid-template-columns:1fr}.brief-vcard,.brief-vcard.wide,.brief-vcard.third{grid-column:span 12}.brief-mini-grid,.brief-score-grid{grid-template-columns:1fr}}
+@media print{.brief-hero-pro,.brief-vcard,.brief-score,.brief-chip,.brief-mini{background:#fff!important;color:#111!important;box-shadow:none!important;border:1px solid #bbb!important}.brief-hero-copy h3,.brief-chip b,.brief-score b,.brief-mini b{color:#111!important}.brief-vbadge{background:#fff!important;color:#111;border:1px solid #bbb}.brief-bar-track{background:#ddd!important}.brief-bar-fill{background:#999!important;transform:none!important;animation:none!important}.brief-stack i{animation:none!important}.brief-hero-orb{display:none}.brief-chip-grid{grid-template-columns:repeat(2,1fr)}.brief-vgrid{display:block}.brief-vcard{margin:10px 0}.brief-pill-row span{border:1px solid #bbb;background:#fff!important;color:#111!important}}
+
+/* Improve contrast on the dark gradient header, in both light and dark themes. */
+#main .brief-page > .spse-hero h2,#main .brief-hero-pro .brief-hero-copy h3{color:#ffffff!important}
+#main .brief-page > .spse-hero p,#main .brief-page > .spse-hero .spse-eyebrow{color:#e2f8f6!important}
+.brief-hero-pro .brief-hero-copy p{color:rgba(255,255,255,.9)!important}
+.brief-hero-pro .brief-hero-copy h3{max-width:850px}
+@media print{#main .brief-page > .spse-hero h2,#main .brief-hero-pro .brief-hero-copy h3,#main .brief-page > .spse-hero p{color:#111!important}}
+/* SATRIA 3.0.59.39 — SVG chart entrance animations (no fake live numbers) */
+@keyframes briefChartPop{from{opacity:.15;transform:scale(.94) translateY(7px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.brief-vcard .brief-chart svg{animation:briefChartPop .85s cubic-bezier(.2,.8,.2,1) both;transform-origin:center}
+.brief-visual-shell .brief-vcard{min-width:0}
+.brief-visual-shell .brief-vcard svg{max-width:100%}
+@media(prefers-reduced-motion:reduce){.brief-hero-orb .orb,.brief-live-dot,.brief-hero-kicker i,.brief-bar-fill,.brief-stack i,.brief-vcard .brief-chart svg{animation:none!important;transform:none!important}}
+@media print{.brief-vcard .brief-chart svg{animation:none!important}.brief-visual-shell{display:block!important}.brief-vcard{break-inside:avoid!important;page-break-inside:avoid}}

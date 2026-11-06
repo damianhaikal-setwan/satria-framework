@@ -1,12 +1,13 @@
 'use strict';
 const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
-const src=fs.readFileSync(path.resolve(__dirname,'..','index.html'),'utf8');
+const src=require('./legacy_index_source.cjs').readIndex();
+const hpsReviewHelpers=src.slice(src.indexOf('const satriaHpsReviewDrafts=new Map();'),src.indexOf('function evalPw(p){'));
 const core=src.slice(src.indexOf('function satriaOfferGate('),src.indexOf('function pemenang('));
 const state={P:null,confirmations:[],S:{penyedia:[{id:'sellerA',nama:'Penyedia A'}]},toast:()=>{},synced:[],rendered:0};
 const p={id:'pkg1',nama:'Paket Test',pagu:1500000,tglNego:'2026-10-28',items:[{id:'i1',nama:'Barang 1',vol:1,hs:1000000}],pemenangId:null,penawaran:[]};
 const w={id:'pw1',pen:'sellerA',harga:{i1:1100000},nego:{i1:900000},negoDetails:{i1:{beforeTax:810811,tax:89189,inclusive:900000}},sumberHarga:'Katalog INAPROC',tanggalHarga:'2026-10-28',catalogRefs:{i1:{negotiatedBase:810811,negotiatedTax:89189,displayPrice:1100000,link:'https://katalog.inaproc.id/test/a',name:'Produk A'}}};p.penawaran.push(w);state.P=p;
 const ctx={S:state.S,KN:{lastSaved:null},P:id=>id==='pkg1'?p:null,PY:()=>({nama:'Penyedia A'}),hps:p=>p.items.reduce((n,i)=>n+i.vol*i.hs,0),rp:n=>'Rp '+n,knStr:x=>String(x),esc:x=>String(x),nf:x=>Number(x).toLocaleString('id-ID'),knIdr:n=>'Rp '+n,evalPw:p=>p.penawaran.map(w=>({w,t:900000,st:'Lengkap',lengkap:true,negoLengkap:true,negoCount:1})),pemenang:()=>null,kandidat:()=>null,totPw:(p,w,ne)=>p.items.reduce((n,i)=>n+i.vol*Number((ne?w.nego:w.harga)[i.id]),0),toast:()=>{},render:()=>{},confirm:()=>true,window:{},Number,Math,Date,Set,String};
-vm.createContext(ctx);vm.runInContext(core,ctx);
+vm.createContext(ctx);vm.runInContext(hpsReviewHelpers,ctx);vm.runInContext(core,ctx);
 const e=ctx.evalPw(p)[0];assert(ctx.satriaOfferGate(p,e).ready,'Eligible offer should pass');
 w.harga.i1=850000;assert(!ctx.satriaOfferGate(p,e).ready,'Offer gross higher than list must be rejected');w.harga.i1=1100000;p.pagu=800000;assert(!ctx.satriaOfferGate(p,e).ready,'Offer above pagu must be rejected');p.pagu=1500000;
 const renderCore=src.slice(src.indexOf('function satriaOfferNegoBreakdown('),src.indexOf('/* ===== DOKUMEN OTOMATIS ===== */'));

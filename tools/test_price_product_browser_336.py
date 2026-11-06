@@ -4,7 +4,7 @@ import re
 import fitz
 from playwright.sync_api import sync_playwright
 root=Path(__file__).resolve().parents[1]
-html=(root/'index.html').read_text()
+html=__import__('legacy_index_source').read_index()
 html=re.sub(r'<script\s+src="https?://[^"]+"\s*>\s*</script>','',html)
 for name in ['satria-next4.css','satria-operator-studio.css','satria-price-analysis.css']:
  html=html.replace(f'<link rel="stylesheet" href="./frontend/{name}">','<style>'+(root/'frontend'/name).read_text()+'</style>')

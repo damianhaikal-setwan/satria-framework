@@ -2,7 +2,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const html=require('./legacy_index_source.cjs').readIndex();
 const start=html.indexOf('/* Bank RUP adalah daftar sumber lintas OPD/tahun');
 const end=html.indexOf('function satriaBankRow(p)',start);
 assert(start>=0&&end>start,'Bank RUP function not found');

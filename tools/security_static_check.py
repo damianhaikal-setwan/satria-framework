@@ -1,7 +1,8 @@
 from pathlib import Path
 import sys
 ROOT = Path(__file__).resolve().parents[1]
-html = (ROOT / 'index.html').read_text()
+from legacy_index_source import read_index
+html = read_index()
 sql = (ROOT / 'supabase/migrations/20261024053200_satria_scoped_access_and_years.sql').read_text()
 create = (ROOT / 'supabase/functions/admin-create-user/index.ts').read_text()
 roster = (ROOT / 'supabase/functions/admin-list-users/index.ts').read_text()

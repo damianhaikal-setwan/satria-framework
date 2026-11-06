@@ -1,6 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path'),assert=require('assert/strict');
-const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const html=require('./legacy_index_source.cjs').readIndex();
 const mod=fs.readFileSync(path.join(__dirname,'..','frontend','satria-price-analysis.js'),'utf8');
 const audit=html.match(/<script id="satria-document-quality-engine-v340">([\s\S]*?)<\/script>/);
 assert(audit,'QA print capture module missing');
@@ -13,5 +13,5 @@ assert(html.includes("docMiss=(p,k)=>docReqs(p,k).filter(r=>!r.ok&&!r.manual)"),
 assert(html.includes("analisa:'Analisis Kewajaran Harga & Bukti'"),'active guide should name the analysis document');
 assert(mod.includes('manual:true'),'the human verification requirement must remain explicit');
 const sw=fs.readFileSync(path.join(__dirname,'..','sw.js'),'utf8');
-assert(sw.includes('3.0.59.36'),'cache key must be invalidated for hotfix');
+assert(sw.includes('refactor-index-20261106'),'PWA cache must be updated after index refactor');
 console.log('PASS Document QA 3.0.59.36: 15 registered types, matching ID, manual/automatic checks separated, no blocking draft confirmation, SW cache');

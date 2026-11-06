@@ -1,0 +1,143 @@
+/* Sebelum refactor: index.html baris 11732; id: satria-3596-dpp-signature-layout */
+
+/* 3.0.59.7 — DPP: cap dan tanda tangan dibuat lebih dekat lagi
+   dengan overlap ringan yang lebih rapat namun tetap proporsional dan etis. */
+.doc[data-document-type="dpp"] .satria-dpp-signature,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-signature {
+  width:330px!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+  text-align:center!important;
+  white-space:normal!important;
+  overflow-wrap:break-word!important;
+  break-inside:avoid!important;
+  page-break-inside:avoid!important;
+}
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images {
+  display:block!important;
+  position:relative!important;
+  width:68mm!important;
+  max-width:100%!important;
+  height:21mm!important;
+  min-height:21mm!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  margin:1.6mm auto .8mm!important;
+  padding:0!important;
+  line-height:normal!important;
+  break-inside:avoid!important;
+  page-break-inside:avoid!important;
+}
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images > img,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images > img {
+  display:block!important;
+  position:absolute!important;
+  float:none!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  min-width:0!important;
+  min-height:0!important;
+  object-fit:contain!important;
+  box-sizing:border-box!important;
+  transform:none!important;
+  mix-blend-mode:multiply!important;
+}
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-cap,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-cap {
+  z-index:1!important;
+  left:2.6mm!important;
+  top:.35mm!important;
+  width:20.2mm!important;
+  height:19.9mm!important;
+  object-position:center center!important;
+}
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-ttd,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-ttd {
+  z-index:2!important;
+  left:14.2mm!important;
+  top:1.0mm!important;
+  width:46.2mm!important;
+  height:17.6mm!important;
+  object-position:left center!important;
+}
+/* Bila hanya satu berkas gambar tersedia, tetap tampil terpusat dan rapi. */
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-ttd:only-child,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-ttd:only-child {left:9.5mm!important;width:49mm!important;height:17.8mm!important;object-position:center center!important;}
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-cap:only-child,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-cap:only-child {left:23.5mm!important;top:.3mm!important;width:21mm!important;height:20.5mm!important;}
+@media print {
+  #satria-print-root .doc[data-document-type="dpp"] .satria-dpp-signature {
+    margin-top:8px!important;
+    font-size:10.2pt!important;
+    line-height:1.25!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images {
+    width:68mm!important;
+    height:21mm!important;
+    min-height:21mm!important;
+  }
+}
+
+
+/* Sebelum refactor: index.html baris 11815; id: satria-3594-dpp-smart-print-css */
+
+/* SATRIA NEXT 3.0.59.4: print-safe styling only for DPP, Arial and native A4. */
+.doc[data-document-type="dpp"] .satria594-spec-block,
+#satria-print-root .doc[data-document-type="dpp"] .satria594-spec-block {break-inside:avoid!important;page-break-inside:avoid!important;}
+.doc[data-document-type="dpp"] .satria594-closing-signature,
+#satria-print-root .doc[data-document-type="dpp"] .satria594-closing-signature {
+  break-inside:avoid!important;page-break-inside:avoid!important;
+  display:flow-root!important;clear:both!important;
+}
+.doc[data-document-type="dpp"] .satria594-closing-signature .satria-dpp-signature,
+#satria-print-root .doc[data-document-type="dpp"] .satria594-closing-signature .satria-dpp-signature {margin-top:3.5mm!important;}
+.doc[data-document-type="dpp"] .satria51-photo-grid,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-photo-grid {display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:3.2mm!important;}
+.doc[data-document-type="dpp"] .satria51-photo-card,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-photo-card {
+  grid-template-columns:48mm minmax(0,1fr)!important;gap:4mm!important;
+  padding:2.6mm!important;min-height:0!important;height:auto!important;
+  break-inside:avoid!important;page-break-inside:avoid!important;
+}
+.doc[data-document-type="dpp"] .satria51-photo-picture,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-photo-picture {justify-content:flex-start!important;}
+.doc[data-document-type="dpp"] img.satria51-product-image,
+#satria-print-root .doc[data-document-type="dpp"] img.satria51-product-image {max-width:48mm!important;max-height:43mm!important;width:100%!important;height:auto!important;}
+.doc[data-document-type="dpp"] .satria51-photo-fields .satria51-field,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-photo-fields .satria51-field {font-size:8pt!important;line-height:1.22!important;margin-bottom:1.2mm!important;}
+.doc[data-document-type="dpp"] .satria51-photo-fields .satria51-product-title,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-photo-fields .satria51-product-title {font-size:8.8pt!important;margin:0 0 1.8mm!important;}
+.doc[data-document-type="dpp"] .satria51-photo-caption,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-photo-caption {font-size:7pt!important;margin-top:1.3mm!important;}
+.doc[data-document-type="dpp"] .satria51-sheet-meta,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-sheet-meta {font-size:8pt!important;margin-bottom:3mm!important;}
+.doc[data-document-type="dpp"] .satria51-appendix-note,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-appendix-note {font-size:7.7pt!important;margin-top:2.2mm!important;}
+@media print {
+ @page satriaDppCompactA4 {size:A4 portrait;margin:8mm 10mm 10mm;
+    @bottom-right {content:"Halaman " counter(page);font:8pt Arial,sans-serif;color:#555;}}
+ #satria-print-root .doc[data-document-type="dpp"] {font:9.35pt/1.12 Arial,Helvetica,sans-serif!important;}
+ #satria-print-root .doc[data-document-type="dpp"] :is(p,li) {font-size:9.35pt!important;line-height:1.12!important;}
+ #satria-print-root .doc[data-document-type="dpp"] :is(ol,ul) {margin-top:.7mm!important;margin-bottom:.7mm!important;}
+ #satria-print-root .doc[data-document-type="dpp"] .tbl-letter-meta td {font-size:8.9pt!important;line-height:1.09!important;padding:1px 3px!important;}
+ #satria-print-root .doc[data-document-type="dpp"] .tbl-dpp-items :is(th,td) {font-size:8.2pt!important;padding:1.7px 3px!important;}
+ #satria-print-root .doc[data-document-type="dpp"] p.doc-title {font-size:10.5pt!important;margin:2mm 0!important;}
+ #satria-print-root .doc[data-document-type="dpp"] p:has(>b:first-child) {orphans:2;widows:2;}
+ #satria-print-root .doc[data-document-type="dpp"] .satria594-closing-signature {break-inside:avoid!important;page-break-inside:avoid!important;}
+ #satria-print-root .doc[data-document-type="dpp"] .satria51-sheet {break-before:page!important;page-break-before:always!important;}
+ #satria-print-root .doc[data-document-type="dpp"] .satria51-photo-card {max-height:none!important;overflow:visible!important;}
+}
+@media screen and (max-width:680px) {
+ .doc[data-document-type="dpp"] .satria51-photo-card {grid-template-columns:1fr!important;}
+}
+/* Data verification panel appears only in the application, never on official paper. */
+.satria594-check-panel{border:1px solid #d8d8ed;border-radius:14px;background:#fafaff;padding:14px 16px;margin:14px 0;line-height:1.5;font:12px/1.5 Arial,sans-serif;}
+.satria594-check-panel strong{font-size:13px;color:#19183b;}
+.satria594-check-panel ul{margin:7px 0 0 19px;padding:0;}
+.satria594-check-panel li{margin:3px 0;}
+.satria594-check-panel .satria594-critical{color:#ae1f32;font-weight:700;}
+.satria594-check-panel .satria594-warning{color:#805800;}

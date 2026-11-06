@@ -2,7 +2,7 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const assert=require('node:assert/strict');
-const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const html=require('./legacy_index_source.cjs').readIndex();
 const visual=html.match(/<script id="satria-brief-hotfix-329-script">([\s\S]*?)<\/script>/);
 assert(visual,'Executive Briefing visual script absent');
 new Function(visual[1]);
@@ -21,5 +21,5 @@ assert.match(html,/Executive Briefing 4\.1/);
 assert.equal(html.match(/<script id="satria-brief-hotfix-329-script">/g)?.length,1,'Duplicate visual script would risk double initialization');
 assert.match(html,/@media\(prefers-reduced-motion:reduce\)/);
 const sw=fs.readFileSync(path.join(__dirname,'..','sw.js'),'utf8');
-assert.match(sw,/satria-v3\.0\.59\.36/);
+assert.match(sw,/satria-v3\.0\.59\.39-refactor-index-20261106/);
 console.log('PASS — Executive Briefing 4.1 visual route binding, EP/SPSE/combined/package charts, print, reduced motion, cache version');

@@ -1,3 +1,5 @@
+> **Pembaruan 6 November 2026 — Refactor `index.html` dan maintenance:** file utama telah dipisah menjadi 34 skrip klasik dan 22 stylesheet berurutan; diagnostik baca-saja serta pemeriksaan CI diperkuat. **Semua file di `frontend/refactor/` wajib ikut di-deploy.** Baca [`docs/REFACTOR-INDEX-DAN-MAINTENANCE-2026-11-06.md`](docs/REFACTOR-INDEX-DAN-MAINTENANCE-2026-11-06.md). Refactor ini tidak mengubah aturan negosiasi maupun analisis harga tayang antarpenyedia.
+
 ## SATRIA NEXT 3.0.59.39 — Analisis kewajaran mengikuti contoh PDF Pejabat Pengadaan
 
 Dokumen ke-15 kini mengikuti susunan I–VII sesuai contoh PDF pengguna, **A4 potret**, menampilkan sumber harga dari setiap penyedia, analisis per barang dengan bahasa manusia, rekap selisih HPS/negosiasi, dan lampiran foto produk yang memang tersimpan. Nama penyedia/akun/program/angka dihitung dari paket terpilih—tidak disalin dari contoh. Tetap baca-saja, tanpa persetujuan berjenjang atau migrasi Supabase. Baca `docs/PANDUAN-UPDATE-3.0.59.39.md`.
@@ -50,7 +52,7 @@ Perbaikan ini memperbaiki error render pada Executive Briefing, membersihkan pat
 
 Versi ini menambahkan **Executive Briefing 3.0** (e-Purchasing, SPSE, gabungan), briefing per paket, cetak A4/PDF, daftar risiko, analisis penetapan dan penyedia, ringkasan per OPD, serta CSV. Lihat [panduan fitur](docs/EXECUTIVE-BRIEFING-3.0.59.27.md).
 
-Repositori ini menyimpan **aplikasi SATRIA NEXT dalam satu `index.html`**, aset PWA, Edge Functions, migrasi SQL, serta dokumentasi dan pengujian. Paket ini meneruskan struktur repo yang telah dirapikan dan menyempurnakan perhitungan sisa pagu RUP menurut HPS maupun penetapan yang lolos validasi; tidak diperlukan migrasi database baru.
+Repositori ini menyimpan **aplikasi SATRIA NEXT dengan `index.html` sebagai entry point dan skrip/style modular**, aset PWA, Edge Functions, migrasi SQL, serta dokumentasi dan pengujian. Paket ini meneruskan struktur repo yang telah dirapikan dan menyempurnakan perhitungan sisa pagu RUP menurut HPS maupun penetapan yang lolos validasi; tidak diperlukan migrasi database baru.
 
 Lihat [panduan evaluasi total HPS historis 3.0.59.23](docs/EVALUASI-TOTAL-HPS-HISTORIS-3.0.59.23.md).
 
@@ -66,7 +68,8 @@ Lihat [panduan evaluasi total HPS historis 3.0.59.23](docs/EVALUASI-TOTAL-HPS-HI
 
 | Lokasi | Fungsi |
 | --- | --- |
-| `index.html` | Aplikasi SATRIA NEXT (frontend terintegrasi) |
+| `index.html` | Entry point dan struktur HTML; memuat CSS/JS modular berurutan |
+| `frontend/refactor/` | Kode hasil refactor index, stylesheet, dan diagnostik |
 | `manifest.json`, `sw.js`, `icon-*.png` | PWA, cache, ikon |
 | `_headers`, `_redirects` | Aturan untuk hosting yang mendukung format ini; tidak otomatis berlaku di GitHub Pages |
 | `supabase/functions/` | **Satu-satunya lokasi resmi** Edge Functions aktif |

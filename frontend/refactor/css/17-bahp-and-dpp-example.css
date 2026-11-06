@@ -1,0 +1,137 @@
+/* Sebelum refactor: index.html baris 12667; id: satria-35919-bahp-title-sppbj-letter */
+
+/* 3.0.59.18 — Perubahan hanya BAHP heading dan Surat Perintah Pengadaan. */
+.doc[data-document-type="bahp"] .bahp-document-title,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-document-title{
+ display:block!important;width:100%!important;max-width:none!important;
+ box-sizing:border-box!important;text-align:center!important;
+ margin:5px auto 9px!important;padding:0!important;text-indent:0!important;
+ float:none!important;clear:both!important;
+}
+.doc[data-document-type="bahp"] .bahp-document-title>b,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-document-title>b{
+ display:block!important;width:100%!important;text-align:center!important;
+ font-size:10pt!important;line-height:1.24!important;
+}
+.doc[data-document-type="bahp"] .bahp-document-title>span,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-document-title>span{
+ display:block!important;width:100%!important;text-align:center!important;
+ font-size:9pt!important;line-height:1.2!important;margin-top:2px!important;
+}
+.doc[data-document-type="sppbj"] .satria-sppbj-official,
+#satria-print-root .doc[data-document-type="sppbj"] .satria-sppbj-official{
+ font-family:Arial,Helvetica,sans-serif!important;font-size:10.2pt!important;
+ line-height:1.35!important;color:#000!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-letter-heading,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-letter-heading{
+ display:grid!important;grid-template-columns:minmax(0, 3fr) minmax(0, 2fr)!important;
+ align-items:start!important;gap:12px!important;margin:8px 0 21px!important;
+}
+/* 3.0.59.20: SPPBJ adalah surat biasa, bukan tabel bergaris. */
+.doc[data-document-type="sppbj"] .sppbj-letter-meta,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-letter-meta{
+ width:100%!important;min-width:0!important;display:flex!important;flex-direction:column!important;
+ border:none!important;outline:none!important;box-shadow:none!important;
+ margin:0!important;padding:0!important;background:transparent!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-meta-row,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-meta-row{
+ display:grid!important;grid-template-columns:75px 13px minmax(0,1fr)!important;
+ width:100%!important;min-width:0!important;break-inside:avoid!important;
+ padding:1px 0!important;margin:0!important;border:none!important;outline:none!important;box-shadow:none!important;
+ font-size:9.7pt!important;line-height:1.22!important;background:transparent!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-meta-row>span,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-meta-row>span{
+ display:block!important;border:none!important;outline:none!important;box-shadow:none!important;
+ padding:0!important;margin:0!important;min-width:0!important;
+ font-size:inherit!important;line-height:inherit!important;overflow-wrap:break-word!important;
+ background:transparent!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-letter-place,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-letter-place{
+ text-align:right!important;white-space:normal!important;overflow-wrap:break-word!important;
+ font-size:9.7pt!important;line-height:1.24!important;padding-top:1px!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-destination,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-destination{
+ margin:4px 0 18px!important;font-size:10.1pt!important;
+ line-height:1.33!important;overflow-wrap:break-word!important;
+}
+.doc[data-document-type="sppbj"] p.sppbj-body-text,
+#satria-print-root .doc[data-document-type="sppbj"] p.sppbj-body-text{
+ margin:10px 0 12px!important;text-align:justify!important;
+ line-height:1.35!important;font-size:10.2pt!important;
+}
+.doc[data-document-type="sppbj"] ol.sppbj-attachments,
+#satria-print-root .doc[data-document-type="sppbj"] ol.sppbj-attachments{
+ margin:10px 0 16px 22px!important;padding-left:7px!important;
+ font-size:10.2pt!important;line-height:1.35!important;
+}
+.doc[data-document-type="sppbj"] ol.sppbj-attachments>li,
+#satria-print-root .doc[data-document-type="sppbj"] ol.sppbj-attachments>li{
+ padding-left:4px!important;margin-bottom:4px!important;
+}
+.doc[data-document-type="sppbj"] p.sppbj-closing,
+#satria-print-root .doc[data-document-type="sppbj"] p.sppbj-closing{
+ margin:13px 0 14px!important;text-align:left!important;
+ font-size:10.2pt!important;line-height:1.35!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-signature-layout,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-signature-layout{
+ display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+ width:100%!important;min-width:0!important;margin:8px 0 0!important;
+ border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;
+ break-inside:avoid!important;page-break-inside:avoid!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-signature-cell,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-signature-cell{
+ min-width:0!important;border:none!important;outline:none!important;box-shadow:none!important;
+ padding:0 6px!important;margin:0!important;background:transparent!important;
+ font-size:10pt!important;line-height:1.25!important;text-align:left!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-signature-left,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-signature-left{
+ border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-signature-space,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-signature-space{
+ height:24mm!important;min-height:24mm!important;
+}
+.doc[data-document-type="sppbj"] .sppbj-signature-cell .satria914-images,
+#satria-print-root .doc[data-document-type="sppbj"] .sppbj-signature-cell .satria914-images{
+ margin:1mm 0 2mm!important;
+}
+@media(max-width:600px){
+ .doc[data-document-type="sppbj"] .sppbj-letter-heading{grid-template-columns:minmax(0,3fr) minmax(0,2fr)!important;gap:8px!important}
+}
+
+
+/* Sebelum refactor: index.html baris 12776; id: satria-dpp-example-print-20261102 */
+
+/* Khusus DPP: tabel 5 kolom sesuai contoh; tidak mempengaruhi template lainnya. */
+.doc[data-document-type="dpp"] table.tbl-dpp-items.satria-dpp-example-five,
+#satria-print-root .doc[data-document-type="dpp"] table.tbl-dpp-items.satria-dpp-example-five{width:100%!important;table-layout:fixed!important;}
+#main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(1),#satria-print-root #main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(1){width:6%!important;text-align:center!important;}
+#main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(2),#satria-print-root #main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(2){width:52%!important;}
+#main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(3),#satria-print-root #main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(3){width:10%!important;text-align:right!important;}
+#main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(4),#satria-print-root #main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(4){width:12%!important;}
+#main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(5),#satria-print-root #main .doc[data-document-type="dpp"] .satria-dpp-example-five :is(th,td):nth-child(5){width:20%!important;text-align:right!important;}
+.doc[data-document-type="dpp"] .satria-dpp-example-five th{white-space:normal!important;}
+.satria-dpp-format-panel{border:1px solid var(--bd);border-radius:13px;padding:15px;margin:10px 0;background:var(--card-solid)}
+.satria-dpp-format-panel h3{font-size:14px;margin:0 0 6px}
+.satria-dpp-format-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.satria-dpp-format-panel label{display:block;font-size:11px;font-weight:700;margin-bottom:4px}
+.satria-dpp-format-panel :is(input,select,textarea){width:100%;max-width:100%;font-size:13px!important}
+.satria-dpp-format-panel textarea{height:78px;min-height:78px}
+.satria-dpp-format-panel .satria-dpp-wide{grid-column:1/-1}
+.satria-dpp-format-panel .satria-dpp-photo-option{display:flex;align-items:center;gap:8px}
+.satria-dpp-format-panel .satria-dpp-photo-option input{width:auto;height:auto}
+@media(max-width:650px){.satria-dpp-format-grid{grid-template-columns:1fr}}
+@media print{.satria-dpp-format-panel{display:none!important}}
+/* Hindari memisahkan judul Bab VII dari paragraf penutup; blok tanda tangan tetap utuh. */
+.doc[data-document-type="dpp"] .satria-dpp-closing>p:first-child,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-closing>p:first-child{break-after:avoid!important;page-break-after:avoid!important}
+.doc[data-document-type="dpp"] .satria-dpp-signature,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-signature{break-inside:avoid!important;page-break-inside:avoid!important;}

@@ -1,0 +1,35 @@
+/* Sebelum refactor: index.html baris 11507; id: satria-353-print-and-photo-controls */
+
+/* SATRIA NEXT 3.0.53. Antarmuka input foto; tidak memengaruhi keluaran PDF. */
+@media screen {
+ .satria353-photo-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 8px;padding:12px;border:1px solid #e1dcf9;border-radius:13px;background:#f9f8ff}
+ .satria353-photo-toolbar span{font:500 12px/1.5 Inter,Arial,sans-serif;color:#5d6079;max-width:550px}
+ .satria353-photo-toolbar button{flex:0 0 auto;min-height:40px;color:#a21e30!important;border:1px solid #fecaca!important;background:#fff7f7!important;font-weight:700}
+ .satria353-photo-toolbar button:hover{background:#fee2e2!important}
+}
+@media screen and (max-width:640px){.satria353-photo-toolbar{flex-direction:column;align-items:stretch}.satria353-photo-toolbar button{width:100%}}
+/* Inform user when a remote source photo no longer loads; no invented sample image. */
+.doc .satria353-photo-unavailable::before{content:"Foto produk tidak dapat dimuat — unggah foto lokal melalui Smart Survey";display:block;padding:12mm 3mm;border:1px dashed #999;font:9pt/1.4 Arial,sans-serif;text-align:center}
+/* DPP: A4 native size, automatic pagination. No CSS transform/zoom or print scaling. */
+@page satriaDppCompactA4 {size:A4 portrait;margin:9mm 11mm}
+@media print {
+ #satria-print-root .doc[data-document-type="dpp"]{page:satriaDppCompactA4!important;box-sizing:border-box!important;font:9.7pt/1.15 Arial,Helvetica,sans-serif!important;transform:none!important;zoom:1!important;letter-spacing:normal!important}
+ #satria-print-root .doc[data-document-type="dpp"] :is(p,li){font-size:9.7pt!important;line-height:1.15!important}
+ #satria-print-root .doc[data-document-type="dpp"] :is(ol,ul){margin-top:1mm!important;margin-bottom:1mm!important}
+ #satria-print-root .doc[data-document-type="dpp"] .tbl-letter-meta{margin-bottom:3mm!important}
+ #satria-print-root .doc[data-document-type="dpp"] .tbl-letter-meta td{font-size:9.1pt!important;line-height:1.12!important;padding:1.5px 3px!important}
+ #satria-print-root .doc[data-document-type="dpp"] .tbl-dpp-items th,
+ #satria-print-root .doc[data-document-type="dpp"] .tbl-dpp-items td{font-size:8.4pt!important;line-height:1.16!important;padding:2px 3px!important}
+ #satria-print-root .doc[data-document-type="dpp"] p.doc-title{font-size:11pt!important;margin:3mm 0!important}
+ #satria-print-root .doc[data-document-type="dpp"] .satria-dpp-signature{margin-top:8px!important;font-size:10.2pt!important;line-height:1.25!important;break-inside:avoid!important;page-break-inside:avoid!important}
+ #satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images{height:75px!important}
+ #satria-print-root .doc[data-document-type="dpp"] .satria51-sheet{font-size:9pt!important;break-before:page!important;page-break-before:always!important;zoom:1!important;transform:none!important}
+ #satria-print-root .doc[data-document-type="dpp"] .satria51-sheet-title{font-size:11pt!important}
+ #satria-print-root .doc[data-document-type="dpp"] .satria51-photo-card{min-height:0!important;break-inside:avoid!important}
+ #satria-print-root .doc[data-document-type="dpp"] .satria51-photo-fields .satria51-field{font-size:8.2pt!important}
+}
+/* On-screen document is full physical A4 paper, with horizontal scroll only where necessary.
+   Never shrink text with transform; final A4 layout happens via print CSS. */
+@media screen {
+ .dok-preview-frame .doc[data-document-type="dpp"]{box-sizing:border-box!important;transform:none!important;zoom:1!important}
+}

@@ -1,0 +1,19 @@
+/* Sebelum refactor: index.html baris 13380; id: satria-human-first-spse-dok-20261103 */
+
+/* Tahap 2 Human First: no schema change, read-only guidance. */
+.satria-human-follow{margin:12px 0 15px;border:1px solid var(--bd-strong);border-radius:15px;padding:16px;background:var(--card-solid);box-shadow:var(--shadow-xs)}
+.satria-human-follow h3{font-size:15px!important;margin:0 0 5px!important;font-weight:800;line-height:1.4}
+.satria-human-follow p{font-size:12px;color:var(--mut);line-height:1.5;margin:5px 0}
+.satria-human-follow-cta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-radius:12px;background:var(--card-2);padding:12px;margin:11px 0}
+.satria-human-follow-cta b{font-size:13px}.satria-human-follow-cta a,.satria-human-follow-cta button{display:inline-flex;align-items:center;justify-content:center;min-height:37px;height:auto;padding:8px 12px;border-radius:9px;font-size:12px;font-weight:750;text-decoration:none!important;border:1px solid var(--bd);background:var(--card-solid);color:var(--ink)!important;cursor:pointer}
+.satria-human-follow-cta a:hover,.satria-human-follow-cta button:hover{border-color:var(--acc)}
+.satria-human-follow-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:8px;margin:12px 0 5px}
+.satria-human-follow-item{border:1px solid var(--bd);border-radius:10px;padding:10px;min-width:0}
+.satria-human-follow-item b{font-size:11px;display:block;color:var(--ink);line-height:1.4}.satria-human-follow-item small{font-size:11px;display:block;color:var(--mut);line-height:1.5;margin-top:4px}
+.satria-human-follow-shortcuts{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.satria-human-follow-shortcuts button{height:auto!important;min-height:34px;padding:7px 11px;font-size:12px;white-space:normal}
+.satria-human-follow-note{font-size:11px!important;line-height:1.5;color:var(--mut)}
+.satria-human-spse-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}.satria-human-spse-list a{display:block;text-decoration:none!important;border:1px solid var(--bd);border-radius:11px;padding:12px;background:var(--card-2);color:var(--ink)!important;min-width:0}.satria-human-spse-list a b,.satria-human-spse-list a small{display:block;overflow-wrap:anywhere}.satria-human-spse-list a b{font-size:12px}.satria-human-spse-list a small{font-size:11px;color:var(--mut);margin-top:4px}
+.satria-human-doc-library{margin:9px 0 16px;border:1px solid var(--bd);border-radius:12px;padding:10px 12px;background:var(--card-solid)}
+.satria-human-doc-library>summary{cursor:pointer;font-size:12px;font-weight:750;color:var(--ink-2);padding:6px 4px}.satria-human-doc-library[open]>summary{margin-bottom:12px}.satria-human-doc-library .dok-library{margin:0!important}
+@media(max-width:740px){.satria-human-follow{padding:12px}.satria-human-spse-list{grid-template-columns:1fr}.satria-human-follow-cta a,.satria-human-follow-cta button{width:100%}}
+@media print{.satria-human-follow,.satria-human-doc-library{display:none!important}}

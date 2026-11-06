@@ -1,0 +1,13 @@
+/* Sebelum refactor: index.html baris 1873; id: satria352-dpp-controls */
+
+@media screen{
+.satria352-ppk-panel{margin:14px 0 18px;padding:18px 20px;background:linear-gradient(135deg,#fff,#f5f3ff);border:1px solid #dad4fc;border-radius:18px;box-shadow:0 7px 24px rgba(28,20,81,.04)}
+.satria352-ppk-title{display:flex;gap:12px;align-items:flex-start;color:#24203c}.satria352-ppk-title>span{display:grid;place-items:center;min-width:38px;height:38px;border-radius:12px;background:#eae7ff;color:#6555ee}.satria352-ppk-title b{font-size:16px}.satria352-ppk-title p{font-size:12px;line-height:1.5;color:#667085;margin:4px 0 10px}
+.satria352-ppk-grid{display:grid;grid-template-columns:minmax(240px,1.5fr) minmax(200px,1fr);gap:12px;align-items:center}.satria352-ppk-grid .fg{min-width:0}.satria352-ppk-grid label{font-size:12px;font-weight:750;color:#31334e}.satria352-ppk-grid select{display:block;width:100%;min-width:0;margin-top:6px;padding:11px;border:1px solid #cdd3e4;border-radius:11px;background:#fff;color:#20243b;font-size:14px}.satria352-ppk-meta{display:flex;flex-direction:column;gap:3px;background:white;border:1px solid #e1e2ef;border-radius:12px;padding:10px 14px}.satria352-ppk-meta small,.satria352-ppk-help{font-size:11px;line-height:1.55;color:#667085}.satria352-ppk-meta b{font-size:15px;color:#302956}.satria352-ppk-help{margin:10px 0 0}.satria352-ppk-warning{font-size:12px;color:#9a3412}
+@media(max-width:720px){.satria352-ppk-panel{padding:14px}.satria352-ppk-grid{grid-template-columns:1fr}.satria352-ppk-grid select{font-size:16px}}
+}
+
+.satria-hps-total-review{padding:14px;border:1px solid #e3af70;border-radius:12px;background:#fffbf3;margin:12px 0;color:#4d3922;font-size:13px;line-height:1.5}
+.satria-hps-total-review b{font-weight:750}.satria-hps-total-review p{margin:6px 0}.satria-hps-total-review details{margin:10px 0}.satria-hps-total-review summary{cursor:pointer;font-weight:750}
+.satria-hps-total-review textarea,.satria-hps-total-review input:not([type=checkbox]){width:100%;box-sizing:border-box;background:#fff;border:1px solid #d1c3ac;border-radius:8px;padding:9px;font-size:14px}
+.satria-hps-total-review .fg{margin:10px 0}.satria-hps-review-check{display:flex;align-items:flex-start;gap:8px;margin:12px 0}.satria-hps-review-check input{flex:none;margin-top:4px}

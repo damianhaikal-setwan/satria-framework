@@ -1,0 +1,282 @@
+/* Sebelum refactor: index.html baris 12166; id: satria-3599-dpp-hps-thin-grid-clarity */
+
+/* SATRIA NEXT 3.0.59.9 — tabel HPS DPP memakai grid 1px yang lebih jelas.
+   Penyebab garis pemisah tampak samar adalah border-collapse pada beberapa browser/PDF
+   dapat me-render garis gabungan di posisi sub-pixel sehingga terlihat abu-abu/faint.
+   Solusi: pakai model border terpisah namun tetap 1px, sehingga setiap pemisah sel stabil. */
+#main .doc[data-document-type="dpp"] table.tbl-dpp-items,
+#satria-print-root .doc[data-document-type="dpp"] table.tbl-dpp-items {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border: 1px solid #000 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background:#fff !important;
+}
+#main .doc[data-document-type="dpp"] table.tbl-dpp-items :is(thead,tbody,tfoot,tr),
+#satria-print-root .doc[data-document-type="dpp"] table.tbl-dpp-items :is(thead,tbody,tfoot,tr) {
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+#main .doc[data-document-type="dpp"] table.tbl-dpp-items :is(th,td),
+#satria-print-root .doc[data-document-type="dpp"] table.tbl-dpp-items :is(th,td) {
+  border: 0 !important;
+  border-right: 1px solid #000 !important;
+  border-bottom: 1px solid #000 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background:#fff !important;
+}
+#main .doc[data-document-type="dpp"] table.tbl-dpp-items tr > :first-child,
+#satria-print-root .doc[data-document-type="dpp"] table.tbl-dpp-items tr > :first-child {
+  border-left: 1px solid #000 !important;
+}
+#main .doc[data-document-type="dpp"] table.tbl-dpp-items thead tr:first-child > *,
+#satria-print-root .doc[data-document-type="dpp"] table.tbl-dpp-items thead tr:first-child > *,
+#main .doc[data-document-type="dpp"] table.tbl-dpp-items tbody tr:first-child > *,
+#satria-print-root .doc[data-document-type="dpp"] table.tbl-dpp-items tbody tr:first-child > * {
+  border-top: 1px solid #000 !important;
+}
+
+
+/* Sebelum refactor: index.html baris 12207; id: satria-35910-dpp-final-typography */
+
+/* SATRIA NEXT 3.0.59.18 — DPP ONLY. Finishing tipografi mengacu pada PDF contoh asli.
+   Tidak menyentuh struktur data, isi hukum, foto, cap/TTD, atau generator dokumen lain.
+   Tidak memperkecil halaman dengan transform/zoom, dan tidak mengganti grid HPS 1px. */
+.doc[data-document-type="dpp"] .tbl-letter-meta,
+#satria-print-root .doc[data-document-type="dpp"] .tbl-letter-meta {
+  table-layout:fixed!important;
+  border-spacing:0!important;
+}
+.doc[data-document-type="dpp"] .tbl-letter-meta td:first-child,
+#satria-print-root .doc[data-document-type="dpp"] .tbl-letter-meta td:first-child {
+  width:41mm!important;
+  vertical-align:top!important;
+  text-align:left!important;
+}
+.doc[data-document-type="dpp"] .tbl-letter-meta td:nth-child(2),
+#satria-print-root .doc[data-document-type="dpp"] .tbl-letter-meta td:nth-child(2) {
+  width:3.6mm!important;
+  vertical-align:top!important;
+  text-align:center!important;
+}
+.doc[data-document-type="dpp"] .tbl-letter-meta td:nth-child(3),
+#satria-print-root .doc[data-document-type="dpp"] .tbl-letter-meta td:nth-child(3) {
+  width:auto!important;
+  vertical-align:top!important;
+  text-align:left!important;
+  overflow-wrap:break-word!important;
+}
+.doc[data-document-type="dpp"] p.doc-title,
+#satria-print-root .doc[data-document-type="dpp"] p.doc-title {
+  text-align:center!important;
+  font-weight:700!important;
+  line-height:1.2!important;
+  text-underline-offset:2px!important;
+}
+/* Sekat subbagian tidak boleh meninggalkan judul atau paragraf pendek terbelah. */
+.doc[data-document-type="dpp"] > p.satria-dpp-service-block,
+#satria-print-root .doc[data-document-type="dpp"] > p.satria-dpp-service-block {
+  break-inside:avoid!important;
+  page-break-inside:avoid!important;
+}
+.doc[data-document-type="dpp"] > p.doc-section-heading,
+#satria-print-root .doc[data-document-type="dpp"] > p.doc-section-heading {
+  break-after:avoid!important;
+  page-break-after:avoid!important;
+}
+.doc[data-document-type="dpp"] > p.satria594-spec-block,
+#satria-print-root .doc[data-document-type="dpp"] > p.satria594-spec-block {
+  break-inside:avoid!important;
+  page-break-inside:avoid!important;
+}
+@media print {
+  #satria-print-root .doc[data-document-type="dpp"] {
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:9.35pt!important;
+    line-height:1.135!important;
+    font-weight:400!important;
+    word-spacing:normal!important;
+    transform:none!important;
+    zoom:1!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] :is(p,li) {
+    font-size:9.35pt!important;
+    line-height:1.135!important;
+    letter-spacing:normal!important;
+    word-spacing:normal!important;
+  }
+  /* Jarak terukur: sedikit lebih lapang pada teks, tanpa memperbesar total tinggi halaman. */
+  #satria-print-root .doc[data-document-type="dpp"] > p:not(.doc-title) {
+    margin-top:0.85mm!important;
+    margin-bottom:0.85mm!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] > ol,
+  #satria-print-root .doc[data-document-type="dpp"] > ul {
+    margin-top:0.35mm!important;
+    margin-bottom:0.35mm!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .tbl-letter-meta {
+    margin-top:1.2mm!important;
+    margin-bottom:2.1mm!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .tbl-letter-meta td {
+    font-size:8.9pt!important;
+    line-height:1.135!important;
+    padding:1.0px 3px!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] p.doc-title {
+    font-size:10.5pt!important;
+    margin:2.2mm 0 2.3mm!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .tbl-dpp-items :is(th,td) {
+    line-height:1.17!important;
+    padding:1.8px 3px!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .satria594-closing-signature {
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+    margin-top:.8mm!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .satria594-closing-signature > p {
+    margin:.8mm 0!important;
+    line-height:1.135!important;
+  }
+  /* Kontrol TTD dan cap manual tetap berwenang mengatur koordinat via CSS variable. */
+  #satria-print-root .doc[data-document-type="dpp"] .satria594-closing-signature .satria-dpp-signature {
+    margin:1.7mm 0 0 auto!important;
+  }
+}
+
+
+/* Sebelum refactor: index.html baris 12317; id: satria-35912-quality-print */
+
+/* Penyempurnaan keterbacaan hanya dokumen 3 (RFI) dan 5 (Formulir Penetapan).
+   Format BAHP dan BA Reviu DPP tetap menggunakan template khusus sumber. */
+#main .doc[data-document-type="rfi"] table.tbl-rfi :is(td,th),
+#satria-print-root .doc[data-document-type="rfi"] table.tbl-rfi :is(td,th){font-size:8pt!important;line-height:1.2!important}
+#main .doc[data-document-type="metode"] .metode-main-table :is(td,th),
+#satria-print-root .doc[data-document-type="metode"] .metode-main-table :is(td,th){font-size:7.9pt!important;line-height:1.16!important;padding:2.2px 3px!important}
+#main .doc[data-document-type="metode"] .metode-main-table .metode-column-head th,
+#satria-print-root .doc[data-document-type="metode"] .metode-main-table .metode-column-head th{font-size:8pt!important}
+#main .doc[data-document-type="metode"] .metode-reasons li,
+#satria-print-root .doc[data-document-type="metode"] .metode-reasons li{font-size:7.9pt!important;line-height:1.16!important}
+#main .doc[data-document-type="metode"] .metode-footnote,
+#satria-print-root .doc[data-document-type="metode"] .metode-footnote{font-size:8pt!important;line-height:1.18!important}
+#main .doc[data-document-type="metode"] .metode-meta-table td,
+#satria-print-root .doc[data-document-type="metode"] .metode-meta-table td{font-size:8pt!important;line-height:1.16!important}
+#main .doc[data-document-type="metode"] .metode-signature-table td,
+#satria-print-root .doc[data-document-type="metode"] .metode-signature-table td{font-size:8pt!important;line-height:1.16!important}
+/* Format surat nomor 6, BAHP dan BA Reviu DPP tidak diubah lewat stylesheet ini. */
+
+
+/* Sebelum refactor: index.html baris 12337; id: satria-35912-metode-pagination */
+
+@media print {
+/* Form Penetapan lebih mudah dibaca dalam dua bagian utuh jika satu halaman tidak cukup. */
+#satria-print-root .doc[data-document-type="metode"] .metode-main-table {break-inside:auto!important;page-break-inside:auto!important;}
+#satria-print-root .doc[data-document-type="metode"] .metode-main-table tbody {break-inside:auto!important;page-break-inside:auto!important;}
+#satria-print-root .doc[data-document-type="metode"] .metode-main-table .satria35912-page-second {break-before:page!important;page-break-before:always!important;}
+#satria-print-root .doc[data-document-type="metode"] .metode-signature-table .metode-sign-people {break-inside:avoid!important;page-break-inside:avoid!important;}
+#satria-print-root .doc[data-document-type="rfi"] .satria35912-rfi-half-break {break-before:page!important;page-break-before:always!important;}
+}
+
+
+/* Sebelum refactor: index.html baris 12348; id: satria-35913-bahp-signature-dpp-parity */
+
+/* Hanya BAHP. Data gambar tetap dari pejabat BAHP; geometri dari preferensi DPP per paket.
+   Tidak mengubah dua kolom/format PDF rujukan BAHP dan dokumen lain. */
+.doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images {
+  display:block!important;
+  flex:0 0 20mm!important;
+  position:relative!important;
+  width:68mm!important;
+  max-width:100%!important;
+  height:20mm!important;
+  min-height:20mm!important;
+  margin:1mm 0 0.5mm!important;
+  padding:0!important;
+  overflow:hidden!important;
+  line-height:normal!important;
+  box-sizing:border-box!important;
+  break-inside:avoid!important;
+  page-break-inside:avoid!important;
+}
+.doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images > img,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images > img {
+  display:block!important;
+  position:absolute!important;
+  float:none!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  min-width:0!important;
+  min-height:0!important;
+  object-fit:contain!important;
+  box-sizing:border-box!important;
+  transform:none!important;
+  mix-blend-mode:multiply!important;
+}
+.doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images > .satria-dpp-cap,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images > .satria-dpp-cap {
+  z-index:1!important;
+  left:var(--satria-dpp-cap-x,2.8mm)!important;
+  top:var(--satria-dpp-cap-y,0.3mm)!important;
+  width:var(--satria-dpp-cap-w,19.5mm)!important;
+  height:var(--satria-dpp-cap-h,19mm)!important;
+  object-position:center center!important;
+}
+.doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images > .satria-dpp-ttd,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-ppk-images > .satria-dpp-ttd {
+  z-index:2!important;
+  left:var(--satria-dpp-ttd-x,15.2mm)!important;
+  top:var(--satria-dpp-ttd-y,1mm)!important;
+  width:var(--satria-dpp-ttd-w,45.5mm)!important;
+  height:var(--satria-dpp-ttd-h,17.5mm)!important;
+  object-position:left center!important;
+}
+/* Bila hanya tanda tangan atau hanya cap, gunakan posisi yang tersimpan. */
+.doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-signature-spacer,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-signatures .satria-bahp-signature-spacer {
+  height:20mm!important;
+  min-height:20mm!important;
+  width:68mm!important;
+  max-width:100%!important;
+  margin:1mm 0 0.5mm!important;
+  flex:0 0 20mm!important;
+}
+.doc[data-document-type="bahp"] .bahp-signatures > div > b,
+#satria-print-root .doc[data-document-type="bahp"] .bahp-signatures > div > b {
+  margin-top:0!important;
+}
+
+
+/* Sebelum refactor: index.html baris 12418; id: satria35914-ppk-studio-style */
+
+/* Menu pengaturan berada di luar dokumen cetak. Generator lain tetap utuh. */
+.satria914-panel{border:1px solid #d9d8ef;border-radius:15px;background:linear-gradient(125deg,#f8f7ff,#f4fbff);padding:16px;margin:12px 0;color:#25263d;font-family:Arial,sans-serif}
+.satria914-panel *{box-sizing:border-box}.satria914-panel h3{margin:0 0 4px;font-size:15px}.satria914-panel p{margin:3px 0 10px;font-size:12px;color:#525a74;line-height:1.5}
+.satria914-main{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px}.satria914-field{display:flex;flex-direction:column;gap:5px;min-width:0}.satria914-field label{font-size:12px;font-weight:700}.satria914-field select{width:100%;padding:10px;border-radius:10px;border:1px solid #cbcde1;background:#fff;color:#222;font-size:13px}
+.satria914-switch{display:flex;align-items:center;gap:9px;padding:9px 10px;background:white;border:1px solid #dedff0;border-radius:10px;cursor:pointer;font-size:12px;font-weight:650;min-height:43px}.satria914-switch input{width:17px;height:17px;accent-color:#5848b9}
+.satria914-layout{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}.satria914-layout .satria914-field{min-width:150px;flex:1}
+.satria914-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.satria914-grp{padding:10px;background:#fff;border:1px solid #e0e0ec;border-radius:11px}.satria914-grp>strong{font-size:12px}
+.satria914-range{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;margin-top:10px;align-items:center}.satria914-range label,.satria914-range output{font-size:11px}.satria914-range output{font-variant-numeric:tabular-nums;font-weight:700}.satria914-range input{grid-column:1/-1;width:100%;accent-color:#5848b9}
+.satria914-actions{display:flex;flex-wrap:wrap;gap:8px;margin:13px 0 0}.satria914-actions button{background:#fff;border:1px solid #bdbbd9;border-radius:10px;padding:10px 13px;font-weight:700;font-size:12px;color:#272540;min-height:40px;cursor:pointer}.satria914-actions .satria914-save{background:#5142b7;color:white;border-color:#5142b7}.satria914-actions button:disabled{opacity:.5;cursor:not-allowed}
+.satria914-live{font-size:11px;color:#494965;margin-top:9px}.satria914-sample{display:flex;align-items:center;gap:12px;margin-top:10px;padding:9px;background:white;border:1px dashed #cfcee5;border-radius:11px;min-height:106px}.satria914-sample .satria914-demo{width:68mm;height:21mm;max-width:100%;position:relative;overflow:hidden;flex-shrink:0}.satria914-sample .satria914-sample-text{font-size:11px;color:#65667a;line-height:1.5}
+@media(max-width:700px){.satria914-main,.satria914-grid{grid-template-columns:1fr}.satria914-panel{padding:12px}.satria914-sample{flex-wrap:wrap}.satria914-actions button{flex:1 1 auto}}
+@media print{.satria914-panel{display:none!important}}
+/* Semua blok PPK menggunakan gambar cap dahulu, lalu TTD, mengikuti Mode Sedang DPP. */
+.doc .satria914-images,#satria-print-root .doc .satria914-images{width:68mm!important;max-width:100%!important;height:21mm!important;min-height:21mm!important;position:relative!important;display:block!important;margin:1.4mm auto .8mm!important;padding:0!important;overflow:hidden!important;break-inside:avoid!important;page-break-inside:avoid!important}
+.doc .satria914-images>img,#satria-print-root .doc .satria914-images>img,.satria914-demo>img{position:absolute!important;display:block!important;margin:0!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;object-fit:contain!important;transform:none!important;mix-blend-mode:multiply!important}
+.doc .satria914-images>.satria914-cap,#satria-print-root .doc .satria914-images>.satria914-cap,.satria914-demo>.satria914-cap{left:var(--satria-dpp-cap-x,2.8mm)!important;top:var(--satria-dpp-cap-y,.3mm)!important;width:var(--satria-dpp-cap-w,19.5mm)!important;height:var(--satria-dpp-cap-h,19mm)!important;z-index:1!important}
+.doc .satria914-images>.satria914-ttd,#satria-print-root .doc .satria914-images>.satria914-ttd,.satria914-demo>.satria914-ttd{left:var(--satria-dpp-ttd-x,15.2mm)!important;top:var(--satria-dpp-ttd-y,1mm)!important;width:var(--satria-dpp-ttd-w,45.5mm)!important;height:var(--satria-dpp-ttd-h,17.5mm)!important;object-position:left center!important;z-index:2!important}
+.doc[data-document-type="bahp"] .bahp-signatures .satria914-images{margin:1mm 0 .5mm!important}
+.doc[data-document-type="idkb"] .satria914-images,.doc[data-document-type="metode"] .satria914-images{margin-left:0!important}
+.doc[data-document-type="spek"] .satria914-images{margin:1mm auto!important}
+.doc[data-document-type="reviu"] .rv-sign-col .satria914-images{margin:1mm 0!important}
+.doc .satria914-signature-blank{height:21mm;min-height:21mm;display:block;break-inside:avoid!important}

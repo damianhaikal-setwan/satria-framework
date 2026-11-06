@@ -1,0 +1,188 @@
+/* Sebelum refactor: index.html baris 11925; id: satria-3595-dpp-pagination-spec-only */
+
+/* SATRIA 3.0.59.7 — Pagination + lembar lampiran DPP saja.
+   Tidak menyentuh Smart Survey, Kalkulator Nego maupun generator lainnya. */
+@page satriaDppCompactA4 {
+  size:A4 portrait;
+  margin:8mm 10mm 9mm;
+  @bottom-right {content:"Halaman " counter(page);font:8pt Arial,sans-serif;color:#555;}
+}
+@media print {
+  /* Memanfaatkan ruang A4 yang sebelumnya hilang karena margin dan ritme antarparagraf. */
+  #satria-print-root .doc[data-document-type="dpp"] {
+    page:satriaDppCompactA4!important;
+    font-size:9.35pt!important;
+    line-height:1.105!important;
+    letter-spacing:normal!important;
+    transform:none!important;
+    zoom:1!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] :is(p,li) {
+    font-size:9.35pt!important;
+    line-height:1.105!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] :is(ol,ul) {
+    margin-top:0.45mm!important;
+    margin-bottom:0.45mm!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] p:not(.satria51-appendix-note) {
+    margin-top:1.0mm!important;
+    margin-bottom:1.0mm!important;
+  }
+  /* VII. Penutup tetap satu unit dengan nama penandatangan, tanpa menyisakan lembar sendiri. */
+  #satria-print-root .doc[data-document-type="dpp"] .satria594-closing-signature {
+    display:block!important;
+    clear:both!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+    margin-top:1mm!important;
+    padding:0!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .satria594-closing-signature > p {margin:1.0mm 0!important;}
+  #satria-print-root .doc[data-document-type="dpp"] .satria594-closing-signature .satria-dpp-signature {
+    margin:2mm 0 0 auto!important;
+    line-height:1.12!important;
+    font-size:9.65pt!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .satria594-closing-signature .satria-dpp-ppk-images {
+    height:20mm!important;
+    min-height:20mm!important;
+    margin:1.0mm auto 0.35mm!important;
+  }
+  /* Lampiran tetap mulai halaman baru, 2 kartu per halaman, tanpa memotong satu kartu. */
+  #satria-print-root .doc[data-document-type="dpp"] .satria51-sheet {
+    break-before:page!important;
+    page-break-before:always!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .satria51-photo-grid {
+    gap:3.0mm!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .satria51-photo-card {
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+    overflow:visible!important;
+    max-height:none!important;
+  }
+}
+
+
+/* Sebelum refactor: index.html baris 11992; id: satria-3598-dpp-photo-appendix-layout */
+
+/* Perbaikan berdasarkan cetak DPP RUP 68401050: tiga referensi foto ringkas per lembar.
+   Berlaku hanya DPP; sumber data, RFI, survei, tanda tangan dan dokumen utama tidak berubah. */
+.doc[data-document-type="dpp"] .satria51-sheet,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-sheet {
+  box-sizing:border-box!important;
+}
+.doc[data-document-type="dpp"] .satria51-photo-grid,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-photo-grid {
+  gap:2.5mm!important;
+}
+.doc[data-document-type="dpp"] .satria51-photo-card,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-photo-card {
+  grid-template-columns:46mm minmax(0,1fr)!important;
+  column-gap:4mm!important;
+  padding:2.3mm!important;
+  min-height:0!important;
+  break-inside:avoid!important;
+  page-break-inside:avoid!important;
+}
+.doc[data-document-type="dpp"] img.satria51-product-image,
+#satria-print-root .doc[data-document-type="dpp"] img.satria51-product-image {
+  max-width:46mm!important;
+  max-height:42mm!important;
+  object-fit:contain!important;
+}
+.doc[data-document-type="dpp"] .satria51-photo-fields .satria51-field,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-photo-fields .satria51-field {
+  line-height:1.2!important;
+  margin-bottom:1mm!important;
+}
+.doc[data-document-type="dpp"] .satria51-sheet-title,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-sheet-title {margin-bottom:2.5mm!important;}
+.doc[data-document-type="dpp"] .satria51-sheet-meta,
+#satria-print-root .doc[data-document-type="dpp"] .satria51-sheet-meta {margin-bottom:2.5mm!important;}
+@media screen and (max-width:680px) {
+  .doc[data-document-type="dpp"] .satria51-photo-card {grid-template-columns:1fr!important;}
+}
+@media print {
+  #satria-print-root .doc[data-document-type="dpp"] .satria51-sheet {
+    break-before:page!important;
+    page-break-before:always!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+  }
+  #satria-print-root .doc[data-document-type="dpp"] .satria51-photo-card {
+    overflow:visible!important;
+  }
+}
+
+
+/* Sebelum refactor: index.html baris 12042; id: satria-3597-dpp-signature-control-css */
+
+/* User-customizable DPP signature; the --satria-dpp-* custom values are sanitized as mm numbers.
+   CSS comes LAST so preview and A4 print use the identical positions. */
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images {
+  width:68mm!important;
+  height:20mm!important;
+  min-height:20mm!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+}
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-cap,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-cap {
+  left:var(--satria-dpp-cap-x,2.8mm)!important;
+  top:var(--satria-dpp-cap-y,0.3mm)!important;
+  width:var(--satria-dpp-cap-w,19.5mm)!important;
+  height:var(--satria-dpp-cap-h,19mm)!important;
+  object-position:center center!important;
+}
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-ttd,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-ttd {
+  left:var(--satria-dpp-ttd-x,15.2mm)!important;
+  top:var(--satria-dpp-ttd-y,1mm)!important;
+  width:var(--satria-dpp-ttd-w,45.5mm)!important;
+  height:var(--satria-dpp-ttd-h,17.5mm)!important;
+  object-position:left center!important;
+  mix-blend-mode:multiply!important;
+}
+/* The preserved one-image fallback keeps controls predictable even if a PPK has only one image. */
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-ttd:only-child,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-ttd:only-child {
+  left:var(--satria-dpp-ttd-x,15.2mm)!important;
+  top:var(--satria-dpp-ttd-y,1mm)!important;
+  width:var(--satria-dpp-ttd-w,45.5mm)!important;
+  height:var(--satria-dpp-ttd-h,17.5mm)!important;
+}
+.doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-cap:only-child,
+#satria-print-root .doc[data-document-type="dpp"] .satria-dpp-ppk-images > .satria-dpp-cap:only-child {
+  left:var(--satria-dpp-cap-x,2.8mm)!important;
+  top:var(--satria-dpp-cap-y,0.3mm)!important;
+  width:var(--satria-dpp-cap-w,19.5mm)!important;
+  height:var(--satria-dpp-cap-h,19mm)!important;
+}
+.satria597-panel{margin:12px 0;padding:15px;border:1px solid #dcd9f3;background:linear-gradient(135deg,#f7f6ff,#f4fbff);border-radius:16px;color:#22243c;font-family:Arial,Helvetica,sans-serif;}
+.satria597-panel *{box-sizing:border-box;}
+.satria597-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;}
+.satria597-panel-head b{font-size:14px;}
+.satria597-panel-head p,.satria597-help{font-size:12px;line-height:1.5;color:#575b75;margin:5px 0 0;}
+.satria597-preset-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.satria597-preset-row label{font-size:12px;font-weight:700;}
+.satria597-preset-row select{min-width:174px;max-width:100%;padding:9px 12px;border:1px solid #d1d4e4;border-radius:11px;background:white;color:#22243c;}
+.satria597-details{margin-top:12px;border:1px solid #e1e0ee;background:#fff;border-radius:12px;padding:11px;}
+.satria597-details summary{cursor:pointer;font-weight:700;font-size:12px;}
+.satria597-slidergrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px;}
+.satria597-group{min-width:0;padding:9px;background:#f8f8fc;border-radius:10px;}
+.satria597-group b{font-size:12px;color:#343754;display:block;margin-bottom:8px;}
+.satria597-row{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:center;margin:9px 0;}
+.satria597-row label{font-size:11px;font-weight:650;min-width:0;}
+.satria597-row output{font-size:11px;font-weight:750;font-variant-numeric:tabular-nums;}
+.satria597-row input{grid-column:1/-1;width:100%;accent-color:#6354c9;touch-action:pan-y;}
+.satria597-actions{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:12px;}
+.satria597-actions button{border-radius:11px;padding:10px 13px;min-height:40px;border:1px solid #c8c8e5;font-size:12px;font-weight:750;background:#fff;color:#333653;cursor:pointer;}
+.satria597-actions button.satria597-primary{background:#5142b7;color:#fff;border-color:#5142b7;}
+.satria597-actions button:disabled{opacity:.55;cursor:not-allowed;}
+.satria597-status{margin-top:9px;font-size:12px;color:#575b75;line-height:1.45;}
+@media(max-width:580px){.satria597-panel{padding:12px;}.satria597-slidergrid{grid-template-columns:minmax(0,1fr);}.satria597-preset-row{align-items:stretch;}.satria597-preset-row select{width:100%;}.satria597-actions button{flex:1 1 auto;}}
+@media print{.satria597-panel{display:none!important;}}
