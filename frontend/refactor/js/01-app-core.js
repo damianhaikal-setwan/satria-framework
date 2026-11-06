@@ -2991,7 +2991,7 @@ document.addEventListener('click',e=>{
  if(a==='print')return window.print();
  if(a==='csv')return csvExport();
  if(a==='csvDetail')return satriaLaporanCsvDetail();
- if(a==='export'){const o={...S};delete o.ui;delete o.log;delete o.dirty;delete o.chat;const u=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:'application/json'}));const l=document.createElement('a');l.href=u;l.download='SATRIA-backup-'+new Date().toISOString().slice(0,10)+'.json';l.click();S.dirty=false;return render()}
+ if(a==='export'){const o={...S};delete o.ui;delete o.log;delete o.dirty;delete o.chat;const u=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:'application/json'}));const l=document.createElement('a');l.href=u;l.download='SATRIA-backup-'+new Date().toISOString().slice(0,10)+'.json';l.click();setTimeout(()=>URL.revokeObjectURL(u),1500);return render()}
 });
 let paketSearchTimer=null;
 /* Draf review ditangkap sebelum event generik atau refresh tampilan. */

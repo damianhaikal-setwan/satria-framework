@@ -5,6 +5,7 @@
   let client=null, member=null, orgId='', version=0, localUsersBackup=null, recoveryListenerClient=null, cloudStateReady=false;
   let clientConfigUrl='', clientConfigKey='', sessionRestorePromise=null, explicitSignOut=false;
   let lastSyncedPayload=null, autoSaveTimer=null, autoSaveInFlight=false, autosyncRequested=false, realtimeChannel=null, remoteNoticePending=false, remoteNoticeVersion=0, conflictActive=false, realtimeRefreshTimer=null, autoRetryTimer=null, autoRetryAttempt=0;
+  let lastCloudConfirmedAt=null, lastCloudErrorAt=null;
   const $id=id=>document.getElementById(id);
   const modal=$id('satriaCloudModal');
   const status=(msg,kind='')=>{const e=$id('scStatus');if(e){e.textContent=msg;e.dataset.kind=kind}};
@@ -15,7 +16,23 @@
       const b=$id('satriaCloudOpen');if(b)b.insertAdjacentElement('afterend',e);else document.body.appendChild(e);
     }
     e.textContent=message;e.title=message;e.dataset.kind=kind;
+    // Waktu ini hanya mencatat peristiwa dari klien ini, bukan uji kesehatan server.
+    if(kind==='error')lastCloudErrorAt=new Date().toISOString();
+    if(kind===''&&message.startsWith('Tersinkron'))lastCloudConfirmedAt=new Date().toISOString();
   }
+  // API status baca-saja untuk Perawatan; jangan mengekspor URL, UUID, token, email, atau data bisnis.
+  window.SATRIA_SYNC_HEALTH=Object.freeze({inspect:()=>Object.freeze({
+    configured:Boolean(window.SATRIA_CLOUD_CONFIGURED),
+    authenticated:Boolean(member),
+    baselineLoaded:Boolean(cloudStateReady),
+    online:typeof navigator!=='undefined'?navigator.onLine!==false:null,
+    pending:typeof S!=='undefined'&&Boolean(S?.dirty),
+    conflict:Boolean(conflictActive),
+    inFlight:Boolean(autoSaveInFlight),
+    retryScheduled:Boolean(autoRetryTimer),
+    lastConfirmedAt:lastCloudConfirmedAt,
+    lastErrorAt:lastCloudErrorAt
+  })});
   function cloneJson(value){return value==null?value:JSON.parse(JSON.stringify(value))}
   function payloadEqual(a,b){return JSON.stringify(a)===JSON.stringify(b)}
   const ARRAY_DELTAS=['rupBank','paket','opd','unit','pejabat','penyedia','akun','kode'];
@@ -580,7 +597,7 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
       explicitSignOut=true;
       cancelAutosaveTimer();if(autoRetryTimer){clearTimeout(autoRetryTimer);autoRetryTimer=null}stopRealtime();if(client)await client.auth.signOut();
       window.SATRIA_MEDIA?.clear();
-      member=null;version=0;cloudStateReady=false;lastSyncedPayload=null;conflictActive=false;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;orgId=$id('scOrg').value.trim();window.SATRIA_CLOUD_ROLE=null;
+      member=null;version=0;cloudStateReady=false;lastSyncedPayload=null;conflictActive=false;lastCloudConfirmedAt=null;lastCloudErrorAt=null;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;orgId=$id('scOrg').value.trim();window.SATRIA_CLOUD_ROLE=null;
       resetCloudScopedView();
       try{if(DB&&DB.kv)await DB.kv.delete('main')}catch(e){console.warn('Cache SATRIA tidak dapat dihapus setelah logout',e)}
       localUsersBackup=null;
