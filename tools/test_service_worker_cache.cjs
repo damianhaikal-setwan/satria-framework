@@ -21,6 +21,8 @@ function wait(name,event){let promise;hooks[name]({...event,waitUntil:p=>{promis
  await wait('install',{});
  assert(skipped && cached.length>60,'precache must cover all modular files');
  assert(cached.includes('./frontend/refactor/maintenance/diagnostics.js'));
+ assert(cached.includes('./frontend/refactor/maintenance/care-center.js'));
+ assert(cached.includes('./frontend/refactor/maintenance/care-center.css'));
  await wait('activate',{});
  assert(claimed && !store.has('satria-v-old'));
  assert(store.has('another-app-v1'),'activation must not delete other app caches');

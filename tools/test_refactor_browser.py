@@ -31,6 +31,7 @@ with sync_playwright() as playwright:
     page.set_content(html,wait_until='domcontentloaded',timeout=30000)
     page.wait_for_timeout(400)
     assert page.locator('nav a').count()>=10, 'Navigasi utama tidak muncul'
+    assert page.locator('a[href="#care"]').count()>=1, 'Menu Perawatan SATRIA belum tersedia'
     assert page.evaluate("typeof render === 'function'"), 'Render core tidak dimuat'
     assert page.evaluate("typeof window.SATRIA_PRICE_CORE?.analyze === 'function'"), 'Analisa harga tidak dimuat'
     health=page.evaluate('window.SATRIA_MAINTENANCE.inspect()')

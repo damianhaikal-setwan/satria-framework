@@ -26,16 +26,19 @@ assert ref_styles==[e['file'] for e in manifest['styles']]
 for t,a in p.entries:
  if t=='script' and a.get('data-satria-refactor')=='script':
   assert 'async' not in a and 'defer' not in a and a.get('type','text/javascript') in ('text/javascript','')
-for link in assets+['./frontend/refactor/maintenance/diagnostics.js','./frontend/satria-next4.js','./frontend/satria-operator-studio.js','./frontend/satria-price-analysis.js']:
+for link in assets+['./frontend/refactor/maintenance/diagnostics.js','./frontend/refactor/maintenance/care-center.js','./frontend/refactor/maintenance/care-center.css','./frontend/satria-next4.js','./frontend/satria-operator-studio.js','./frontend/satria-price-analysis.js']:
  assert link in sw, 'sw precache missing '+link
  assert (ROOT/link.removeprefix('./')).is_file(), 'missing '+link
 for f in (ROOT/'frontend/refactor/js').glob('*.js'):
  check=subprocess.run(['node','--check',str(f)],capture_output=True,text=True)
  assert check.returncode==0, f'{f}: {check.stderr}'
-for f in [ROOT/'sw.js',ROOT/'frontend/refactor/maintenance/diagnostics.js']:
+for f in [ROOT/'sw.js',ROOT/'frontend/refactor/maintenance/diagnostics.js',ROOT/'frontend/refactor/maintenance/care-center.js']:
  check=subprocess.run(['node','--check',str(f)],capture_output=True,text=True)
  assert check.returncode==0, check.stderr
-assert 'satria-v3.0.59.39-refactor-index-20261106' in sw
+assert 'satria-v3.0.59.39-care-center-20261106' in sw
 assert "if (request.mode === 'navigate')" in sw
+assert 'data-satria-care="script"' in html and 'data-satria-care="style"' in html
+assert html.count('./frontend/refactor/maintenance/care-center.js') == 1
+assert html.count('./frontend/refactor/maintenance/care-center.css') == 1
 assert (ROOT/'index.html').stat().st_size<40000
 print(f'PASS index modular: {len(ref_scripts)} JS, {len(ref_styles)} CSS, urutan aman, cache terdaftar, sintaks valid')
