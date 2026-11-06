@@ -1,0 +1,47 @@
+/* SATRIA Perawatan: scoped styling, no document/print/global-layout changes. */
+.satria-care-page{display:grid;gap:16px;max-width:1300px;margin:0 auto 24px;min-width:0}
+.satria-care-page *{box-sizing:border-box}
+.satria-care-hero{background:linear-gradient(110deg,#211b49 0%,#244777 58%,#0d7a73 100%);color:#fff;border-radius:18px;padding:23px 26px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px}
+.satria-care-hero h2{margin:6px 0;font-size:clamp(21px,2.2vw,28px);color:#fff!important}
+.satria-care-hero p{margin:0;opacity:.93;font-size:14px;line-height:1.5;color:#fff}
+.satria-care-eyebrow{display:block;font-size:11px;font-weight:800;letter-spacing:.1em;opacity:.9}
+.satria-care-hero-actions,.satria-care-actions,.satria-care-tile-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.satria-care-page .satria-care-button{appearance:none;border:1px solid var(--bd,#dfe4f0);border-radius:12px;padding:10px 15px;min-height:42px;display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1.3;font:inherit;font-size:13px;font-weight:700;line-height:1.35;cursor:pointer;text-decoration:none!important;max-width:100%;box-shadow:none;white-space:normal}
+.satria-care-page .satria-care-button.primary{background:#201b45;color:#fff!important;border-color:#201b45}
+.satria-care-page .satria-care-button.ghost{background:rgba(255,255,255,.13);color:#fff!important;border-color:rgba(255,255,255,.5)}
+.satria-care-page .satria-care-button.secondary{background:var(--card-solid,#fff);color:var(--ink,#231d3d)!important;border-color:var(--bd,#dfe4f0)}
+.satria-care-page .satria-care-button:hover{filter:brightness(.95)}
+.satria-care-page .satria-care-button:focus-visible{outline:3px solid #8d86ff;outline-offset:2px}
+.satria-care-summary{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;border:1px solid var(--bd,#dfe4f0);border-radius:15px;background:var(--card,#fff);padding:17px 19px}
+.satria-care-summary strong{font-size:16px;line-height:1.3;display:block}
+.satria-care-summary p{margin:6px 0 0;line-height:1.55;color:var(--mut,#686a85);font-size:13px;max-width:850px}
+.satria-care-status,.satria-care-tag{font-size:12px;font-weight:800;padding:7px 11px;border-radius:999px;background:var(--bg-2,#f2f2f9);color:var(--ink,#211b49);white-space:normal}
+.satria-care-status.ok{background:#dcfce7;color:#166534}
+.satria-care-status.warn,.satria-care-tag.warn{background:#fef3c7;color:#92400e}
+.satria-care-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.satria-care-kpi{display:flex;flex-direction:column;min-width:0;padding:16px;border:1px solid var(--bd,#dfe4f0);background:var(--card,#fff);border-radius:14px;gap:5px}
+.satria-care-kpi>span{font-size:12px;font-weight:750;color:var(--mut,#686a85)}
+.satria-care-kpi>strong{font-size:25px;line-height:1.3;overflow-wrap:anywhere;color:var(--ink,#211b49)}
+.satria-care-kpi>small{font-size:11px;line-height:1.5;color:var(--mut,#686a85)}
+.satria-care-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.satria-care-tile,.satria-care-panel{border:1px solid var(--bd,#dfe4f0);border-radius:16px;background:var(--card,#fff);padding:17px 19px;min-width:0}
+.satria-care-tile{display:flex;flex-direction:column;gap:10px}
+.satria-care-tile-head{display:flex;align-items:start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.satria-care-tile h3,.satria-care-panel h3{font-size:16px;line-height:1.4;margin:0;color:var(--ink,#211b49)}
+.satria-care-tile p,.satria-care-panel>p{color:var(--mut,#686a85);line-height:1.55;font-size:13px;margin:0}
+.satria-care-tile-actions{margin-top:auto;padding-top:5px}
+.satria-care-bottom{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.satria-care-panel{display:flex;flex-direction:column;gap:13px}
+.satria-care-checks{padding:0;margin:0;list-style:none}
+.satria-care-checks li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--bd,#dfe4f0);font-size:13px;line-height:1.4}
+.satria-care-checks li span{color:var(--mut,#686a85)}
+.satria-care-checks li b{text-align:right;font-weight:650;overflow-wrap:anywhere}
+.satria-care-footnote,.satria-care-muted{font-size:12px;line-height:1.55;color:var(--mut,#686a85)}
+.satria-settings-actions .satria-settings-care-link{padding:9px 12px;display:inline-flex;align-items:center;text-decoration:none;border:1px solid var(--bd);border-radius:9px;color:var(--ink)}
+#satriaDebug[hidden]{display:none!important}
+@media(max-width:1000px){.satria-care-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.satria-care-tiles{grid-template-columns:1fr}}
+@media(max-width:700px){.satria-care-page{gap:11px}.satria-care-hero{padding:18px;border-radius:14px}.satria-care-hero-actions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.satria-care-hero-actions .satria-care-button{width:100%}.satria-care-bottom{grid-template-columns:1fr}.satria-care-kpi{padding:13px}.satria-care-kpi>strong{font-size:22px}.satria-care-tile,.satria-care-panel{padding:15px}.satria-care-summary{padding:14px}.satria-care-status{font-size:11px}#satriaDebug{max-width:calc(100vw - 24px)!important;left:12px!important;right:12px!important;width:auto!important}}
+@media print{.satria-care-page{display:none!important}}
+
+/* Prioritas judul pada tema global yang juga memakai selector #main h2. */
+#main .satria-care-page .satria-care-hero h2{color:#fff!important}
