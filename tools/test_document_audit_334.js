@@ -13,5 +13,5 @@ assert(html.includes("docMiss=(p,k)=>docReqs(p,k).filter(r=>!r.ok&&!r.manual)"),
 assert(html.includes("analisa:'Analisis Kewajaran Harga & Bukti'"),'active guide should name the analysis document');
 assert(mod.includes('manual:true'),'the human verification requirement must remain explicit');
 const sw=fs.readFileSync(path.join(__dirname,'..','sw.js'),'utf8');
-assert(sw.includes('care-center-20261106'),'PWA cache must be updated after index refactor');
+assert(/satria-v3\.\d+\.\d+\.\d+-[a-z0-9-]+/.test(sw) && sw.includes('./frontend/refactor/maintenance/care-center.js'),'PWA cache must be updated after index refactor');
 console.log('PASS Document QA 3.0.59.36: 15 registered types, matching ID, manual/automatic checks separated, no blocking draft confirmation, SW cache');

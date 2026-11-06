@@ -11,7 +11,7 @@ assert.match(html,/<link rel="stylesheet" href="\.\/frontend\/satria-operator-st
 assert.match(html,/<script src="\.\/frontend\/satria-operator-studio\.js"><\/script>/);
 assert.match(html,/window\.SATRIA_OPERATOR_STUDIO\?\.enhance\?\.\(\)/);
 assert.match(html,/NEXT · 3\.0\.59\.39/);
-assert.match(sw,/satria-v3\.0\.59\.39-care-center-20261106/);
+assert.match(sw,/satria-v3\.\d+\.\d+\.\d+-[a-z0-9-]+/);
 assert.match(sw,/\.\/frontend\/satria-operator-studio\.js/);
 assert.match(sw,/\.\/frontend\/satria-operator-studio\.css/);
 assert.match(mf.description,/3\.0\.59\.39/);

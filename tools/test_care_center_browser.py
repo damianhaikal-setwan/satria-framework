@@ -38,6 +38,8 @@ with sync_playwright() as playwright:
     page.wait_for_timeout(180)
     assert page.locator('.satria-care-page').count()==1, 'Halaman Perawatan tidak muncul'
     assert page.get_by_role('heading',name='Perawatan SATRIA').count()==1
+    assert page.locator('.satria-care-tiles .satria-care-tile').count()==4, 'Status sync wajib muncul'
+    assert 'Sinkronisasi cloud' in page.locator('.satria-care-page').inner_text()
     before=page.evaluate('JSON.stringify(S.paket)')
     page.get_by_role('button',name='Periksa Ulang').click()
     assert page.evaluate('JSON.stringify(S.paket)')==before, 'Pemeriksaan mengubah data paket'

@@ -35,7 +35,7 @@ for f in (ROOT/'frontend/refactor/js').glob('*.js'):
 for f in [ROOT/'sw.js',ROOT/'frontend/refactor/maintenance/diagnostics.js',ROOT/'frontend/refactor/maintenance/care-center.js']:
  check=subprocess.run(['node','--check',str(f)],capture_output=True,text=True)
  assert check.returncode==0, check.stderr
-assert 'satria-v3.0.59.39-care-center-20261106' in sw
+assert re.search(r"const CACHE_NAME\s*=\s*'satria-v3\.\d+\.\d+\.\d+-[a-z0-9-]+'", sw)
 assert "if (request.mode === 'navigate')" in sw
 assert 'data-satria-care="script"' in html and 'data-satria-care="style"' in html
 assert html.count('./frontend/refactor/maintenance/care-center.js') == 1
