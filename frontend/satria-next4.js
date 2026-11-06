@@ -17,6 +17,7 @@
     lap:['Laporan dan Analisis','Analisis, filter, ekspor, dan laporan pengadaan'],
     master:['Data Master','Kelola referensi organisasi, pejabat, dan penyedia'],
     set:['Pengaturan Sistem','Konfigurasi organisasi, backup, dan pemulihan'],
+    care:['Perawatan SATRIA','Pemeriksaan konfigurasi, kualitas data, error aplikasi, dan backup'],
     user:['Pengguna dan Hak Akses','Kelola pengguna dan kewenangan'],
     panduan:['Panduan Penggunaan','Petunjuk operasional dan bantuan kontekstual'],
     chat:['Asisten SATRIA','Cari data dan pahami proses berbasis catatan SATRIA'],
@@ -122,7 +123,7 @@
     const main=document.getElementById('main');if(!main||!S?.ui)return;
     const page=String(S.ui.page||'dash');
     main.dataset.satriaModule=page;
-    if(page!=='satria360'){
+    if(page!=='satria360' && page!=='care'){
       const item=PAGE[page]||[page,'Pekerjaan SATRIA'];
       const module=document.createElement('section');module.className='s4-module-head no-print';module.setAttribute('aria-label','Navigasi modul SATRIA');
       const p=typeof P==='function'?P(S.ui.pid):null;
