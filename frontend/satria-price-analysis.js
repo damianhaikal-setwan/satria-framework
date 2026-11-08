@@ -44,7 +44,7 @@ function analyze(p,options={}){
  if(items.some(i=>!positive(i.vol)||!positive(i.hs)))add('Tinggi','BAD_HPS','Volume atau HPS satuan belum valid');
  if(pagu>0&&H>pagu)add('Tinggi','HPS_OVER_PAGU','Total HPS melebihi pagu paket');
  const offersOut=offers.map(w=>{
-  const name=nameFor(w.pen),source=clean(w.sumberHarga),sourceDate=clean(w.tanggalHarga);
+  const name=nameFor(w.pen),source=clean(Object.hasOwn(options.sources||{},String(w.id))?options.sources[String(w.id)]:w.sumberHarga),sourceDate=clean(w.tanggalHarga);
   const shipping=no(w.ongkir),shippingValid=shipping!==null;
   const fullTayang=items.length>0&&items.every(i=>!!positive(w.harga?.[i.id]));
   const fullNego=items.length>0&&items.every(i=>!!positive(w.nego?.[i.id]));
@@ -142,7 +142,7 @@ function escLocal(v){return typeof esc==='function'?esc(v):String(v).replace(/[&
 function rpLocal(v){return v===null||v===undefined?'—':rp(v);}
 function fmtPercent(v){return Number.isFinite(v)?v.toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—';}
 function safeLink(url){const s=safeURL(url);return s?`<a class="spha-link-open" target="_blank" rel="noopener noreferrer" href="${escLocal(s)}">Buka toko/sumber ↗</a><small class="spha-url-full">${escLocal(s)}</small>`:'Belum ada URL';}
-function getAnalysis(p){const names={};for(const y of S.penyedia||[])names[String(y.id)]=y.nama;const valid=pemenang(p);return analyze(p,{suppliers:names,validWinnerId:valid?.w?.id||''});}
+function getAnalysis(p){const names={},sources={};for(const y of S.penyedia||[])names[String(y.id)]=y.nama;for(const w of p.penawaran||[])sources[String(w.id)]=satriaOfferPriceSource(w);const valid=pemenang(p);return analyze(p,{suppliers:names,sources,validWinnerId:valid?.w?.id||''});}
 function priceGapText(value,percent){if(value===null)return 'belum dapat dihitung';if(value===0)return 'sama dengan acuan';return `${rpLocal(Math.abs(value))} (${fmtPercent(Math.abs(percent))}) ${value>0?'lebih rendah':'lebih tinggi'}`;}
 function productNarrative(f){
  const unit=f.unit||'satuan';
