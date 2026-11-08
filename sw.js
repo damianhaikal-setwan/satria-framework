@@ -1,5 +1,5 @@
 /* SATRIA PWA: network-first, precache all refactored assets for offline use. */
-const CACHE_NAME = 'satria-v3.0.59.42-nego-tax-total-rounding-20261108';
+const CACHE_NAME = 'satria-v3.0.59.43-hps-draft-batch-20261109';
 const APP_ASSETS = [
   "./",
   "./index.html",
@@ -37,6 +37,7 @@ const APP_ASSETS = [
   "./frontend/refactor/css/20-human-first.css",
   "./frontend/refactor/css/21-human-first-docs.css",
   "./frontend/refactor/css/22-briefing-visual.css",
+  "./frontend/refactor/css/23-hps-draft-batch.css",
   "./frontend/refactor/js/01-app-core.js",
   "./frontend/refactor/js/02-premium-ui.js",
   "./frontend/refactor/js/03-analytics-dashboard.js",
