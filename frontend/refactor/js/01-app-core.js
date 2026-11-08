@@ -1083,7 +1083,7 @@ function vInputRup(){
  const scope=activeCloudScope(),opds=(S.opd||[]).filter(o=>!scope||scope.opdIds.includes(String(o.id)));
  const cloudRole=String(window.SATRIA_CLOUD_ROLE||'').toLowerCase();
  const usingCloud=!!window.SATRIA_CLOUD_CONFIGURED;
- const cloudName=cloudRole==='admin'?'Admin Supabase — seluruh OPD organisasi':cloudRole==='operator'?'Operator Supabase — terbatas OPD/tahun assignment':cloudRole==='viewer'?'Viewer Supabase — hanya baca':'Belum login Supabase';
+ const cloudName=cloudRole==='admin'?'Admin Supabase — seluruh OPD organisasi':cloudRole==='operator'?(window.SATRIA_CLOUD_MEMBER?.account_type==='ppkom'?'PPKom Supabase — satu OPD/tahun penugasan':'Operator Supabase — terbatas OPD/tahun assignment'):cloudRole==='viewer'?'Viewer Supabase — hanya baca':'Belum login Supabase';
  const roleNote=usingCloud?cloudName:'Mode lokal — pilihan Admin di header bukan autentikasi Supabase';
  const localWarning=usingCloud&&!cloudRole?'<p class="mut">Masuk melalui tombol Supabase dan tarik snapshot organisasi agar daftar OPD cloud tersedia. Pilihan Admin lokal tidak memberikan hak cloud.</p>':'';
  const opdsListed=(S.opd||[]).length;

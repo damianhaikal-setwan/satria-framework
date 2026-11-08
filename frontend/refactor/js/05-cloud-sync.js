@@ -88,6 +88,7 @@
   window.SATRIA_AUTO_SYNC_REQUEST=requestAutosave;
 
   const roleName=r=>({admin:'Admin',operator:'Operator',viewer:'Viewer'}[r]||'Viewer');
+  const accountName=()=>member?.role==='operator'&&member?.account_type==='ppkom'?'PPKom':roleName(member?.role);
   const config=()=>{let local={};try{local=JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}')}catch(_){}const embedded=window.SATRIA_EMBEDDED_SUPABASE_CONFIG||{};return {url:local.url||embedded.url||'',key:local.key||embedded.key||'',org:local.org||embedded.org||''}};
   window.SATRIA_CLOUD_CONFIGURED=!!(config().url&&config().key&&config().org);
   function fillConfig(){const c=config(); const a=$id('scUrl'), b=$id('scKey'), cc=$id('scOrg'); if(a) a.value=c.url||''; if(b) b.value=c.key||''; if(cc) cc.value=c.org||''; }
@@ -193,14 +194,14 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
     
     if(!membership||!membership.active) throw new Error('Membership tidak aktif. Hubungi admin untuk aktivasi.');
     
-    member={id:user.id,email:user.email||'Pengguna Supabase',role:membership.role,scope:null};
+    member={id:user.id,email:user.email||'Pengguna Supabase',role:membership.role,account_type:membership.role==='operator'&&user.app_metadata?.satria_account_type==='ppkom'?'ppkom':'standard',scope:null};
     cloudStateReady=false;
     window.SATRIA_CLOUD_ROLE=member.role;
     window.SATRIA_CLOUD_MEMBER=member;
     if(!['admin','operator','viewer'].includes(member.role)) throw new Error('Role membership tidak dikenal: '+member.role);
     if(!localUsersBackup) localUsersBackup=JSON.parse(JSON.stringify(S.users||[]));
     if(member.role!=='admin') resetCloudScopedView();
-    S.users=[{id:'auth-'+member.id,nama:member.email,username:member.email,role:roleName(member.role),opd:'all',aktif:true}];
+    S.users=[{id:'auth-'+member.id,nama:member.account_type==='ppkom'?'PPKom · '+member.email:member.email,username:member.email,role:roleName(member.role),opd:'all',aktif:true}];
     S.ui.user=S.users[0].id;
     version=0;
     setButtons();
@@ -376,7 +377,7 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
     const o=JSON.parse(JSON.stringify(S));
     ['ui','log','dirty','chat','chatCtx','persistError'].forEach(k=>delete o[k]);
     // Browser-side user list is not an identity store; persist only the authenticated principal's display role.
-    o.users=member?[{id:'auth-'+member.id,nama:member.email,username:member.email,role:roleName(member.role),opd:'all',aktif:true}]:[];
+    o.users=member?[{id:'auth-'+member.id,nama:member.account_type==='ppkom'?'PPKom · '+member.email:member.email,username:member.email,role:roleName(member.role),opd:'all',aktif:true}]:[];
     return o;
   }
 
@@ -458,7 +459,7 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
       Object.assign(S,data.payload,{ui,log:[],dirty:false,chat:[],chatCtx:null});
       const assignedOpds=member.role==='admin'?'all':(Array.isArray(member.scope?.opd_ids)?member.scope.opd_ids.map(String):[]);
       const assignedYears=member.role==='admin'?null:(Array.isArray(member.scope?.years)?member.scope.years.map(Number).filter(Number.isFinite):[]);
-      S.users=[{id:'auth-'+member.id,nama:member.email,username:member.email,role:roleName(member.role),opd:assignedOpds,years:assignedYears,aktif:true}];S.ui.user=S.users[0].id;
+      S.users=[{id:'auth-'+member.id,nama:member.account_type==='ppkom'?'PPKom · '+member.email:member.email,username:member.email,role:roleName(member.role),opd:assignedOpds,years:assignedYears,aktif:true}];S.ui.user=S.users[0].id;
       if(typeof normalizeData==='function')normalizeData();
       version=Number(data.version)||0;S.dirty=false;cloudStateReady=true;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;
       if(member.role!=='admin'){
@@ -488,7 +489,7 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
       if(typeof route==='function')route();applyUserLock();
       lastSyncedPayload=currentPayload();conflictActive=false;S.dirty=false;
       const scopeText=member.role==='admin'?'seluruh organisasi':`${member.scope.opd_ids.length} OPD · TA ${member.scope.years.join(', ')}`;
-      status('Data cloud dimuat sesuai scope '+scopeText+'. Versi '+version+' · diperbarui '+(data.updated_at||'waktu tidak tersedia')+'.','ok');
+      status(accountName()+' · Data cloud dimuat sesuai scope '+scopeText+'. Versi '+version+' · diperbarui '+(data.updated_at||'waktu tidak tersedia')+'.','ok');
       syncIndicator('Tersinkron · versi '+version,'');
     }catch(e){
       // Fail closed for every role: a failed cloud pull must never leave seed/stale data pushable.
@@ -954,14 +955,14 @@ main{overflow-anchor:none}
 </style>
     <section class="satria-user-modal" role="dialog" aria-modal="true" aria-labelledby="satriaUserModalTitle">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
-        <div><h2 id="satriaUserModalTitle">Tambah akun operator</h2><p>Buat akun Auth dan membership SATRIA.</p></div>
+        <div><h2 id="satriaUserModalTitle">Tambah akun Operator / PPKom</h2><p>Akun dibuat Admin dengan akses dibatasi OPD dan tahun anggaran di server.</p></div>
         <button type="button" data-satria-user-close aria-label="Tutup modal">Tutup</button>
       </div>
       <div class="satria-user-note">
         Email dummy harus berformat valid dan unik, tetapi tidak perlu menerima email. Tidak ada email konfirmasi yang dikirim. Password awal wajib disampaikan kepada operator melalui saluran terpisah yang aman; pemulihan lewat email tidak tersedia untuk alamat dummy.
       </div>
       <form id="satriaCreateUserForm" autocomplete="off">
-        <label for="satriaNewUserName">Nama operator</label>
+        <label for="satriaNewUserName">Nama pengguna / PPKom</label>
         <input id="satriaNewUserName" name="display_name" type="text" minlength="2" maxlength="100" required autocomplete="off">
 
         <label for="satriaNewUserEmail">Email / username login</label>
@@ -985,13 +986,15 @@ main{overflow-anchor:none}
         <label for="satriaNewUserRole">Role</label>
         <select id="satriaNewUserRole" name="role" required>
           <option value="operator" selected>Operator</option>
+          <option value="ppkom">PPKom (satu OPD + tahun anggaran tertentu)</option>
           <option value="admin" disabled>Admin (dinonaktifkan oleh kebijakan server)</option>
         </select>
 
+        <p class="satria-opd-help" id="satriaCreateRoleHelp">PPKom dapat melihat dan mengolah data paket/dokumen sesuai OPD dan TA yang ditetapkan. Pengelolaan akun dan pengaturan organisasi tetap hanya untuk Admin.</p>
         <fieldset class="satria-opd-fieldset" id="satriaCreateUserOpdFieldset">
-          <legend>OPD yang dapat diakses Operator</legend>
+          <legend>OPD yang dapat diakses</legend>
           <div class="satria-opd-choices" id="satriaCreateUserOpdChoices"><p class="satria-opd-empty">Memuat katalog OPD organisasi…</p></div>
-          <p class="satria-opd-help">Pilih 1–100 OPD. Daftar berasal dari katalog organisasi di Supabase, bukan dari input bebas di browser.</p>
+          <p class="satria-opd-help">PPKom wajib memilih tepat satu OPD (misalnya Bapperida atau Disporapar). Operator dapat memilih 1–100 OPD. Katalog berasal dari Supabase.</p>
         </fieldset>
 
         <fieldset class="satria-opd-fieldset" id="satriaCreateUserYearFieldset">
@@ -1020,6 +1023,16 @@ main{overflow-anchor:none}
   const roleInput = root.querySelector('#satriaNewUserRole');
   const opdChoices = root.querySelector('#satriaCreateUserOpdChoices');
   const yearChoices = root.querySelector('#satriaCreateUserYearChoices');
+  roleInput.addEventListener('change', () => {
+    if (roleInput.value === 'ppkom') {
+      const checked = Array.from(opdChoices.querySelectorAll('input[name="satria_create_opd_ids"]:checked'));
+      checked.slice(1).forEach(input => { input.checked = false; });
+    }
+  });
+  opdChoices.addEventListener('change', (event) => {
+    if (roleInput.value !== 'ppkom' || !event.target?.matches?.('input[name="satria_create_opd_ids"]') || !event.target.checked) return;
+    opdChoices.querySelectorAll('input[name="satria_create_opd_ids"]').forEach(input => { if(input!==event.target) input.checked=false; });
+  });
   let availableOpds = [];
   let availableYears = [];
   let busy = false;
@@ -1215,8 +1228,8 @@ main{overflow-anchor:none}
       window.dispatchEvent(new CustomEvent('satria:load-opd-catalog'));
       return;
     }
-    if (!opdIds.length || opdIds.length > 100) {
-      setMessage('Pilih minimal satu dan maksimal 100 OPD untuk user Operator.', 'error');
+    if (!opdIds.length || opdIds.length > 100 || (role === 'ppkom' && opdIds.length !== 1)) {
+      setMessage(role === 'ppkom' ? 'Akun PPKom wajib memilih tepat satu OPD.' : 'Pilih minimal satu dan maksimal 100 OPD untuk Operator.', 'error');
       root.querySelector('#satriaCreateUserOpdFieldset')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
@@ -1256,7 +1269,7 @@ main{overflow-anchor:none}
       roleInput.value = 'operator';
       window.dispatchEvent(new CustomEvent('satria:user-created'));
       const auditWarning = data.audit_recorded === false ? ' Catatan audit gagal disimpan; periksa log Edge Function.' : '';
-      setMessage(`Akun berhasil dibuat. UID: ${data.user.id}. Scope OPD: ${opdIds.length}; tahun: ${yearIds.join(', ')}. Email ditandai terkonfirmasi dan tidak ada email yang dikirim. Sampaikan password awal secara aman kepada operator.${auditWarning}`, auditWarning ? 'error' : 'ok');
+      setMessage(`Akun ${role === 'ppkom' ? 'PPKom' : 'Operator'} berhasil dibuat. UID: ${data.user.id}. Scope OPD: ${opdIds.length}; tahun: ${yearIds.join(', ')}. Email ditandai terkonfirmasi dan tidak ada email yang dikirim. Sampaikan password awal secara aman kepada pengguna.${auditWarning}`, auditWarning ? 'error' : 'ok');
     } catch (error) {
       const safeMessage = error instanceof Error ? error.message : 'Gagal membuat akun.';
       setMessage(safeMessage, 'error');
@@ -1358,7 +1371,7 @@ main{overflow-anchor:none}
       const row = document.createElement('tr');
       addCell(row, user.display_name || user.email || ('Pengguna ' + String(user.id || '').slice(0, 8)));
       addCell(row, user.email || '—');
-      addCell(row, ({ admin: 'Admin', operator: 'Operator', viewer: 'Viewer' })[user.role] || user.role || '—');
+      addCell(row, user.account_type === 'ppkom' && user.role === 'operator' ? 'PPKom' : (({ admin: 'Admin', operator: 'Operator', viewer: 'Viewer' })[user.role] || user.role || '—'));
 
       let opdLabel = '—';
       if (user.role === 'admin') opdLabel = 'Semua OPD (akses admin)';
@@ -2000,7 +2013,7 @@ main{overflow-anchor:none}
 </style>
       <section class="satria-edit-opd-dialog" role="dialog" aria-modal="true" aria-labelledby="satriaEditUserOpdTitle">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div><h2 id="satriaEditUserOpdTitle">Atur OPD Pengguna</h2><p id="satriaEditUserOpdName"></p></div><button type="button" data-satria-edit-opd-close>Tutup</button></div>
-        <p>Pilih OPD yang dapat diakses oleh Operator ini. Perubahan akan divalidasi dan disimpan oleh server.</p>
+        <p>PPKom hanya dapat ditugaskan pada satu OPD. Perubahan OPD dan tahun anggaran hanya dapat dilakukan Admin dan diverifikasi oleh server.</p>
         <div id="satriaEditUserOpdChoices" class="satria-edit-opd-choices"></div>
         <p id="satriaEditUserOpdMessage" role="status" aria-live="polite"></p>
         <div class="satria-edit-opd-actions"><button type="button" data-satria-edit-opd-close>Batal</button><button id="satriaEditUserOpdSave" class="primary" type="button">Simpan assignment</button></div>
@@ -2010,6 +2023,10 @@ main{overflow-anchor:none}
       if (event.target === modal || (event.target instanceof Element && event.target.closest('[data-satria-edit-opd-close]'))) closeAssignmentModal();
     });
     byId('satriaEditUserOpdSave').addEventListener('click', () => { void saveAssignment(); });
+    byId('satriaEditUserOpdChoices').addEventListener('change', event => {
+      if (editingUser?.account_type !== 'ppkom' || !event.target?.matches?.('input[name="satria_edit_opd_ids"]') || !event.target.checked) return;
+      byId('satriaEditUserOpdChoices').querySelectorAll('input[name="satria_edit_opd_ids"]').forEach(input => { if (input !== event.target) input.checked=false; });
+    });
     return modal;
   }
 
@@ -2036,7 +2053,7 @@ main{overflow-anchor:none}
     }
     const modal = ensureAssignmentModal();
     editingUser = user;
-    byId('satriaEditUserOpdName').textContent = `${user.display_name || user.email} · ${user.email || ''}`;
+    byId('satriaEditUserOpdName').textContent = `${user.account_type === 'ppkom' ? 'PPKom · ' : ''}${user.display_name || user.email} · ${user.email || ''}`;
     const choices = byId('satriaEditUserOpdChoices');
     choices.replaceChildren();
     const selected = new Set(Array.isArray(user.opd_ids) ? user.opd_ids : []);
@@ -2087,8 +2104,8 @@ main{overflow-anchor:none}
       return;
     }
     const opdIds = Array.from(document.querySelectorAll('#satriaEditUserOpdChoices input[name="satria_edit_opd_ids"]:checked')).map((input) => input.value);
-    if (!opdIds.length || opdIds.length > 100) {
-      assignmentMessage('Pilih minimal satu dan maksimal 100 OPD sebelum menyimpan.', 'error');
+    if (!opdIds.length || opdIds.length > 100 || (editingUser?.account_type === 'ppkom' && opdIds.length !== 1)) {
+      assignmentMessage(editingUser?.account_type === 'ppkom' ? 'Akun PPKom hanya boleh memiliki satu OPD.' : 'Pilih minimal satu dan maksimal 100 OPD sebelum menyimpan.', 'error');
       return;
     }
     const saveButton = byId('satriaEditUserOpdSave');
