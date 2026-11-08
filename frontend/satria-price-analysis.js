@@ -332,13 +332,11 @@ function exampleConclusion(a,p){
   const peers=a.offers.filter(o=>o.id!==w.id).map(o=>o.detail.find(d=>d.id===f.id));
   return priceTayangStatus(target?.listedUnit??null,peers.map(peer=>peer?.listedUnit??null))==='Wajar';
  });
- const original=(p.penawaran||[]).find(o=>String(o.id)===w?.id);
- const specOK=!!w&&a.productFindings.length>0&&a.productFindings.every(f=>{
-  const ref=original?.catalogRefs?.[f.id];
-  return clean(ref?.surveyMeta?.suitability||ref?.suitability).toLowerCase()==='sesuai';
- });
- const validConclusion=perItemOK&&specOK;
- return `<ol class="spha-example-conclusion"><li>${validConclusion?`Berdasarkan hasil perbandingan harga per item di atas, Penyedia ${escLocal(w.name)} menawarkan harga yang paling efisien dan wajar untuk seluruh item pekerjaan.`:'—'}</li><li>${specOK?'Spesifikasi teknis yang ditawarkan sesuai dengan kebutuhan/KAK.':'—'}</li><li>${validConclusion?'Rekomendasi: Rekomendasi kepada PPK untuk melanjutkan proses transaksi ke pembuatan Surat Pesanan melalui sistem E-Purchasing.':'—'}</li></ol>`;
+ // No checkbox in Smart Survey can prove technical suitability. Assess price evidence independently.
+ const priceEvidenceOK=!!w&&w.detail.length===a.items.length&&w.detail.every(d=>d.evidenceOK);
+ const hasSpecCaution=!!w&&w.detail.some(d=>d.specWarnings.length>0);
+ const priceConclusion=perItemOK&&priceEvidenceOK;
+ return `<ol class="spha-example-conclusion"><li>${priceConclusion?`Berdasarkan perbandingan harga tayang per item dan bukti yang tercatat, harga Penyedia ${escLocal(w.name)} tidak lebih tinggi dari pembanding pada tabel.`:'Bukti atau perbandingan harga belum cukup untuk menyimpulkan kewajaran.'}</li><li>Referensi produk diambil dari e-Katalog. Smart Survey tidak melakukan penilaian ulang lulus/tidak lulus spesifikasi. Kesesuaian dengan kebutuhan/KAK tetap harus dipastikan PPK sebelum transaksi.${hasSpecCaution?' Terdapat catatan produk atau perbedaan yang masih perlu ditindaklanjuti.':''}</li><li>${priceConclusion&&!hasSpecCaution?'Rekomendasi: Hasil analisis harga dapat menjadi bahan pertimbangan PPK untuk proses berikutnya setelah memastikan kebutuhan dan persyaratan pengadaan terpenuhi.':'Rekomendasi: Lengkapi bukti harga dan tindak lanjuti catatan sebelum melanjutkan proses.'}</li></ol>`;
 }
 function documentHTML(p){
  const a=getAnalysis(p),stamp=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
