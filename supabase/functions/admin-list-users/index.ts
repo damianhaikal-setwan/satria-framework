@@ -464,6 +464,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
         email,
         display_name: cleanDisplayName(user.user_metadata?.full_name, fallbackName),
         role: row.role,
+        account_type: row.role === "operator" && user.app_metadata?.satria_account_type === "ppkom" ? "ppkom" : "standard",
         active: row.active,
         membership_created_at: row.created_at,
         auth_created_at: user.created_at,
