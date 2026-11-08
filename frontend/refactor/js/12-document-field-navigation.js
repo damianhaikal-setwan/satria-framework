@@ -72,7 +72,7 @@
       const nego=Number(ref.negotiatedBase||0),tax=Number(ref.negotiatedTax||0),saved=Number((w.nego||{})[i.id]||0);
       return (!price||Math.abs(price-offer)<=1)&&(!nego||Math.abs(nego+tax-saved)<=1);
     })));
-    if(needsProof.includes(k))add('bukti',offers.length>0&&offers.every(w=>String(w.sumberHarga||'').trim()&&isValidDate(w.tanggalHarga)));
+    if(needsProof.includes(k))add('bukti',offers.length>0&&offers.every(w=>satriaOfferPriceSource(w)&&isValidDate(w.tanggalHarga)));
     if(['bahp','kknego'].includes(k))add('pemenang',!!pemenang(p));
     // Do not certify VAT reconciliation from display gross prices alone.
     if(['bahp','kknego'].includes(k))add('pajak',!!pemenang(p)&&offers.every(w=>Number.isFinite(Number(w.ongkir||0))&&Number(w.ongkir||0)>=0));
