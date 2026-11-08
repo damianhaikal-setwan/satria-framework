@@ -1,6 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-type NewRole = "admin" | "operator";
+type NewRole = "admin" | "operator" | "ppkom";
 type CreateUserBody = {
   organization_id: string;
   email: string;
@@ -181,15 +181,18 @@ Deno.serve(async (request: Request): Promise<Response> => {
   if (initialPassword.length < MIN_PASSWORD_LENGTH || initialPassword.length > MAX_PASSWORD_LENGTH) {
     return response(request, 400, { error: `Password awal harus ${MIN_PASSWORD_LENGTH}–${MAX_PASSWORD_LENGTH} karakter.`, request_id: requestId }, config.allowedOrigins);
   }
-  if (role !== "operator" && role !== "admin") {
-    return response(request, 400, { error: "Role harus admin atau operator.", request_id: requestId }, config.allowedOrigins);
+  if (role !== "operator" && role !== "admin" && role !== "ppkom") {
+    return response(request, 400, { error: "Role harus admin, operator, atau PPKom.", request_id: requestId }, config.allowedOrigins);
   }
   if (role === "admin" && Deno.env.get("ALLOW_ADMIN_CREATION") !== "true") {
     return response(request, 403, { error: "Pembuatan admin baru belum diaktifkan.", request_id: requestId }, config.allowedOrigins);
   }
 
+  // PPKom adalah profil akun terpisah, tetapi hak database tetap Operator + scope OPD/TA.
+  // Metadata tipe akun hanya bisa ditulis melalui Supabase Auth admin API.
+  const membershipRole = role === "ppkom" ? "operator" : role;
   let opdIds: string[] = [];
-  if (role === "operator") {
+  if (membershipRole === "operator") {
     try {
       opdIds = normalizeOpdIds(body.opd_ids);
     } catch (error) {
@@ -199,8 +202,12 @@ Deno.serve(async (request: Request): Promise<Response> => {
     return response(request, 400, { error: "Admin memiliki akses organisasi; assignment OPD tidak perlu dikirim.", request_id: requestId }, config.allowedOrigins);
   }
 
+  if (role === "ppkom" && opdIds.length !== 1) {
+    return response(request, 400, { error: "Akun PPKom wajib ditetapkan tepat satu OPD.", request_id: requestId }, config.allowedOrigins);
+  }
+
   let yearIds: number[] = [];
-  if (role === "operator") {
+  if (membershipRole === "operator") {
     try {
       yearIds = normalizeYears(body.year_ids);
     } catch (error) {
@@ -261,6 +268,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
     password: initialPassword,
     email_confirm: true,
     ...(displayName ? { user_metadata: { full_name: displayName } } : {}),
+    ...(role === "ppkom" ? { app_metadata: { satria_account_type: "ppkom" } } : {}),
   });
   const createdUser = createData?.user;
   if (createError || !createdUser) {
@@ -270,7 +278,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
 
   const { error: insertMembershipError } = await adminClient
     .from("satria_memberships")
-    .insert({ organization_id: organizationId, user_id: createdUser.id, role, active: true, login_email: email, display_name: displayName });
+    .insert({ organization_id: organizationId, user_id: createdUser.id, role: membershipRole, active: true, login_email: email, display_name: displayName });
 
   if (insertMembershipError) {
     const { error: rollbackError } = await adminClient.auth.admin.deleteUser(createdUser.id);
@@ -291,7 +299,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
     }, config.allowedOrigins);
   }
 
-  if (role === "operator") {
+  if (membershipRole === "operator") {
     const { error: assignmentError } = await adminClient.rpc("satria_admin_set_membership_opds", {
       p_organization_id: organizationId,
       p_actor_user_id: actor.id,
@@ -323,7 +331,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
     }
   }
 
-  if (role === "operator") {
+  if (membershipRole === "operator") {
     const { error: yearAssignmentError } = await adminClient.rpc("satria_admin_set_membership_years", {
       p_organization_id: organizationId,
       p_actor_user_id: actor.id,
@@ -360,7 +368,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
     actor_user_id: actor.id,
     target_user_id: createdUser.id,
     action: "user_created",
-    details: { role, email_confirmed: true, opd_ids: role === "operator" ? opdIds : [], year_ids: role === "operator" ? yearIds : [] },
+    details: { role, membership_role: membershipRole, account_type: role === "ppkom" ? "ppkom" : "standard", email_confirmed: true, opd_ids: membershipRole === "operator" ? opdIds : [], year_ids: membershipRole === "operator" ? yearIds : [] },
   });
   if (auditError) {
     console.error(JSON.stringify({ event: "audit_insert_failed", requestId, actorId: actor.id, organizationId, targetUserId: createdUser.id }));
@@ -371,8 +379,10 @@ Deno.serve(async (request: Request): Promise<Response> => {
     ok: true,
     user: { id: createdUser.id, email: createdUser.email },
     role,
-    opd_ids: role === "operator" ? opdIds : [],
-    year_ids: role === "operator" ? yearIds : [],
+    membership_role: membershipRole,
+    account_type: role === "ppkom" ? "ppkom" : "standard",
+    opd_ids: membershipRole === "operator" ? opdIds : [],
+    year_ids: membershipRole === "operator" ? yearIds : [],
     email_confirmed: true,
     email_sent: false,
     audit_recorded: !auditError,
