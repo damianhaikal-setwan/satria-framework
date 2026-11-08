@@ -46,11 +46,7 @@
 .smart-survey-wrap[data-satria-survey-mode="simple"] .smart-survey-preview,
 .smart-survey-wrap[data-satria-survey-mode="simple"] .smart-note,
 .smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-featurehead,
-.smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-detail:not([data-s59-ocr]):not([data-satria-evaluation]){display:none!important}
-.smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-detail[data-satria-evaluation] .satria59-grid>label:not(:has([data-s59-field="suitability"])){display:none!important}
-.smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-detail[data-satria-evaluation] .satria59-grid{display:block!important}
-.smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-detail[data-satria-evaluation] .satria59-grid>label{display:flex;flex-direction:column;gap:6px}
-.smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-detail[data-satria-evaluation] .satria59-info{display:none!important}
+.smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-detail:not([data-s59-ocr]){display:none!important}
 .smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-detail[data-s59-ocr] textarea,
 .smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-detail[data-s59-ocr] p{font-size:11px}
 .smart-survey-wrap[data-satria-survey-mode="simple"] .satria59-suite>.satria59-status{display:none!important}
