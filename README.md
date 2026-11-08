@@ -1,3 +1,5 @@
+> **Pembaruan 8 November 2026 — akun PPKom dibatasi OPD dan TA:** Admin kini dapat membuat jenis akun **PPKom** untuk Bapperida dan Disporapar (satu OPD per akun, tahun anggaran dipilih Admin), memakai otorisasi Operator scoped di server. **Perlu deploy ulang Edge Functions `admin-create-user` dan `admin-list-users`; perubahan GitHub saja tidak cukup.** Tidak membuat akun nyata atau menambahkan migrasi SQL baru. Baca [panduan PPKom](docs/AKUN-PPKOM-OPD-TA-2026-11-08.md).
+
 > **Pembaruan 6 November 2026 — Refactor `index.html` dan maintenance:** file utama telah dipisah menjadi 34 skrip klasik dan 22 stylesheet berurutan; diagnostik baca-saja serta pemeriksaan CI diperkuat. **Semua file di `frontend/refactor/` wajib ikut di-deploy.** Baca [`docs/REFACTOR-INDEX-DAN-MAINTENANCE-2026-11-06.md`](docs/REFACTOR-INDEX-DAN-MAINTENANCE-2026-11-06.md). Refactor ini tidak mengubah aturan negosiasi maupun analisis harga tayang antarpenyedia.
 
 ## SATRIA NEXT 3.0.59.39 — Analisis kewajaran mengikuti contoh PDF Pejabat Pengadaan
