@@ -34,6 +34,9 @@
 #main .s4-filter input{width:100%;min-height:42px;font-size:13px}
 #main .s4-items{display:grid;gap:9px}
 #main .s4-rowcard{border:1px solid var(--bd);padding:12px 14px;border-radius:15px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;background:var(--card-2)}
+/* RUP di kartu SATRIA 360: kontras di latar terang, tetap terang pada mode gelap. */
+:root:not([data-theme="dark"]) #main .s4-rowcard .s4-kicker{color:#4338ca}
+:root[data-theme="dark"] #main .s4-rowcard .s4-kicker{color:#d9f99d}
 #main .s4-rowcard h4{font-size:12px;margin:3px 0 4px;font-weight:800;max-width:760px}
 #main .s4-rowcard p{font-size:11px;margin:0;color:var(--mut);line-height:1.45}
 #main .s4-rowcard .s4-row-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
