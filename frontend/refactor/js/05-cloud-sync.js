@@ -2736,70 +2736,17 @@ function attachPaketVirtualScroll(){
   renderPaketVirtualSlice();
 }
 
-function renderHpsVirtualSlice(){
-  const viewport = document.getElementById('hpsVirtualViewport');
-  const content = document.getElementById('hpsVirtualContent');
-  const spacer = document.getElementById('hpsVirtualSpacer');
-  if(!viewport || !content || !spacer) return;
-  const data = window.__hpsVirtualData || [];
-  const rowH = 52;
-  const scrollTop = viewport.scrollTop;
-  const viewportH = viewport.clientHeight;
-  const buffer = 6;
-  const start = Math.max(0, Math.floor(scrollTop / rowH) - buffer);
-  const visible = Math.ceil(viewportH / rowH) + buffer*2;
-  const end = Math.min(data.length, start + visible);
-  
-  spacer.style.height = (data.length * rowH) + 'px';
-  content.style.transform = `translateY(${start * rowH}px)`;
-  
-  let html = '';
-  for(let i=start;i<end;i++){
-    const it = data[i];
-    if(!it) continue;
-    const pid = window.__hpsPaketId;
-    html += `<div class="hps-virtual-row" data-idx="${i}" style="height:${rowH}px">
-      <div><input type="text" value="${esc(it.nama??'')}" data-col="item" data-pid="${pid}" data-id="${it.id}" data-f="nama" style="width:100%;min-width:0;box-sizing:border-box"></div>
-      <div><input class="n" type="number" min="0" step="any" inputmode="decimal" value="${esc(it.vol)}" data-col="item" data-pid="${pid}" data-id="${it.id}" data-f="vol" style="width:100%;text-align:right"></div>
-      <div><input type="text" value="${esc(it.satuan??'')}" data-col="item" data-pid="${pid}" data-id="${it.id}" data-f="satuan" style="width:100%"></div>
-      <div><input class="n" type="text" inputmode="numeric" value="${nf(it.hs)}" data-col="item" data-pid="${pid}" data-id="${it.id}" data-f="hs" data-rp="1" style="width:100%;text-align:right"></div>
-      <div class="n">${nf((+it.vol||0)*(+it.hs||0))}</div>
-      <div style="text-align:center"><button class="d" data-act="delitem" data-pid="${pid}" data-id="${it.id}" title="Hapus produk">×</button></div>
-    </div>`;
-  }
-  content.innerHTML = html;
-}
-
-let hpsScrollRaf = null;
-function attachHpsVirtualScroll(){
-  const vp = document.getElementById('hpsVirtualViewport');
-  if(!vp) return;
-  // Only one scroll listener per viewport, even after repeated renders.
-  if(vp.dataset.satriaHpsScrollAttached!=='1'){
-    vp.dataset.satriaHpsScrollAttached='1';
-    vp.addEventListener('scroll', ()=>{
-      if(hpsScrollRaf) cancelAnimationFrame(hpsScrollRaf);
-      hpsScrollRaf = requestAnimationFrame(renderHpsVirtualSlice);
-    }, {passive:true});
-  }
-  renderHpsVirtualSlice();
-}
-// Explicit interface for the main script; avoids out-of-scope function references.
-window.SATRIA_HPS_VIRTUAL={attach:attachHpsVirtualScroll,render:renderHpsVirtualSlice};
-
 // Auto attach after render
 const origRender = window.requestAnimationFrame;
 setTimeout(()=>{
   attachPaketVirtualScroll();
-  attachHpsVirtualScroll();
 }, 300);
 
 // Re-attach on hash change (when user navigates to paket detail)
 window.addEventListener('hashchange', ()=>{
   setTimeout(()=>{
     attachPaketVirtualScroll();
-    attachHpsVirtualScroll();
-  }, 200);
+    }, 200);
 });
 
 

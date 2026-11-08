@@ -1205,46 +1205,109 @@ function fData(p){
  ${F('Masa pelaksanaan (hari kerja)',I('masaHk','number'))}${F('Batas akhir pekerjaan',I('batas','date'))}${F('Tanggal survei harga',I('tglSurvei','date'))}${F('Tanggal evaluasi penyedia',I('tglEvaluasi','date'))}${F('Tanggal negosiasi',I('tglNego','date'))}${F('Tanggal penetapan',I('tglPenetapan','date'))}
  ${F('Tanggal Nota Dinas',I('tglNodis','date'))}${F('Tanggal DPP',I('tglDpp','date'))}${F('Tanggal SPPBJ',I('tglSppbj','date'))}${F('Tanggal BA Hasil',I('tglBahp','date'))}</div>`;
 }
-function fItems(p){
-  const H=hps(p);
-  const count=(p.items||[]).length;
-  const diff=(+p.pagu||0)-H;
-  const summary=`<section class="satria342-section-intro" aria-label="Ringkasan rincian dan HPS"><div class="satria342-intro-text"><span class="satria342-eyebrow">TAHAP 02 / RINCIAN & HPS</span><h3>Susun kebutuhan barang</h3><p>Rincian barang menjadi sumber HPS, survei harga, negosiasi, dan dokumen. Perubahan pada rincian akan dihitung ulang otomatis.</p></div><div class="satria342-stat-grid"><div><small>Jumlah barang</small><strong>${count}</strong></div><div><small>Total HPS</small><strong>${rp(H)}</strong></div><div class="${diff<0?'satria342-over-budget':''}"><small>${diff<0?'Melebihi pagu':'Sisa pagu'}</small><strong>${rp(Math.abs(diff))}</strong></div></div></section>`;
-  if(window.matchMedia && window.matchMedia('(max-width: 767px)').matches){
-    return summary+`<div class="satria-mobile-hps">${(p.items||[]).map((it,i)=>`<article class="satria-mobile-hps-card"><div class="satria-mobile-hps-head"><b>Barang ${i+1}</b><button type="button" class="d" data-act="delitem" data-pid="${p.id}" data-id="${it.id}">Hapus</button></div><label>Nama/spesifikasi barang<textarea rows="2" data-col="item" data-pid="${p.id}" data-id="${it.id}" data-f="nama">${esc(it.nama||'')}</textarea></label><div class="satria-mobile-hps-fields"><label>Volume<input type="number" min="0" step="any" inputmode="decimal" value="${esc(it.vol)}" data-col="item" data-pid="${p.id}" data-id="${it.id}" data-f="vol"></label><label>Satuan<input value="${esc(it.satuan||'')}" data-col="item" data-pid="${p.id}" data-id="${it.id}" data-f="satuan"></label></div><label>Harga satuan HPS (Rp)<input type="text" inputmode="numeric" value="${nf(it.hs)}" data-col="item" data-pid="${p.id}" data-id="${it.id}" data-f="hs" data-rp="1"></label><div class="satria-mobile-hps-total">Subtotal <strong>${rp((+it.vol||0)*(+it.hs||0))}</strong></div></article>`).join('')||'<p class="mut">Belum ada rincian barang.</p>'}</div><div class="satria-mobile-hps-footer"><button class="g" data-act="additem" data-pid="${p.id}">+ Tambah Barang</button><strong>Total HPS: ${rp(H)}</strong><span class="${H>p.pagu?'bad':'mut'}">Pagu ${rp(p.pagu)} · Selisih ${rp(p.pagu-H)}</span></div>`;
-  }
-  window.__hpsVirtualData = p.items || [];
-  window.__hpsPaketId = p.id;
-  // SATRIA 3.0.40.1: virtual HPS helpers live in a separate module.
-  // Never schedule an unscoped call that can throw after any page re-render.
-  const activeHpsPaketId=String(p.id);
-  setTimeout(()=>{
-    const api=window.SATRIA_HPS_VIRTUAL;
-    const vp=document.getElementById('hpsVirtualViewport');
-    if(!vp || String(window.__hpsPaketId)!==activeHpsPaketId)return;
-    if(api && typeof api.attach==='function')api.attach();
-    else console.warn('[SATRIA] Virtual HPS belum siap; halaman tetap dapat digunakan.');
-  }, 50);
-  return summary+`
-    <div class="hps-virtual-table">
-      <div class="hps-virtual-header">
-        <div>Nama Produk</div><div class="n">Volume</div><div>Satuan</div><div class="n">Harga Satuan (Rp)</div><div class="n">Jumlah (Rp)</div><div>Aksi</div>
-      </div>
-      <div id="hpsVirtualViewport" class="hps-virtual-viewport" style="height: ${count>12 ? 'min(62vh, 520px)' : (count*52+20)+'px'};">
-        <div id="hpsVirtualSpacer" style="height:${count*52}px; position:relative;">
-          <div id="hpsVirtualContent" style="position:absolute; top:0; left:0; right:0;"></div>
-        </div>
-      </div>
-      ${count===0 ? '<div style="text-align:center;padding:22px" class="mut">Belum ada rincian produk. Klik "Tambah Produk" untuk mulai mengisi.</div>' : ''}
-    </div>
-    <div class="row" style="margin-top:12px;justify-content:space-between;align-items:center;flex-wrap:wrap">
-      <button class="g" data-act="additem" data-pid="${p.id}">+ Tambah Produk</button>
-      <div style="text-align:right"><b>Total HPS: ${rp(H)}</b><span class="mut"> · Pagu: ${rp(p.pagu)} · Selisih: </span><b class="${p.pagu-H>=0?'ok':'bad'}">${rp(p.pagu-H)}</b> <span class="mut">· ${count} item • virtual</span></div>
-    </div>
-    <p class="mut">Jumlah dihitung otomatis dari volume × harga satuan. Virtual scroll aktif: hanya ${Math.min(count, 14)} baris dirender dari ${count} item, hemat memori 80% di Android/iPhone.</p>
-  `;
+/* SATRIA 2026-11-09 — Rincian & HPS dengan draf eksplisit.
+   Input tidak memakai virtual scroll / type=number sehingga scroll dan blur
+   tidak mengubah volume atau menulis ke paket. Simpan dilakukan atomik. */
+const satriaHpsEditDrafts=new Map();
+function satriaHpsDraftKey(pid){
+ const uid=window.SATRIA_CLOUD_MEMBER?.id||('local:'+String(S?.ui?.user||'unknown'));
+ return JSON.stringify([String(uid),String(pid)]);
 }
-
+function satriaHpsCanEdit(p){
+ if(!p||!canWrite())return false;
+ const scope=activeCloudScope();
+ return !scope||(scope.opdIds.includes(String(p.opd))&&scope.years.includes(Number(p.tahun)));
+}
+function satriaHpsDraft(p){
+ const key=satriaHpsDraftKey(p.id);
+ if(!satriaHpsEditDrafts.has(key))satriaHpsEditDrafts.set(key,{
+   baseline:JSON.stringify(p.items||[]),
+   items:(p.items||[]).map(i=>({...i,vol:Number.isFinite(Number(i.vol))&&!Number.isInteger(Number(i.vol))?String(i.vol).replace('.',','):String(i.vol??''),hs:String(i.hs??'')})),
+   dirty:false
+ });
+ return satriaHpsEditDrafts.get(key);
+}
+function satriaHpsDraftPending(){return [...satriaHpsEditDrafts.values()].some(d=>d.dirty);}
+function satriaHpsDraftVolume(value){
+ const raw=String(value??'').trim().replace(/\s/g,'');
+ // Format Indonesia: 4.849 = 4849 barang; 1,5 = satu setengah.
+ if(/^\d{1,3}(?:\.\d{3})+(?:,\d+)?$/.test(raw))return Number(raw.replace(/\./g,'').replace(',','.'));
+ if(/^\d+(?:,\d+)?$/.test(raw))return Number(raw.replace(',','.'));
+ if(/^\d+\.\d{1,2}$/.test(raw))return Number(raw);
+ return NaN;
+}
+function satriaHpsDraftHarga(value){
+ const raw=String(value??'').trim().replace(/^Rp\s*/i,'').replace(/\s/g,'');
+ if(!/^(?:\d+|\d{1,3}(?:\.\d{3})+)$/.test(raw))return NaN;
+ return Number(raw.replace(/\./g,''));
+}
+function satriaHpsDraftTotals(d){
+ let total=0;
+ for(const it of d.items){
+  const qty=satriaHpsDraftVolume(it.vol),price=satriaHpsDraftHarga(it.hs);
+  if(!Number.isFinite(qty)||!Number.isSafeInteger(price)||qty<=0||price<=0)return null;
+  total+=qty*price;
+ }
+ return Number.isSafeInteger(Math.round(total))?total:null;
+}
+function satriaHpsDraftMarkup(p){
+ const d=satriaHpsDraft(p),count=d.items.length,H=hps(p),preview=satriaHpsDraftTotals(d);
+ const editable=satriaHpsCanEdit(p);
+ const diff=(+p.pagu||0)-H;
+ const field=(it,name,label,value,mode='text')=>`<label class="satria-hps-field satria-hps-${name}"><span>${label}</span><input type="text" inputmode="${mode}" autocomplete="off" data-hps-edit="1" data-pid="${esc(p.id)}" data-id="${esc(it.id)}" data-f="${name}" aria-label="${label}" value="${esc(value)}" ${editable?'':'disabled'}></label>`;
+ const rows=d.items.map((it,index)=>{
+  const qty=satriaHpsDraftVolume(it.vol),price=satriaHpsDraftHarga(it.hs);
+  const subtotal=Number.isFinite(qty)&&Number.isFinite(price)?rp(qty*price):'—';
+  return `<div class="satria-hps-entry" data-hps-row="${esc(it.id)}">
+    <strong class="satria-hps-num">${index+1}</strong>
+    ${field(it,'nama','Nama barang',it.nama||'')}
+    ${field(it,'vol','Volume',it.vol??'','decimal')}
+    ${field(it,'satuan','Satuan',it.satuan||'')}
+    ${field(it,'hs','HPS satuan (Rp)',it.hs===undefined?'':String(it.hs).match(/^\d+$/)?nf(it.hs):it.hs,'numeric')}
+    <span class="satria-hps-subtotal" data-hps-subtotal="${esc(it.id)}">${subtotal}</span>
+    <button type="button" class="d satria-hps-remove" data-act="hpsdraftdel" data-pid="${esc(p.id)}" data-id="${esc(it.id)}" ${editable?'':'disabled'} title="Tandai barang untuk dihapus setelah Simpan">Hapus</button>
+   </div>`;
+ }).join('');
+ return `<section class="satria342-section-intro" aria-label="Ringkasan rincian dan HPS"><div class="satria342-intro-text"><span class="satria342-eyebrow">TAHAP 02 / RINCIAN & HPS</span><h3>Susun kebutuhan barang</h3><p>Isi semua barang dahulu, lalu klik <b>Simpan Semua Rincian</b>. Angka tersimpan, negosiasi dan dokumen tidak berubah selama masih berupa draf.</p></div><div class="satria342-stat-grid"><div><small>Barang tersimpan</small><strong>${p.items.length}</strong></div><div><small>HPS tersimpan</small><strong>${rp(H)}</strong></div><div class="${diff<0?'satria342-over-budget':''}"><small>${diff<0?'Melebihi pagu':'Sisa pagu'}</small><strong>${rp(Math.abs(diff))}</strong></div></div></section>
+ <section class="satria-hps-draft" data-hps-draft="${esc(p.id)}">
+  <div class="satria-hps-draft-intro"><div><strong>Isi rincian — ${count} barang</strong><p>Baris tidak dibuat ulang saat digeser. Volume tidak berubah dengan roda mouse. Contoh: 4.849 (ribuan), 1,5 (pecahan). Gunakan Tab untuk berpindah kolom.</p></div><span class="pill" data-hps-status aria-live="polite">${d.dirty?'● Ada isian belum disimpan':'✓ Semua rincian tersimpan'}</span></div>
+  <div class="satria-hps-scroller" role="region" aria-label="Daftar isian rincian kebutuhan dan HPS" tabindex="0"><div class="satria-hps-grid-head"><span>No.</span><span>Nama barang</span><span>Volume</span><span>Satuan</span><span>HPS satuan</span><span>Jumlah</span><span>Aksi</span></div>${rows||'<p class="mut" style="padding:16px">Belum ada barang. Klik Tambah Barang untuk mulai.</p>'}</div>
+  <div class="satria-hps-draft-bottom"><div class="satria-hps-actions"><button type="button" class="g" data-act="hpsdraftadd" data-pid="${esc(p.id)}" ${editable?'':'disabled'}>+ Tambah Barang</button><button type="button" data-act="hpsdraftsave" data-pid="${esc(p.id)}" ${editable?'':'disabled'}>Simpan Semua Rincian</button><button type="button" class="g" data-act="hpsdraftdiscard" data-pid="${esc(p.id)}" ${editable?'':'disabled'}>Batalkan Perubahan</button></div><div class="satria-hps-preview"><small>Total sementara (belum tersimpan)</small><strong data-hps-preview>${preview===null?'Lengkapi volume & HPS':rp(preview)}</strong><small>Pagu: ${rp(p.pagu)} · ${count} barang</small></div></div>
+  <p class="mut satria-hps-guidance">Perubahan baru memengaruhi HPS, penawaran, dan dokumen setelah <b>Simpan Semua Rincian</b>. Isian yang belum disimpan dipertahankan saat berpindah tab di sesi ini; memuat ulang/menutup browser akan membuang draf.</p>
+ </section>`;
+}
+function fItems(p){return satriaHpsDraftMarkup(p);}
+function satriaHpsDraftSave(p){
+ if(!satriaHpsCanEdit(p)){toast('Tidak memiliki izin menyimpan rincian paket ini.');return false;}
+ const d=satriaHpsEditDrafts.get(satriaHpsDraftKey(p.id));if(!d||!d.dirty){toast('Tidak ada perubahan rincian untuk disimpan.');return false;}
+ if(JSON.stringify(p.items||[])!==d.baseline){toast('Data rincian paket sudah berubah dari sumber lain. Periksa lalu batalkan draf untuk memuat data terbaru.');return false;}
+ const seen=new Set(),next=[];
+ for(let i=0;i<d.items.length;i++){
+  const r=d.items[i],nama=String(r.nama||'').trim(),satuan=String(r.satuan||'').trim(),vol=satriaHpsDraftVolume(r.vol),hs=satriaHpsDraftHarga(r.hs);
+  if(!r.id||seen.has(String(r.id))){toast('ID barang tidak valid/duplikat. Penyimpanan dibatalkan.');return false;}seen.add(String(r.id));
+  if(!nama||!satuan||!Number.isFinite(vol)||vol<=0||!Number.isSafeInteger(hs)||hs<=0){toast('Barang '+(i+1)+': isi nama, satuan, volume positif dan HPS satuan positif yang valid.');return false;}
+  if(!Number.isSafeInteger(Math.round(vol*hs))){toast('Barang '+(i+1)+': total melebihi batas angka aman.');return false;}
+  next.push({...r,nama,satuan,vol,hs});
+ }
+ const guard=satriaRupUjiPerubahanRincian(p,next);
+ if(!guard.ok){toast('Rincian belum disimpan: '+guard.msg);return false;}
+ const removed=(p.items||[]).filter(i=>!seen.has(String(i.id)));
+ if(!next.length&&removed.length&&!confirm('Semua barang pada paket ini akan dihapus setelah disimpan. Lanjutkan?'))return false;
+ const hasHistory=!!p.pemenangId||(p.penawaran||[]).some(w=>
+   Object.values(w.harga||{}).some(x=>Number(x)>0)||Object.values(w.nego||{}).some(x=>Number(x)>0));
+ if(hasHistory&&!confirm('Paket ini sudah memiliki harga penawaran atau negosiasi. Menyimpan rincian dapat mengubah hasil perhitungan HPS, indikator, dan dokumen paket INI. Paket lain tidak diubah. Lanjutkan setelah memeriksa backup dan angka historis?'))return false;
+ const priced=removed.filter(i=>(p.penawaran||[]).some(w=>[w.harga,w.nego,w.negoDetails,w.catalogRefs].some(m=>m&&Object.prototype.hasOwnProperty.call(m,i.id))));
+ if(priced.length&&!confirm('Ada '+priced.length+' barang yang telah memiliki data penawaran/negosiasi. Menghapusnya akan menghapus juga harga dan referensi terkait barang tersebut. Lanjutkan menyimpan penghapusan?'))return false;
+ const result=SATRIA.tx('items','Simpan seluruh rincian & HPS paket '+String(p.rup||p.id),()=>{
+  p.items=next;
+  for(const it of removed)for(const w of (p.penawaran||[]))for(const field of ['harga','nego','negoDetails','catalogRefs'])if(w[field])delete w[field][it.id];
+  return true;
+ });
+ if(result===null)return false;
+ satriaHpsEditDrafts.delete(satriaHpsDraftKey(p.id));
+ render();
+ return true;
+}
 /* SATRIA 3.0.49 — Tabel Harga Nego = harga SEBELUM PPN per unit.
    Mesin akuntansi lama dan dokumen tetap menyimpan nominal BRUTO di w.nego;
    rinciannya wajib dapat direkonsiliasi dari kalkulator/Smart Survey.
@@ -2638,7 +2701,7 @@ function render(){
  if(S.ui.rupManualSkipCapture)S.ui.rupManualSkipCapture=false;
  else rupManualCapture();
  const u=S.ui;
- $('#hPemda').innerHTML='SATRIA <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">NEXT · 3.0.59.39</span>';
+ $('#hPemda').innerHTML='SATRIA <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">NEXT · 3.0.59.43</span>';
  $('#hSub').innerHTML='<span style="font-weight:600;letter-spacing:-0.01em">Government work, in flow.</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px;opacity:.8">Simple • Connected • Accountable</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px">'+(u.opd==='all'?'Multi OPD • Multi Tahun':esc(O(u.opd).nama))+'</span>';
  $('#dirty').textContent=S.persistError?'⚠ Gagal menyimpan':(S.dirty?'● Perubahan belum di-backup':'✔ Tidak ada perubahan baru');$('#dirty').title=S.persistError||'Penyimpanan lokal dan backup file adalah dua hal berbeda';$('#dirty').style.background=S.persistError?'#FEE2E2':(S.dirty?'#F59E0B':'rgba(15,118,110,.14)'); $('#dirty').style.color=S.persistError?'#991B1B':(S.dirty?'#78350f':'#0F766E');
  $('#selTahun').innerHTML=S.tahun.map(t=>`<option value="${Number(t)}" ${Number(t)===Number(u.tahun)?'selected':''}>${Number(t)}</option>`).join('');
@@ -2923,8 +2986,27 @@ document.addEventListener('click',e=>{
   if(PERAN[d.m]){const pr=PERAN[d.m];row.peran=pr;row.aktif=true;row.jabatan=row.jabatan||JAB[pr];row.opd=row.opd||S.opd[0].id;S.pejabat.push(row);sync('master','Pejabat ditambahkan: '+row.nama);return render()}
   S[d.m].push(row);sync('master','Data master ditambahkan');return render()}
  if(a==='dtype'){const jump=!!t.closest('.spha-quick')&&d.tab==='analisa';S.ui.dok=d.tab;render();if(jump)requestAnimationFrame(()=>document.querySelector('#dokLazyContainer')?.scrollIntoView({block:'start',behavior:'smooth'}));return}
- if(a==='additem'){P(pid).items.push({id:uid('i'),nama:'',spesifikasi:'',merek:'',pdn:'Perlu verifikasi',linkProduk:'',vol:1,satuan:'Buah',hs:0});sync('items','Produk ditambahkan');return render()}
- if(a==='delitem'){if(!confirm('Hapus barang ini?'))return;const p=P(pid);p.items=p.items.filter(i=>i.id!==id);p.penawaran.forEach(w=>{delete w.harga[id];delete w.nego[id]});sync('items','Barang dihapus');return render()}
+ if(a==='hpsdraftadd'||a==='additem'){
+  const p=P(pid);if(!satriaHpsCanEdit(p))return;
+  const draft=satriaHpsDraft(p),iid=uid('i');
+  draft.items.push({id:iid,nama:'',spesifikasi:'',merek:'',pdn:'Perlu verifikasi',linkProduk:'',vol:'',satuan:'Buah',hs:''});
+  draft.dirty=true;render();requestAnimationFrame(()=>{const el=[...document.querySelectorAll('[data-hps-edit][data-f="nama"]')].find(x=>x.dataset.id===iid);el?.scrollIntoView({block:'nearest'});el?.focus()});return;
+ }
+ if(a==='hpsdraftdel'||a==='delitem'){
+  const p=P(pid);if(!satriaHpsCanEdit(p))return;
+  const draft=satriaHpsDraft(p),it=draft.items.find(x=>String(x.id)===String(id));if(!it)return;
+  if(!confirm('Hapus barang "'+String(it.nama||'baru')+'" dari draf? Data asli baru berubah setelah Simpan Semua Rincian.'))return;
+  draft.items=draft.items.filter(x=>String(x.id)!==String(id));draft.dirty=true;return render();
+ }
+ if(a==='hpsdraftdiscard'){
+  const draft=satriaHpsEditDrafts.get(satriaHpsDraftKey(pid));if(!draft)return;
+  if(draft.dirty&&!confirm('Batalkan seluruh isian rincian yang belum disimpan?'))return;
+  satriaHpsEditDrafts.delete(satriaHpsDraftKey(pid));return render();
+ }
+ if(a==='hpsdraftsave'){
+  const p=P(pid);if(!satriaHpsCanEdit(p)){toast('Akun ini tidak dapat mengubah rincian paket.');return;}
+  satriaHpsDraftSave(p);return;
+ }
 
  if(a==='correctOfferProvider'){
    if(!canWrite()){toast('Akun Viewer tidak dapat mengubah penyedia penawaran.');return}
@@ -3022,6 +3104,24 @@ document.addEventListener('click',e=>{
  if(a==='csvDetail')return satriaLaporanCsvDetail();
  if(a==='export'){const o={...S};delete o.ui;delete o.log;delete o.dirty;delete o.chat;const u=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:'application/json'}));const l=document.createElement('a');l.href=u;l.download='SATRIA-backup-'+new Date().toISOString().slice(0,10)+'.json';l.click();setTimeout(()=>URL.revokeObjectURL(u),1500);return render()}
 });
+/* Form rincian: capture langsung saat mengetik, tanpa merender ulang atau auto-sync. */
+document.addEventListener('input',e=>{
+ const t=e.target;if(!t?.matches?.('[data-hps-edit]'))return;
+ const p=P(t.dataset.pid);if(!satriaHpsCanEdit(p))return;
+ const d=satriaHpsDraftsGet(p);if(!d)return;
+ const it=d.items.find(x=>String(x.id)===String(t.dataset.id));
+ if(!it||!['nama','vol','satuan','hs'].includes(t.dataset.f))return;
+ it[t.dataset.f]=t.value;d.dirty=true;
+ const wrap=t.closest('[data-hps-draft]');
+ const status=wrap?.querySelector('[data-hps-status]');if(status)status.textContent='● Ada isian belum disimpan';
+ const preview=wrap?.querySelector('[data-hps-preview]');const total=satriaHpsDraftTotals(d);
+ if(preview)preview.textContent=total===null?'Lengkapi volume & HPS':rp(total);
+ const row=wrap?.querySelector('[data-hps-row="'+CSS.escape(String(it.id))+'"]');
+ const rowSubtotal=row?.querySelector('[data-hps-subtotal]');
+ const qty=satriaHpsDraftVolume(it.vol),price=satriaHpsDraftHarga(it.hs);
+ if(rowSubtotal)rowSubtotal.textContent=Number.isFinite(qty)&&Number.isFinite(price)?rp(qty*price):'—';
+},true);
+function satriaHpsDraftsGet(p){return satriaHpsEditDrafts.get(satriaHpsDraftKey(p.id));}
 let paketSearchTimer=null;
 /* Draf review ditangkap sebelum event generik atau refresh tampilan. */
 document.addEventListener('input',e=>{
@@ -3050,6 +3150,7 @@ document.addEventListener('input',event=>{
 });
 document.addEventListener('change',e=>{
  const t=e.target,d=t.dataset;
+ if(t.matches?.('[data-hps-edit]'))return; // Hanya tombol Simpan Semua Rincian yang menulis data.
  // Review historis ditangani oleh kontrol sendiri, tanpa menggambar ulang semua input.
  if(t.matches?.('[data-hps-review-reason],[data-hps-review-evidence],[data-hps-review-check]'))return;
  if(t.matches?.('[data-provider-correction-target],[data-provider-correction-reason],[data-provider-correction-evidence],[data-provider-correction-confirm]'))return;
@@ -3137,7 +3238,7 @@ document.addEventListener('change',e=>{
  else if(d.col){const r=S[d.col].find(x=>x.id===d.id);if(r){r[d.f]=t.value;sync(d.col==='opd'?'settings':'master','Master: '+d.col)}}
  render();
 });
-window.addEventListener('hashchange',route);window.addEventListener('beforeunload',e=>{if(S.dirty){e.preventDefault();e.returnValue=''}});
+window.addEventListener('hashchange',route);window.addEventListener('beforeunload',e=>{if(S.dirty||satriaHpsDraftPending()){e.preventDefault();e.returnValue=''}});
 /* ===== PENYIMPANAN: Dexie.js (IndexedDB) atau memori sesi ===== */
 let DB=null,ENGINE='memory',pTimer=null,persistRevision=0,lastPersistedRevision=0;
 let satriaLocalBaseStamp=null,satriaLocalConflict=false;
