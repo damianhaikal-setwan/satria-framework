@@ -133,3 +133,58 @@
 /* Prioritas atas aturan tombol global Gen Z: batang adalah kontrol transparan, bukan CTA solid. */
 #main .satria-lv button.satria-lv-barline,#main .satria-lv button.satria-lv-auditline{background:transparent!important;color:var(--lv-ink)!important;border:1px solid transparent!important;box-shadow:none!important}
 #main .satria-lv button.satria-lv-barline:hover,#main .satria-lv button.satria-lv-auditline:hover{background:color-mix(in srgb,var(--lv-purple) 7%,transparent)!important;border-color:var(--lv-stroke)!important}
+
+
+/* SATRIA NEXT 3.0.59.51 — Laporan integrated shell. Scope khusus #satriaLaporanShell;
+   hide legacy stacks outside active tab so production has same hierarchy as preview. */
+#main #satriaLaporanShell{--lap-ink:var(--ink,#1c2040);--lap-muted:var(--mut,#647087);--lap-border:var(--bd,#e0e4ef);--lap-surface:var(--card-solid,#fff);color:var(--lap-ink);max-width:100%;min-width:0;margin:0 auto 22px}
+#satriaLaporanShell *{box-sizing:border-box}
+#satriaLaporanShell [hidden]{display:none!important}
+#satriaLaporanShell .satria-lap-topline{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px;margin:0 1px 14px;color:var(--lap-muted);font-size:11px;font-weight:750;letter-spacing:.06em}
+#satriaLaporanShell .satria-lap-topline>div{display:flex;align-items:center;gap:9px}
+#satriaLaporanShell .satria-lap-topline-icon{display:grid;place-items:center;width:27px;height:27px;border-radius:9px;background:#eceaff;color:#5245ce;font-size:17px}
+#satriaLaporanShell .satria-lap-topline-status{letter-spacing:0;font-weight:550;font-size:11px}
+#satriaLaporanShell .satria-lap-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:7px;margin-bottom:16px;background:var(--lap-surface);border:1px solid var(--lap-border);border-radius:19px;box-shadow:0 4px 17px #151b3610}
+#main #satriaLaporanShell button.satria-lap-nav-item{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left;min-height:67px;min-width:0;padding:11px 15px;border-radius:13px!important;border:1px solid transparent!important;background:transparent!important;color:var(--lap-ink)!important;box-shadow:none!important;transition:background .15s ease,border-color .15s ease}
+#main #satriaLaporanShell button.satria-lap-nav-item:hover{background:color-mix(in srgb,#6b60ed 7%,var(--lap-surface))!important}
+#main #satriaLaporanShell button.satria-lap-nav-item.is-active{background:linear-gradient(115deg,#29246e,#5c4be7)!important;color:#fff!important;border-color:#6155d2!important;box-shadow:0 5px 16px #4237b325!important}
+#satriaLaporanShell .satria-lap-nav-item b{font-size:13px;font-weight:850;line-height:1.3;letter-spacing:-.01em}
+#satriaLaporanShell .satria-lap-nav-item small{font-size:10px;line-height:1.4;opacity:.72;font-weight:550;margin-top:3px}
+#satriaLaporanShell .satria-lap-nav-item.is-active small{opacity:.85}
+#satriaLaporanShell .satria-lap-nav-item:focus-visible{outline:3px solid #7a6bf3;outline-offset:2px}
+#satriaLaporanShell .satria-lap-tab-panel{min-width:0;max-width:100%}
+#satriaLaporanShell .satria-lv-hero{box-shadow:0 12px 32px #241d6626}
+#satriaLaporanShell .satria-lv-panel,#satriaLaporanShell .satria-lv-kpi{box-shadow:0 7px 25px #191d3610}
+#main #satriaLaporanShell .satria-rek,#main #satriaLaporanShell .satria-lap-audit,#main #satriaLaporanShell [data-satria-laporan="integrated"]{background:var(--lap-surface)!important;border:1px solid var(--lap-border)!important;border-radius:22px!important;box-shadow:0 8px 27px #161b3710!important;padding:24px!important;margin-bottom:15px}
+#satriaLaporanShell .satria-rek-heading{padding-bottom:18px;border-bottom:1px solid var(--lap-border);margin-bottom:16px}
+#satriaLaporanShell .satria-rek-heading h3,#satriaLaporanShell [data-satria-laporan="integrated"] h3{font-size:clamp(20px,2vw,26px);font-weight:850;line-height:1.22;letter-spacing:-.03em;margin:5px 0 9px}
+#satriaLaporanShell .satria-rek-heading p{font-size:12px;line-height:1.7;max-width:780px}
+#satriaLaporanShell .satria-rek-eyebrow{font-size:10px;letter-spacing:.15em;color:#6558e6}
+#satriaLaporanShell .satria-rek-filter{border:1px solid var(--lap-border);border-radius:17px;background:color-mix(in srgb,var(--lap-surface) 90%,#7672e4);padding:15px;margin:14px 0 17px}
+#satriaLaporanShell .satria-rek-filter label,#satriaLaporanShell .satria-lap-audit-toolbar label{font-size:11px;line-height:1.45}
+#satriaLaporanShell .satria-rek-filter input,#satriaLaporanShell .satria-rek-filter select,#satriaLaporanShell .satria-lap-audit-toolbar select{min-height:43px;border-radius:10px}
+#satriaLaporanShell .satria-rek-kpi{gap:11px;margin-bottom:18px}
+#satriaLaporanShell .satria-rek-kpi>div{background:var(--lap-surface);border:1px solid var(--lap-border);border-radius:16px;padding:16px;box-shadow:0 4px 12px #13173507}
+#satriaLaporanShell .satria-rek-kpi>div.satria-rek-kpi-key{border-left:4px solid #6558e6;background:color-mix(in srgb,var(--lap-surface) 94%,#6152e9)}
+#satriaLaporanShell .satria-rek-kpi b{font-size:clamp(14px,1.5vw,21px);letter-spacing:-.02em}
+#satriaLaporanShell .satria-rek h4{font-size:14px;font-weight:850;margin:24px 0 11px;letter-spacing:-.01em}
+#satriaLaporanShell .satria-rek-scroll,#satriaLaporanShell .satria-lap-table-scroll{border-radius:14px;box-shadow:0 3px 10px #151b3608}
+#satriaLaporanShell .satria-rek-scroll tbody tr:hover,#satriaLaporanShell .satria-lap-table-scroll tbody tr:hover{background:color-mix(in srgb,#776cef 6%,transparent)}
+#satriaLaporanShell .satria-rek-scroll th,#satriaLaporanShell .satria-lap-table-scroll th{font-size:10px;letter-spacing:.035em;text-transform:uppercase;white-space:nowrap}
+#satriaLaporanShell .satria-lap-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#main #satriaLaporanShell .satria-lap-metric{margin:0;padding:17px;min-width:0;background:var(--lap-surface)!important;border:1px solid var(--lap-border)!important;border-radius:16px!important}
+#satriaLaporanShell .satria-lap-label{font-size:11px;line-height:1.4}
+#satriaLaporanShell .satria-lap-value{font-size:clamp(16px,1.75vw,23px);letter-spacing:-.02em;overflow-wrap:anywhere}
+#satriaLaporanShell .satria-lap-note{font-size:10px;line-height:1.5}
+#satriaLaporanShell .satria-lap-audit .satria-rek-kpi{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1000px){#satriaLaporanShell .satria-lap-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:740px){#satriaLaporanShell .satria-lap-nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:5px;border-radius:14px}#main #satriaLaporanShell button.satria-lap-nav-item{min-height:57px;padding:10px}#satriaLaporanShell .satria-lap-nav-item b{font-size:12px}#satriaLaporanShell .satria-lap-topline-status{font-size:10px}#main #satriaLaporanShell .satria-rek,#main #satriaLaporanShell .satria-lap-audit,#main #satriaLaporanShell [data-satria-laporan="integrated"]{padding:16px!important;border-radius:17px!important}#satriaLaporanShell .satria-rek-kpi,#satriaLaporanShell .satria-lap-audit .satria-rek-kpi{grid-template-columns:repeat(2,minmax(0,1fr))}#satriaLaporanShell .satria-lap-metrics{grid-template-columns:1fr}}
+@media print{#satriaLaporanShell .satria-lap-nav,#satriaLaporanShell .satria-lap-topline{display:none!important}#satriaLaporanShell [role="tabpanel"][hidden]{display:none!important}}
+/* Global heading rules carry !important; hero uses its own white text on dark surface. */
+#main #satriaLaporanShell .satria-lv-hero h2{color:#fff!important;text-shadow:none!important}
+#main #satriaLaporanShell .satria-lv-hero p{color:#e9e7ff!important}
+/* Jika pengguna mencetak tab Dashboard yang aktif, jangan hasilkan halaman kosong. */
+@media print{
+ #main #satriaLaporanShell .satria-lv{display:block!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ #main #satriaLaporanShell .satria-lv-panel,#main #satriaLaporanShell .satria-lv-kpi{break-inside:avoid}
+}
