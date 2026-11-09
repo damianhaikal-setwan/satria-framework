@@ -87,27 +87,16 @@
 .spha-audit-paper .spha-conclusion{break-inside:avoid;page-break-inside:avoid;min-height:80px}
 .spha-audit-paper .spha-sign{display:block;width:43%;max-width:320px;margin-left:auto;text-align:left;margin-top:8px}
 .spha-audit-paper .spha-sign-space{height:54px}
-.spha-audit-paper .spha-photo-sheet{break-before:page;page-break-before:always;break-inside:avoid;page-break-inside:avoid}
-.spha-audit-paper .spha-photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.spha-audit-paper .spha-photo-card{border:1px solid #aaa;break-inside:avoid;page-break-inside:avoid;padding:7px;display:flex;flex-direction:column;min-width:0}
-.spha-audit-paper .spha-photo-frame{height:120px;display:flex;justify-content:center;align-items:center;min-width:0;overflow:hidden;background:#f8fafc}
-.spha-audit-paper .spha-photo-frame img{max-width:100%;max-height:115px;object-fit:contain;display:block}
 .spha-audit-paper .spha-photo-frame.spha-photo-missing:before{content:'Foto tidak dapat ditampilkan. Periksa kembali file tersimpan.';font-size:9px;text-align:center;color:#555}
 .spha-audit-paper .spha-photo-info{display:grid;gap:4px;margin-top:7px;line-height:1.25}
 .spha-audit-paper .spha-photo-info b{font-size:10px;overflow-wrap:anywhere}
 .spha-audit-paper .spha-photo-info span{font-size:9.5px}
 .spha-audit-paper .spha-photo-info small{font-size:9px;color:#475569}
-@media screen and (max-width:660px){.spha-audit-paper .spha-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media print {
  #satria-print-root .doc[data-document-type="analisa"] .spha-doc-title{font-size:13pt!important}
  #satria-print-root .doc[data-document-type="analisa"] .spha-price-detail{table-layout:fixed!important}
  #satria-print-root .doc[data-document-type="analisa"] .spha-price-detail :is(th,td){font-size:8pt!important;line-height:1.2!important;padding:4px!important}
  #satria-print-root .doc[data-document-type="analisa"] .spha-recap :is(th,td){font-size:8.5pt!important;line-height:1.25!important;padding:4px!important}
- #satria-print-root .doc[data-document-type="analisa"] .spha-photo-sheet{break-before:page!important;page-break-before:always!important}
- #satria-print-root .doc[data-document-type="analisa"] .spha-photo-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:3mm!important}
- #satria-print-root .doc[data-document-type="analisa"] .spha-photo-card{padding:2mm!important;break-inside:avoid!important}
- #satria-print-root .doc[data-document-type="analisa"] .spha-photo-frame{height:40mm!important}
- #satria-print-root .doc[data-document-type="analisa"] .spha-photo-frame img{max-height:38mm!important}
  #satria-print-root .doc[data-document-type="analisa"] .spha-sign-space{height:17mm!important}
 }
 
@@ -135,7 +124,6 @@
 .spha-example-paper .spha-example-summary p{margin:4px 0}
 .spha-example-paper .spha-example-history{font-style:italic;font-size:9px}
 .spha-example-paper .spha-sign{margin-left:auto;text-align:left;max-width:250px;width:42%}
-.spha-example-paper .spha-photo-sheet{break-before:page;page-break-before:always}
 @media print{
  #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper h3{font-size:10pt!important;margin:11px 0 5px!important}
  #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper p,
@@ -144,7 +132,6 @@
  #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-identity td{font-size:9pt!important;padding:1.3px 3px!important}
  #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper :is(.spha-example-needs,.spha-example-compare) :is(th,td){font-size:8pt!important;padding:3px!important;line-height:1.22!important}
  #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-item p{font-size:8.8pt!important}
- #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-photo-sheet{break-before:page!important;page-break-before:always!important}
 }
 
 .spha-example-paper .spha-example-item p{margin:2px 0!important}.spha-example-paper .spha-example-item b{font-weight:700}
@@ -202,3 +189,64 @@
 #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-needs :is(th,td),
 #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-compare :is(th,td){border:1px solid #333!important}
 #satria-print-root .doc[data-document-type="analisa"] .spha-example-paper .spha-example-compare :is(th,td){vertical-align:top!important}
+
+
+/* v3.0.59.46 — Analisa: isolate the report cover from the application's global
+   header layout; use page-width metadata, not flex/sticky navigation styles. */
+.doc[data-document-type="analisa"] .spha-example-paper,
+.doc[data-document-type="analisa"] .spha-example-cover{width:100%!important;max-width:100%!important;min-width:0!important}
+.doc[data-document-type="analisa"] .spha-example-cover{
+ display:block!important;position:static!important;top:auto!important;z-index:auto!important;
+ height:auto!important;min-height:0!important;max-height:none!important;
+ padding:0!important;margin:0!important;border:0!important;border-radius:0!important;
+ box-shadow:none!important;transform:none!important;backdrop-filter:none!important;
+ overflow:visible!important;background:#fff!important;
+}
+.doc[data-document-type="analisa"] .spha-example-cover>.kop{
+ display:block!important;position:static!important;width:100%!important;max-width:100%!important;
+ height:auto!important;min-height:0!important;margin:0 0 9px!important;padding:0 0 5px!important;
+ overflow:hidden!important;
+}
+.doc[data-document-type="analisa"] .spha-example-cover>.kop-image img{
+ display:block!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;
+ height:auto!important;max-height:37mm!important;object-fit:contain!important;object-position:center!important;
+}
+.doc[data-document-type="analisa"] .spha-example-cover .spha-doc-title{display:block!important;clear:both!important;margin:9px 0 11px!important}
+.doc[data-document-type="analisa"] .spha-example-identity{
+ width:100%!important;max-width:100%!important;table-layout:fixed!important;margin:6px 0 12px!important;
+}
+.doc[data-document-type="analisa"] .spha-example-identity th,
+.doc[data-document-type="analisa"] .spha-example-identity td{
+ max-width:100%!important;overflow-wrap:anywhere!important;word-break:normal!important;
+ vertical-align:top!important;
+}
+.doc[data-document-type="analisa"] .spha-example-identity col:nth-child(1){width:23%!important}
+.doc[data-document-type="analisa"] .spha-example-identity col:nth-child(2){width:3%!important}
+.doc[data-document-type="analisa"] .spha-example-identity col:nth-child(3){width:74%!important}
+
+/* Flow photo evidence continuously rather than imposing a new page every six.
+   Print cards in paired rows; keep each image and its caption together. */
+.spha-example-paper .spha-photo-sheet{break-before:page;page-break-before:always;break-inside:auto!important;page-break-inside:auto!important}
+.spha-example-paper .spha-photo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:9px}
+.spha-example-paper .spha-photo-card{display:flex;flex-direction:column;border:1px solid #aaa;padding:7px}
+.spha-example-paper .spha-photo-frame{display:flex;justify-content:center;align-items:center;min-width:0;overflow:hidden;background:#f8fafc}
+@media screen and (max-width:520px){.spha-example-paper .spha-photo-grid{grid-template-columns:1fr}}
+.spha-example-paper .spha-photo-card{min-width:0;max-width:100%;break-inside:avoid;page-break-inside:avoid}
+.spha-example-paper .spha-photo-frame{height:180px;min-width:0}
+.spha-example-paper .spha-photo-frame img{width:auto;max-width:100%;max-height:176px;object-fit:contain}
+@media print{
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-cover{display:block!important;position:static!important;height:auto!important;min-height:0!important;grid-template-columns:none!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-cover>.kop-image img{max-width:100%!important;max-height:37mm!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-example-identity{table-layout:fixed!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-photo-sheet{break-before:page!important;page-break-before:always!important;break-inside:auto!important;page-break-inside:auto!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-photo-grid{display:block!important;font-size:0!important;line-height:0!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-photo-card{
+  display:inline-flex!important;vertical-align:top!important;box-sizing:border-box!important;
+  width:48.4%!important;max-width:48.4%!important;margin:0 1.6% 2.5mm 0!important;padding:1.5mm!important;
+  font-size:9pt!important;line-height:1.22!important;break-inside:avoid!important;page-break-inside:avoid!important;
+ }
+ #satria-print-root .doc[data-document-type="analisa"] .spha-photo-frame{height:33mm!important;min-height:33mm!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-photo-frame img{width:auto!important;height:auto!important;max-width:100%!important;max-height:32mm!important;object-fit:contain!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-photo-info{margin-top:1.5mm!important;gap:1mm!important}
+ #satria-print-root .doc[data-document-type="analisa"] .spha-photo-info :is(b,span,small){line-height:1.22!important;overflow-wrap:anywhere!important}
+}

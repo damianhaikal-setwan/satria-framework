@@ -225,9 +225,10 @@ function productPhotoAppendix(a){
  const entries=[];
  const ordered=[...(a.winner?[a.winner]:[]),...a.offers.filter(o=>o.id!==a.winner?.id)];
  for(const o of ordered)for(const d of o.detail){const image=safeImage(d.img);if(!image)continue;entries.push({o,d,image});}
- if(!entries.length)return ''; // PDF contoh berakhir dengan tanda tangan bila tidak ada foto asli.
- const chunks=[];for(let i=0;i<entries.length;i+=6)chunks.push(entries.slice(i,i+6));
- return chunks.map((group,page)=>`<section class="spha-photo-sheet"><h3>Lampiran Foto Barang${chunks.length>1?' — '+(page+1)+'/'+chunks.length:''}</h3><p>Foto produk yang dicatat dalam Penawaran &amp; Negosiasi; ditampilkan menurut penyedia dan barang. Periksa kembali kesesuaian foto dengan produk pada sumber aslinya.</p><div class="spha-photo-grid">${group.map(({o,d,image})=>`<article class="spha-photo-card"><div class="spha-photo-frame"><img src="${escLocal(image)}" alt="Foto ${escLocal(d.item)} dari ${escLocal(o.name)}" loading="eager" decoding="sync" onerror="this.style.display='none';this.parentElement.classList.add('spha-photo-missing')"></div><div class="spha-photo-info"><b>${escLocal(d.item)}</b><span>${escLocal(o.name)}${a.winner?.id===o.id?' — Penyedia terpilih':''}</span><small>${escLocal(d.refName||'Nama produk belum dicatat')}</small><small>Harga tayang: ${rpLocal(d.listedUnit)}</small></div></article>`).join('')}</div></section>`).join('');
+ if(!entries.length)return ''; // Never fabricate photos for a document.
+ // One flowing appendix: the browser paginates rows as needed. Fixed six-photo
+ // page breaks used to leave large unused areas on every sheet.
+ return `<section class="spha-photo-sheet"><h3>Lampiran Foto Barang</h3><p>Foto produk yang dicatat dalam Penawaran &amp; Negosiasi; ditampilkan menurut penyedia dan barang. Periksa kembali kesesuaian foto dengan produk pada sumber aslinya.</p><div class="spha-photo-grid">${entries.map(({o,d,image})=>`<article class="spha-photo-card"><div class="spha-photo-frame"><img src="${escLocal(image)}" alt="Foto ${escLocal(d.item)} dari ${escLocal(o.name)}" loading="eager" decoding="sync" onerror="this.style.display='none';this.parentElement.classList.add('spha-photo-missing')"></div><div class="spha-photo-info"><b>${escLocal(d.item)}</b><span>${escLocal(o.name)}${a.winner?.id===o.id?' — Penyedia terpilih':''}</span><small>${escLocal(d.refName||'Nama produk belum dicatat')}</small><small>Harga tayang: ${rpLocal(d.listedUnit)}</small></div></article>`).join('')}</div></section>`;
 }
 function evidenceTable(a){let idx=0;return `<div class="spha-scroll"><table class="spha-table spha-evidence"><colgroup><col style="width:5%"><col style="width:23%"><col style="width:14%"><col style="width:28%"><col style="width:11%"><col style="width:19%"></colgroup><thead><tr><th>No.</th><th>Barang</th><th>Penyedia</th><th>Referensi / tanggal</th><th>Harga bukti</th><th>Status & catatan</th></tr></thead><tbody>${a.offers.flatMap(o=>o.detail.map(d=>`<tr><td>${++idx}</td><td><b>${escLocal(d.item)}</b><small>${escLocal(d.refName||'Nama produk referensi belum diisi')}</small></td><td>${escLocal(o.name)}</td><td>${safeLink(d.link)}<small>${prettyDate(d.date)}${d.img?` · <a target="_blank" rel="noopener noreferrer" href="${escLocal(d.img)}">Bukti foto ↗</a>`:''}</small></td><td class="n">${rpLocal(d.refPrice)}</td><td><b>${d.specWarnings.length?'⚠ Indikasi beda produk':d.evidenceOK?'Sumber harga tercatat':'Bukti harga perlu diperiksa'}</b>${d.specWarnings.length?`<small>${escLocal(d.specWarnings.join('; '))}</small>`:''}${d.gaps.length?`<small>${escLocal(d.gaps.join('; '))}</small>`:''}</td></tr>`)).join('')||'<tr><td colspan="6">Bukti harga belum tersedia.</td></tr>'}</tbody></table></div>`;}
 function narrative(a){const n=a.offers.length,w=a.winner,delta=a.delta;
@@ -342,14 +343,14 @@ function documentHTML(p){
  const a=getAnalysis(p),stamp=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
  const datePlace=clean(O(p.opd)?.tempat)||'';
  return `<div class="spha-doc spha-audit-paper spha-example-paper" data-spha-document="true">
- <header class="spha-example-cover">${typeof kop==='function'?kop(p):''}
+ <div class="spha-example-cover">${typeof kop==='function'?kop(p):''}
  <p class="spha-doc-title">DOKUMEN ANALISIS KEWAJARAN HARGA E-PURCHASING</p>
- ${docIdentity(p)}</header>
+ ${docIdentity(p)}</div>
  <section class="spha-example-section spha-intro"><h3>I. LATAR BELAKANG</h3>
  <p>Analisis ini dibuat sebagai kertas kerja PPK/Pejabat Pengadaan untuk menilai kewajaran harga per item (<em>unit price</em>) pada daftar produk E-Katalog sebelum dilakukan pembuatan Surat Pesanan (Purchase Order).</p>
  <p>Tujuannya adalah untuk memastikan bahwa harga yang ditawarkan oleh Penyedia di E-Katalog merupakan harga pasar yang wajar dan memberikan manfaat paling optimal (<em>value for money</em>).</p></section>
  <section class="spha-example-section spha-needs-section"><h3>II. DAFTAR KEBUTUHAN BARANG</h3>${exampleNeedTable(a)}</section>
- <section class="spha-example-section spha-reference-section"><h3>III. METODE REFRENSI DAN HARGA PEMBANDING</h3>${exampleProviders(a)}</section>
+ <section class="spha-example-section spha-reference-section"><h3>III. METODE REFERENSI DAN HARGA PEMBANDING</h3>${exampleProviders(a)}</section>
  <section class="spha-example-section spha-comparison-section"><h3>IV. TABEL ANALISA BEDA HARGA PER ITEM</h3>${exampleCompareTable(a)}</section>
  <section class="spha-example-section spha-narrative-section"><h3>V. ANALISA DAN PERTIMBANGAN KEWAJARAN</h3>${exampleItemNarratives(a)}</section>
  <section class="spha-example-section spha-recap-section"><h3>VI. REKAPITULASI PROSES E-PURCHASING &amp; EFISIENSI ANGGARAN</h3>${exampleEfficiency(a)}</section>
