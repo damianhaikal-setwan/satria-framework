@@ -224,6 +224,31 @@
 .doc[data-document-type="analisa"] .spha-example-identity col:nth-child(2){width:3%!important}
 .doc[data-document-type="analisa"] .spha-example-identity col:nth-child(3){width:74%!important}
 
+/* v3.0.59.47 — Ringkas judul lampiran foto tanpa mengubah kartu atau pagination. */
+.spha-example-paper .spha-photo-heading{
+ display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+ margin:0 0 10px;padding:0 0 7px;border-bottom:1px solid #94a3b8;
+ break-after:avoid;page-break-after:avoid;
+}
+.spha-example-paper .spha-photo-heading h3{
+ flex:1;min-width:0;margin:0!important;font-size:11px!important;line-height:1.35!important;
+ color:#1e293b!important;letter-spacing:.025em;font-weight:700!important;
+}
+.spha-example-paper .spha-photo-heading span{
+ flex:none;font-size:9px;line-height:1.4;color:#475569;white-space:nowrap;
+}
+@media print{
+ #satria-print-root .doc[data-document-type="analisa"] .spha-photo-heading{
+  margin-bottom:2.5mm!important;padding-bottom:1.5mm!important;
+ }
+ #satria-print-root .doc[data-document-type="analisa"] .spha-photo-heading h3{
+  margin:0!important;font-size:10pt!important;
+ }
+ #satria-print-root .doc[data-document-type="analisa"] .spha-photo-heading span{
+  font-size:8pt!important;
+ }
+}
+
 /* Flow photo evidence continuously rather than imposing a new page every six.
    Print cards in paired rows; keep each image and its caption together. */
 .spha-example-paper .spha-photo-sheet{break-before:page;page-break-before:always;break-inside:auto!important;page-break-inside:auto!important}
