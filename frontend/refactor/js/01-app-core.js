@@ -2253,11 +2253,107 @@ function satriaLaporanDownloadCsv(filename,headers,rows){
  const url=URL.createObjectURL(new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}));
  const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
 }
+/* SATRIA 2026-11-09 — laporan pengadaan menurut rekening anggaran.
+ * Read-only: akunId paket -> Data Master akun, tanpa menebak dari RUP/meta.
+ * Pembatasan OPD dan tahun berasal dari scope cloud yang sama dengan laporan utama.
+ * Pagu di sini adalah penjumlahan pagu PAKET, bukan pagu unik DPA/RUP/rekening.
+ */
+function satriaLaporanRekeningScope(){
+ const scope=activeCloudScope(),selectedOpd=String(S.ui.opd||'all');
+ return (S.paket||[]).filter(p=>
+   (selectedOpd==='all'||String(p.opd)===selectedOpd)&&
+   (!scope||(scope.opdIds.includes(String(p.opd))&&scope.years.includes(Number(p.tahun))))
+ );
+}
+function satriaLaporanRekeningId(p){
+ const id=String(p?.akunId??'').trim();
+ return id?'akun:'+id:'tanpa';
+}
+function satriaLaporanRekeningNama(key,akunById){
+ if(key==='tanpa')return {kode:'—',nama:'Belum ditautkan ke rekening',status:'tanpa'};
+ const id=key.slice(5),a=akunById.get(id);
+ return a?{kode:String(a.kode||'—'),nama:String(a.nama||'Tanpa uraian'),status:'valid'}:
+   {kode:'—',nama:'Rekening tidak ditemukan di Data Master (ID: '+id+')',status:'hilang'};
+}
+function satriaLaporanRekeningRows(){
+ const scoped=satriaLaporanRekeningScope();
+ const akunById=new Map((S.akun||[]).map(a=>[String(a.id),a]));
+ const options=new Map(scoped.map(p=>[satriaLaporanRekeningId(p),satriaLaporanRekeningNama(satriaLaporanRekeningId(p),akunById)]));
+ const years=[...new Set(scoped.map(p=>Number(p.tahun)).filter(Number.isInteger))].sort((a,b)=>b-a);
+ const validYears=new Set(years.map(String));
+ const year=String(S.ui.lapRekeningTahun||'all');
+ const selectedYear=year==='all'||validYears.has(year)?year:'all';
+ const key=String(S.ui.lapRekeningAkun||'all');
+ const selectedKey=key==='all'||options.has(key)?key:'all';
+ const query=String(S.ui.lapRekeningCari||'').trim().toLocaleLowerCase('id-ID');
+ const filtered=scoped.filter(p=>{
+   if(selectedYear!=='all'&&String(p.tahun)!==selectedYear)return false;
+   const k=satriaLaporanRekeningId(p);
+   if(selectedKey!=='all'&&k!==selectedKey)return false;
+   if(!query)return true;
+   const a=options.get(k);
+   return [p.nama,p.rup,p.id,a?.kode,a?.nama,O(p.opd).nama,O(p.opd).singkat].some(v=>String(v??'').toLocaleLowerCase('id-ID').includes(query));
+ });
+ const groups=new Map(),details=[];
+ for(const p of filtered){
+   const key=satriaLaporanRekeningId(p),account=options.get(key);
+   const id=JSON.stringify([Number(p.tahun),String(p.opd),key]);
+   if(!groups.has(id))groups.set(id,{tahun:Number(p.tahun),opd:String(p.opd),key,...account,
+     total:0,ep:0,spse:0,pagu:0,hps:0,penetapan:0,kontrak:0,bayar:0});
+   const g=groups.get(id),spse=satriaSpseIs(p),m=p.spseMonitoring||{};
+   const hv=spse?0:hps(p);
+   const winner=spse?null:pemenang(p);
+   const award=winner?Number(winner.t)||0:0;
+   const contract=spse&&String(m.contractNo||'').trim()?satriaSpseContractValue(m):0;
+   const paid=spse?satriaSpsePayments(m,true):0;
+   g.total++;g.pagu+=Number(p.pagu)||0;
+   if(spse){g.spse++;g.kontrak+=contract;g.bayar+=paid}
+   else{g.ep++;g.hps+=hv;g.penetapan+=award}
+   details.push({tahun:Number(p.tahun),opd:String(p.opd),key,...account,
+     id:String(p.id),rup:String(p.rup||''),paketNama:String(p.nama||''),rekeningStatus:account.status,spse,
+     pagu:Number(p.pagu)||0,hps:hv,penetapan:award,kontrak:contract,bayar:paid,
+     status:spse?String(m.status||'Belum diisi'):stt(p)});
+ }
+ const sort=(a,b)=>b.tahun-a.tahun||String(a.opd).localeCompare(String(b.opd),'id')||String(a.kode).localeCompare(String(b.kode),'id')||String(a.nama).localeCompare(String(b.nama),'id');
+ return {groups:[...groups.values()].sort(sort),details:details.sort(sort),options,years,
+   selectedYear,selectedKey,query,totalScope:scoped.length};
+}
+function vLaporanRekening(){
+ const data=satriaLaporanRekeningRows(),groups=data.groups,details=data.details;
+ const total=groups.reduce((a,g)=>{for(const k of ['total','ep','spse','pagu','hps','penetapan','kontrak','bayar'])a[k]+=g[k];return a},
+   {total:0,ep:0,spse:0,pagu:0,hps:0,penetapan:0,kontrak:0,bayar:0});
+ const without=details.filter(p=>p.rekeningStatus==='tanpa'||p.rekeningStatus==='hilang').length;
+ const unique=new Set(details.filter(p=>p.rekeningStatus==='valid').map(p=>p.key)).size;
+ const options=[...data.options.entries()].sort((a,b)=>a[1].kode.localeCompare(b[1].kode,'id')).map(([k,a])=>`<option value="${esc(k)}" ${data.selectedKey===k?'selected':''}>${esc(a.kode+' — '+a.nama)}</option>`).join('');
+ const groupRows=groups.map(g=>`<tr class="${g.status!=='valid'?'satria-rek-warning':''}"><td>${esc(g.tahun)}</td><td>${esc(O(g.opd).singkat||O(g.opd).nama||g.opd)}</td><td><b>${esc(g.kode)}</b><small>${esc(g.nama)}</small></td><td class="n">${g.total}</td><td class="n">${g.ep}</td><td class="n">${g.spse}</td><td class="n">${rp(g.pagu)}</td><td class="n">${rp(g.hps)}</td><td class="n">${rp(g.penetapan)}</td><td class="n">${rp(g.kontrak)}</td><td class="n">${rp(g.bayar)}</td></tr>`).join('');
+ const detailRows=details.slice(0,300).map(p=>`<tr class="${p.rekeningStatus==='tanpa'||p.rekeningStatus==='hilang'?'satria-rek-warning':''}"><td>${esc(p.tahun)}</td><td>${esc(O(p.opd).singkat||O(p.opd).nama||p.opd)}</td><td><b>${esc(p.kode)}</b><small>${esc(p.nama)}</small></td><td><b>${esc(p.paketNama)}</b><small>RUP: ${esc(p.rup||'—')} · ${p.spse?'SPSE':'E-Purchasing'}</small></td><td class="n">${rp(p.pagu)}</td><td class="n">${rp(p.hps)}</td><td class="n">${rp(p.penetapan)}</td><td class="n">${rp(p.kontrak)}</td><td>${esc(p.status)}</td><td><button type="button" class="g" data-act="lapRekeningOpen" data-id="${esc(p.id)}">Buka</button></td></tr>`).join('');
+ return `<section class="card satria-rek" id="satriaLaporanRekening" aria-label="Laporan pengadaan per rekening anggaran">
+ <div class="satria-rek-heading"><div><span class="satria-rek-eyebrow">ANALISIS REKENING ANGGARAN</span><h3>Pengadaan Berdasarkan Kode Rekening</h3><p class="mut">Rekap e-Purchasing dan SPSE berdasarkan <b>Rekening Anggaran</b> yang dipilih pada Data Paket. OPD mengikuti filter di header SATRIA; tahun dan rekening dapat difilter di bawah.</p></div><div class="satria-rek-actions"><button type="button" class="g" data-act="lapRekeningCsv">Ekspor Rekap CSV</button><button type="button" class="g" data-act="lapRekeningDetailCsv">Ekspor Paket CSV</button></div></div>
+ <div class="satria-rek-filter"><label>Tahun Anggaran<select id="lapRekeningTahun"><option value="all">Semua tahun yang dapat diakses</option>${data.years.map(y=>`<option value="${y}" ${data.selectedYear===String(y)?'selected':''}>${y}</option>`).join('')}</select></label><label>Rekening Anggaran<select id="lapRekeningAkun"><option value="all">Semua rekening</option>${options}</select></label><label>Cari paket, RUP, atau kode rekening<input id="lapRekeningCari" type="search" placeholder="Ketik lalu Enter / klik Cari" value="${esc(S.ui.lapRekeningCari||'')}"></label><button type="button" class="g" data-act="lapRekeningCari">Cari</button><button type="button" class="g" data-act="lapRekeningReset">Reset</button></div>
+ <div class="satria-rek-kpi"><div><small>Rekening tercatat</small><b>${unique}</b></div><div><small>Paket terfilter</small><b>${total.total}</b></div><div><small>Pagu paket tercatat</small><b>${rp(total.pagu)}</b></div><div><small>Nilai penetapan E-P</small><b>${rp(total.penetapan)}</b></div><div><small>Kontrak SPSE tercatat</small><b>${rp(total.kontrak)}</b></div></div>
+ ${without?`<p class="satria-rek-attention" role="status">⚠ ${without} paket belum ditautkan ke rekening atau mengacu pada rekening yang tidak ditemukan di Data Master. Lengkapi Data Paket → Rekening Anggaran agar laporannya akurat.</p>`:''}
+ <p class="mut satria-rek-note">Pagu yang tampil adalah <b>jumlah pagu paket tercatat</b>, bukan pagu DPA/rekening unik atau sisa anggaran. HPS, penetapan e-Purchasing, kontrak SPSE, dan pembayaran adalah indikator berbeda; jangan dijumlahkan sebagai realisasi belanja. Laporan bersifat baca-saja dan mencakup paket arsip dalam cakupan akun.</p>
+ <h4>Rekap per rekening · Tahun · OPD</h4><div class="table-wrap satria-rek-scroll"><table><thead><tr><th>TA</th><th>OPD</th><th>Kode / Uraian Rekening</th><th>Paket</th><th>E-P</th><th>SPSE</th><th>Pagu paket</th><th>HPS E-P</th><th>Penetapan E-P</th><th>Kontrak SPSE</th><th>Bayar SPSE terverifikasi</th></tr></thead><tbody>${groupRows||'<tr><td colspan="11">Tidak ada paket yang sesuai filter.</td></tr>'}</tbody></table></div>
+ <h4>Daftar paket penyusun rekap</h4><div class="table-wrap satria-rek-scroll"><table><thead><tr><th>TA</th><th>OPD</th><th>Rekening</th><th>Nama Paket / RUP</th><th>Pagu paket</th><th>HPS</th><th>Penetapan</th><th>Kontrak SPSE</th><th>Status</th><th>Aksi</th></tr></thead><tbody>${detailRows||'<tr><td colspan="10">Tidak ada paket yang sesuai filter.</td></tr>'}</tbody></table></div><small class="mut">Menampilkan ${Math.min(details.length,300)} dari ${details.length} paket. Ekspor CSV memuat <b>semua</b> paket yang cocok dengan filter. Tombol Buka menuju paket sesuai penugasan OPD/tahun akun.</small>
+ </section>`;
+}
+function satriaLaporanRekeningCsv(detail=false){
+ const {groups,details}=satriaLaporanRekeningRows();
+ if(detail){
+   const headers=['TA','OPD','Kode rekening','Uraian rekening','Kondisi rekening','ID Paket','Kode RUP','Nama paket','Jalur','Pagu paket tercatat','HPS E-P','Penetapan E-P','Kontrak SPSE dengan nomor kontrak','Bayar SPSE terverifikasi','Status'];
+   const rows=details.map(p=>[p.tahun,O(p.opd).singkat||O(p.opd).nama||p.opd,p.kode,p.nama,p.rekeningStatus,p.id,p.rup,p.paketNama,p.spse?'SPSE':'E-Purchasing',p.pagu,p.hps,p.penetapan,p.kontrak,p.bayar,p.status]);
+   return satriaLaporanDownloadCsv('satria-paket-per-rekening.csv',headers,rows);
+ }
+ const headers=['TA','OPD','Kode rekening','Uraian rekening','Kondisi rekening','Jumlah paket','Paket E-P','Paket SPSE','Pagu paket tercatat','HPS E-P','Penetapan E-P','Kontrak SPSE dengan nomor kontrak','Bayar SPSE terverifikasi'];
+ const rows=groups.map(g=>[g.tahun,O(g.opd).singkat||O(g.opd).nama||g.opd,g.kode,g.nama,g.status,g.total,g.ep,g.spse,g.pagu,g.hps,g.penetapan,g.kontrak,g.bayar]);
+ return satriaLaporanDownloadCsv('satria-rekap-per-rekening.csv',headers,rows);
+}
+
 function vLap(){
  const data=satriaLaporanData(), totals=data.reduce((a,g)=>{for(const k of ['rup','terpakai','sisa','ep','spse','paguPaket','hps','penetapan','hematHps','nilaiKontrak','bayar','rupPerluCek','paketTanpaRup','kontrakPerluCek'])a[k]=(a[k]||0)+g[k];return a},{});
  const cards=[['Pagu RUP unik',totals.rup||0,'Tidak dijumlahkan berulang per paket'],['Penggunaan RUP terhitung',totals.terpakai||0,'Nilai penetapan valid atau HPS/cadangan non-final'],['Sisa kapasitas RUP',totals.sisa||0,'Bukan saldo kas / realisasi'],['Kontrak SPSE tercatat',totals.nilaiKontrak||0,'Nilai kontrak dan addendum dengan nomor kontrak'],['Pembayaran SPSE terverifikasi',totals.bayar||0,'Bukan progres fisik; tidak termasuk e-Purchasing'],['Nilai penetapan E-Purchasing',totals.penetapan||0,'Bukan nilai kontrak atau pembayaran']];
  const rows=data.map(g=>`<tr><td>${g.tahun}</td><td>${esc(O(g.opd).singkat||g.opd)}</td><td class=n>${g.rupValid}</td><td class=n>${rp(g.rup)}</td><td class=n>${rp(g.terpakai)}</td><td class=n>${rp(g.sisa)}</td><td class=n>${g.ep}</td><td class=n>${g.spse}</td><td class=n>${rp(g.hps)}</td><td class=n>${rp(g.penetapan)}</td><td class=n>${rp(g.hematHps)}</td><td class=n>${rp(g.nilaiKontrak)}</td><td class=n>${rp(g.bayar)}</td><td class=n>${g.rupPerluCek}</td><td class=n>${g.spseTerlambat+g.spseMasalah}</td></tr>`).join('');
- return `<section class="card" data-satria-laporan="integrated"><div class="row" style="justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><h3>Laporan dan Analisis • E-Purchasing + Monitoring SPSE</h3><div class="row" style="gap:8px"><button class="g" data-act="csv">Ekspor Ringkasan (CSV)</button><button class="g" data-act="csvDetail">Ekspor Paket (CSV)</button></div></div>
+ return vLaporanRekening()+`<section class="card" data-satria-laporan="integrated"><div class="row" style="justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><h3>Laporan dan Analisis • E-Purchasing + Monitoring SPSE</h3><div class="row" style="gap:8px"><button class="g" data-act="csv">Ekspor Ringkasan (CSV)</button><button class="g" data-act="csvDetail">Ekspor Paket (CSV)</button></div></div>
  <p class="mut">Sumber: data SATRIA terakhir yang berhasil dimuat sesuai akses Anda, termasuk paket arsip. Nilai RUP adalah anggaran sumber, penggunaannya merupakan perhitungan HPS/cadangan sebelum penetapan dan nilai pemenang tervalidasi setelah penetapan paket RUP tunggal; penetapan e-Purchasing bukan pembayaran, dan pembayaran SPSE hanya yang berstatus terverifikasi. Laporan tidak mengubah data. Informasi SPSE yang dicatat manual perlu dibandingkan dengan SPSE resmi.</p>
  <div class="satria-lap-metrics">${cards.map(([l,v,d])=>`<div class="card satria-lap-metric"><span class="satria-lap-label">${esc(l)}</span><b class="satria-lap-value">${rp(v)}</b><small class="satria-lap-note">${esc(d)}</small></div>`).join('')}</div>
  <p class="mut">Total ${totals.ep||0} paket e-Purchasing, ${totals.spse||0} paket SPSE, ${totals.rupPerluCek||0} kelompok RUP perlu perhatian, ${totals.paketTanpaRup||0} paket dengan referensi RUP tidak ditemukan, ${totals.kontrakPerluCek||0} catatan kontrak/pembayaran SPSE perlu periksa. Selisih HPS–penetapan hanya dihitung untuk paket e-Purchasing dengan pemenang terpilih; selisih negatif tetap dilaporkan. Total tidak digunakan sebagai bukti realisasi anggaran.</p>
@@ -2701,7 +2797,7 @@ function render(){
  if(S.ui.rupManualSkipCapture)S.ui.rupManualSkipCapture=false;
  else rupManualCapture();
  const u=S.ui;
- $('#hPemda').innerHTML='SATRIA <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">NEXT · 3.0.59.43</span>';
+ $('#hPemda').innerHTML='SATRIA <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">NEXT · 3.0.59.44</span>';
  $('#hSub').innerHTML='<span style="font-weight:600;letter-spacing:-0.01em">Government work, in flow.</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px;opacity:.8">Simple • Connected • Accountable</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px">'+(u.opd==='all'?'Multi OPD • Multi Tahun':esc(O(u.opd).nama))+'</span>';
  $('#dirty').textContent=S.persistError?'⚠ Gagal menyimpan':(S.dirty?'● Perubahan belum di-backup':'✔ Tidak ada perubahan baru');$('#dirty').title=S.persistError||'Penyimpanan lokal dan backup file adalah dua hal berbeda';$('#dirty').style.background=S.persistError?'#FEE2E2':(S.dirty?'#F59E0B':'rgba(15,118,110,.14)'); $('#dirty').style.color=S.persistError?'#991B1B':(S.dirty?'#78350f':'#0F766E');
  $('#selTahun').innerHTML=S.tahun.map(t=>`<option value="${Number(t)}" ${Number(t)===Number(u.tahun)?'selected':''}>${Number(t)}</option>`).join('');
@@ -3100,6 +3196,11 @@ document.addEventListener('click',e=>{
  if(a==='delyear'){const y=+d.y;if(S.paket.some(p=>+p.tahun===y)||(S.rupBank||[]).some(r=>+r.tahun===y)){toast('Tahun masih digunakan Paket Pengadaan atau Bank RUP.');return render()}if(S.tahun.length<=1){toast('Tahun anggaran terakhir tidak dapat dihapus. Tambahkan tahun pengganti terlebih dahulu.');return render()}if(!confirm('Hapus TA '+y+'? Tindakan ini hanya diizinkan bila tidak ada paket yang memakai tahun tersebut.'))return;S.tahun=S.tahun.filter(x=>+x!==y);if(+S.ui.tahun===y)S.ui.tahun=S.tahun[0];sync('settings','Tahun '+y+' dihapus');return render()}
  if(a==='reset'){if(!confirm('PERINGATAN: seluruh data aktif—paket, master, pengaturan, pengguna, dan penawaran—akan diganti dengan data awal. Unduh backup JSON terlebih dahulu. Lanjutkan?'))return;if(!confirm('Konfirmasi terakhir: ganti seluruh data aktif dengan data awal SATRIA?'))return;init();sync('settings','Data direset ke data awal');route();toast('Data awal dimuat ulang. Periksa konfigurasi dan unduh backup setelah pengisian.');return}
  if(a==='print')return window.print();
+ if(a==='lapRekeningCsv')return satriaLaporanRekeningCsv(false);
+ if(a==='lapRekeningDetailCsv')return satriaLaporanRekeningCsv(true);
+ if(a==='lapRekeningReset'){S.ui.lapRekeningTahun='all';S.ui.lapRekeningAkun='all';S.ui.lapRekeningCari='';return render()}
+ if(a==='lapRekeningCari'){S.ui.lapRekeningCari=String($('#lapRekeningCari')?.value||'');return render()}
+ if(a==='lapRekeningOpen'){const pack=P(id),scope=activeCloudScope();if(!pack||(scope&&(!scope.opdIds.includes(String(pack.opd))||!scope.years.includes(Number(pack.tahun))))||(S.ui.opd!=='all'&&String(pack.opd)!==String(S.ui.opd))){toast('Paket tidak tersedia pada kewenangan akun.');return}S.ui.tahun=Number(pack.tahun);S.ui.pid=pack.id;location.hash='#'+(satriaSpseIs(pack)?'spse':'paket')+'/'+encodeURIComponent(pack.id);return}
  if(a==='csv')return csvExport();
  if(a==='csvDetail')return satriaLaporanCsvDetail();
  if(a==='export'){const o={...S};delete o.ui;delete o.log;delete o.dirty;delete o.chat;const u=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:'application/json'}));const l=document.createElement('a');l.href=u;l.download='SATRIA-backup-'+new Date().toISOString().slice(0,10)+'.json';l.click();setTimeout(()=>URL.revokeObjectURL(u),1500);return render()}
@@ -3133,6 +3234,8 @@ document.addEventListener('change',e=>{
    satriaHpsReviewCapture(e.target.closest('.satria-hps-total-review'));
 },true);
 document.addEventListener('input',e=>{if(RUP_MANUAL_FIELD_IDS.includes(e.target?.id))rupManualCapture();});
+document.addEventListener('input',e=>{if(e.target?.id==='lapRekeningCari')S.ui.lapRekeningCari=String(e.target.value||'')});
+document.addEventListener('keydown',e=>{if(e.target?.id==='lapRekeningCari'&&e.key==='Enter'){e.preventDefault();S.ui.lapRekeningCari=String(e.target.value||'');render()}});
 document.addEventListener('input',e=>{if(e.target?.id==='rupJsonIn'){S.ui.rupJson=e.target.value;S.ui.rupPrev=null;}});
 document.addEventListener('input',e=>{if(e.target?.id==='rupBankSearch'){const inp=e.target;S.ui.rupSearch=inp.value;const pos=inp.selectionStart;render();const next=$('#rupBankSearch');if(next){next.focus();try{next.setSelectionRange(pos,pos)}catch(_){}}}});
 document.addEventListener('input',event=>{
@@ -3150,6 +3253,9 @@ document.addEventListener('input',event=>{
 });
 document.addEventListener('change',e=>{
  const t=e.target,d=t.dataset;
+ if(t.id==='lapRekeningTahun'){S.ui.lapRekeningTahun=String(t.value||'all');return render()}
+ if(t.id==='lapRekeningAkun'){S.ui.lapRekeningAkun=String(t.value||'all');return render()}
+ if(t.id==='lapRekeningCari'){S.ui.lapRekeningCari=String(t.value||'');return}
  if(t.matches?.('[data-hps-edit]'))return; // Hanya tombol Simpan Semua Rincian yang menulis data.
  // Review historis ditangani oleh kontrol sendiri, tanpa menggambar ulang semua input.
  if(t.matches?.('[data-hps-review-reason],[data-hps-review-evidence],[data-hps-review-check]'))return;
