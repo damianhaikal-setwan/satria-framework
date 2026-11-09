@@ -9,9 +9,10 @@
 .satria-rek-filter label{font-size:12px;font-weight:700;min-width:0;color:var(--ink);display:flex;flex-direction:column;gap:5px}
 .satria-rek-filter select,.satria-rek-filter input{width:100%;max-width:100%;min-width:0;min-height:38px}
 .satria-rek-filter button{min-height:38px}
-.satria-rek-kpi{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-bottom:12px}
+.satria-rek-kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:12px}
 .satria-rek-kpi>div{padding:12px;border:1px solid var(--bd);border-radius:12px;background:var(--card-2);min-width:0}
 .satria-rek-kpi small{display:block;font-size:11px;color:var(--mut);margin-bottom:6px}
+.satria-rek-kpi>div.satria-rek-kpi-key{border-left:3px solid var(--acc)}
 .satria-rek-kpi b{font-size:clamp(13px,1.45vw,19px);color:var(--ink);overflow-wrap:anywhere;line-height:1.35}
 .satria-rek h4{margin:17px 0 9px}
 .satria-rek-scroll{overflow:auto;max-width:100%;max-height:470px;border:1px solid var(--bd);border-radius:12px}
@@ -25,3 +26,110 @@
 .satria-rek-note{font-size:11px;line-height:1.6}
 @media(max-width:1080px){.satria-rek-filter{grid-template-columns:repeat(2,minmax(0,1fr))}.satria-rek-kpi{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:640px){.satria-rek-filter{grid-template-columns:1fr}.satria-rek-kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Audit laporan (baca-saja), mengikuti tema SATRIA */
+.satria-lap-audit{scroll-margin-top:110px}
+.satria-lap-audit-toolbar{display:flex;align-items:end;gap:15px;flex-wrap:wrap;margin:14px 0 9px}
+.satria-lap-audit-toolbar label{display:flex;flex-direction:column;gap:5px;min-width:min(280px,100%);font-weight:700;font-size:12px;color:var(--ink)}
+.satria-lap-audit-toolbar select{min-height:38px;width:100%}
+.satria-lap-audit-toolbar small{color:var(--mut);font-size:11px}
+.satria-lap-audit .satria-rek-scroll table{min-width:890px}
+.satria-lap-audit .satria-rek-scroll td:nth-child(5){white-space:normal;min-width:290px}
+@media(max-width:640px){.satria-lap-audit-toolbar{align-items:stretch}.satria-lap-audit-toolbar label{width:100%}}
+
+/* SATRIA NEXT 3.0.59.50 — Dashboard visual Laporan & Analisis.
+   Tema terang/gelap dan aksesibilitas; grafik tanpa ketergantungan library. */
+.satria-lv{--lv-purple:#6152e9;--lv-green:#0e9489;--lv-amber:#e69a20;--lv-blue:#3b82f6;--lv-ink:var(--ink,#17182e);--lv-mut:var(--mut,#626783);--lv-stroke:var(--bd,#e4e6f1);--lv-card:var(--card-solid,#fff);color:var(--lv-ink);min-width:0;margin-bottom:23px}
+.satria-lv *{box-sizing:border-box}
+.satria-lv-hero{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:27px 30px;border-radius:25px;background:linear-gradient(114deg,#201a57 0%,#4938a8 56%,#574be3 100%);color:#fff;overflow:hidden;position:relative}
+.satria-lv-hero::after{content:"";position:absolute;width:270px;height:270px;right:14%;top:-155px;background:radial-gradient(circle,#c9fe7670,transparent 67%);pointer-events:none}
+.satria-lv-hero>div{position:relative;z-index:1}
+.satria-lv-eyebrow{display:block;color:#d6ff99;font-size:10px;font-weight:850;letter-spacing:.16em;margin-bottom:10px}
+.satria-lv-hero h2{font-size:clamp(23px,3vw,34px);line-height:1.16;letter-spacing:-.04em;margin:0 0 10px;color:#fff!important}
+.satria-lv-dot-title{color:#caff69}
+.satria-lv-hero p{font-size:13px;line-height:1.55;color:#e6e5ff;margin:0;max-width:690px}
+.satria-lv-meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+.satria-lv-meta span{border:1px solid #ffffff48;border-radius:999px;padding:5px 10px;color:#fff;font-size:11px;font-weight:650;background:#ffffff16}
+.satria-lv-hero-filter{width:210px;max-width:100%;flex:none;padding:14px;border:1px solid #ffffff55;border-radius:16px;background:#ffffff1c;backdrop-filter:blur(6px)}
+.satria-lv-hero-filter label{display:block;font-size:11px;color:#f0edff;font-weight:700;margin-bottom:6px}
+.satria-lv-hero-filter select{width:100%;min-width:0;max-width:100%;min-height:41px;color:#181b35!important;background:#fff!important;border:0!important;border-radius:10px;padding:9px}
+.satria-lv-hero-filter small{display:block;color:#e6e4ff;font-size:10px;line-height:1.5;margin-top:8px}
+.satria-lv-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin:15px 0}
+.satria-lv-kpi{position:relative;min-width:0;overflow:hidden;padding:16px 17px 19px;border:1px solid var(--lv-stroke);border-radius:18px;background:var(--lv-card);box-shadow:0 8px 27px #161b3710}
+.satria-lv-kpi>span{display:block;font-size:11px;font-weight:750;color:var(--lv-mut)}
+.satria-lv-kpi strong{display:block;font-size:clamp(15px,1.75vw,24px);font-weight:850;letter-spacing:-.035em;overflow-wrap:anywhere;color:var(--lv-ink);margin:7px 0}
+.satria-lv-kpi small{display:block;font-size:10px;line-height:1.55;color:var(--lv-mut)}
+.satria-lv-kpi-stroke{position:absolute;height:4px;bottom:0;left:0;right:0}
+.satria-lv-kpi-stroke.is-purple{background:linear-gradient(90deg,#6152e9,#ad9fff)}
+.satria-lv-kpi-stroke.is-green{background:linear-gradient(90deg,#0e9489,#62d8bb)}
+.satria-lv-kpi-stroke.is-blue{background:linear-gradient(90deg,#327ef2,#93bdfb)}
+.satria-lv-kpi-stroke.is-amber{background:linear-gradient(90deg,#d89112,#ffd88a)}
+.satria-lv-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin-bottom:15px}
+.satria-lv-panel{min-width:0;padding:19px 20px;background:var(--lv-card);border:1px solid var(--lv-stroke);border-radius:20px;box-shadow:0 8px 24px #151b360a}
+.satria-lv-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:17px}
+.satria-lv-heading h3{font-size:clamp(15px,1.4vw,19px);line-height:1.3;letter-spacing:-.02em;color:var(--lv-ink);margin:5px 0 0;padding:0}
+#main .satria-lv .satria-lv-heading h3::before{display:none!important}
+.satria-lv-chip{display:inline-block;font-size:10px;font-weight:850;letter-spacing:.11em;color:var(--lv-purple)}
+.satria-lv-caption{font-size:10px;color:var(--lv-mut);line-height:1.55}
+.satria-lv-foot{font-size:11px;color:var(--lv-mut);line-height:1.55;margin:12px 0 0}
+.satria-lv-empty{display:grid;place-items:center;min-height:130px;border:1px dashed var(--lv-stroke);border-radius:12px;text-align:center;font-size:12px;color:var(--lv-mut);margin:0}
+.satria-lv-donut-layout{display:flex;align-items:center;justify-content:center;gap:25px;min-height:205px}
+.satria-lv-donut{width:190px;height:190px;flex:0 0 190px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--lv-purple) 0% var(--lv-stop1),var(--lv-amber) var(--lv-stop1) var(--lv-stop2),var(--lv-green) var(--lv-stop2) 100%);position:relative}
+.satria-lv-donut:before{content:"";position:absolute;width:70%;height:70%;border-radius:50%;background:var(--lv-card)}
+.satria-lv-donut[data-empty="true"]{background:var(--lv-stroke)}
+.satria-lv-donut>div{position:relative;text-align:center}
+.satria-lv-donut strong{font-size:34px;color:var(--lv-ink);display:block;line-height:1}
+.satria-lv-donut small{font-size:12px;color:var(--lv-mut);display:block;margin-top:5px}
+.satria-lv-legend{flex:1;min-width:142px;display:grid;gap:12px}
+.satria-lv-legend>div{display:grid;grid-template-columns:11px 1fr auto;gap:8px;align-items:center;color:var(--lv-ink);font-size:12px}
+.satria-lv-legend strong{font-size:13px}
+.satria-lv-legend-color{width:10px;height:10px;display:block;border-radius:4px}
+.satria-lv-legend-color.is-purple{background:var(--lv-purple)}.satria-lv-legend-color.is-amber{background:var(--lv-amber)}.satria-lv-legend-color.is-green{background:var(--lv-green)}
+.satria-lv-metric-control{font-size:11px;font-weight:750;color:var(--lv-mut)}
+.satria-lv-metric-control select{display:block;min-height:34px;margin-top:4px;max-width:154px;border-radius:9px;font-size:12px}
+.satria-lv-bars{display:grid;gap:5px;min-height:194px}
+.satria-lv-barline{appearance:none;display:grid;grid-template-columns:minmax(90px,1.1fr) minmax(80px,1fr) auto;align-items:center;gap:8px;border:1px solid transparent;background:transparent;color:var(--lv-ink);border-radius:10px;padding:7px;min-width:0;cursor:pointer;text-align:left;box-shadow:none!important}
+.satria-lv-barline:hover,.satria-lv-auditline:hover{background:color-mix(in srgb,var(--lv-purple) 6%,transparent);border-color:var(--lv-stroke)}
+.satria-lv-barline:focus-visible,.satria-lv-auditline:focus-visible{outline:3px solid var(--lv-blue);outline-offset:2px}
+.satria-lv-barlabel{min-width:0;display:block}
+.satria-lv-barlabel b{font-size:11px;display:block}.satria-lv-barlabel small{font-size:10px;color:var(--lv-mut);display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.satria-lv-barline strong{font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.satria-lv-rail,.satria-lv-audittrack{display:block;height:11px;overflow:hidden;border-radius:999px;background:color-mix(in srgb,var(--lv-purple) 10%,var(--lv-card))}
+.satria-lv-fill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#6152e9,#9582fa)}
+.satria-lv-trend-svg{display:block;width:100%;height:auto;min-height:177px;overflow:visible}
+.satria-lv-gridline{stroke:var(--lv-stroke);stroke-dasharray:4 5;stroke-width:1}
+.satria-lv-axis{font-size:10px;fill:var(--lv-mut)}
+.satria-lv-line{fill:none;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round}
+.satria-lv-line.satria-lv-purple{stroke:var(--lv-purple)}
+.satria-lv-line.satria-lv-green{stroke:var(--lv-green)}
+.satria-lv-dot{stroke:var(--lv-card);stroke-width:2}
+.satria-lv-dot.satria-lv-purple{fill:var(--lv-purple)}.satria-lv-dot.satria-lv-green{fill:var(--lv-green)}
+.satria-lv-line-legend{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;margin:8px 0}
+.satria-lv-line-legend span{font-size:11px;color:var(--lv-ink)}
+.satria-lv-line-legend i{width:16px;height:4px;display:inline-block;vertical-align:middle;margin-right:6px;border-radius:5px}.satria-lv-line-legend .is-purple{background:var(--lv-purple)}.satria-lv-line-legend .is-green{background:var(--lv-green)}
+.satria-lv-auditbars{display:grid;gap:8px;min-height:197px}
+.satria-lv-auditline{appearance:none;border:1px solid transparent;display:grid;grid-template-columns:minmax(130px,1fr) minmax(65px,1fr) 22px;gap:9px;align-items:center;min-width:0;padding:6px;background:transparent;color:var(--lv-ink);text-align:left;cursor:pointer;border-radius:10px;box-shadow:none!important}
+.satria-lv-auditline span:first-child{font-size:11px;line-height:1.25}
+.satria-lv-auditline b{font-size:12px;text-align:right}
+.satria-lv-audittrack{background:color-mix(in srgb,var(--lv-amber) 12%,var(--lv-card))}
+.satria-lv-audittrack i{display:block;height:100%;background:linear-gradient(90deg,#e0a225,#f8c763);border-radius:999px}
+.satria-lv-table-panel{margin-bottom:13px}
+.satria-lv-table-wrap{width:100%;overflow:auto;border:1px solid var(--lv-stroke);border-radius:12px}
+.satria-lv-table-wrap table{width:100%;min-width:730px;border-collapse:collapse}
+.satria-lv-table-wrap th,.satria-lv-table-wrap td{padding:12px 13px;border-bottom:1px solid var(--lv-stroke);vertical-align:middle;font-size:12px}
+.satria-lv-table-wrap td small{display:block;color:var(--lv-mut);font-size:10px;white-space:normal;max-width:310px;margin-top:3px}
+.satria-lv-table-wrap td.n,.satria-lv-table-wrap th.n{text-align:right;font-variant-numeric:tabular-nums}
+.satria-lv-rank{font-weight:850;color:var(--lv-purple)}
+.satria-lv-table-wrap tbody tr:hover{background:color-mix(in srgb,var(--lv-purple) 4%,transparent)}
+.satria-lv-scope{color:var(--lv-mut);font-size:11px;line-height:1.65;padding:7px 4px 12px;margin:0}
+:root[data-theme="dark"] .satria-lv{--lv-purple:#a89aff;--lv-green:#4ce0c2;--lv-amber:#f5c46b;--lv-blue:#86b8ff}
+:root[data-theme="dark"] .satria-lv-hero{background:linear-gradient(120deg,#221c50,#4837a0)}
+:root[data-theme="dark"] .satria-lv-fill{background:linear-gradient(90deg,#8473ff,#b9aaff)}
+:root[data-theme="dark"] .satria-lv-audittrack i{background:linear-gradient(90deg,#e4a129,#f8d384)}
+@media(max-width:1050px){.satria-lv-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.satria-lv-grid{grid-template-columns:1fr}}
+@media(max-width:620px){.satria-lv-hero{flex-direction:column;align-items:stretch;padding:22px 18px;border-radius:19px}.satria-lv-hero-filter{width:100%}.satria-lv-meta{gap:5px}.satria-lv-meta span{font-size:10px;padding:4px 7px}.satria-lv-kpis{gap:9px}.satria-lv-kpi{padding:12px 12px 16px;border-radius:14px}.satria-lv-kpi strong{font-size:clamp(14px,4vw,20px)}.satria-lv-panel{padding:14px;border-radius:15px}.satria-lv-donut-layout{flex-direction:column;gap:15px}.satria-lv-legend{width:100%;grid-template-columns:1fr}.satria-lv-donut{width:165px;height:165px;flex-basis:165px}.satria-lv-donut strong{font-size:28px}.satria-lv-barline{grid-template-columns:1fr auto;gap:5px}.satria-lv-barline .satria-lv-rail{grid-column:1/-1;grid-row:2}.satria-lv-auditline{grid-template-columns:minmax(125px,1fr) 80px 20px}.satria-lv-hero h2{font-size:26px}}
+@media(prefers-reduced-motion:reduce){.satria-lv *, .satria-lv *:before{scroll-behavior:auto!important;transition:none!important}}
+@media print{.satria-lv{display:none!important}}
+/* Prioritas atas aturan tombol global Gen Z: batang adalah kontrol transparan, bukan CTA solid. */
+#main .satria-lv button.satria-lv-barline,#main .satria-lv button.satria-lv-auditline{background:transparent!important;color:var(--lv-ink)!important;border:1px solid transparent!important;box-shadow:none!important}
+#main .satria-lv button.satria-lv-barline:hover,#main .satria-lv button.satria-lv-auditline:hover{background:color-mix(in srgb,var(--lv-purple) 7%,transparent)!important;border-color:var(--lv-stroke)!important}
