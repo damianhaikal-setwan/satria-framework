@@ -1,0 +1,27 @@
+/* 2026-11-09 — Laporan rekening anggaran; tema terang/gelap memakai token SATRIA. */
+.satria-rek{margin-bottom:20px;min-width:0}
+.satria-rek-heading{display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:14px}
+.satria-rek-heading h3{margin:5px 0 7px}
+.satria-rek-heading p{max-width:850px;margin:0}
+.satria-rek-eyebrow{font-size:10px;font-weight:850;letter-spacing:.1em;color:var(--acc)}
+.satria-rek-actions{display:flex;gap:8px;flex-wrap:wrap}
+.satria-rek-filter{display:grid;grid-template-columns:minmax(150px,.75fr) minmax(190px,1.1fr) minmax(200px,1.3fr) auto auto;align-items:end;gap:10px;margin:16px 0}
+.satria-rek-filter label{font-size:12px;font-weight:700;min-width:0;color:var(--ink);display:flex;flex-direction:column;gap:5px}
+.satria-rek-filter select,.satria-rek-filter input{width:100%;max-width:100%;min-width:0;min-height:38px}
+.satria-rek-filter button{min-height:38px}
+.satria-rek-kpi{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-bottom:12px}
+.satria-rek-kpi>div{padding:12px;border:1px solid var(--bd);border-radius:12px;background:var(--card-2);min-width:0}
+.satria-rek-kpi small{display:block;font-size:11px;color:var(--mut);margin-bottom:6px}
+.satria-rek-kpi b{font-size:clamp(13px,1.45vw,19px);color:var(--ink);overflow-wrap:anywhere;line-height:1.35}
+.satria-rek h4{margin:17px 0 9px}
+.satria-rek-scroll{overflow:auto;max-width:100%;max-height:470px;border:1px solid var(--bd);border-radius:12px}
+.satria-rek-scroll table{min-width:1100px;width:100%;border-collapse:collapse;font-size:12px}
+.satria-rek-scroll :is(th,td){padding:9px 11px;vertical-align:top;text-align:left;white-space:nowrap;border-bottom:1px solid var(--bd)}
+.satria-rek-scroll th{position:sticky;top:0;background:var(--card-solid);color:var(--ink);z-index:1}
+.satria-rek-scroll td small{display:block;font-size:11px;font-weight:400;color:var(--mut);max-width:290px;white-space:normal;margin-top:3px}
+.satria-rek-scroll td.n{text-align:right;font-variant-numeric:tabular-nums}
+.satria-rek-warning{background:rgba(245,158,11,.085)}
+.satria-rek-attention{padding:11px 13px;border:1px solid #c58a29;background:rgba(245,158,11,.12);border-radius:9px;font-size:12px;color:var(--ink)}
+.satria-rek-note{font-size:11px;line-height:1.6}
+@media(max-width:1080px){.satria-rek-filter{grid-template-columns:repeat(2,minmax(0,1fr))}.satria-rek-kpi{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:640px){.satria-rek-filter{grid-template-columns:1fr}.satria-rek-kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
