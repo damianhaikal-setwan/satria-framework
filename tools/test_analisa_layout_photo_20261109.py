@@ -63,6 +63,12 @@ with sync_playwright() as w:
     page.wait_for_timeout(200)
     assert page.locator('.spha-example-paper').count()==1
     assert page.locator('.spha-photo-card').count()==15
+    heading=page.locator('.spha-photo-heading')
+    assert heading.count()==1
+    assert heading.locator('h3').inner_text()=='LAMPIRAN FOTO BARANG'
+    assert heading.locator('span').inner_text()=='15 foto produk'
+    assert page.locator('.spha-photo-sheet > p').count()==0
+    assert 'Periksa kembali kesesuaian foto dengan produk pada sumber aslinya.' not in page.locator('.spha-photo-sheet').inner_text()
     props=page.evaluate('''() => {
      const paper=document.querySelector('.spha-example-paper');
      const cover=paper.querySelector('.spha-example-cover');
@@ -105,10 +111,13 @@ assert 'DOKUMEN ANALISIS KEWAJARAN' in front,front[:600]
 assert 'I. LATAR BELAKANG' in front,front[-400:]
 alltext='\n'.join(pg.get_text() for pg in p)
 assert alltext.count('Harga tayang:')>=15,alltext.count('Harga tayang:')
+assert 'LAMPIRAN FOTO BARANG' in alltext
+assert '15 foto produk' in alltext
+assert 'Periksa kembali kesesuaian foto dengan produk pada sumber aslinya.' not in alltext
 image_pages=[]
 for i,pg in enumerate(p):
    text=pg.get_text()
-   if 'Lampiran Foto Barang' in text or 'Harga tayang:' in text:
+   if 'LAMPIRAN FOTO BARANG' in text or 'Harga tayang:' in text:
       image_pages.append((i+1,text.count('Harga tayang:'),len(text)))
    # For every actual text span, reject rightward and leftward clipping beyond printable page bounds.
    for line in pg.get_text('dict')['blocks']:
