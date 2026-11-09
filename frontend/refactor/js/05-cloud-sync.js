@@ -3006,6 +3006,7 @@ function vDokOptimized(){
 
       <section class="dok-preview-section">
         <div class="dok-preview-heading no-print"><div><span class="dok-section-kicker">03 / LIVE PREVIEW</span><h3>Pratinjau dokumen</h3><p>${activeT[1]} · Paket ${esc(p.rup||'belum memiliki Kode RUP')}</p></div><span class="dok-preview-status ${currentMissing.length?'is-pending':'is-ready'}"><i></i>${currentMissing.length?currentMissing.length+' hal perlu dicek':'Isian dasar OK'}</span></div>
+        ${S.ui.dok==='analisa'?`<p class="satria340-quality-note no-print" data-satria-analisa-date-help style="margin:12px 0;padding:11px 13px;border:1px solid #d6d5ed;border-radius:10px"><b>Tanggal dokumen Analisis Harga:</b> ${window.SATRIA_PRICE_ANALYSIS?.documentDate?.(p)?esc(satriaDateId(window.SATRIA_PRICE_ANALYSIS.documentDate(p))):'<strong>Belum diisi</strong>'}. Otomatis mengikuti <b>Tanggal negosiasi</b> di Paket Pengadaan → Data Paket atau Kalkulator Nego. ${window.SATRIA_PRICE_ANALYSIS?.documentDate?.(p)?'':'Isi tanggal negosiasi sebelum mencetak dokumen resmi.'}</p>`:''}
         ${docQualityHtml}
         ${satria35912WarningPanel(p,S.ui.dok)}
         ${window.SATRIA_DOC_PPK?.panel?.(p,S.ui.dok)||''}${S.ui.dok==='dpp'?(window.SATRIA_DPP_PREFLIGHT?.panel?.(p)||''):''}${S.ui.dok==='dpp'?(window.SATRIA_DPP_FORMAT?.panel?.(p)||''):''}
