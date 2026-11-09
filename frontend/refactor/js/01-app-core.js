@@ -2299,19 +2299,22 @@ function satriaLaporanRekeningRows(){
    const key=satriaLaporanRekeningId(p),account=options.get(key);
    const id=JSON.stringify([Number(p.tahun),String(p.opd),key]);
    if(!groups.has(id))groups.set(id,{tahun:Number(p.tahun),opd:String(p.opd),key,...account,
-     total:0,ep:0,spse:0,pagu:0,hps:0,penetapan:0,kontrak:0,bayar:0});
+     total:0,ep:0,spse:0,pagu:0,hps:0,penetapan:0,selisihHps:0,ditetapkan:0,kontrak:0,bayar:0});
    const g=groups.get(id),spse=satriaSpseIs(p),m=p.spseMonitoring||{};
    const hv=spse?0:hps(p);
    const winner=spse?null:pemenang(p);
    const award=winner?Number(winner.t)||0:0;
+   // Selisih hanya dihitung untuk paket dengan penetapan tervalidasi; jangan
+   // kurangi total HPS paket yang masih dalam proses dengan nilai nol.
+   const selisihHps=winner?hv-award:null;
    const contract=spse&&String(m.contractNo||'').trim()?satriaSpseContractValue(m):0;
    const paid=spse?satriaSpsePayments(m,true):0;
    g.total++;g.pagu+=Number(p.pagu)||0;
    if(spse){g.spse++;g.kontrak+=contract;g.bayar+=paid}
-   else{g.ep++;g.hps+=hv;g.penetapan+=award}
+   else{g.ep++;g.hps+=hv;g.penetapan+=award;if(winner){g.ditetapkan++;g.selisihHps+=selisihHps}}
    details.push({tahun:Number(p.tahun),opd:String(p.opd),key,...account,
      id:String(p.id),rup:String(p.rup||''),paketNama:String(p.nama||''),rekeningStatus:account.status,spse,
-     pagu:Number(p.pagu)||0,hps:hv,penetapan:award,kontrak:contract,bayar:paid,
+     pagu:Number(p.pagu)||0,hps:hv,penetapan:award,selisihHps,kontrak:contract,bayar:paid,
      status:spse?String(m.status||'Belum diisi'):stt(p)});
  }
  const sort=(a,b)=>b.tahun-a.tahun||String(a.opd).localeCompare(String(b.opd),'id')||String(a.kode).localeCompare(String(b.kode),'id')||String(a.nama).localeCompare(String(b.nama),'id');
@@ -2320,40 +2323,233 @@ function satriaLaporanRekeningRows(){
 }
 function vLaporanRekening(){
  const data=satriaLaporanRekeningRows(),groups=data.groups,details=data.details;
- const total=groups.reduce((a,g)=>{for(const k of ['total','ep','spse','pagu','hps','penetapan','kontrak','bayar'])a[k]+=g[k];return a},
-   {total:0,ep:0,spse:0,pagu:0,hps:0,penetapan:0,kontrak:0,bayar:0});
+ const total=groups.reduce((a,g)=>{for(const k of ['total','ep','spse','pagu','hps','penetapan','selisihHps','ditetapkan','kontrak','bayar'])a[k]+=g[k];return a},
+   {total:0,ep:0,spse:0,pagu:0,hps:0,penetapan:0,selisihHps:0,ditetapkan:0,kontrak:0,bayar:0});
  const without=details.filter(p=>p.rekeningStatus==='tanpa'||p.rekeningStatus==='hilang').length;
  const unique=new Set(details.filter(p=>p.rekeningStatus==='valid').map(p=>p.key)).size;
  const options=[...data.options.entries()].sort((a,b)=>a[1].kode.localeCompare(b[1].kode,'id')).map(([k,a])=>`<option value="${esc(k)}" ${data.selectedKey===k?'selected':''}>${esc(a.kode+' — '+a.nama)}</option>`).join('');
- const groupRows=groups.map(g=>`<tr class="${g.status!=='valid'?'satria-rek-warning':''}"><td>${esc(g.tahun)}</td><td>${esc(O(g.opd).singkat||O(g.opd).nama||g.opd)}</td><td><b>${esc(g.kode)}</b><small>${esc(g.nama)}</small></td><td class="n">${g.total}</td><td class="n">${g.ep}</td><td class="n">${g.spse}</td><td class="n">${rp(g.pagu)}</td><td class="n">${rp(g.hps)}</td><td class="n">${rp(g.penetapan)}</td><td class="n">${rp(g.kontrak)}</td><td class="n">${rp(g.bayar)}</td></tr>`).join('');
- const detailRows=details.slice(0,300).map(p=>`<tr class="${p.rekeningStatus==='tanpa'||p.rekeningStatus==='hilang'?'satria-rek-warning':''}"><td>${esc(p.tahun)}</td><td>${esc(O(p.opd).singkat||O(p.opd).nama||p.opd)}</td><td><b>${esc(p.kode)}</b><small>${esc(p.nama)}</small></td><td><b>${esc(p.paketNama)}</b><small>RUP: ${esc(p.rup||'—')} · ${p.spse?'SPSE':'E-Purchasing'}</small></td><td class="n">${rp(p.pagu)}</td><td class="n">${rp(p.hps)}</td><td class="n">${rp(p.penetapan)}</td><td class="n">${rp(p.kontrak)}</td><td>${esc(p.status)}</td><td><button type="button" class="g" data-act="lapRekeningOpen" data-id="${esc(p.id)}">Buka</button></td></tr>`).join('');
+ const groupRows=groups.map(g=>`<tr class="${g.status!=='valid'?'satria-rek-warning':''}"><td>${esc(g.tahun)}</td><td>${esc(O(g.opd).singkat||O(g.opd).nama||g.opd)}</td><td><b>${esc(g.kode)}</b><small>${esc(g.nama)}</small></td><td class="n">${g.total}</td><td class="n">${g.ep}</td><td class="n">${g.spse}</td><td class="n">${g.ditetapkan}</td><td class="n">${g.ep-g.ditetapkan}</td><td class="n">${rp(g.pagu)}</td><td class="n">${rp(g.hps)}</td><td class="n">${rp(g.penetapan)}</td><td class="n">${g.ditetapkan?rp(g.selisihHps):'—'}</td><td class="n">${rp(g.kontrak)}</td><td class="n">${rp(g.bayar)}</td></tr>`).join('');
+ const detailRows=details.slice(0,300).map(p=>`<tr class="${p.rekeningStatus==='tanpa'||p.rekeningStatus==='hilang'?'satria-rek-warning':''}"><td>${esc(p.tahun)}</td><td>${esc(O(p.opd).singkat||O(p.opd).nama||p.opd)}</td><td><b>${esc(p.kode)}</b><small>${esc(p.nama)}</small></td><td><b>${esc(p.paketNama)}</b><small>RUP: ${esc(p.rup||'—')} · ${p.spse?'SPSE':'E-Purchasing'}</small></td><td class="n">${rp(p.pagu)}</td><td class="n">${rp(p.hps)}</td><td class="n">${rp(p.penetapan)}</td><td class="n">${p.selisihHps===null?'—':rp(p.selisihHps)}</td><td class="n">${rp(p.kontrak)}</td><td class="n">${rp(p.bayar)}</td><td>${esc(p.status)}</td><td><button type="button" class="g" data-act="lapRekeningOpen" data-id="${esc(p.id)}">Buka</button></td></tr>`).join('');
  return `<section class="card satria-rek" id="satriaLaporanRekening" aria-label="Laporan pengadaan per rekening anggaran">
  <div class="satria-rek-heading"><div><span class="satria-rek-eyebrow">ANALISIS REKENING ANGGARAN</span><h3>Pengadaan Berdasarkan Kode Rekening</h3><p class="mut">Rekap e-Purchasing dan SPSE berdasarkan <b>Rekening Anggaran</b> yang dipilih pada Data Paket. OPD mengikuti filter di header SATRIA; tahun dan rekening dapat difilter di bawah.</p></div><div class="satria-rek-actions"><button type="button" class="g" data-act="lapRekeningCsv">Ekspor Rekap CSV</button><button type="button" class="g" data-act="lapRekeningDetailCsv">Ekspor Paket CSV</button></div></div>
  <div class="satria-rek-filter"><label>Tahun Anggaran<select id="lapRekeningTahun"><option value="all">Semua tahun yang dapat diakses</option>${data.years.map(y=>`<option value="${y}" ${data.selectedYear===String(y)?'selected':''}>${y}</option>`).join('')}</select></label><label>Rekening Anggaran<select id="lapRekeningAkun"><option value="all">Semua rekening</option>${options}</select></label><label>Cari paket, RUP, atau kode rekening<input id="lapRekeningCari" type="search" placeholder="Ketik lalu Enter / klik Cari" value="${esc(S.ui.lapRekeningCari||'')}"></label><button type="button" class="g" data-act="lapRekeningCari">Cari</button><button type="button" class="g" data-act="lapRekeningReset">Reset</button></div>
- <div class="satria-rek-kpi"><div><small>Rekening tercatat</small><b>${unique}</b></div><div><small>Paket terfilter</small><b>${total.total}</b></div><div><small>Pagu paket tercatat</small><b>${rp(total.pagu)}</b></div><div><small>Nilai penetapan E-P</small><b>${rp(total.penetapan)}</b></div><div><small>Kontrak SPSE tercatat</small><b>${rp(total.kontrak)}</b></div></div>
+ <div class="satria-rek-kpi"><div><small>Rekening tercatat</small><b>${unique}</b></div><div><small>Paket terfilter</small><b>${total.total}</b></div><div><small>Pagu paket tercatat</small><b>${rp(total.pagu)}</b></div><div class="satria-rek-kpi-key"><small>Total HPS E-P</small><b>${rp(total.hps)}</b></div><div class="satria-rek-kpi-key"><small>Total Penetapan E-P</small><b>${rp(total.penetapan)}</b></div><div><small>Selisih HPS–Penetapan*</small><b>${total.ditetapkan?rp(total.selisihHps):'—'}</b></div><div><small>Kontrak SPSE tercatat</small><b>${rp(total.kontrak)}</b></div></div>
  ${without?`<p class="satria-rek-attention" role="status">⚠ ${without} paket belum ditautkan ke rekening atau mengacu pada rekening yang tidak ditemukan di Data Master. Lengkapi Data Paket → Rekening Anggaran agar laporannya akurat.</p>`:''}
- <p class="mut satria-rek-note">Pagu yang tampil adalah <b>jumlah pagu paket tercatat</b>, bukan pagu DPA/rekening unik atau sisa anggaran. HPS, penetapan e-Purchasing, kontrak SPSE, dan pembayaran adalah indikator berbeda; jangan dijumlahkan sebagai realisasi belanja. Laporan bersifat baca-saja dan mencakup paket arsip dalam cakupan akun.</p>
- <h4>Rekap per rekening · Tahun · OPD</h4><div class="table-wrap satria-rek-scroll"><table><thead><tr><th>TA</th><th>OPD</th><th>Kode / Uraian Rekening</th><th>Paket</th><th>E-P</th><th>SPSE</th><th>Pagu paket</th><th>HPS E-P</th><th>Penetapan E-P</th><th>Kontrak SPSE</th><th>Bayar SPSE terverifikasi</th></tr></thead><tbody>${groupRows||'<tr><td colspan="11">Tidak ada paket yang sesuai filter.</td></tr>'}</tbody></table></div>
- <h4>Daftar paket penyusun rekap</h4><div class="table-wrap satria-rek-scroll"><table><thead><tr><th>TA</th><th>OPD</th><th>Rekening</th><th>Nama Paket / RUP</th><th>Pagu paket</th><th>HPS</th><th>Penetapan</th><th>Kontrak SPSE</th><th>Status</th><th>Aksi</th></tr></thead><tbody>${detailRows||'<tr><td colspan="10">Tidak ada paket yang sesuai filter.</td></tr>'}</tbody></table></div><small class="mut">Menampilkan ${Math.min(details.length,300)} dari ${details.length} paket. Ekspor CSV memuat <b>semua</b> paket yang cocok dengan filter. Tombol Buka menuju paket sesuai penugasan OPD/tahun akun.</small>
+ <p class="mut satria-rek-note">*Selisih HPS–Penetapan hanya untuk ${total.ditetapkan} paket e-Purchasing dengan penetapan valid; bukan penghematan kas. Paket yang belum ditetapkan tidak ikut selisih. Nilai negatif tetap ditampilkan. Pagu yang tampil adalah <b>jumlah pagu paket tercatat</b>, bukan pagu DPA/rekening unik atau sisa anggaran. HPS, penetapan e-Purchasing, kontrak SPSE, dan pembayaran adalah indikator berbeda; jangan dijumlahkan sebagai realisasi belanja. Laporan bersifat baca-saja dan mencakup paket arsip dalam cakupan akun.</p>
+ <h4>Rekap per rekening · Tahun · OPD</h4><div class="table-wrap satria-rek-scroll"><table><thead><tr><th>TA</th><th>OPD</th><th>Kode / Uraian Rekening</th><th>Paket</th><th>E-P</th><th>SPSE</th><th>E-P ditetapkan</th><th>E-P belum ditetapkan</th><th>Pagu paket</th><th>HPS E-P</th><th>Penetapan E-P</th><th>Selisih HPS–Penetapan*</th><th>Kontrak SPSE</th><th>Bayar SPSE terverifikasi</th></tr></thead><tbody>${groupRows||'<tr><td colspan="14">Tidak ada paket yang sesuai filter.</td></tr>'}</tbody></table></div>
+ <h4>Daftar paket penyusun rekap</h4><div class="table-wrap satria-rek-scroll"><table><thead><tr><th>TA</th><th>OPD</th><th>Rekening</th><th>Nama Paket / RUP</th><th>Pagu paket</th><th>HPS</th><th>Penetapan</th><th>Selisih HPS–Penetapan*</th><th>Kontrak SPSE</th><th>Bayar SPSE terverifikasi</th><th>Status</th><th>Aksi</th></tr></thead><tbody>${detailRows||'<tr><td colspan="14">Tidak ada paket yang sesuai filter.</td></tr>'}</tbody></table></div><small class="mut">Menampilkan ${Math.min(details.length,300)} dari ${details.length} paket. Ekspor CSV memuat <b>semua</b> paket yang cocok dengan filter. Tombol Buka menuju paket sesuai penugasan OPD/tahun akun.</small>
  </section>`;
 }
 function satriaLaporanRekeningCsv(detail=false){
  const {groups,details}=satriaLaporanRekeningRows();
  if(detail){
-   const headers=['TA','OPD','Kode rekening','Uraian rekening','Kondisi rekening','ID Paket','Kode RUP','Nama paket','Jalur','Pagu paket tercatat','HPS E-P','Penetapan E-P','Kontrak SPSE dengan nomor kontrak','Bayar SPSE terverifikasi','Status'];
-   const rows=details.map(p=>[p.tahun,O(p.opd).singkat||O(p.opd).nama||p.opd,p.kode,p.nama,p.rekeningStatus,p.id,p.rup,p.paketNama,p.spse?'SPSE':'E-Purchasing',p.pagu,p.hps,p.penetapan,p.kontrak,p.bayar,p.status]);
+   const headers=['TA','OPD','Kode rekening','Uraian rekening','Kondisi rekening','ID Paket','Kode RUP','Nama paket','Jalur','Pagu paket tercatat','HPS E-P','Penetapan E-P','Selisih HPS–Penetapan (penetapan valid saja)','Kontrak SPSE dengan nomor kontrak','Bayar SPSE terverifikasi','Status','Tanggal negosiasi','Tanggal kontrak SPSE','Arsip'];
+   const rows=details.map(p=>[p.tahun,O(p.opd).singkat||O(p.opd).nama||p.opd,p.kode,p.nama,p.rekeningStatus,p.id,p.rup,p.paketNama,p.spse?'SPSE':'E-Purchasing',p.pagu,p.hps,p.penetapan,p.selisihHps===null?'':p.selisihHps,p.kontrak,p.bayar,p.status, (S.paket||[]).find(x=>String(x.id)===p.id)?.tglNego||'',(S.paket||[]).find(x=>String(x.id)===p.id)?.spseMonitoring?.contractDate||'',(S.paket||[]).find(x=>String(x.id)===p.id)?.arsip===true?'Ya':'Tidak']);
    return satriaLaporanDownloadCsv('satria-paket-per-rekening.csv',headers,rows);
  }
- const headers=['TA','OPD','Kode rekening','Uraian rekening','Kondisi rekening','Jumlah paket','Paket E-P','Paket SPSE','Pagu paket tercatat','HPS E-P','Penetapan E-P','Kontrak SPSE dengan nomor kontrak','Bayar SPSE terverifikasi'];
- const rows=groups.map(g=>[g.tahun,O(g.opd).singkat||O(g.opd).nama||g.opd,g.kode,g.nama,g.status,g.total,g.ep,g.spse,g.pagu,g.hps,g.penetapan,g.kontrak,g.bayar]);
+ const headers=['TA','OPD','Kode rekening','Uraian rekening','Kondisi rekening','Jumlah paket','Paket E-P','Paket SPSE','Pagu paket tercatat','HPS E-P','Penetapan E-P','Selisih HPS–Penetapan (penetapan valid saja)','Kontrak SPSE dengan nomor kontrak','Bayar SPSE terverifikasi','Paket E-P ditetapkan valid','Paket E-P belum ditetapkan'];
+ const rows=groups.map(g=>[g.tahun,O(g.opd).singkat||O(g.opd).nama||g.opd,g.kode,g.nama,g.status,g.total,g.ep,g.spse,g.pagu,g.hps,g.penetapan,g.ditetapkan?g.selisihHps:'',g.kontrak,g.bayar,g.ditetapkan,g.ep-g.ditetapkan]);
  return satriaLaporanDownloadCsv('satria-rekap-per-rekening.csv',headers,rows);
 }
 
+/* SATRIA 3.0.59.49 — audit kelengkapan laporan.
+ * Hanya baca dari cakupan laporan rekening aktif (OPD/TA/rekening/pencarian).
+ * Temuan adalah pekerjaan verifikasi data, BUKAN keputusan kelayakan hukum.
+ */
+const SATRIA_LAP_AUDIT_LABELS={
+ 'rekening-kosong':'Rekening belum ditautkan',
+ 'rekening-hilang':'Rekening tidak ditemukan',
+ 'rup-kosong':'Referensi Bank RUP perlu periksa',
+ 'rup-scope':'RUP tertaut ke OPD/TA berbeda',
+ 'pagu-kosong':'Pagu paket belum valid',
+ 'hps-belum':'Rincian HPS belum lengkap',
+ 'hps-pagu':'HPS melampaui pagu paket',
+ 'penetapan-gate':'Penetapan tercatat perlu verifikasi ulang',
+ 'kontrak-nomor':'Nilai kontrak SPSE tanpa nomor kontrak',
+ 'kontrak-pagu':'Kontrak SPSE melampaui pagu paket',
+ 'bayar-kontrak':'Pembayaran SPSE terverifikasi melebihi kontrak',
+ 'bayar-bukti':'Pembayaran SPSE tanpa kontrak bernomor'
+};
+function satriaLaporanAuditRows(){
+ const filtered=satriaLaporanRekeningRows();
+ const byId=new Map((S.paket||[]).map(p=>[String(p.id),p]));
+ const byRupId=new Map((S.rupBank||[]).map(r=>[String(r.id),r]));
+ const rupKeys=new Set((S.rupBank||[]).map(r=>rupBankKey(r)));
+ const findings=[];
+ const summary={paket:filtered.details.length,ep:0,spse:0,ditetapkan:0,menunggu:0,kontrak:0,
+   arsip:0,temuanPaket:0,temuan:0,hps:0,penetapan:0,pagu:0,bayar:0};
+ for(const d of filtered.details){
+  const p=byId.get(d.id);if(!p)continue;
+  const spse=d.spse,items=Array.isArray(p.items)?p.items:[];
+  const h=Number(d.hps)||0,pg=Number(p.pagu),win=spse?null:pemenang(p);
+  const add=(kode,catatan)=>findings.push({kode,kategori:SATRIA_LAP_AUDIT_LABELS[kode],catatan, tahun:d.tahun,opd:d.opd,
+    rekening:d.kode, paket:d.paketNama,rup:d.rup,id:d.id,jalur:spse?'SPSE':'E-Purchasing'});
+  summary.pagu+=Number.isFinite(pg)?pg:0;
+  summary.hps+=h;summary.penetapan+=Number(d.penetapan)||0;summary.bayar+=Number(d.bayar)||0;
+  if(p.arsip===true)summary.arsip++;
+  if(spse){summary.spse++;if(d.kontrak>0)summary.kontrak++}
+  else{summary.ep++;if(win)summary.ditetapkan++;else summary.menunggu++}
+  if(d.rekeningStatus==='tanpa')add('rekening-kosong','Pilih rekening anggaran pada Data Paket.');
+  else if(d.rekeningStatus==='hilang')add('rekening-hilang','Akun rekening yang dirujuk tidak ada di Data Master.');
+  const refs=satriaRupLinks(p);
+  if(refs.length){
+   const missing=refs.filter(id=>!byRupId.has(String(id)));
+   if(missing.length)add('rup-kosong','ID RUP tertaut tidak ditemukan di Bank RUP.');
+   const cross=refs.filter(id=>{const r=byRupId.get(String(id));return r&&(String(r.opd)!==String(p.opd)||Number(r.tahun)!==Number(p.tahun))});
+   if(cross.length)add('rup-scope','RUP yang ditautkan memiliki OPD atau tahun berbeda.');
+  }else if(!rupKeys.has(rupBankKey(p)))add('rup-kosong','Kode RUP paket tidak ditemukan pada Bank RUP untuk OPD dan tahun yang sama.');
+  if(!Number.isFinite(pg)||pg<=0)add('pagu-kosong','Pagu paket belum berupa nilai positif.');
+  if(!spse){
+   if(!items.length||items.some(i=>!String(i.nama||'').trim()||!Number.isFinite(Number(i.vol))||Number(i.vol)<=0||!Number.isFinite(Number(i.hs))||Number(i.hs)<=0))
+    add('hps-belum','Periksa nama barang, volume, dan HPS satuan.');
+   if(Number.isFinite(pg)&&pg>0&&h>pg)add('hps-pagu','HPS terhitung melebihi pagu paket; periksa nilai sumber.');
+   if(p.pemenangId&&!win)add('penetapan-gate','Ada ID pemenang tersimpan, tetapi penetapan tidak lolos validasi data saat ini. Jangan menyimpulkan nilainya nol tanpa memeriksa bukti historis.');
+  }else{
+   const m=p.spseMonitoring||{},cv=Number(satriaSpseContractValue(m))||0,
+     paid=Number(satriaSpsePayments(m,true))||0,hasNo=!!String(m.contractNo||'').trim();
+   if(cv>0&&!hasNo)add('kontrak-nomor','Nilai kontrak tercatat tetapi nomor kontrak kosong.');
+   if(Number.isFinite(pg)&&pg>0&&cv>pg)add('kontrak-pagu','Nilai kontrak termasuk addendum melebihi pagu paket.');
+   if(paid>Math.max(cv,0))add('bayar-kontrak','Pembayaran terverifikasi lebih besar dari nilai kontrak yang tercatat.');
+   if(paid>0&&!hasNo)add('bayar-bukti','Ada pembayaran terverifikasi tetapi nomor kontrak kosong.');
+  }
+ }
+ summary.temuan= findings.length;
+ summary.temuanPaket=new Set(findings.map(f=>f.id)).size;
+ const selected=String(S.ui.lapAuditJenis||'all');
+ const visible=selected==='all'||SATRIA_LAP_AUDIT_LABELS[selected]?selected:'all';
+ const counts=Object.fromEntries(Object.keys(SATRIA_LAP_AUDIT_LABELS).map(k=>[k,0]));
+ findings.forEach(f=>counts[f.kode]++);
+ return {summary,findings,counts,selected:visible,shown:findings.filter(f=>visible==='all'||f.kode===visible),filtered};
+}
+function vLaporanAudit(){
+ const {summary,counts,selected,shown}=satriaLaporanAuditRows();
+ const options=Object.entries(SATRIA_LAP_AUDIT_LABELS).filter(([id])=>counts[id]>0)
+  .map(([id,label])=>`<option value="${esc(id)}" ${selected===id?'selected':''}>${esc(label)} (${counts[id]})</option>`).join('');
+ const rows=shown.slice(0,200).map(f=>`<tr><td>${esc(f.tahun)}</td><td>${esc(O(f.opd).singkat||O(f.opd).nama||f.opd)}</td>
+  <td><b>${esc(f.paket)}</b><small>RUP: ${esc(f.rup||'—')} · Rekening: ${esc(f.rekening)}</small></td><td>${esc(f.jalur)}</td>
+  <td><b>${esc(f.kategori)}</b><small>${esc(f.catatan)}</small></td><td><button type="button" class="g" data-act="lapRekeningOpen" data-id="${esc(f.id)}">Buka</button></td></tr>`).join('');
+ return `<section class="card satria-rek satria-lap-audit" id="satriaLaporanAudit" aria-label="Audit kelengkapan laporan">
+  <div class="satria-rek-heading"><div><span class="satria-rek-eyebrow">AUDIT DATA • BACA SAJA</span><h3>Kelengkapan & Tindak Lanjut Laporan</h3>
+  <p class="mut">Mengikuti filter tahun, rekening, pencarian, dan OPD pada laporan di atas. Temuan menandai data yang perlu diperiksa, bukan keputusan kepatuhan atau perubahan transaksi.</p></div>
+  <div class="satria-rek-actions"><button type="button" class="g" data-act="lapAuditCsv">Ekspor Temuan CSV</button></div></div>
+  <div class="satria-rek-kpi"><div><small>Total paket</small><b>${summary.paket}</b></div><div><small>E-P sudah ditetapkan valid</small><b>${summary.ditetapkan}</b></div><div><small>E-P belum ditetapkan valid</small><b>${summary.menunggu}</b></div><div><small>Paket SPSE</small><b>${summary.spse}</b></div><div><small>Arsip dalam cakupan</small><b>${summary.arsip}</b></div><div class="satria-rek-kpi-key"><small>Paket perlu diperiksa</small><b>${summary.temuanPaket}</b></div><div><small>Total catatan pemeriksaan</small><b>${summary.temuan}</b></div><div><small>Kontrak SPSE bernomor</small><b>${summary.kontrak}</b></div></div>
+  <div class="satria-lap-audit-toolbar"><label>Jenis temuan<select id="lapAuditJenis"><option value="all">Semua temuan (${summary.temuan})</option>${options}</select></label><small>Menampilkan ${Math.min(shown.length,200)} dari ${shown.length} temuan. CSV memuat seluruh temuan sesuai filter.</small></div>
+  <div class="table-wrap satria-rek-scroll"><table><thead><tr><th>TA</th><th>OPD</th><th>Nama Paket / RUP / Rekening</th><th>Jalur</th><th>Temuan / Tindak Lanjut</th><th>Aksi</th></tr></thead><tbody>${rows||(summary.paket?'<tr><td colspan="6">Tidak ditemukan masalah kelengkapan pada data yang terfilter. Tetap cocokkan dengan dokumen resmi.</td></tr>':'<tr><td colspan="6">Tidak ada paket pada cakupan filter ini.</td></tr>')}</tbody></table></div>
+  <p class="mut satria-rek-note">Status penetapan memakai validasi SATRIA saat laporan dibuka. Pemenang historis yang tidak memenuhi validasi terkini ditandai untuk pemeriksaan, tidak dihapus. Pemeriksaan tidak mencakup dokumen eksternal atau saldo DPA yang tidak tersimpan di SATRIA.</p>
+ </section>`;
+}
+function satriaLaporanAuditCsv(){
+ const {shown}=satriaLaporanAuditRows();
+ return satriaLaporanDownloadCsv('satria-audit-kelengkapan-pengadaan.csv',
+ ['Tahun','OPD','Kode Rekening','Nama Paket','RUP','ID Paket','Jalur','Jenis Temuan','Catatan Tindak Lanjut'],
+ shown.map(f=>[f.tahun,O(f.opd).singkat||O(f.opd).nama||f.opd,f.rekening,f.paket,f.rup,f.id,f.jalur,f.kategori,f.catatan]));
+}
+/* SATRIA NEXT 3.0.59.50 — Visual command center laporan (baca-saja).
+ * Semua grafik berbagi sumber/filter/scope server laporan rekening & audit.
+ * Tanpa library eksternal; data nominal tidak direkayasa dan tidak dijumlah
+ * silang antara HPS, penetapan, kontrak, maupun pembayaran.
+ */
+const SATRIA_LV_METRICS={hps:'HPS E-Purchasing',penetapan:'Penetapan E-Purchasing',pagu:'Pagu paket tercatat'};
+function satriaLaporanVisualData(){
+ const rekening=satriaLaporanRekeningRows(),audit=satriaLaporanAuditRows();
+ const totals={paket:0,ep:0,spse:0,ditetapkan:0,hps:0,penetapan:0,pagu:0,kontrak:0,bayar:0};
+ const accounts=new Map(),yearMap=new Map();
+ for(const g of rekening.groups){
+  for(const k of Object.keys(totals))if(k in g)totals[k]+=Number(g[k])||0;
+  let a=accounts.get(g.key);
+  if(!a){a={key:g.key,kode:g.kode,nama:g.nama,status:g.status,paket:0,hps:0,penetapan:0,pagu:0};accounts.set(g.key,a)}
+  for(const k of ['hps','penetapan','pagu'])a[k]+=Number(g[k])||0;
+  a.paket+=g.total;
+  let y=yearMap.get(g.tahun);
+  if(!y){y={tahun:g.tahun,hps:0,penetapan:0,pagu:0};yearMap.set(g.tahun,y)}
+  for(const k of ['hps','penetapan','pagu'])y[k]+=Number(g[k])||0;
+ }
+ totals.paket=rekening.details.length;
+ totals.ep=audit.summary.ep;
+ totals.spse=audit.summary.spse;
+ totals.ditetapkan=audit.summary.ditetapkan;
+ return {rekening,audit,totals,
+  accounts:[...accounts.values()].sort((a,b)=>b.hps-a.hps||b.paket-a.paket),
+  years:[...yearMap.values()].sort((a,b)=>a.tahun-b.tahun)};
+}
+function satriaLaporanVisualCompact(n){
+ const v=Math.abs(Number(n)||0),sign=Number(n)<0?'-':'';
+ const f=(v,unit)=>sign+'Rp '+v.toLocaleString('id-ID',{maximumFractionDigits:1})+' '+unit;
+ if(v>=1e12)return f(v/1e12,'T');
+ if(v>=1e9)return f(v/1e9,'M');
+ if(v>=1e6)return f(v/1e6,'jt');
+ if(v>=1e3)return f(v/1e3,'rb');
+ return sign+'Rp '+Math.round(v).toLocaleString('id-ID');
+}
+function satriaLaporanVisualTrend(years){
+ if(!years.length)return '<p class="satria-lv-empty">Belum ada data tahunan pada filter ini.</p>';
+ const data=years.slice(-8),W=650,H=216,l=40,r=12,t=16,b=36;
+ const max=Math.max(1,...data.flatMap(y=>[y.hps,y.penetapan]))*1.08;
+ const x=i=>l+(data.length===1?.5:i/(data.length-1))*(W-l-r);
+ const y=v=>H-b-Math.max(0,v)/max*(H-t-b);
+ const grid=[0,.25,.5,.75,1].map(f=>`<line x1="${l}" x2="${W-r}" y1="${y(max*f).toFixed(2)}" y2="${y(max*f).toFixed(2)}" class="satria-lv-gridline"/><text x="${l-6}" y="${(y(max*f)+4).toFixed(2)}" text-anchor="end" class="satria-lv-axis">${esc(satriaLaporanVisualCompact(max*f))}</text>`).join('');
+ const line=(key,cls)=>{
+  const pts=data.map((v,i)=>[x(i),y(v[key])]);
+  return `<polyline class="satria-lv-line ${cls}" points="${pts.map(p=>p.map(n=>n.toFixed(2)).join(',')).join(' ')}"/>`+
+   data.map((v,i)=>`<circle class="satria-lv-dot ${cls}" cx="${pts[i][0].toFixed(2)}" cy="${pts[i][1].toFixed(2)}" r="4.8"><title>TA ${v.tahun} • ${key==='hps'?'HPS':'Penetapan'} ${rp(v[key])}</title></circle>`).join('')};
+ const ticks=data.map((v,i)=>`<text x="${x(i).toFixed(2)}" y="${H-11}" text-anchor="middle" class="satria-lv-axis">${esc(v.tahun)}</text>`).join('');
+ return `<svg class="satria-lv-trend-svg" role="img" aria-label="Tren tahunan total HPS dan total penetapan e-Purchasing" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${grid}${line('hps','satria-lv-purple')}${line('penetapan','satria-lv-green')}${ticks}</svg>`;
+}
+function vLaporanVisual(){
+ const d=satriaLaporanVisualData(),{totals,rekening,audit}=d;
+ const chosen=String(S.ui.lapVizMetric||'hps');
+ const metric=Object.hasOwn(SATRIA_LV_METRICS,chosen)?chosen:'hps';
+ const top=[...d.accounts].sort((a,b)=>(b[metric]-a[metric])||b.paket-a.paket).slice(0,7);
+ const max=Math.max(1,...top.map(a=>a[metric]));
+ const wait=audit.summary.menunggu,valid=audit.summary.ditetapkan,spse=audit.summary.spse;
+ const num=Math.max(0,valid+wait+spse),p1=num?valid*100/num:0,p2=num?(valid+wait)*100/num:0;
+ const yearOptions=rekening.years.map(y=>`<option value="${y}" ${rekening.selectedYear===String(y)?'selected':''}>${y}</option>`).join('');
+ const bars=top.map(a=>`<button type="button" class="g satria-lv-barline" data-act="lapVizAccount" data-key="${esc(a.key)}" aria-label="Filter rekening ${esc(a.kode)}">
+  <span class="satria-lv-barlabel"><b>${esc(a.kode)}</b><small>${esc(a.nama)}</small></span>
+  <span class="satria-lv-rail"><span class="satria-lv-fill" style="width:${Math.min(100,Math.max(0,a[metric]/max*100)).toFixed(2)}%"></span></span>
+  <strong>${esc(satriaLaporanVisualCompact(a[metric]))}</strong></button>`).join('');
+ const topAudit=Object.entries(audit.counts).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,6);
+ const maxAudit=Math.max(1,...topAudit.map(([,v])=>v));
+ const auditBars=topAudit.map(([code,count])=>`<button type="button" class="g satria-lv-auditline" data-act="lapVizAudit" data-kind="${esc(code)}" aria-label="Lihat temuan ${esc(SATRIA_LAP_AUDIT_LABELS[code])}">
+  <span>${esc(SATRIA_LAP_AUDIT_LABELS[code])}</span><span class="satria-lv-audittrack"><i style="width:${(count/maxAudit*100).toFixed(2)}%"></i></span><b>${count}</b></button>`).join('');
+ const table=top.map((a,i)=>`<tr><td class="satria-lv-rank">${i+1}</td><td><b>${esc(a.kode)}</b><small>${esc(a.nama)}</small></td><td class="n">${a.paket}</td><td class="n">${rp(a.hps)}</td><td class="n">${rp(a.penetapan)}</td><td><button type="button" class="g" data-act="lapVizAccount" data-key="${esc(a.key)}">Fokus</button></td></tr>`).join('');
+ return `<section class="satria-lv" id="satriaLaporanVisual" aria-label="Dashboard visual Laporan dan Analisis">
+  <div class="satria-lv-hero"><div><span class="satria-lv-eyebrow">SATRIA INSIGHTS • LAPORAN & ANALISIS</span><h2>Pengadaan dalam satu pandangan<span class="satria-lv-dot-title">.</span></h2><p>Data nyata dari paket dan rekening yang dapat diakses. Pahami tren, bandingkan nilai, temukan tindak lanjut.</p>
+  <div class="satria-lv-meta"><span>● Baca-saja</span><span>● Termasuk paket arsip</span><span>● OPD sesuai akses akun</span></div></div>
+  <div class="satria-lv-hero-filter"><label for="lapVizYear">Tahun anggaran</label><select id="lapVizYear" aria-label="Filter tahun dashboard"><option value="all">Semua TA diizinkan</option>${yearOptions}</select><small>Rekening & pencarian mengikuti filter laporan di bawah.</small></div></div>
+  <div class="satria-lv-kpis">
+   <div class="satria-lv-kpi"><span>HPS e-Purchasing</span><strong>${rp(totals.hps)}</strong><small>Nilai HPS terfilter, bukan realisasi</small><i class="satria-lv-kpi-stroke is-purple"></i></div>
+   <div class="satria-lv-kpi"><span>Nilai penetapan E-P</span><strong>${rp(totals.penetapan)}</strong><small>Hanya penetapan tervalidasi</small><i class="satria-lv-kpi-stroke is-green"></i></div>
+   <div class="satria-lv-kpi"><span>Paket dalam cakupan</span><strong>${totals.paket.toLocaleString('id-ID')}</strong><small>${valid} E-P ditetapkan • ${wait} menunggu • ${spse} SPSE</small><i class="satria-lv-kpi-stroke is-blue"></i></div>
+   <div class="satria-lv-kpi"><span>Perlu ditinjau</span><strong>${audit.summary.temuanPaket.toLocaleString('id-ID')}</strong><small>${audit.summary.temuan} catatan pemeriksaan data</small><i class="satria-lv-kpi-stroke is-amber"></i></div>
+  </div>
+  <div class="satria-lv-grid">
+   <article class="satria-lv-panel"><div class="satria-lv-heading"><div><span class="satria-lv-chip">01 • KOMPOSISI</span><h3>Status paket pengadaan</h3></div><span class="satria-lv-caption">Berdasarkan jumlah paket</span></div>
+    <div class="satria-lv-donut-layout"><div class="satria-lv-donut" data-empty="${num?'false':'true'}" role="img" aria-label="${valid} E-P ditetapkan, ${wait} E-P menunggu, ${spse} paket SPSE" style="--lv-stop1:${p1.toFixed(3)}%;--lv-stop2:${p2.toFixed(3)}%"><div><strong>${num.toLocaleString('id-ID')}</strong><small>Paket</small></div></div>
+     <div class="satria-lv-legend"><div><i class="satria-lv-legend-color is-purple"></i><span>E-P ditetapkan</span><strong>${valid}</strong></div><div><i class="satria-lv-legend-color is-amber"></i><span>E-P menunggu</span><strong>${wait}</strong></div><div><i class="satria-lv-legend-color is-green"></i><span>SPSE</span><strong>${spse}</strong></div></div></div>
+    <p class="satria-lv-foot">Status e-Purchasing berdasar validasi pemenang saat laporan dibuka. SPSE dipisahkan dari penetapan E-P.</p></article>
+   <article class="satria-lv-panel"><div class="satria-lv-heading"><div><span class="satria-lv-chip">02 • REKENING</span><h3>Rekening dengan nilai terbesar</h3></div><label class="satria-lv-metric-control">Ukuran<select id="lapVizMetric"><option value="hps" ${metric==='hps'?'selected':''}>HPS</option><option value="penetapan" ${metric==='penetapan'?'selected':''}>Penetapan</option><option value="pagu" ${metric==='pagu'?'selected':''}>Pagu paket</option></select></label></div>
+     <div class="satria-lv-bars">${bars||'<p class="satria-lv-empty">Belum ada rekening pada filter ini.</p>'}</div>
+     <p class="satria-lv-foot">7 rekening teratas menurut ${esc(SATRIA_LV_METRICS[metric])}; klik batang untuk memfilter rinciannya. Nilai dijumlah dari paket per rekening, bukan saldo DPA.</p></article>
+   <article class="satria-lv-panel"><div class="satria-lv-heading"><div><span class="satria-lv-chip">03 • TREN</span><h3>HPS vs penetapan per tahun</h3></div><span class="satria-lv-caption">Maks. 8 tahun terakhir</span></div>
+     ${satriaLaporanVisualTrend(d.years)}<div class="satria-lv-line-legend"><span><i class="is-purple"></i>HPS E-P</span><span><i class="is-green"></i>Penetapan E-P</span></div>
+     <p class="satria-lv-foot">Dua seri nilai yang berbeda, tidak dihitung sebagai pembayaran. Semua grafik mengikuti filter yang sama.</p></article>
+   <article class="satria-lv-panel"><div class="satria-lv-heading"><div><span class="satria-lv-chip">04 • AUDIT DATA</span><h3>Jenis temuan paling sering</h3></div><span class="satria-lv-caption">12 kategori pemeriksaan</span></div>
+     <div class="satria-lv-auditbars">${auditBars||'<p class="satria-lv-empty">Tidak ada temuan pada cakupan ini.</p>'}</div>
+     <p class="satria-lv-foot">Satu paket dapat memuat beberapa temuan. Klik kategori untuk melihat daftar paket yang perlu diperiksa, bukan penilaian hukum.</p></article>
+  </div>
+  <article class="satria-lv-panel satria-lv-table-panel"><div class="satria-lv-heading"><div><span class="satria-lv-chip">05 • PRIORITAS</span><h3>Rekening teratas • rincian cepat</h3></div><span class="satria-lv-caption">HPS dan penetapan ditampilkan terpisah</span></div>
+   <div class="satria-lv-table-wrap"><table><thead><tr><th>#</th><th>Rekening anggaran</th><th class="n">Paket</th><th class="n">HPS E-P</th><th class="n">Penetapan E-P</th><th>Aksi</th></tr></thead><tbody>${table||'<tr><td colspan="6">Belum ada data rekening pada filter ini.</td></tr>'}</tbody></table></div>
+   <p class="satria-lv-foot">Tabel visual menampilkan 7 rekening teratas sesuai ukuran grafik; untuk seluruh rekening, semua paket, serta ekspor gunakan tabel lengkap di bawah.</p></article>
+  <p class="satria-lv-scope">Cakupan: ${rekening.selectedYear==='all'?'semua tahun yang diizinkan':'TA '+esc(rekening.selectedYear)} • ${rekening.selectedKey==='all'?'semua rekening':'rekening terpilih'} • ${rekening.query?'pencarian aktif':'tanpa pencarian'} • mengikuti OPD header. Panel ringkasan Bank RUP di bagian bawah tetap memiliki cakupan seluruh tahun yang diizinkan dan dijelaskan secara terpisah.</p>
+ </section>`;
+}
 function vLap(){
  const data=satriaLaporanData(), totals=data.reduce((a,g)=>{for(const k of ['rup','terpakai','sisa','ep','spse','paguPaket','hps','penetapan','hematHps','nilaiKontrak','bayar','rupPerluCek','paketTanpaRup','kontrakPerluCek'])a[k]=(a[k]||0)+g[k];return a},{});
- const cards=[['Pagu RUP unik',totals.rup||0,'Tidak dijumlahkan berulang per paket'],['Penggunaan RUP terhitung',totals.terpakai||0,'Nilai penetapan valid atau HPS/cadangan non-final'],['Sisa kapasitas RUP',totals.sisa||0,'Bukan saldo kas / realisasi'],['Kontrak SPSE tercatat',totals.nilaiKontrak||0,'Nilai kontrak dan addendum dengan nomor kontrak'],['Pembayaran SPSE terverifikasi',totals.bayar||0,'Bukan progres fisik; tidak termasuk e-Purchasing'],['Nilai penetapan E-Purchasing',totals.penetapan||0,'Bukan nilai kontrak atau pembayaran']];
+ const cards=[['Pagu RUP unik',totals.rup||0,'Tidak dijumlahkan berulang per paket'],['Penggunaan RUP terhitung',totals.terpakai||0,'Nilai penetapan valid atau HPS/cadangan non-final'],['Sisa kapasitas RUP',totals.sisa||0,'Bukan saldo kas / realisasi'],['Kontrak SPSE tercatat',totals.nilaiKontrak||0,'Nilai kontrak dan addendum dengan nomor kontrak'],['Pembayaran SPSE terverifikasi',totals.bayar||0,'Bukan progres fisik; tidak termasuk e-Purchasing'],['HPS e-Purchasing',totals.hps||0,'HPS paket yang tercatat, bukan penetapan'],['Nilai penetapan E-Purchasing',totals.penetapan||0,'Bukan nilai kontrak atau pembayaran']];
  const rows=data.map(g=>`<tr><td>${g.tahun}</td><td>${esc(O(g.opd).singkat||g.opd)}</td><td class=n>${g.rupValid}</td><td class=n>${rp(g.rup)}</td><td class=n>${rp(g.terpakai)}</td><td class=n>${rp(g.sisa)}</td><td class=n>${g.ep}</td><td class=n>${g.spse}</td><td class=n>${rp(g.hps)}</td><td class=n>${rp(g.penetapan)}</td><td class=n>${rp(g.hematHps)}</td><td class=n>${rp(g.nilaiKontrak)}</td><td class=n>${rp(g.bayar)}</td><td class=n>${g.rupPerluCek}</td><td class=n>${g.spseTerlambat+g.spseMasalah}</td></tr>`).join('');
- return vLaporanRekening()+`<section class="card" data-satria-laporan="integrated"><div class="row" style="justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><h3>Laporan dan Analisis • E-Purchasing + Monitoring SPSE</h3><div class="row" style="gap:8px"><button class="g" data-act="csv">Ekspor Ringkasan (CSV)</button><button class="g" data-act="csvDetail">Ekspor Paket (CSV)</button></div></div>
+ return vLaporanVisual()+vLaporanRekening()+vLaporanAudit()+`<section class="card" data-satria-laporan="integrated"><div class="row" style="justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><h3>Laporan dan Analisis • E-Purchasing + Monitoring SPSE</h3><div class="row" style="gap:8px"><button class="g" data-act="csv">Ekspor Ringkasan (CSV)</button><button class="g" data-act="csvDetail">Ekspor Paket (CSV)</button></div></div>
+ <p class="mut">Ringkasan terintegrasi di bagian ini selalu mencakup <b>semua tahun yang diizinkan</b> dalam OPD header. Filter tahun/rekening pada laporan di atas berlaku khusus untuk Rekening Anggaran dan Audit Kelengkapan, bukan ringkasan Bank RUP di bawah ini.</p>
  <p class="mut">Sumber: data SATRIA terakhir yang berhasil dimuat sesuai akses Anda, termasuk paket arsip. Nilai RUP adalah anggaran sumber, penggunaannya merupakan perhitungan HPS/cadangan sebelum penetapan dan nilai pemenang tervalidasi setelah penetapan paket RUP tunggal; penetapan e-Purchasing bukan pembayaran, dan pembayaran SPSE hanya yang berstatus terverifikasi. Laporan tidak mengubah data. Informasi SPSE yang dicatat manual perlu dibandingkan dengan SPSE resmi.</p>
  <div class="satria-lap-metrics">${cards.map(([l,v,d])=>`<div class="card satria-lap-metric"><span class="satria-lap-label">${esc(l)}</span><b class="satria-lap-value">${rp(v)}</b><small class="satria-lap-note">${esc(d)}</small></div>`).join('')}</div>
  <p class="mut">Total ${totals.ep||0} paket e-Purchasing, ${totals.spse||0} paket SPSE, ${totals.rupPerluCek||0} kelompok RUP perlu perhatian, ${totals.paketTanpaRup||0} paket dengan referensi RUP tidak ditemukan, ${totals.kontrakPerluCek||0} catatan kontrak/pembayaran SPSE perlu periksa. Selisih HPS–penetapan hanya dihitung untuk paket e-Purchasing dengan pemenang terpilih; selisih negatif tetap dilaporkan. Total tidak digunakan sebagai bukti realisasi anggaran.</p>
@@ -2368,8 +2564,8 @@ function csvExport(){
 function satriaLaporanCsvDetail(){
  const scope=activeCloudScope();
  const list=(S.paket||[]).filter(p=>(S.ui.opd==='all'||String(p.opd)===String(S.ui.opd))&&(!scope||(scope.opdIds.includes(String(p.opd))&&scope.years.includes(Number(p.tahun)))));
- const head=['TA','OPD','ID Paket','RUP','Jalur','Nama paket','Pagu paket tercatat','HPS e-Purchasing','Nilai penetapan e-Purchasing','Nilai kontrak SPSE','Bayar SPSE terverifikasi','Status'];
- const rows=list.map(p=>{const sp=satriaSpseIs(p),m=p.spseMonitoring||{};return [p.tahun,O(p.opd).singkat||p.opd,p.id,p.rup,sp?'SPSE':'E-Purchasing',p.nama,p.pagu,sp?'':hps(p),sp?'':(pemenang(p)?kontrak(p):''),sp?satriaSpseContractValue(m):'',sp?satriaSpsePayments(m,true):'',sp?(m.status||'Belum diisi'):stt(p)]});
+ const head=['TA','OPD','ID Paket','RUP','Jalur','Nama paket','Pagu paket tercatat','HPS e-Purchasing','Nilai penetapan e-Purchasing','Nilai kontrak SPSE','Bayar SPSE terverifikasi','Status','Kode rekening','Kondisi rekening','Tanggal negosiasi','Tanggal kontrak SPSE','Arsip'];
+ const rows=list.map(p=>{const sp=satriaSpseIs(p),m=p.spseMonitoring||{};const akun=(S.akun||[]).find(a=>String(a.id)===String(p.akunId||''));return [p.tahun,O(p.opd).singkat||p.opd,p.id,p.rup,sp?'SPSE':'E-Purchasing',p.nama,p.pagu,sp?'':hps(p),sp?'':(pemenang(p)?kontrak(p):''),sp?(String(m.contractNo||'').trim()?satriaSpseContractValue(m):''):'',sp?satriaSpsePayments(m,true):'',sp?(m.status||'Belum diisi'):stt(p),akun?.kode||'',akun?'Terhubung':p.akunId?'Tidak ditemukan':'Belum ditautkan',p.tglNego||'',sp?m.contractDate||'':'',p.arsip===true?'Ya':'Tidak']});
  satriaLaporanDownloadCsv('satria-laporan-paket.csv',head,rows);
 }
 
@@ -3196,6 +3392,9 @@ document.addEventListener('click',e=>{
  if(a==='delyear'){const y=+d.y;if(S.paket.some(p=>+p.tahun===y)||(S.rupBank||[]).some(r=>+r.tahun===y)){toast('Tahun masih digunakan Paket Pengadaan atau Bank RUP.');return render()}if(S.tahun.length<=1){toast('Tahun anggaran terakhir tidak dapat dihapus. Tambahkan tahun pengganti terlebih dahulu.');return render()}if(!confirm('Hapus TA '+y+'? Tindakan ini hanya diizinkan bila tidak ada paket yang memakai tahun tersebut.'))return;S.tahun=S.tahun.filter(x=>+x!==y);if(+S.ui.tahun===y)S.ui.tahun=S.tahun[0];sync('settings','Tahun '+y+' dihapus');return render()}
  if(a==='reset'){if(!confirm('PERINGATAN: seluruh data aktif—paket, master, pengaturan, pengguna, dan penawaran—akan diganti dengan data awal. Unduh backup JSON terlebih dahulu. Lanjutkan?'))return;if(!confirm('Konfirmasi terakhir: ganti seluruh data aktif dengan data awal SATRIA?'))return;init();sync('settings','Data direset ke data awal');route();toast('Data awal dimuat ulang. Periksa konfigurasi dan unduh backup setelah pengisian.');return}
  if(a==='print')return window.print();
+ if(a==='lapVizAccount'){const key=String(d.key||'');if(!satriaLaporanRekeningRows().options.has(key))return;S.ui.lapRekeningAkun=key;render();document.getElementById('satriaLaporanRekening')?.scrollIntoView({block:'start',behavior:'smooth'});return}
+ if(a==='lapVizAudit'){const kind=String(d.kind||'');if(!Object.hasOwn(SATRIA_LAP_AUDIT_LABELS,kind))return;S.ui.lapAuditJenis=kind;render();document.getElementById('satriaLaporanAudit')?.scrollIntoView({block:'start',behavior:'smooth'});return}
+ if(a==='lapAuditCsv')return satriaLaporanAuditCsv();
  if(a==='lapRekeningCsv')return satriaLaporanRekeningCsv(false);
  if(a==='lapRekeningDetailCsv')return satriaLaporanRekeningCsv(true);
  if(a==='lapRekeningReset'){S.ui.lapRekeningTahun='all';S.ui.lapRekeningAkun='all';S.ui.lapRekeningCari='';return render()}
@@ -3253,6 +3452,9 @@ document.addEventListener('input',event=>{
 });
 document.addEventListener('change',e=>{
  const t=e.target,d=t.dataset;
+ if(t.id==='lapVizYear'){S.ui.lapRekeningTahun=String(t.value||'all');return render()}
+ if(t.id==='lapVizMetric'){const key=String(t.value||'hps');S.ui.lapVizMetric=Object.hasOwn(SATRIA_LV_METRICS,key)?key:'hps';return render()}
+ if(t.id==='lapAuditJenis'){S.ui.lapAuditJenis=String(t.value||'all');return render()}
  if(t.id==='lapRekeningTahun'){S.ui.lapRekeningTahun=String(t.value||'all');return render()}
  if(t.id==='lapRekeningAkun'){S.ui.lapRekeningAkun=String(t.value||'all');return render()}
  if(t.id==='lapRekeningCari'){S.ui.lapRekeningCari=String(t.value||'');return}
