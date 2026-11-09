@@ -196,6 +196,10 @@ function available(p){return !!p&&packetList().some(x=>String(x.id)===String(p.i
 function current(){const pid=String(S.ui.pid||'');return packetList().find(x=>String(x.id)===pid)||(!pid?packetList()[0]:null);}
 function prettyDate(v){return validDate(v)?satriaDateId(v):escLocal(v||'—');}
 function today(){return new Date().toLocaleString('id-ID',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+// Date on the price-analysis document is the RECORDED negotiation date,
+// never the date the browser happens to print the document. Read only:
+// changes to this date must be made in Data Paket / Kalkulator Nego.
+function documentDate(p){const recorded=clean(p?.tglNego);return validDate(recorded)?recorded:'';}
 function changeLink(p,type='analisa'){return '#'+type+'/'+encodeURIComponent(p.id);}
 function matrix(a){return `<div class="spha-scroll"><table class="spha-table"><thead><tr><th>Barang / Kebutuhan</th><th>Vol.</th><th>HPS satuan</th>${a.offers.map(o=>`<th>${escLocal(o.name)}<small>Harga tayang / Negosiasi</small></th>`).join('')}<th>Catatan perbandingan harga</th></tr></thead><tbody>${a.items.map(i=>{
  const priced=i.refs.filter(d=>d.listedUnit!==null);
@@ -340,7 +344,7 @@ function exampleConclusion(a,p){
  return `<ol class="spha-example-conclusion"><li>${priceConclusion?`Berdasarkan perbandingan harga tayang per item dan bukti yang tercatat, harga Penyedia ${escLocal(w.name)} tidak lebih tinggi dari pembanding pada tabel.`:'Bukti atau perbandingan harga belum cukup untuk menyimpulkan kewajaran.'}</li><li>Referensi produk diambil dari e-Katalog. Smart Survey tidak melakukan penilaian ulang lulus/tidak lulus spesifikasi. Kesesuaian dengan kebutuhan/KAK tetap harus dipastikan PPK sebelum transaksi.${hasSpecCaution?' Terdapat catatan produk atau perbedaan yang masih perlu ditindaklanjuti.':''}</li><li>${priceConclusion&&!hasSpecCaution?'Rekomendasi: Hasil analisis harga dapat menjadi bahan pertimbangan PPK untuk proses berikutnya setelah memastikan kebutuhan dan persyaratan pengadaan terpenuhi.':'Rekomendasi: Lengkapi bukti harga dan tindak lanjuti catatan sebelum melanjutkan proses.'}</li></ol>`;
 }
 function documentHTML(p){
- const a=getAnalysis(p),stamp=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+ const a=getAnalysis(p),negoDate=documentDate(p),stamp=negoDate?satriaDateId(negoDate):'Tanggal negosiasi belum diisi';
  const datePlace=clean(O(p.opd)?.tempat)||'';
  return `<div class="spha-doc spha-audit-paper spha-example-paper" data-spha-document="true">
  <div class="spha-example-cover">${typeof kop==='function'?kop(p):''}
@@ -360,6 +364,7 @@ function documentHTML(p){
  </div>`;
 }
 function docChecks(p){const a=getAnalysis(p);return [
+ {id:'nego-date',label:'Tanggal Analisis Harga mengikuti tanggal negosiasi yang valid',tab:'data',f:'tglNego',ok:!!documentDate(p)},
  {id:'rup',label:'Kode RUP tersedia',tab:'data',f:'rup',ok:!!p.rup},
  {id:'items',label:'Rincian barang dan HPS lengkap',tab:'rincian',f:null,ok:a.items.length>0&&a.items.every(i=>i.hpsUnit>0&&i.qty>0)},
  {id:'offers',label:'Penawaran penyedia tercatat',tab:'nego',f:null,ok:a.offers.length>0},
@@ -368,7 +373,7 @@ function docChecks(p){const a=getAnalysis(p);return [
  {id:'technical',label:'Kesetaraan spesifikasi dan keaslian bukti harus diperiksa manual oleh Pejabat Pengadaan',tab:'nego',f:null,ok:false,manual:true}
  ];}
 function showDoc(p){if(!available(p))return false;S.ui.dpid=String(p.id);S.ui.dok='analisa';S.ui.pid=null;S.ui.page='dok';location.hash='#dok';render();return true;}
-root.SATRIA_PRICE_ANALYSIS=Object.freeze({page,getAnalysis,analyze,documentHTML,docChecks,showDoc});
+root.SATRIA_PRICE_ANALYSIS=Object.freeze({page,getAnalysis,analyze,documentHTML,documentDate,docChecks,showDoc});
 // Extend the EXISTING document studio instead of making a second print engine.
 if(typeof DOCS!=='undefined')DOCS.analisa=documentHTML;
 // The document and dashboard read only already-visible package data; events do not write to S.
