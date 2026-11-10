@@ -2,7 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8'),sw=fs.readFileSync(path.join(root,'sw.js'),'utf8'),manifest=JSON.parse(fs.readFileSync(path.join(root,'manifest.json'),'utf8'));
-const version='3.0.59.53';assert(html.includes(version)&&manifest.description.includes(version)&&sw.includes(version),'App/cache/manifest versions differ');
+const version='3.0.59.54';assert(html.includes(version)&&manifest.description.includes(version)&&sw.includes(version),'App/cache/manifest versions differ');
 const hrefs=[...html.matchAll(/<(?:script|link)\b[^>]*?(?:src|href)="(\.\/[^"#?]+)"/g)].map(x=>x[1]);
 for(const href of hrefs)assert(fs.existsSync(path.join(root,href)),'Missing index asset '+href);
 const m=sw.match(/const APP_ASSETS\s*=\s*\[([\s\S]*?)\];/);assert(m,'Precache list missing');
