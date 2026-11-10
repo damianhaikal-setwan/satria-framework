@@ -58,7 +58,7 @@
    if(page==='dok'){
      const p=ep.find(x=>String(x.id)===String(S.ui.dpid))||ep[0], ready=p&&typeof docMiss==='function'&&typeof S?.ui?.dok==='string'?(docMiss(p,S.ui.dok)||[]).length:null;
      return {kicker:'DOCUMENT STUDIO / SIAP CETAK',title:'Dokumen rapi, kerja sat-set.',sub:'Pilih paket, tentukan jenis dokumen, periksa pratinjau A4, lalu cetak. Data tidak perlu diketik ulang.',
-       stats:metric('Paket tersedia',ep.length,'Dalam filter tahun/OPD')+metric('Paket aktif',p?(p.rup||p.nama||'Terpilih'):'Belum ada','Sumber data dokumen')+metric('Jenis dokumen', '14','Template dokumen pengadaan')+metric('Pemeriksaan isian',ready===null?'—':ready===0?'Terisi':ready+' perlu dicek','Bukan pengesahan dokumen',ready===0?'is-good':ready?'is-warn':''),
+       stats:metric('Paket tersedia',ep.length,'Dalam filter tahun/OPD')+metric('Paket aktif',p?(p.rup||p.nama||'Terpilih'):'Belum ada','Sumber data dokumen')+metric('Jenis dokumen', '15','Template dokumen pengadaan')+metric('Pemeriksaan isian',ready===null?'—':ready===0?'Terisi':ready+' perlu dicek','Bukan pengesahan dokumen',ready===0?'is-good':ready?'is-warn':''),
        actions:jump('Pilih paket','dok-paket','⌕')+jump('Pilih template','dok-template','▤')+jump('Lihat pratinjau','dok-preview','▣')+link('Lengkapi data paket','#paket','↗'),
        note:'Cetak/PDF tetap menggunakan tombol asli SATRIA agar format dan pemeriksaan dokumen tidak berubah.'};
    }
