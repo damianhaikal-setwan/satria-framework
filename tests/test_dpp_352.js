@@ -1,6 +1,6 @@
 const path=require('path');
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
-const s=fs.readFileSync(path.resolve(__dirname,'..','index.html'),'utf8');
+const s=require('../tools/legacy_index_source.cjs').readIndex();
 const i=s.indexOf('/* SATRIA NEXT 3.0.53 — referensi resmi DPP: tempat');
 const j=s.indexOf('function sppbj(',i);
 assert(i>0&&j>i,'isolated DPP unit');
