@@ -187,7 +187,7 @@ function rulesAtTransaction(p){
  const catalogRule=!phase?'Periksa tanggal pelaksanaan untuk menentukan peraturan katalog yang relevan.':phase<'2026-09-01'?'Tanggal fase yang tercatat mendahului 1 September 2026; telaah Peraturan LKPP Nomor 9 Tahun 2021 yang berlaku sebelum digantikan.':'Tanggal fase yang tercatat mulai 1 September 2026; telaah Peraturan LKPP Nomor 2 Tahun 2026.';
  return {phase,catalogRule};
 }
-function regulationNotes(p){const r=rulesAtTransaction(p);return `<div class="spha-rules"><p><b>Dasar pertimbangan pengadaan:</b> Perpres Nomor 16 Tahun 2018 sebagaimana diubah Perpres Nomor 12 Tahun 2021 dan Perpres Nomor 46 Tahun 2025 (periksa ketentuan yang berlaku pada saat pelaksanaan). <b>Katalog Elektronik:</b> ${escLocal(r.catalogRule)}</p><p>Jumlah sumber pembanding tidak dipaksakan harus tiga. Referensi harga digunakan menurut kecukupan bukti yang tersedia dan karakter produk/metode e-Purchasing. Harga dari sumber berbeda hanya dibandingkan setelah volume/satuan, spesifikasi/fungsi, pajak, ongkos kirim, layanan, lokasi, dan tanggalnya diperiksa. Harga katalog bukan otomatis harga final; hasil negosiasi dan bukti menjadi dasar analisis. <b>Catatan:</b> tanggal fase yang tercatat bukan bukti tanggal penerapan ketentuan pada transaksi.</p><p class="spha-source-note">Sumber peraturan: jdih.lkpp.go.id — Peraturan LKPP 2/2026 dan Perpres 46/2025; peraturan.bpk.go.id — Perpres 46/2025. Verifikasi dokumen resmi jika lampiran ini akan dipakai untuk pemeriksaan.</p></div>`;}
+function regulationNotes(p){const r=rulesAtTransaction(p),pbj=(typeof window!=='undefined'?window.SATRIA_PBJ_POLICY:null)?.regulatoryContext(p);return `<div class="spha-rules"><p><b>Dasar regulasi PBJ:</b> ${escLocal(pbj?.label||'Periksa regulasi sesuai metode')}. ${escLocal(pbj?.note||'Tanggal pemilihan dan metode harus diperiksa.')} <b>Dasar pertimbangan pengadaan:</b> Perpres Nomor 16 Tahun 2018 sebagaimana diubah Perpres Nomor 12 Tahun 2021 dan Perpres Nomor 46 Tahun 2025 (periksa ketentuan yang berlaku pada saat pelaksanaan). <b>Katalog Elektronik:</b> ${escLocal(r.catalogRule)}</p><p>Jumlah sumber pembanding tidak dipaksakan harus tiga. Referensi harga digunakan menurut kecukupan bukti yang tersedia dan karakter produk/metode e-Purchasing. Harga dari sumber berbeda hanya dibandingkan setelah volume/satuan, spesifikasi/fungsi, pajak, ongkos kirim, layanan, lokasi, dan tanggalnya diperiksa. Harga katalog bukan otomatis harga final; hasil negosiasi dan bukti menjadi dasar analisis. <b>Catatan:</b> tanggal fase yang tercatat bukan bukti tanggal penerapan ketentuan pada transaksi.</p><p class="spha-source-note">Sumber peraturan: jdih.lkpp.go.id — Peraturan LKPP 2/2026 (katalog), Peraturan LKPP 3/2026 (melalui penyedia), SE Kepala LKPP 3/2026 (transisi), dan Perpres 46/2025; peraturan.bpk.go.id — Perpres 46/2025. Verifikasi dokumen resmi jika lampiran ini akan dipakai untuk pemeriksaan.</p></div>`;}
 function needTable(a){return `<div class="spha-scroll"><table class="spha-table spha-needs"><thead><tr><th>No.</th><th>Barang kebutuhan</th><th>Volume</th><th>HPS satuan</th><th>HPS total item</th></tr></thead><tbody>${a.productFindings.map((f,i)=>`<tr><td>${i+1}</td><td>${escLocal(f.name)}<small>${escLocal(f.spec)}</small></td><td>${escLocal(f.qty)} ${escLocal(f.unit)}</td><td class="n">${rpLocal(f.hpsUnit)}</td><td class="n">${rpLocal(f.hpsUnit*f.qty)}</td></tr>`).join('')}</tbody></table></div>`;}
 function efficiencyBox(a){const w=a.winner,d=a.delta;return `<div class="spha-efficiency"><b>Nilai HPS paket:</b> ${rpLocal(a.packet.hps)}<br><b>Hasil negosiasi penyedia yang ditetapkan${w?' ('+escLocal(w.name)+')':''}:</b> ${rpLocal(w?.negoTotal)}<br><b>Selisih nominal terhadap HPS:</b> ${d===null?'Belum dapat dihitung':`${rpLocal(Math.abs(d))} (${fmtPercent(a.packet.hps>0?Math.abs(d)/a.packet.hps*100:NaN)}) ${d>=0?'di bawah HPS':'di atas HPS'}`}<p class="spha-note">Selisih HPS adalah efisiensi nominal terhadap estimasi, bukan pembuktian bahwa harga produk sebanding dengan harga pasar. Nilai total sudah termasuk ongkos kirim yang tercatat; PPN tidak ditambahkan kembali pada harga tayang yang sudah tercatat termasuk pajak.</p></div>`;}
 function accessible(p){if(!p||satriaSpseIs(p)||Number(p.tahun)!==Number(S.ui.tahun)||(S.ui.opd!=='all'&&String(p.opd)!==String(S.ui.opd)))return false;const scope=activeCloudScope();return !scope||(scope.opdIds.includes(String(p.opd))&&scope.years.includes(Number(p.tahun)));}
@@ -301,11 +301,13 @@ function exampleCompareTable(a){
   const x=target?.listedUnit??null,y=peer?.listedUnit??null;
   const deviation=x===null||y===null?null:money(y-x);
   const semuaHargaPembanding=ordered.slice(1).map(o=>priceFor(o)?.listedUnit??null);
-  const status=priceTayangStatus(x,semuaHargaPembanding);
+  const priceStatus=priceTayangStatus(x,semuaHargaPembanding);
+  const specCaution=ordered.some(o=>(priceFor(o)?.specWarnings||[]).length>0);
+  const status=specCaution?'Perlu verifikasi produk':priceStatus==='Wajar'?'Harga tayang terendah (periksa bukti)':priceStatus;
   const extra=ordered.slice(2).map(o=>{const r=priceFor(o);return `<span class="spha-extra-peer">${escLocal(o.name)}: ${fmtPaperNumber(r?.listedUnit)}</span>`;}).join('');
   return `<tr><td class="spha-center">${i+1}</td><td><span class="spha-item-name">${escLocal(f.name)}</span>${f.spec&&f.spec!=='Spesifikasi belum dirinci'&&normalize(f.spec)!==normalize(f.name)?`<span class="spha-item-spec">Spesifikasi: ${escLocal(f.spec)}</span>`:''}</td><td class="spha-number">${fmtPaperNumber(x)}</td><td class="spha-number">${fmtPaperNumber(y)}${extra}</td><td class="spha-number">${deviation===null?'—':(deviation<0?'−':'')+fmtPaperNumber(Math.abs(deviation))}</td><td class="spha-status">${escLocal(status)}</td></tr>`;
  }).join('');
- return `<table class="spha-example-compare"><colgroup><col style="width:6%"><col style="width:35%"><col style="width:16%"><col style="width:16%"><col style="width:12%"><col style="width:15%"></colgroup><thead><tr><th>No.</th><th>Item Barang</th><th>Harga<br>${escLocal(label(first))}</th><th>Harga<br>${escLocal(label(second))}</th><th>Selisih / Deviasi</th><th>Status Kewajaran</th></tr></thead><tbody>${rows||'<tr><td colspan="6">Barang belum tersedia.</td></tr>'}</tbody></table>`;
+ return `<table class="spha-example-compare"><colgroup><col style="width:6%"><col style="width:35%"><col style="width:16%"><col style="width:16%"><col style="width:12%"><col style="width:15%"></colgroup><thead><tr><th>No.</th><th>Item Barang</th><th>Harga<br>${escLocal(label(first))}</th><th>Harga<br>${escLocal(label(second))}</th><th>Selisih / Deviasi</th><th>Status Perbandingan Harga</th></tr></thead><tbody>${rows||'<tr><td colspan="6">Barang belum tersedia.</td></tr>'}</tbody></table>`;
 }
 function exampleItemNarratives(a){
  const ordered=a.winner?[a.winner,...a.offers.filter(o=>o.id!==a.winner.id)]:a.offers;
@@ -319,9 +321,11 @@ function exampleItemNarratives(a){
    if(gap===0)return `Penawaran ${selected.name} sama dengan ${peer.name} di E-Katalog.`;
    return `Penawaran ${selected.name} ${gap>0?'lebih murah':'lebih mahal'} ${rpLocal(Math.abs(gap))} per ${unit} dibandingkan ${peer.name} di E-Katalog.`;
   });
-  const canAccept=priceTayangStatus(price,peers.map(x=>x.detail?.listedUnit??null))==='Wajar';
+  const evidenceCaution=!!(d?.specWarnings?.length||!d?.evidenceOK||peers.some(x=>x.detail?.specWarnings?.length||!x.detail?.evidenceOK));
+  const canAccept=!evidenceCaution&&priceTayangStatus(price,peers.map(x=>x.detail?.listedUnit??null))==='Wajar';
+  const peerInfo=peers.map(x=>x.detail?.refName?`${x.name}: referensi ${x.detail.refName}${x.detail.specWarnings?.length?' (kesesuaian perlu diverifikasi)':''}`:'').filter(Boolean).join('; ');
   const spec=f.spec&&f.spec!=='Spesifikasi belum dirinci'&&normalize(f.spec)!==normalize(f.name)?` Spesifikasi: ${escLocal(f.spec)}`:'';
-  return `<article class="spha-example-item"><h4><span class="spha-item-index">${i+1}.</span><span>${escLocal(f.name)}${spec} — ${escLocal(f.qty)} ${escLocal(unit)}</span></h4><ul><li><b>Harga Penawaran ${escLocal(selected?.name||'—')}:</b> ${rpLocal(price)} / ${escLocal(unit)}</li><li><b>Analisis:</b> ${escLocal(analyses.join(' ')||'—')}</li><li><b>Kesimpulan:</b> ${canAccept?'Harga Diterima / Wajar.':'—'}</li></ul></article>`;
+  return `<article class="spha-example-item"><h4><span class="spha-item-index">${i+1}.</span><span>${escLocal(f.name)}${spec} — ${escLocal(f.qty)} ${escLocal(unit)}</span></h4><ul><li><b>Harga Penawaran ${escLocal(selected?.name||'—')}:</b> ${rpLocal(price)} / ${escLocal(unit)}</li><li><b>Analisis:</b> ${escLocal(analyses.join(' ')||'—')}${peerInfo?' Referensi pembanding tercatat: '+escLocal(peerInfo)+'.':''}</li><li><b>Kesimpulan:</b> ${canAccept?'Harga tayang lebih rendah/sama pada pembanding yang dicatat; tetap perlu verifikasi pejabat.':'Belum dapat dinyatakan wajar otomatis; periksa kesesuaian barang dan bukti asli.'}</li></ul></article>`;
  }).join('')}</div>`;
 }
 function exampleEfficiency(a){
@@ -335,7 +339,7 @@ function exampleConclusion(a,p){
  const perItemOK=!!w&&a.productFindings.length>0&&a.productFindings.every(f=>{
   const target=w.detail.find(d=>d.id===f.id);
   const peers=a.offers.filter(o=>o.id!==w.id).map(o=>o.detail.find(d=>d.id===f.id));
-  return priceTayangStatus(target?.listedUnit??null,peers.map(peer=>peer?.listedUnit??null))==='Wajar';
+  return !!target?.evidenceOK&&!target?.specWarnings?.length&&peers.every(peer=>peer?.evidenceOK&&!peer?.specWarnings?.length)&&priceTayangStatus(target?.listedUnit??null,peers.map(peer=>peer?.listedUnit??null))==='Wajar';
  });
  // No checkbox in Smart Survey can prove technical suitability. Assess price evidence independently.
  const priceEvidenceOK=!!w&&w.detail.length===a.items.length&&w.detail.every(d=>d.evidenceOK);
@@ -349,6 +353,7 @@ function documentHTML(p){
  return `<div class="spha-doc spha-audit-paper spha-example-paper" data-spha-document="true">
  <div class="spha-example-cover">${typeof kop==='function'?kop(p):''}
  <p class="spha-doc-title">DOKUMEN ANALISIS KEWAJARAN HARGA E-PURCHASING</p>
+ <p class="spha-draft-evidence"><b>DRAF ANALISIS OTOMATIS</b> — Periksa bukti referensi harga, kesetaraan spesifikasi, tanggal dan hasil negosiasi. Dokumen ini bukan penetapan kewajaran otomatis dan baru dapat dipakai setelah diperiksa pejabat berwenang.</p>
  ${docIdentity(p)}</div>
  <section class="spha-example-section spha-intro"><h3>I. LATAR BELAKANG</h3>
  <p>Analisis ini dibuat sebagai kertas kerja PPK/Pejabat Pengadaan untuk menilai kewajaran harga per item (<em>unit price</em>) pada daftar produk E-Katalog sebelum dilakukan pembuatan Surat Pesanan (Purchase Order).</p>

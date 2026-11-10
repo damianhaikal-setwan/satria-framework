@@ -23,12 +23,12 @@
      }
    }
    const status=issues.length||placeholders.length?'PERLU MELENGKAPI DATA / MENINJAU DRAF':manualChecks.some(x=>x.needsVerification)?'ISIAN DASAR TERPENUHI — VERIFIKASI BUKTI MANUAL DIPERLUKAN':'ISIAN DASAR TERPENUHI (BUKAN PENGESAHAN)';
-   return {version:'3.0.59.39',checkedAt:new Date().toISOString(),rup:p.rup||'',paket:p.nama||'',tahun:p.tahun,opd:p.opd,jenis:k,namaDokumen:title[k],status,issues,manualChecks,placeholders,templateTables:docEl?docEl.querySelectorAll('table').length:null,templateRows:docEl?docEl.querySelectorAll('table tr').length:null,peringatan:'Pemeriksaan otomatis hanya menilai isian dan metadata. Referensi asli, spesifikasi, tanggal, kewajaran harga, dan keputusan Pejabat Pengadaan harus diverifikasi.'};
+   return {version:'3.0.59.52',checkedAt:new Date().toISOString(),rup:p.rup||'',paket:p.nama||'',tahun:p.tahun,opd:p.opd,jenis:k,namaDokumen:title[k],status,issues,manualChecks,placeholders,templateTables:docEl?docEl.querySelectorAll('table').length:null,templateRows:docEl?docEl.querySelectorAll('table tr').length:null,peringatan:'Pemeriksaan otomatis hanya menilai isian dan metadata. Referensi asli, spesifikasi, tanggal, kewajaran harga, dan keputusan Pejabat Pengadaan harus diverifikasi.'};
  }
  function downloadReport(){
    const p=current(),k=S.ui.dok;
    const rows=KNOWN.has(k)?[review(p,k)]:[...KNOWN].map(key=>review(p,key));
-   const data=JSON.stringify({application:'SATRIA',version:'3.0.59.39',reviews:rows},null,2);
+   const data=JSON.stringify({application:'SATRIA',version:'3.0.59.52',reviews:rows},null,2);
    const url=URL.createObjectURL(new Blob([data],{type:'application/json;charset=utf-8'}));
    const a=document.createElement('a');a.href=url;a.download='SATRIA-pemeriksaan-dokumen-'+String(p?.rup||'paket').replace(/[^a-z\d_-]/gi,'_')+'-'+k+'.json';
    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);
@@ -56,5 +56,5 @@
    if(!window.SATRIA_DOK_PRINT?.prepare()){alert('Pratinjau tidak tersedia. Buka ulang dokumen.');return;}
    window.print();
  },true);
- window.SATRIA_DOK_QA=Object.freeze({review,report:downloadReport,types:[...KNOWN],version:'3.0.59.39'});
+ window.SATRIA_DOK_QA=Object.freeze({review,report:downloadReport,types:[...KNOWN],version:'3.0.59.52'});
 })();

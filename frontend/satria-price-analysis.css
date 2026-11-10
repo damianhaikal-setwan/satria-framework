@@ -275,3 +275,6 @@
  #satria-print-root .doc[data-document-type="analisa"] .spha-photo-info{margin-top:1.5mm!important;gap:1mm!important}
  #satria-print-root .doc[data-document-type="analisa"] .spha-photo-info :is(b,span,small){line-height:1.22!important;overflow-wrap:anywhere!important}
 }
+
+.spha-example-paper .spha-draft-evidence{border:1px solid #a77c34;background:#fff9ed;padding:8px 10px;font-size:9.5px;line-height:1.4;margin:5px 0 14px}
+@media print{#satria-print-root .spha-example-paper .spha-draft-evidence{border:1px solid #777;background:#fff!important;font-size:8.5pt!important}}
