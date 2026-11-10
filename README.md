@@ -1,6 +1,6 @@
-# Pembaruan SATRIA NEXT 3.0.59.52 — PBJ 2026
+# Pembaruan SATRIA NEXT 3.0.59.53 — PBJ 2026
 
-**Dokumen rilis aktif:** [docs/RILIS-PBJ-2026-3.0.59.52.md](docs/RILIS-PBJ-2026-3.0.59.52.md).
+**Dokumen rilis aktif:** [docs/RILIS-PBJ-2026-3.0.59.53.md](docs/RILIS-PBJ-2026-3.0.59.53.md).
 Panduan rilis/penetapan HPS historis di bawah ini adalah **arsip versi lama**; ikuti panduan baru bila terjadi pertentangan. Kandidat rilis harus diuji staging dan RLS Supabase sebelum produksi.
 
 ---
