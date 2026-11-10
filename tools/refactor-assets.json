@@ -284,6 +284,24 @@
       "ids": [
         "satria-brief-hotfix-329"
       ]
+    },
+    {
+      "file": "./frontend/refactor/css/23-hps-draft-batch.css",
+      "source_lines": [
+        1,
+        33
+      ],
+      "blocks": 1,
+      "ids": []
+    },
+    {
+      "file": "./frontend/refactor/css/24-laporan-rekening.css",
+      "source_lines": [
+        1,
+        190
+      ],
+      "blocks": 1,
+      "ids": []
     }
   ],
   "scripts": [

@@ -15,8 +15,8 @@ class Parse(HTMLParser):
 p=Parse();p.feed(html)
 assets=[e['file'] for e in manifest['styles']+manifest['scripts']]
 assert len(assets)==len(set(assets))
-assert len(manifest['styles'])==22 and len(manifest['scripts'])==34
-assert len([1 for t,a in p.entries if t=='link' and a.get('data-satria-refactor')=='style'])==22
+assert len(manifest['styles'])==24 and len(manifest['scripts'])==34
+assert len([1 for t,a in p.entries if t=='link' and a.get('data-satria-refactor')=='style'])==24
 assert len([1 for t,a in p.entries if t=='script' and a.get('data-satria-refactor')=='script'])==34
 assert len([1 for t,a in p.entries if t=='script' and a.get('id')=='satriaEmbeddedSupabaseConfig' and not a.get('src')])==1
 ref_scripts=[a['src'] for t,a in p.entries if t=='script' and a.get('data-satria-refactor')=='script']

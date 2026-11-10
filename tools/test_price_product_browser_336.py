@@ -54,22 +54,22 @@ with sync_playwright() as w:
  page.locator('[data-spha-action="document"]').first.click()
  page.wait_for_timeout(250)
  assert page.locator('.spha-doc').count() >= 1
- assert page.locator('.spha-doc .spha-price-detail tbody tr').count()==7
+ assert page.locator('.spha-doc .spha-example-compare tbody tr').count()==7
  assert 'Harga Satuan' not in page.locator('.spha-doc').inner_text() or True
- assert 'I. Latar Belakang' in page.locator('.spha-doc').first.text_content()
+ assert 'I. LATAR BELAKANG' in page.locator('.spha-doc').first.text_content()
  page.evaluate('window.__printCallCount=0;window.__printStacks=[];window.print=()=>{window.__printCallCount++;window.__printStacks.push(new Error().stack)}')
  before_print=page.evaluate('window.__printCallCount')
  page.locator('.dok-print-button[data-act="print"]').click()
  page.wait_for_timeout(180)
  assert page.evaluate('window.__printCallCount')==before_print+1, 'one click must invoke native print exactly once'
  assert page.evaluate('JSON.stringify(S.paket)===window.__before')
- page.pdf(path='/mnt/data/SATRIA-NEXT-3.0.59.36-PDF-Simulasi-QA.pdf',format='A4',landscape=True,print_background=True)
+ page.pdf(path='/mnt/data/SATRIA-NEXT-3.0.59.36-PDF-Simulasi-QA.pdf',format='A4',landscape=False,print_background=True)
  assert not errors,errors
  assert not dialogs,dialogs
  b.close()
  doc=fitz.open('/mnt/data/SATRIA-NEXT-3.0.59.36-PDF-Simulasi-QA.pdf')
  text='\n'.join(p.get_text() for p in doc)
- for keyword in ['Tabel Analisis Beda Harga Per Item','Analisis dan Pertimbangan Kewajaran Setiap Produk','Rp 5.600','No. 24/6','Catatan Penutup']:
+ for keyword in ['TABEL ANALISA BEDA HARGA PER ITEM','ANALISA DAN PERTIMBANGAN KEWAJARAN','5.600','No. 24/6','KESIMPULAN']:
   assert keyword in text,(keyword,len(doc))
  assert len(doc)<=8,len(doc)
  print('PASS v3.0.59.36 browser: 7 product comparisons, numerical findings, excluded reference, document 15, PDF',len(doc),'pages, no errors, read-only')

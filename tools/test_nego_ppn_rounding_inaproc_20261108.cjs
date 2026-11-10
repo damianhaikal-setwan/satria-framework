@@ -18,7 +18,7 @@ const ctx={S:{penyedia:[{id:'penyedia',nama:'Toko A',link:'https://katalog.inapr
  sum:(xs,fn)=>xs.reduce((t,x)=>t+fn(x),0),esc:x=>String(x),rp:n=>'Rp '+Math.round(n).toLocaleString('id-ID'),nf:n=>Math.round(n).toLocaleString('id-ID'),
  Math,Number,String,Set,Date,Intl};
 vm.createContext(ctx);
-vm.runInContext(from('const totPw=', '/* SATRIA 3.0.59.25'),ctx);
+vm.runInContext(from('const totPw=', 'const satriaHpsReviewDrafts=new Map();'),ctx);
 vm.runInContext(from('function satriaOfferSupplierCatalogLink(', 'function satriaNegoReviewFingerprint('),ctx);
 vm.runInContext(from('const KN_TAX=', '/* SATRIA 3.0.47'),ctx);
 vm.runInContext(from('function satriaWriteNegotiatedItems(', 'function satriaNegotiationBridgeNotice('),ctx);

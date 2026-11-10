@@ -1,0 +1,17 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
+const src=fs.readFileSync(path.join(__dirname,'../frontend/refactor/js/01-app-core.js'),'utf8');
+const js=src.slice(src.indexOf('const satriaHpsReviewDrafts=new Map();'),src.indexOf('function pemenang(p){'));
+const ctx={S:{penyedia:[{id:'a',nama:'Supplier',link:'https://example.org/store'}]},hps:p=>p.items.reduce((n,i)=>n+i.hs*i.vol,0),totPw:(p,w,n)=>Math.round(p.items.reduce((s,i)=>s+i.vol*Number((n&&w.nego?.[i.id]!=null?w.nego[i.id]:w.harga[i.id])||0),0)),Number,Math,Map,Date,JSON,String};
+vm.createContext(ctx);vm.runInContext(js,ctx);
+const p={id:'p2026',nama:'Paket Uji',pagu:250,tglNego:'2026-11-10',items:[{id:'a',nama:'Barang 1',vol:1,hs:100},{id:'b',nama:'Barang 2',vol:1,hs:100}],penawaran:[]};
+const w={id:'w1',pen:'a',sumberHarga:'Katalog Elektronik',tanggalHarga:'2026-11-09',harga:{a:150,b:90},nego:{a:130,b:70},ongkir:0};p.penawaran.push(w);
+let e=ctx.evalPw(p)[0],res=ctx.satriaOfferGate(p,e);
+assert.equal(e.t,200);assert(res.ready,'Total 200 <= HPS 200, no historical review required');
+assert.equal(res.unitPriceWarnings.length,1,'Warn about negotiated price above HPS unit');
+assert.equal(res.needsReview,false,'No hierarchical approval');
+assert.equal(ctx.kandidat(p).w.id,w.id);
+w.nego.b=71;e=ctx.evalPw(p)[0];assert(!ctx.satriaOfferGate(p,e).ready,'Total 201 exceeds HPS 200');
+w.nego.b=70;p.pagu=199;e=ctx.evalPw(p)[0];assert(!ctx.satriaOfferGate(p,e).ready,'Total 200 exceeds pagu 199');
+p.pagu=250;w.nego.a=151;e=ctx.evalPw(p)[0];assert(!ctx.satriaOfferGate(p,e).ready,'Nego above listed still blocked');
+console.log('PASS PBJ 2026 award gate: item > HPS permitted, total HPS/pagu protected, no extra approval, no negotiated > listed');

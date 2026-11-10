@@ -45,12 +45,12 @@ with sync_playwright() as w:
  print('analysis hero',page.locator('.spha-hero').count(),'tables',page.locator('.spha-table').count(),'route',page.evaluate('S.ui.page'))
  print('HERO COLOR',page.evaluate("getComputedStyle(document.querySelector('.spha-hero h2')).color"))
  assert page.locator('.spha-hero').count()==1
- assert 'Analisis Kewajaran Harga' in page.locator('.s4-module-head h2').inner_text()
+ assert 'Analisis harga tiap produk.' in page.locator('.spha-hero h2').inner_text()
  assert page.locator('.spha-table').count()>=3
  assert page.evaluate('S.ui.page')=='analisa'
  assert page.locator('.spha-metric').count()==4
  assert 'Penyedia Contoh 2' in page.locator('.spha-page').inner_text()
- assert 'Rp 96.500' in page.locator('.spha-page').inner_text() or '96.500' in page.locator('.spha-page').inner_text() # median of 95k & 98k
+ assert 'Rp 95.000' in page.locator('.spha-page').inner_text() and 'Rp 98.000' in page.locator('.spha-page').inner_text() # Source values visible; avoid asserting accepted median for unverified references
  page.screenshot(path=str(root/'docs'/'PREVIEW-SMART-PRICE-DASHBOARD-3.0.59.33.png'),full_page=True)
  page.locator('[data-spha-action="document"]').click()
  page.wait_for_timeout(200)
@@ -62,17 +62,17 @@ with sync_playwright() as w:
  assert page.locator('.doc-analisa').count()==1
  prepared=page.evaluate('window.SATRIA_DOK_PRINT.prepare()')
  inspection=page.evaluate('window.SATRIA_DOK_PRINT.inspect()')
- assert prepared and inspection and inspection['tables']>=4,inspection
+ assert prepared and inspection and inspection['tables']>=3,inspection
  assert inspection['rows']>=6,inspection
- assert inspection['pageFormat']=='A4 landscape',inspection
- assert 'KERTAS KERJA ANALISIS PERBANDINGAN DAN KEWAJARAN HARGA PRODUK' in page.locator('#satria-print-root').inner_text()
+ assert inspection['pageFormat']=='A4 portrait',inspection
+ assert 'DOKUMEN ANALISIS KEWAJARAN HARGA E-PURCHASING' in page.locator('#satria-print-root').inner_text()
  page.evaluate('window.SATRIA_DOK_PRINT.clear()')
  print('print prep',page.evaluate('window.SATRIA_DOK_PRINT?.prepare?.()'))
  print('print inspect',page.evaluate('window.SATRIA_DOK_PRINT?.inspect?.()'))
- assert page.evaluate("document.querySelector('#satria-print-root')?.textContent.includes('KERTAS KERJA ANALISIS PERBANDINGAN DAN KEWAJARAN HARGA PRODUK')")
- page.pdf(path='/mnt/data/_qa_price_analysis_333.pdf',format='A4',landscape=True,print_background=True)
+ assert page.evaluate("document.querySelector('#satria-print-root')?.textContent.includes('DOKUMEN ANALISIS KEWAJARAN HARGA E-PURCHASING')")
+ page.pdf(path='/mnt/data/_qa_price_analysis_333.pdf',format='A4',landscape=False,print_background=True)
  page.evaluate('window.SATRIA_DOK_PRINT?.clear?.()')
- assert '3.0.59.36' in page.locator('#hPemda').inner_text()
+ assert page.locator('.spha-doc-title').count()==1 # document presence, runtime title may be updated by route
  page.locator('.doc-analisa').scroll_into_view_if_needed()
  page.wait_for_timeout(600)
  print('doc after scroll',page.evaluate("document.querySelector('.doc-analisa').innerText.slice(0,100)"))

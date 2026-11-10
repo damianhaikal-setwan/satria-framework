@@ -35,8 +35,8 @@ with sync_playwright() as playwright:
     assert page.evaluate("typeof render === 'function'"), 'Render core tidak dimuat'
     assert page.evaluate("typeof window.SATRIA_PRICE_CORE?.analyze === 'function'"), 'Analisa harga tidak dimuat'
     health=page.evaluate('window.SATRIA_MAINTENANCE.inspect()')
-    assert health['scriptsExpected']==34 and health['stylesExpected']==22, health
-    assert health['stylesLoaded']==22,health
+    assert health['scriptsExpected']==34 and health['stylesExpected']==24, health
+    assert health['stylesLoaded']==24,health
     assert health['coreReady'] and health['priceAnalysisReady'],health
     assert health['errorCount']==0,health
     assert not errors,errors
@@ -45,5 +45,5 @@ with sync_playwright() as playwright:
     with page.expect_download() as download:
         page.evaluate("document.querySelector('#sdDiagnostics').click()")
     assert download.value.suggested_filename=='SATRIA-Laporan-Diagnostik.json'
-    print('PASS browser: 34 JS, 22 CSS, modul & navigasi, diagnostik unduh, tanpa pageerror (CDN/cloud di-stub)')
+    print('PASS browser: 34 JS, 24 CSS, modul & navigasi, diagnostik unduh, tanpa pageerror (CDN/cloud di-stub)')
     browser.close()

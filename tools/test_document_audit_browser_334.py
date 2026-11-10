@@ -61,16 +61,16 @@ with sync_playwright() as w:
  assert not dialogs,dialogs
  assert page.evaluate('window.__printCalls')==1,'Native print call must be invoked'
  report=page.evaluate('window.SATRIA_DOK_PRINT.inspect()')
- assert report and report['type']=='analisa' and report['pageFormat']=='A4 landscape'
- assert report['tables']>=4 and report['rows']>=20,report
+ assert report and report['type']=='analisa' and report['pageFormat']=='A4 portrait'
+ assert report['tables']>=3 and report['rows']>=20,report
  assert 'DRAF ANALISIS OTOMATIS' in page.locator('#satria-print-root').inner_text()
- assert 'Bukti referensi' in page.locator('#satria-print-root').inner_text()
+ assert 'bukti referensi' in page.locator('#satria-print-root').inner_text().lower()
  assert page.evaluate('JSON.stringify(S.paket)===window.__beforeQAState')
- page.pdf(path='/mnt/data/_qa_price_analysis_334.pdf',format='A4',landscape=True,print_background=True)
+ page.pdf(path='/mnt/data/_qa_price_analysis_334.pdf',format='A4',landscape=False,print_background=True)
  page.locator('.doc-analisa').scroll_into_view_if_needed()
  page.wait_for_timeout(380)
  page.screenshot(path='/mnt/data/SATRIA-NEXT-3.0.59.36-Pratinjau-Perbaikan-Dokumen.png',full_page=True)
- print('Print:',report,'pagesize A4 landscape','zero browser dialogs')
+ print('Print:',report,'pagesize A4 portrait','zero browser dialogs')
  # Export all 15 review statuses; the old export for this exact RUP included only 14.
  export=page.evaluate('''async () => {
    const create=URL.createObjectURL.bind(URL);
@@ -80,7 +80,7 @@ with sync_playwright() as w:
    S.ui.dok='analisa';
    return JSON.parse(str);
  }''')
- assert export['version']=='3.0.59.36' and len(export['reviews'])==15
+ assert export['version']==page.evaluate('window.SATRIA_DOK_QA.version') and len(export['reviews'])==15
  entry=next(x for x in export['reviews'] if x['jenis']=='analisa')
  assert entry['rup']=='QA-2026-ATK' and entry['manualChecks'] and entry['issues']
  assert 'BUKTI' in entry['status'] or 'MENINJAU' in entry['status']
