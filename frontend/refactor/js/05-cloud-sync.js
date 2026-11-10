@@ -2992,6 +2992,9 @@ function vDokOptimized(){
         <button type="button" data-act="print" class="dok-print-button"><span class="dok-print-icon">↗</span><span><b>Cetak / Simpan PDF</b><small>A4 • Arial • Seluruh tabel</small></span></button>
       </section>
 
+      <!-- PBJ 2026 is rendered from the SAME selected package as the active document studio. -->
+      ${window.SATRIA_PBJ_WORKSPACE?.panel?.(p)||''}
+
       <div class="spha-quick no-print"><div><h3>Analisis Kewajaran Harga & Bukti Referensi</h3><p>Diambil otomatis dari penawaran/negosiasi paket ini; cocok untuk lampiran permintaan data per paket.</p></div><button type="button" class="spha-btn" data-act="dtype" data-tab="analisa">Buka laporan analisis →</button></div>
       ${satriaHumanDocGuide(p,S.ui.dok,currentMissing)}
       <div class="satria-integrity-strip no-print" role="status"><span class="satria-integrity-icon">✦</span><div><b>Kualitas relasi data</b><small>${relationHealth.issues.length ? relationHealth.issues.length+' temuan yang perlu diperiksa sebelum finalisasi' : 'Referensi paket dan data master terhubung'}</small></div><button type="button" data-act="satriaAudit">Periksa data →</button></div>
