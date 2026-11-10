@@ -27,6 +27,6 @@ assert.match(css,/\.s4-module-head/);
 assert.match(sw,/satria-v3\.\d+\.\d+\.\d+-[a-z0-9-]+/);
 assert.match(sw,/satria-next4\.css/);
 assert.match(sw,/satria-next4\.js/);
-assert.match(manifest.description,/3\.0\.59\.52/);
+assert.match(manifest.description,/3\.0\.59\.53/);
 assert.equal((html.match(/frontend\/satria-next4\.js/g)||[]).length,1);
 console.log('PASS — '+scripts.length+' inline scripts parse; scoped 360, design assets, roles, module render, reduced motion, PWA cache, read-only guard');
