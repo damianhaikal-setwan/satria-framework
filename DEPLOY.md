@@ -1,3 +1,10 @@
+# Pembaruan SATRIA NEXT 3.0.59.52 — PBJ 2026
+
+**Dokumen rilis aktif:** [docs/RILIS-PBJ-2026-3.0.59.52.md](docs/RILIS-PBJ-2026-3.0.59.52.md).
+Panduan rilis/penetapan HPS historis di bawah ini adalah **arsip versi lama**; ikuti panduan baru bila terjadi pertentangan. Kandidat rilis harus diuji staging dan RLS Supabase sebelum produksi.
+
+---
+
 # Rilis 3.0.59.39 — Perubahan Dokumen Analisis Harga
 
 Perbarui 5 file aplikasi dari 3.0.59.38. Tidak ada migrasi SQL. Gunakan branch uji dan lihat `docs/PANDUAN-UPDATE-3.0.59.39.md` untuk langkah deployment dan pemeriksaan PDF.

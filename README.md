@@ -1,3 +1,10 @@
+# Pembaruan SATRIA NEXT 3.0.59.52 — PBJ 2026
+
+**Dokumen rilis aktif:** [docs/RILIS-PBJ-2026-3.0.59.52.md](docs/RILIS-PBJ-2026-3.0.59.52.md).
+Panduan rilis/penetapan HPS historis di bawah ini adalah **arsip versi lama**; ikuti panduan baru bila terjadi pertentangan. Kandidat rilis harus diuji staging dan RLS Supabase sebelum produksi.
+
+---
+
 > **Pembaruan 8 November 2026 — Smart Survey tanpa evaluasi ulang spesifikasi:** kolom penilaian kesesuaian berulang dihilangkan. Bukti katalog dan analisis harga tetap berjalan, catatan lama dijaga, dan pemenuhan kebutuhan/KAK tetap keputusan PPK. Tidak memerlukan migrasi database. Baca [panduan Smart Survey](docs/SMART-SURVEY-TANPA-EVALUASI-ULANG-SPESIFIKASI-2026-11-08.md).
 
 > **Pembaruan 8 November 2026 — akun PPKom dibatasi OPD dan TA:** Admin kini dapat membuat jenis akun **PPKom** untuk Bapperida dan Disporapar (satu OPD per akun, tahun anggaran dipilih Admin), memakai otorisasi Operator scoped di server. **Perlu deploy ulang Edge Functions `admin-create-user` dan `admin-list-users`; perubahan GitHub saja tidak cukup.** Tidak membuat akun nyata atau menambahkan migrasi SQL baru. Baca [panduan PPKom](docs/AKUN-PPKOM-OPD-TA-2026-11-08.md).
