@@ -16,7 +16,7 @@
   }
   const btn=document.querySelector('#satriaMobileMenuToggle');
   if(btn){btn.setAttribute('aria-label','Buka atau tutup menu navigasi SATRIA');}
-  document.title='SATRIA NEXT 3.0.59.39 | '+(routeNames[page]||'Integrated Government Intelligence Platform');
+  document.title='SATRIA NEXT '+(document.querySelector('meta[name="satria-release-version"]')?.content || "3.0.59.53")+' | '+(routeNames[page]||'Integrated Government Intelligence Platform');
  };
  window.addEventListener('hashchange',apply);
  document.addEventListener('DOMContentLoaded',apply,{once:true});
