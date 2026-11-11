@@ -1,0 +1,35 @@
+/* SATRIA NEXT — scoped styles: no changes to legacy document printing. */
+.pp-ecosystem{color:var(--text,#211c3b);max-width:1400px;margin:auto;padding:0 0 26px}
+.pp-ecosystem .pp-hero{display:flex;justify-content:space-between;gap:22px;align-items:center;padding:25px 30px;margin:0 0 15px;border-radius:20px;background:linear-gradient(110deg,#1e1a43,#364fa9 60%,#067c80);color:white}
+.pp-hero h2{font-size:clamp(22px,3.2vw,34px);line-height:1.15;margin:7px 0 9px;color:#fff}
+.pp-hero p{max-width:630px;font-size:13px;line-height:1.6;margin:0;color:#e7eafa}
+.pp-hero span{font-size:10px;font-weight:750;letter-spacing:.12em}
+.pp-hero-badge{border:1px solid #ffffff70;padding:9px 14px;border-radius:999px;font-weight:800;white-space:nowrap;background:#ffffff24}
+.pp-ecosystem .pp-picker,.pp-ecosystem .pp-block{padding:18px 20px;border-radius:15px;border:1px solid #d7dceb;background:#fff;margin-bottom:15px;box-shadow:0 5px 18px #14143808}
+.pp-ecosystem .pp-picker{display:grid;gap:10px}
+.pp-picker label{font-weight:750;font-size:12px}
+.pp-picker select{width:100%;padding:10px 12px;min-height:43px;border:1px solid #abb5d0;border-radius:10px;background:#fafafe;color:#1f1b36}
+.pp-headline{display:flex;gap:25px;flex-wrap:wrap;justify-content:space-between;align-items:center;padding:12px;background:#f5f5fe;border-radius:10px}
+.pp-headline div{display:grid;gap:4px}.pp-headline b{font-size:14px}.pp-headline small{font-size:11px;color:#545c7a}
+.pp-ecosystem h3{margin:0 0 7px;font-size:17px}.pp-ecosystem h4{margin:0 0 8px;font-size:13px}.pp-ecosystem p{line-height:1.6;margin:6px 0 11px;font-size:12px}
+.pp-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:9px;list-style:none;margin:12px 0 0;padding:0}
+.pp-steps li{display:flex;gap:9px;border:1px solid #e2e5f1;padding:12px;border-radius:12px;background:#fafbff;align-items:start}
+.pp-step-mark{display:grid;place-items:center;width:25px;height:25px;flex:0 0 25px;border-radius:50%;font-weight:850}.pp-data{color:#115a46;background:#dcfce7}.pp-needs{color:#854d0e;background:#fef3c7}
+.pp-steps b,.pp-steps small{display:block}.pp-steps b{font-size:12px}.pp-steps small{font-size:10px;line-height:1.5;color:#5f647a;margin-top:4px}
+.pp-alert{border-left:3px solid #d69d19;padding:6px 12px;background:#fff7e5;margin-top:12px;border-radius:5px}.pp-alert p{margin:5px 0;color:#6d4411}
+.pp-document-list{padding-left:22px}.pp-document-list li{margin:7px 0;font-size:13px}.pp-document-list span{color:#666a80;font-size:11px;margin-left:8px}
+.pp-actions{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0}
+.pp-actions button,.pp-actions a,.pp-editor button{font-size:12px!important;border:0!important;border-radius:9px!important;padding:10px 13px!important;background:#6454ed!important;color:white!important;text-decoration:none!important;font-weight:700!important;cursor:pointer}
+.pp-actions a{background:#f1f0ff!important;color:#4030a4!important}
+.pp-record-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.pp-records{margin:0 0 12px;list-style:none;padding:0;max-height:295px;overflow:auto;border:1px solid #eaebf4;border-radius:9px}
+.pp-records li{display:grid;gap:4px;padding:9px 10px;font-size:11px;overflow-wrap:anywhere;border-bottom:1px solid #ebecf3}.pp-records li:last-child{border-bottom:0}
+.pp-records b{font-size:12px}.pp-records small{color:#646985}.pp-records a{color:#4f45b3}
+.pp-editor{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin:15px 0;padding:14px;border:1px solid #e2e4f1;border-radius:12px;background:#fafaff}
+.pp-editor h4{grid-column:1/-1}.pp-editor label{display:flex;flex-direction:column;gap:5px;font-weight:650;font-size:11px;min-width:0}.pp-editor label:has(textarea){grid-column:1/-1}
+.pp-editor input,.pp-editor select,.pp-editor textarea{width:100%;min-height:38px;border-radius:8px;background:#fff;color:#231e41;border:1px solid #bac2d8;padding:8px 10px}
+.pp-editor button{justify-self:start}.pp-muted,.pp-footer{font-size:11px!important;color:#666b82}.pp-footer{padding:12px;text-align:center}.pp-footer a{color:#3e378d}
+@media(max-width:720px){.pp-ecosystem .pp-hero{padding:19px;display:block}.pp-hero-badge{display:inline-block;margin-top:12px}.pp-steps{grid-template-columns:1fr}.pp-record-grid,.pp-editor{grid-template-columns:1fr}.pp-editor h4,.pp-editor label:has(textarea){grid-column:auto}.pp-headline{align-items:start;flex-direction:column;gap:9px}}
+@media print{.pp-ecosystem{display:none!important}}
+
+.pp-ecosystem .pp-hero h2{color:#fff!important;text-shadow:0 1px 2px #0003}

@@ -3,6 +3,7 @@
  */
 (function(root){'use strict';if(!root||!root.SATRIA_PBJ_POLICY)return;
  const policy=root.SATRIA_PBJ_POLICY;
+ const pending=new Map();
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const money=v=>Number.isFinite(Number(v))?'Rp '+Math.round(Number(v)).toLocaleString('id-ID'):'—';
  const value=v=>String(v??'').trim()?esc(v):'<em>Belum tersedia — lengkapi dari sumber resmi</em>';
@@ -14,14 +15,15 @@
  function panel(p){if(!p)return '';
   const plan=policy.documentPlan(p),context=policy.regulatoryContext(p),feature=policy.spseFeature(p);
   const isSpse=p.jalurPengadaan==='SPSE_MONITOR'||!!p.spseMonitoring;
-  const can=userCanWrite(p),date=String(p.tglMulaiPemilihan||''),basis=String(p.dasarRegulasi||'');
+  const can=userCanWrite(p),working=pending.get(String(p.id))||{},date=String(working.date??p.tglMulaiPemilihan??''),basis=String(working.basis??p.dasarRegulasi??'');
   const choices=plan.docs.map(d=>`<li><b>${esc(d.label)}</b> — ${d.available?(isSpse?'Rancangan bantuan tersedia untuk cetak/PDF':'Tersedia di menu dokumen SATRIA'):'Belum tersedia; jangan gunakan template pengganti tanpa konfirmasi'}</li>`).join('');
   const actions=isSpse?`<div class="pbj-actions">${plan.docs.filter(d=>d.available).map(d=>`<button type="button" class="g" data-pbj-print="${esc(d.code)}" data-pbj-pid="${esc(p.id)}">Cetak draf ${esc(d.label)}</button>`).join('')}</div>`:'<p class="pbj-note">Gunakan tombol <b>Cetak / PDF</b> dan pilihan template DPP yang telah tersedia di menu ini. Dokumen HRS belum dibuat sampai nama/formatnya terverifikasi.</p>';
   return `<section class="card no-print pbj-panel" data-pbj-panel="${esc(p.id)}" aria-label="Paket dokumen pendukung PBJ 2026">
    <h3>📁 Paket Dokumen Pendukung Sistem Resmi</h3>
+   <p><a href="#kerja/${encodeURIComponent(p.id)}"><b>↗ Buka Ruang Kerja PP Terpadu — E-Purchasing / Pengadaan Langsung</b></a></p>
    <p><b>${esc(context.label)}</b> · ${esc(context.note)}</p>
    <p class="pbj-note">SATRIA hanya alat bantu penyusunan dokumen; bukan pengganti SPSE, Katalog Elektronik, INAPROC, SiRUP atau persetujuan resmi. Tidak ada verifikasi/persetujuan berjenjang tambahan.</p>
-   <details><summary>Identitas dasar regulasi paket (opsional, dicatat satu kali)</summary>
+   ${isSpse?`<details><summary>Catatan dasar regulasi paket (opsional; khusus SPSE)</summary>
     <div class="pbj-fields"><label>Tanggal mulai pemilihan menurut catatan resmi<input type="date" data-pbj-start value="${esc(date)}" ${can?'':'disabled'}></label>
     <label>Dasar regulasi transisi (jika berlaku)<select data-pbj-basis ${can?'':'disabled'}>
       <option value="" ${!basis?'selected':''}>Belum dipastikan</option>
@@ -29,9 +31,11 @@
       <option value="perlem-3-2026" ${basis==='perlem-3-2026'?'selected':''}>Perlem 3/2026</option>
     </select></label></div>
     ${can?`<button type="button" class="g" data-pbj-save="${esc(p.id)}">Simpan keterangan regulasi</button>`:'<p class="pbj-note">Akun ini tidak memiliki hak ubah pada paket.</p>'}
-    <p class="pbj-note">Simpan hanya tanggal dan dasar yang benar-benar diketahui dari proses resmi. Tidak ada tanggal yang dibuat otomatis.</p>
-   </details>
+    <p class="pbj-note">Langkah ini <b>tidak wajib</b> untuk setiap paket. Dasar lama dipilih hanya jika bukti dan ketentuan transisi memang mengizinkan; bukan untuk persetujuan berjenjang.</p>
+    <p class="pbj-note" data-pbj-unsaved>${pending.has(String(p.id))?'Ada pilihan belum disimpan. Klik Simpan keterangan regulasi.':'Tidak ada pilihan yang belum disimpan.'}</p>
+   </details>`:`<p class="pbj-note">Paket e-Purchasing: tidak perlu memilih transisi Perlem 3/2026. Pedoman katalog adalah Perlem LKPP 2/2026; tanggal/proses resmi tetap diperiksa.</p>`}
    ${isSpse?`<p><b>Rute SPSE:</b> ${esc(feature.message)}</p>`:''}
+   ${root.SATRIA_PP_KERTAS_KERJA?.panel?.(p)||''}
    <strong>Dokumen yang dibantu SATRIA</strong><ul>${choices}</ul><p class="pbj-note">${esc(plan.note)}</p>${actions}
    <p class="pbj-source">Rujukan: <a href="${policy.SOURCES.penyedia}" target="_blank" rel="noopener noreferrer">Perlem 3/2026</a> · <a href="${policy.SOURCES.transisi}" target="_blank" rel="noopener noreferrer">SE transisi 3/2026</a> · <a href="${policy.SOURCES.katalog}" target="_blank" rel="noopener noreferrer">Perlem 2/2026 katalog</a></p>
    </section>`;
@@ -62,6 +66,13 @@
   const html=`<!doctype html><html lang="id"><head><meta charset="utf-8"><title>DRAF ${esc(kind)} — ${esc(p.rup)}</title><style>@page{size:A4 portrait;margin:17mm}body{font:12px/1.45 Arial,sans-serif;color:#151515}h1{text-align:center;font-size:17px}h2{font-size:15px;text-align:center;margin-top:22px}h3{margin:18px 0 7px;font-size:12px}p{line-height:1.6}table{width:100%;border-collapse:collapse;margin:12px 0;page-break-inside:auto}tr{page-break-inside:avoid}th,td{border:1px solid #888;padding:6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#f4f4f4}td small{display:block}header{border-bottom:2px solid #333;padding-bottom:8px}footer{border-top:1px solid #ccc;margin-top:20px;color:#555}.draft{padding:8px;border:2px solid #ad792d;background:#fff9e9;font-weight:bold}@media print{.draft{color:#000;background:none}}</style></head><body><header><h1>SATRIA • DOKUMEN BANTU PENGADAAN</h1><p class="draft">DRAF BELUM LENGKAP — BUKAN DOKUMEN RESMI / BELUM SIAP UNGGAH</p></header><p><b>Rujukan:</b> ${esc(context.label)}. ${esc(context.note)}</p>${draft(p,kind)}<footer><p>Dokumen ini hanya bahan kerja. Lengkapi nomor, tanggal, hasil pemeriksaan, persyaratan resmi, dan tanda tangan sesuai kewenangan sebelum dipakai dalam sistem pemerintah.</p></footer></body></html>`;
   win.document.open();win.document.write(html);win.document.close();win.focus();win.print();
  }
+ document.addEventListener('change',function(ev){
+  const el=ev.target;if(!el?.matches?.('[data-pbj-start],[data-pbj-basis]'))return;
+  const host=el.closest('[data-pbj-panel]');if(!host)return;
+  const id=host.dataset.pbjPanel,p=typeof P==='function'?P(id):null;if(!p)return;
+  pending.set(String(id),{date:host.querySelector('[data-pbj-start]')?.value||'',basis:host.querySelector('[data-pbj-basis]')?.value||''});
+  const note=host.querySelector('[data-pbj-unsaved]');if(note)note.textContent='Pilihan belum disimpan — klik Simpan keterangan regulasi.';
+ },true);
  document.addEventListener('click',function(ev){const btn=ev.target?.closest?.('[data-pbj-save],[data-pbj-print]');if(!btn)return;
   const pid=btn.getAttribute('data-pbj-save')||btn.getAttribute('data-pbj-pid'),p=typeof P==='function'?P(pid):null;
   if(!p)return;ev.preventDefault();ev.stopImmediatePropagation();
@@ -73,10 +84,10 @@
   const basis=host?.querySelector('[data-pbj-basis]')?.value||'';
   if(date&&(!/^\d{4}-\d{2}-\d{2}$/.test(date)||Number.isNaN(Date.parse(date+'T12:00:00Z'))||new Date(date+'T12:00:00Z').toISOString().slice(0,10)!==date)){root.alert('Tanggal tidak valid.');return;}
   if(!['','perlem-12-2021','perlem-3-2026'].includes(basis)){root.alert('Pilihan dasar regulasi tidak valid.');return;}
-  if(basis==='perlem-12-2021'&&(!date||date<'2026-09-22'||date>'2026-10-09')){root.alert('Pilihan Perlem 12/2021 pada fitur transisi hanya tersedia jika tanggal mulai pemilihan tercatat 22 September–9 Oktober 2026. Untuk paket lebih lama, cocokkan dasar yang berlaku secara manual.');return;}
+  if(basis==='perlem-12-2021'&&!date){root.alert('Isi tanggal mulai pemilihan yang diketahui sebelum mencatat dasar aturan lama, lalu cocokkan bukti transisinya.');return;}
   if(typeof SATRIA==='undefined'||typeof SATRIA.tx!=='function'){root.alert('Penyimpanan SATRIA belum siap.');return;}
   const saved=SATRIA.tx('paket','Catatan dasar regulasi paket '+String(p.rup||p.id),()=>{p.tglMulaiPemilihan=date;p.dasarRegulasi=basis;});
-  if(saved!==null){if(typeof toast==='function')toast('Catatan dasar regulasi tersimpan; cocokkan dengan proses resmi.');if(typeof render==='function')render();}
+  if(saved!==null){pending.delete(String(p.id));if(typeof toast==='function')toast('Catatan dasar regulasi tersimpan; cocokkan dengan proses resmi.');if(typeof render==='function')render();}
  },true);
  root.SATRIA_PBJ_WORKSPACE=Object.freeze({panel,draft});
 })(typeof window!=='undefined'?window:null);

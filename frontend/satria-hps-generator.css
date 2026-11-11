@@ -1,0 +1,15 @@
+/* HPS document helper — inherits SATRIA Document Studio styles. */
+.satria-hps-generator{border-left:4px solid #8b5ad1;margin:14px 0 18px}
+.satria-hps-generator h3{margin:0 0 8px}
+.satria-hps-generator p{line-height:1.55;margin:8px 0}
+.satria-hps-generator details{padding:9px 0}
+.hps-gen-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;margin:12px 0}
+.hps-gen-grid label{min-width:0;display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:650}
+.hps-gen-grid input,.hps-gen-grid select{width:100%;min-height:39px;border:1px solid #abb5cd;border-radius:8px;background:#fff;color:#242338;padding:8px}
+.hps-gen-summary{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.hps-gen-summary span{padding:10px 13px;border-radius:9px;border:1px solid #e1e2ee;background:#f8f8fe;font-size:12px}
+.hps-gen-alert p{font-size:12px;color:#695730}.hps-gen-alert .hps-gen-error{color:#a12a38;font-weight:700}
+.pbj-kertas-kerja{padding:10px;margin:9px 0;border:1px solid #d6dfe7;border-radius:8px}
+.pbj-kertas-kerja summary{cursor:pointer;font-weight:700}
+.pbj-kertas-kerja ul{margin:7px 0 8px;padding-left:22px}
+@media(max-width:720px){.hps-gen-grid{grid-template-columns:1fr}}

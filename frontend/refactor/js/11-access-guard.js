@@ -4,6 +4,7 @@
   const LOCK = {
     input:  {Admin:'rw', Operator:'rw', Viewer:''},
     paket:  {Admin:'rw', Operator:'rw', Viewer:'r'},
+    kerja:  {Admin:'rw', Operator:'rw', Viewer:'r'},
     dok:    {Admin:'rw', Operator:'rw', Viewer:'r'},
     master: {Admin:'rw', Operator:'r',  Viewer:'r'},
     set:    {Admin:'rw', Operator:'r',  Viewer:'r'}

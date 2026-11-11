@@ -6,6 +6,7 @@
   const PAGE={
     dash:['Ringkasan Utama','Analitik pengadaan lintas OPD, HPS, penetapan, dan pekerjaan prioritas'],
     paket:['Paket Pengadaan','Kelola rincian paket, penawaran, negosiasi, dan penetapan'],
+    kerja:['Ruang Kerja Pejabat Pengadaan','Satu paket untuk dua metode, catatan kerja, bukti, dan dokumen pendukung'],
     kalk:['Kalkulator Negosiasi','Bandingkan harga dengan HPS, pagu, dan perhitungan pajak'],
     input:['Input dan Bank RUP','Kelola rencana pengadaan, JSON, serta alokasi anggaran'],
     spse:['Monitoring SPSE','Pantau jadwal, kontrak, kendala, dan bukti pembayaran'],

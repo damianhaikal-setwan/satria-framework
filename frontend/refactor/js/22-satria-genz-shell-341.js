@@ -3,7 +3,7 @@
 /* SATRIA 3.0.41 visual-only UI maintenance. Data, routing and document engines untouched. */
 (function(){
  'use strict';
- const routeNames={dash:'Ringkasan Utama',paket:'Paket Pengadaan',kalk:'Kalkulator Nego',input:'Input RUP',dok:'Dokumen Pengadaan',lap:'Laporan dan Analisis',master:'Data Master',set:'Pengaturan Sistem',care:'Perawatan SATRIA',user:'Pengguna dan Hak Akses',panduan:'Panduan Penggunaan',chat:'Asisten SATRIA'};
+ const routeNames={dash:'Ringkasan Utama',paket:'Paket Pengadaan',kerja:'Ruang Kerja Pejabat Pengadaan',kalk:'Kalkulator Nego',input:'Input RUP',dok:'Dokumen Pengadaan',lap:'Laporan dan Analisis',master:'Data Master',set:'Pengaturan Sistem',care:'Perawatan SATRIA',user:'Pengguna dan Hak Akses',panduan:'Panduan Penggunaan',chat:'Asisten SATRIA'};
  const apply=()=>{
   const page=(location.hash||'#dash').slice(1).split('/')[0]||'dash';
   document.body.dataset.satriaPage=page;

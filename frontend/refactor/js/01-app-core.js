@@ -434,7 +434,7 @@ document.addEventListener('click',e=>{if(e.target?.id!=='rupCsvTemplate')return;
  const csv='rup,nama,opd,tahun,pagu,sub,sumber,masaHk,jenisPengadaan,metodePemilihan,lokasiPengiriman,bulan\r\n"67122699","Contoh Paket ATK","",2026,1924800,"","APBD",7,"Barang","E-Purchasing dengan Negosiasi Harga","","Oktober 2026"\r\n';
  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='SATRIA-Template-Input-RUP.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);
 });
-const NAV=[['dash','Ringkasan Utama'],['paket','Paket Pengadaan'],['kalk','Kalkulator Nego'],['input','Input RUP'],['spse','Monitoring SPSE'],['monitor','Pusat Monitoring'],['finance','Keuangan & Kontrak'],['quality','Kualitas Data'],['brief','Executive Briefing 4.1'],['satria360','SATRIA 360°'],['dok','Dokumen Pengadaan'],['lap','Laporan dan Analisis'],['master','Data Master'],['set','Pengaturan Sistem'],['care','Perawatan SATRIA'],['user','Pengguna dan Hak Akses'],['panduan','Panduan Penggunaan'],['chat','Asisten SATRIA']];
+const NAV=[['dash','Ringkasan Utama'],['paket','Paket Pengadaan'],['kerja','Ruang Kerja PP'],['kalk','Kalkulator Nego'],['input','Input RUP'],['spse','Monitoring SPSE'],['monitor','Pusat Monitoring'],['finance','Keuangan & Kontrak'],['quality','Kualitas Data'],['brief','Executive Briefing 4.1'],['satria360','SATRIA 360°'],['dok','Dokumen Pengadaan'],['lap','Laporan dan Analisis'],['master','Data Master'],['set','Pengaturan Sistem'],['care','Perawatan SATRIA'],['user','Pengguna dan Hak Akses'],['panduan','Panduan Penggunaan'],['chat','Asisten SATRIA']];
 const kpi=(l,v)=>`<div class="card kpi"><span>${l}</span><b>${v}</b></div>`;
 const pill=p=>`<span class=pill title="Kelengkapan: ${esc((window.SATRIA&&SATRIA.lifecycle)?({draf:'Draf',berjalan:'Berjalan',lengkap:'Lengkap',arsip:'Diarsipkan'})[SATRIA.lifecycle(p)]:'-')}">${stt(p)}</span>`;
 function tabelPaket(L){
@@ -2190,6 +2190,7 @@ function vDok(){
     ${window.SATRIA_DOC_PPK?.panel?.(p,S.ui.dok)||''}${S.ui.dok==='dpp'?(window.SATRIA_DPP_PREFLIGHT?.panel?.(p)||''):''}${S.ui.dok==='dpp'?(window.SATRIA_DPP_FORMAT?.panel?.(p)||''):''}
     ${warnDoc(p)}
     ${window.SATRIA_PBJ_WORKSPACE?.panel?.(p)||''}
+      ${window.SATRIA_HPS_GENERATOR?.panel?.(p)||''}
     <div id="dokLazyContainer" class="satria-doc-lazy-container">
       <div class="doc doc-${S.ui.dok} ${S.ui.dok==='rfi'?'doc-landscape':'doc-portrait'}" data-document-type="${esc(S.ui.dok)}" data-lazy="true">
         ${docContent}
@@ -2835,7 +2836,7 @@ function vSet(){
 
 
 /* ===== ROLE & HAK AKSES ===== */
-const ROLE_PAGES={Operator:['dash','paket','kalk','input','spse','monitor','finance','quality','care','brief','satria360','analisa','dok','lap','master','panduan','chat'],Viewer:['dash','paket','kalk','spse','monitor','finance','quality','care','brief','satria360','analisa','dok','lap','panduan','chat']};
+const ROLE_PAGES={Operator:['dash','paket','kerja','kalk','input','spse','monitor','finance','quality','care','brief','satria360','analisa','dok','lap','master','panduan','chat'],Viewer:['dash','paket','kerja','kalk','spse','monitor','finance','quality','care','brief','satria360','analisa','dok','lap','panduan','chat']};
 const WRITE=['newpaket','rupsave','rupimport','rupmanualsave','copy','delpaket','additem','delitem','delpw','winner','autowin','correctOfferProvider','saveHpsTotalReview','removeHpsTotalReview','addrow','delrow','addopd','addyear','delyear','rmlogo','reset','addunit','madd','mtoggle','medit','uadd','utoggle','udel','clearsample','rmkop','satriaFixDemoSub'];
 const cur=()=>S.users.find(u=>u.id===S.ui.user)||{role:'Viewer',nama:'-'};
 const allowed=k=>{const r=cur().role;return !ROLE_PAGES[r]||ROLE_PAGES[r].includes(k)};
@@ -3018,7 +3019,7 @@ function render(){
  if(!allowed(u.page))u.page='dash';$('#selUser').innerHTML=S.users.filter(x=>x.aktif!==false).map(x=>`<option value="${x.id}" ${x.id===S.ui.user?'selected':''}>${esc(x.nama)} (${x.role})</option>`).join('');
  $('#nav').innerHTML=NAV.filter(([k])=>allowed(k)).map(([k,t])=>`<a href="#${k}" class="${u.page===k?'on':''}">${t}</a>`).join('');
  if(u.page==='paket'&&u.pid&&satriaSpseIs(P(u.pid))){u.page='spse';try{history.replaceState(null,'',location.pathname+location.search+'#spse/'+encodeURIComponent(u.pid))}catch(_){}}
- const V={dash:()=>vDash()+satriaOpsDashWidget(),monitor:satriaOpsMonitor,finance:satriaOpsFinance,quality:satriaOpsQuality,care:()=>window.SATRIA_CARE?.page?.()||'<section class="card">Perawatan SATRIA belum dimuat; periksa file aplikasi atau muat ulang halaman.</section>',paket:()=>u.pid?vDetail(P(u.pid)):vPaket(),kalk:vKalk,input:vInputRup,spse:vSpse,brief:vBrief,satria360:()=>window.SATRIA_NEXT4?.vSatria360?.()||'<div class="card">SATRIA 360° sedang dimuat.</div>',analisa:()=>window.SATRIA_PRICE_ANALYSIS?.page?.()||'<div class="card">Analisis Harga belum dimuat. Muat ulang aplikasi.</div>',dok:vDok,lap:vLap,master:vMaster,set:vSet,user:vUser,panduan:vPanduan,chat:vChat};
+ const V={dash:()=>vDash()+satriaOpsDashWidget(),monitor:satriaOpsMonitor,finance:satriaOpsFinance,quality:satriaOpsQuality,care:()=>window.SATRIA_CARE?.page?.()||'<section class="card">Perawatan SATRIA belum dimuat; periksa file aplikasi atau muat ulang halaman.</section>',paket:()=>u.pid?vDetail(P(u.pid)):vPaket(),kerja:()=>window.SATRIA_PP_ECOSYSTEM?.page?.((S.paket||[]).filter(p=>Number(p.tahun)===Number(u.tahun)&&(u.opd==='all'||String(p.opd)===String(u.opd))&&(!cloudScope||(cloudScope.opdIds.includes(String(p.opd))&&cloudScope.years.includes(Number(p.tahun))))),u.pid)||'<section class="card">Ruang Kerja PP belum dimuat. Periksa aset aplikasi.</section>',kalk:vKalk,input:vInputRup,spse:vSpse,brief:vBrief,satria360:()=>window.SATRIA_NEXT4?.vSatria360?.()||'<div class="card">SATRIA 360° sedang dimuat.</div>',analisa:()=>window.SATRIA_PRICE_ANALYSIS?.page?.()||'<div class="card">Analisis Harga belum dimuat. Muat ulang aplikasi.</div>',dok:vDok,lap:vLap,master:vMaster,set:vSet,user:vUser,panduan:vPanduan,chat:vChat};
  $('#main').innerHTML=(V[u.page]||vDash)();
  window.SATRIA_NEXT4?.enhance?.();
  window.SATRIA_OPERATOR_STUDIO?.enhance?.();
@@ -3043,6 +3044,12 @@ function validateBackup(o){
  for(const x of (o.unit||[]))if(!opdIds.has(x.opd))throw new Error('Unit merujuk OPD yang tidak ada');
  for(const x of (o.pejabat||[]))if(x.opd&&!opdIds.has(x.opd))throw new Error('Pejabat merujuk OPD yang tidak ada');
  for(const x of o.paket){if(!x||typeof x.id!=='string'||!Number.isInteger(+x.tahun)||+x.tahun<2000||+x.tahun>2200||typeof x.opd!=='string'||!arr(x.items))throw new Error('Struktur paket tidak valid');if(!opdIds.has(x.opd))throw new Error('Paket merujuk OPD yang tidak ada');if(x.unit&&unitIds.size&&!unitIds.has(x.unit))throw new Error('Paket merujuk unit yang tidak ada');if(!Number.isFinite(+x.pagu)||+x.pagu<0)throw new Error('Nilai pagu tidak valid');if(!x.items.every(i=>i&&typeof i.id==='string'&&Number.isFinite(+i.vol)&&+i.vol>=0&&Number.isFinite(+i.hs)&&+i.hs>=0))throw new Error('Rincian item paket tidak valid');if(new Set(x.items.map(i=>i.id)).size!==x.items.length)throw new Error('ID item duplikat dalam paket');if(x.penawaran!=null&&!arr(x.penawaran))throw new Error('Penawaran paket tidak valid');if(new Set((x.penawaran||[]).map(w=>w&&w.id)).size!==(x.penawaran||[]).length)throw new Error('ID penawaran duplikat dalam paket');for(const w of (x.penawaran||[])){if(!w||typeof w.id!=='string'||typeof w.pen!=='string')throw new Error('Struktur penawaran tidak valid');if(supplierIds.size&&!supplierIds.has(w.pen))throw new Error('Penawaran merujuk penyedia yang tidak ada');}}
+ for(const p of o.paket){if(p.ppEkosistem===undefined)continue;const z=p.ppEkosistem;
+  if(!z||typeof z!=='object'||Array.isArray(z)||z.schema!==1||!Array.isArray(z.notes)||!Array.isArray(z.evidence)||z.notes.length>100||z.evidence.length>100)throw new Error('Kertas kerja PP tidak valid');
+  const field=(r,k,n)=>typeof r[k]==='string'&&r[k].length<=n;
+  for(const a of z.notes){if(!a||typeof a!=='object'||!field(a,'id',120)||!field(a,'topic',40)||!field(a,'text',1000)||!field(a,'at',40)||!field(a,'by',120))throw new Error('Catatan kerja PP tidak valid');}
+  for(const a of z.evidence){if(!a||typeof a!=='object'||!field(a,'id',120)||!field(a,'title',120)||!field(a,'reference',250)||!field(a,'url',600)||!field(a,'date',16)||!field(a,'at',40)||!field(a,'by',120)||a.url&&!/^https:\/\/[^\s<>\"']+$/i.test(a.url))throw new Error('Referensi bukti PP tidak valid');}
+ }
  for(const p of o.paket){if(p.jalurPengadaan==='SPSE_MONITOR'){const m=p.spseMonitoring;if(!m||typeof m!=='object'||arr(m)||!arr(m.stages)||!arr(m.payments)||!arr(m.addenda)||!arr(m.issues)||!m.stages.every(x=>x&&typeof x.key==='string')||!m.payments.every(x=>x&&typeof x.id==='string'&&Number.isSafeInteger(x.amount)&&x.amount>0)||!m.addenda.every(x=>x&&typeof x.id==='string'&&Number.isSafeInteger(x.delta))||!Number.isSafeInteger(m.contractValue)||m.contractValue<0)throw new Error('Data Monitoring SPSE pada backup tidak valid');}}
  if(o.rupBank!==undefined&&!arr(o.rupBank))throw new Error('Bank RUP harus berupa array');
  if(arr(o.rupBank)){
@@ -3469,6 +3476,7 @@ document.addEventListener('change',e=>{
  if(t.id==='lapRekeningTahun'){S.ui.lapRekeningTahun=String(t.value||'all');return render()}
  if(t.id==='lapRekeningAkun'){S.ui.lapRekeningAkun=String(t.value||'all');return render()}
  if(t.id==='lapRekeningCari'){S.ui.lapRekeningCari=String(t.value||'');return}
+ if(t.matches?.('[data-pbj-start],[data-pbj-basis],[data-hps-doc-field]'))return; // Formulir dokumen mempunyai tombol Simpan sendiri; jangan menggambar ulang dropdown.
  if(t.matches?.('[data-hps-edit]'))return; // Hanya tombol Simpan Semua Rincian yang menulis data.
  // Review historis ditangani oleh kontrol sendiri, tanpa menggambar ulang semua input.
  if(t.matches?.('[data-hps-review-reason],[data-hps-review-evidence],[data-hps-review-check]'))return;

@@ -2994,6 +2994,7 @@ function vDokOptimized(){
 
       <!-- PBJ 2026 is rendered from the SAME selected package as the active document studio. -->
       ${window.SATRIA_PBJ_WORKSPACE?.panel?.(p)||''}
+      ${window.SATRIA_HPS_GENERATOR?.panel?.(p)||''}
 
       <div class="spha-quick no-print"><div><h3>Analisis Kewajaran Harga & Bukti Referensi</h3><p>Diambil otomatis dari penawaran/negosiasi paket ini; cocok untuk lampiran permintaan data per paket.</p></div><button type="button" class="spha-btn" data-act="dtype" data-tab="analisa">Buka laporan analisis →</button></div>
       ${satriaHumanDocGuide(p,S.ui.dok,currentMissing)}
