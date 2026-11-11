@@ -1,5 +1,5 @@
 /* SATRIA PWA: network-first, precache all refactored assets for offline use. */
-const CACHE_NAME = 'satria-v3.0.59.59-pbj-2026-20261111-sirup-dua-format';
+const CACHE_NAME = 'satria-v3.0.59.59-pbj-2026-20261111-modular-stage4';
 const APP_ASSETS = [
   "./",
   "./index.html",
@@ -9,6 +9,7 @@ const APP_ASSETS = [
   "./frontend/refactor/maintenance/diagnostics.js",
   "./frontend/refactor/maintenance/care-center.js",
   "./frontend/refactor/maintenance/care-center.css",
+  "./frontend/satria-procurement-core.js",
   "./frontend/pbj2026-policy.js",
   "./frontend/satria-spse-selection-document.js",
   "./frontend/satria-spse-selection-document.css",
@@ -49,6 +50,11 @@ const APP_ASSETS = [
   "./frontend/refactor/css/22-briefing-visual.css",
   "./frontend/refactor/css/23-hps-draft-batch.css",
   "./frontend/refactor/css/24-laporan-rekening.css",
+  "./frontend/satria-document-templates.js",
+  "./frontend/satria-view-performance.js",
+  "./frontend/satria-shared-modal-ui.css",
+  "./frontend/satria-stage4-ux.css",
+  "./frontend/refactor/js/00-core-guards.js",
   "./frontend/refactor/js/01-app-core.js",
   "./frontend/refactor/js/02-premium-ui.js",
   "./frontend/refactor/js/03-analytics-dashboard.js",
