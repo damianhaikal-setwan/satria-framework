@@ -2894,7 +2894,26 @@ function optimizeDocTables(docEl){
 // Enhanced vDok with lazy load
 const originalVDok = window.vDok;
 function vDokOptimized(){
-  const L = filt(), p = L.find(x => x.id === S.ui.dpid) || L[0];
+  const L = filt();
+  // The legacy filter intentionally excludes SPSE packages. Document Studio must not
+  // use that filter alone: the PP selection-document builder needs SPSE packages too.
+  const scope=activeCloudScope();
+  const spseL=(S.paket||[]).filter(x=>satriaSpseIs(x)&&
+    (S.ui.plife==='arsip'?!!x.arsip:!x.arsip)&&Number(x.tahun)===Number(S.ui.tahun)&&
+    (S.ui.opd==='all'||String(x.opd)===String(S.ui.opd))&&
+    (!scope||(scope.years.includes(Number(x.tahun))&&scope.opdIds.includes(String(x.opd)))));
+  const allPackages=[...L,...spseL];
+  const p=allPackages.find(x=>x.id===S.ui.dpid)||allPackages[0];
+  if(p&&satriaSpseIs(p)){
+    return `<div class="dok-studio dok-spse-workspace">
+      <section class="dok-hero no-print"><div class="dok-hero-copy"><span class="dok-eyebrow"><i></i> SATRIA / SPSE DOCUMENT WORKSPACE</span><h2>Dokumen Pemilihan.<br><em>Disusun dari paket, diperiksa pejabat.</em></h2><p>Pengadaan Langsung: dokumen untuk sistem SPSE resmi. Tanpa mengisi ulang HPS dan identitas RUP.</p></div></section>
+      <section class="dok-control-panel no-print"><div class="dok-control-title"><span class="dok-section-kicker">01 / PAKET</span><h3>Pilih paket kerja</h3><p>Metode asli paket tetap dipertahankan.</p></div>
+        <div class="dok-package-control"><label for="selPaket">PAKET / KODE RUP</label><select id="selPaket" class="satria-select">${allPackages.slice().sort((a,b)=>String(a.rup).localeCompare(String(b.rup))).map(x=>`<option value="${esc(x.id)}" ${x.id===p.id?'selected':''}>${esc(x.rup||'RUP BELUM DIISI')} — ${esc(x.nama||'Paket tanpa nama')}</option>`).join('')}</select><div class="dok-package-meta"><span class="dok-meta-tag">${esc(p.rup||'RUP BELUM DIISI')}</span><span>TA ${esc(p.tahun)} · Pengadaan Langsung/SPSE</span></div></div>
+        <a class="g" href="#spse/${encodeURIComponent(p.id)}">Monitoring SPSE →</a></section>
+      ${window.SATRIA_PBJ_WORKSPACE?.panel?.(p)||'<section class="card">Modul PBJ 2026 tidak dimuat. Muat ulang aplikasi.</section>'}
+      <p class="pbj-note">Berkas diunduh menggunakan dialog cetak browser. Periksa penetapan/tanda tangan dan panduan SPSE sebelum unggah manual. Tidak ada unggah otomatis.</p>
+    </div>`;
+  }
   if(!p) return `
     <div class="dok-studio">
       <section class="dok-hero no-print">
@@ -2986,7 +3005,7 @@ function vDokOptimized(){
         <div class="dok-control-title"><span class="dok-section-kicker">01 / WORKSPACE</span><h3>Pilih paket kerja</h3><p>Jenis dokumen akan mengikuti paket aktif yang dipilih.</p></div>
         <div class="dok-package-control">
           <label for="selPaket">PAKET PENGADAAN · KODE RUP</label>
-          <select id="selPaket" class="satria-select">${L.slice().sort((a,b)=>String(a.rup).localeCompare(String(b.rup))).map(x=>`<option value="${x.id}" ${x.id===p.id?'selected':''}>${esc(x.rup||'KODE RUP BELUM DIISI')} — ${esc(x.nama)}</option>`).join('')}</select>
+          <select id="selPaket" class="satria-select">${allPackages.slice().sort((a,b)=>String(a.rup).localeCompare(String(b.rup))).map(x=>`<option value="${x.id}" ${x.id===p.id?'selected':''}>${esc(x.rup||'KODE RUP BELUM DIISI')} — ${esc(x.nama)}</option>`).join('')}</select>
           <div class="dok-package-meta"><span class="dok-meta-tag">${esc(p.rup||'RUP BELUM DIISI')}</span><span>TA ${esc(p.tahun)} · ${esc(O(p.opd).singkat||O(p.opd).nama||'OPD belum diisi')}</span></div>
         </div>
         <button type="button" data-act="print" class="dok-print-button"><span class="dok-print-icon">↗</span><span><b>Cetak / Simpan PDF</b><small>A4 • Arial • Seluruh tabel</small></span></button>

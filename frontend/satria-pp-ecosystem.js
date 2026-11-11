@@ -1,4 +1,4 @@
-/* SATRIA NEXT 3.0.59.56 — Ruang Kerja Pejabat Pengadaan.
+/* SATRIA NEXT 3.0.59.57 — Ruang Kerja Pejabat Pengadaan.
  * Integrates existing package data, E-Purchasing and Pengadaan Langsung.
  * No extra database/login, no SPSE or e-Katalog API, no approval workflow.
  * Work notes and evidence references are part of existing package snapshot.
@@ -52,6 +52,7 @@
     ];
     const concerns=[];
     if(mode==='other') concerns.push('Metode belum dikenali sebagai E-Purchasing atau Pengadaan Langsung. Jangan membuat dokumen pemilihan yang tidak sesuai kewenangan.');
+    if(!str(p?.jenisPengadaan)||!str(p?.metodePemilihan)&&!str(m.method)) concerns.push('Jenis atau metode belum lengkap. Cocokkan dengan SiRUP dan data paket sebelum menyiapkan dokumen.');
     if(total>Number(p?.pagu||0) && total>0) concerns.push('Total HPS tercatat melebihi pagu paket.');
     if(!itemsGood && mode==='pl' && p?.jalurPengadaan==='SPSE_MONITOR') concerns.push('Monitoring SPSE belum memuat rincian HPS di SATRIA; cocokkan DPP/HPS dari sumber resmi.');
     if(mode==='ep' && !source) concerns.push('Belum ada sumber harga dan tanggal referensi yang dapat diperiksa pada penawaran paket.');
@@ -71,7 +72,7 @@
     const labels=list.map(d=>`<li>${safe(d.label)} <span>${d.available?'Draf/fitur terkait tersedia':'Format belum dikonfirmasi — jangan dibuat otomatis'}</span></li>`).join('');
     const ep=a.mode==='ep';const pl=a.mode==='pl';const spse=pl&&p.jalurPengadaan==='SPSE_MONITOR';
     return `<section class="pp-block"><h3>Dokumen berdasarkan metode</h3><p>${safe(a.docs?.note||'Metode harus dipastikan agar dokumen tepat.')}</p><ul class="pp-document-list">${labels||'<li>Belum ada dokumen yang direkomendasikan otomatis.</li>'}</ul>
-    <div class="pp-actions">${ep?`<button type="button" data-pp-go="docs">Buka 15 template & generator HPS</button><a href="#dok">Dokumen Pengadaan →</a>`:''}${spse?`<button type="button" data-pp-draft="pemilihan">Cetak draf Dokumen Pemilihan</button><button type="button" data-pp-draft="reviu-dpp">Cetak draf BA Reviu DPP</button><button type="button" data-pp-draft="analisa-pasar">Cetak draf Analisa Pasar</button>`:''}<a href="#${spse?'spse':'paket'}/${pathId(p)}">Buka ${spse?'Monitoring SPSE':'Paket Pengadaan'} →</a></div>
+    <div class="pp-actions">${ep?`<button type="button" data-pp-go="docs">Buka 15 template & generator HPS</button><a href="#dok">Dokumen Pengadaan →</a>`:''}${spse?`<button type="button" data-pp-go="spse-docs">Susun Dokumen Pemilihan SPSE</button><button type="button" data-pp-draft="reviu-dpp">Cetak draf BA Reviu DPP</button><button type="button" data-pp-draft="analisa-pasar">Cetak draf Analisa Pasar</button>`:''}<a href="#${spse?'spse':'paket'}/${pathId(p)}">Buka ${spse?'Monitoring SPSE':'Paket Pengadaan'} →</a></div>
     <p class="pp-muted">Tidak ada unggah otomatis ke SPSE/INAPROC. HRS belum digenerasikan karena formatnya belum terverifikasi. Dokumen draf tetap memerlukan pemeriksaan pejabat yang berwenang.</p></section>`;
   }
   function records(p,a,readonly) {

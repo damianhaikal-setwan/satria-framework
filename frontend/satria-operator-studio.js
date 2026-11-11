@@ -42,11 +42,11 @@
        note:'Tombol Buat dari Bank RUP menggunakan proses asli SATRIA; tidak membuat transaksi baru secara otomatis.'};
    }
    if(page==='input'){
-     const rup=getRup(),manual=rup.filter(r=>String(r.asal||'').startsWith('Input manual')).length,imports=rup.filter(r=>String(r.asal||'').startsWith('Impor JSON/CSV')).length;
+     const rup=getRup(),manual=rup.filter(r=>String(r.asal||'').startsWith('Input manual')).length,imports=rup.filter(r=>String(r.asal||'').startsWith('Impor JSON/CSV')).length,missing=rup.filter(r=>!String(r.jenisPengadaan||'').trim()||!String(r.metodePemilihan||'').trim()).length;
      return {kicker:'RUANG KERJA / BANK RUP',title:'RUP lebih mudah ditemukan.',sub:'Satu bank untuk RUP manual dan impor JSON. Pilih tindakan yang Anda butuhkan, tanpa menghapus draf atau mengganti filter diam-diam.',
-       stats:metric('RUP dalam akses',rup.length,'Lintas tahun/OPD sesuai hak akses')+metric('Input manual',manual,'Identitas dicatat langsung')+metric('Impor JSON/CSV',imports,'Data hasil impor')+metric('Total pagu tercatat',Rp(rup.reduce((a,r)=>a+N(r.pagu),0)),'Jumlah pagu data Bank RUP yang terlihat'),
+       stats:metric('RUP dalam akses',rup.length,'Lintas tahun/OPD sesuai hak akses')+metric('Input manual',manual,'Identitas dicatat langsung')+metric('Impor JSON/CSV',imports,'Data hasil impor')+metric('Perlu cek jenis/metode',missing,'Klasifikasi tidak diasumsikan otomatis',missing?'is-warn':'is-good'),
        actions:jump('Lihat Bank RUP','rup-bank','⌕')+jump('Input RUP manual','rup-manual','✎')+jump('Impor JSON/CSV','rup-import','⇧')+link('Daftar paket','#paket','▤'),
-       note:'Pagu Bank RUP adalah nilai referensi, bukan saldo kas. HPS dan penetapan ditampilkan terpisah pada setiap RUP.'};
+       note:'Pagu Bank RUP adalah nilai referensi, bukan saldo kas. Periksa jenis dan metode terhadap SiRUP sebelum memilih template dokumen; HPS dan penetapan tidak diubah.'};
    }
    if(page==='kalk'){
      const total=ep.length,haveOffer=ep.filter(p=>Array.isArray(p.penawaran)&&p.penawaran.length).length;

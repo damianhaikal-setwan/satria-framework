@@ -1,0 +1,9 @@
+/* Isolated editor styles: no change to legacy print templates. */
+.sd-editor{margin:14px 0;padding:14px;border:1px solid #94a3b8;border-left:4px solid #4f46e5;border-radius:12px;background:#f8fafc;color:#1e293b}
+.sd-editor h3{margin:0 0 8px;font-size:17px;color:#1e293b}.sd-editor summary{cursor:pointer;padding:8px 0}.sd-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
+.sd-grid label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600;color:#334155}.sd-grid label:has(textarea){grid-column:1/-1}.sd-grid label>span{color:#af2828}
+.sd-grid input,.sd-grid textarea{font:inherit;font-weight:400;line-height:1.5;background:white;color:#172033;padding:9px;border:1px solid #94a3b8;border-radius:7px;width:100%;box-sizing:border-box}
+.sd-grid input:disabled,.sd-grid textarea:disabled{background:#e2e8f0;cursor:not-allowed}.sd-actions{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.sd-verify{display:flex;gap:10px;align-items:start;margin:13px 0;font-size:12px;line-height:1.55}.sd-verify input{margin-top:3px;flex:none}.sd-status{font-size:12px;background:#e8edf8;padding:10px;border-radius:6px;overflow-wrap:anywhere}
+@media(max-width:700px){.sd-grid{grid-template-columns:1fr}.sd-actions button,.sd-editor>details>button{width:100%}}
+/* Maintain heading contrast on the dark SPSE hero without altering legacy document pages. */
+.dok-spse-workspace .dok-hero-copy h2{color:#f8fafc}

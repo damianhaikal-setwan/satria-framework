@@ -264,7 +264,7 @@ function docIdentity(p){
  ${row('Program',program)}${row('Kegiatan',kegiatan)}${row('Sub Kegiatan',sub)}${row('Akun Belanja',kode)}
  ${row('Kode RUP',p.rup)}${row('Nama Paket',p.nama)}
  ${row('Pagu Anggaran',rpLocal(positive(p.pagu)))}
- ${row('Metode Pengadaan',p.metodePemilihan||'E-Purchasing (Katalog Elektronik)')}
+ ${row('Metode Pengadaan',p.metodePemilihan||'Perlu verifikasi')}
  </tbody></table>`;
 }
 function exampleNeedTable(a){

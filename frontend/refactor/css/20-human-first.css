@@ -30,3 +30,18 @@
 .satria-human-overview-item span{font-size:11px;color:var(--acc);font-weight:750}
 @media(max-width:760px){.satria-human-panel{padding:13px}.satria-human-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.satria-human-overview-list{grid-template-columns:1fr}.satria-human-primary button{width:100%}}
 @media print{.satria-human-panel,.satria-human-technical{display:none!important}}
+
+/* SATRIA 3.0.59.59 — Bank RUP: explicit classifications and optional verification */
+.satria-rup-class-summary{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;border:1px solid #e3d8ff;background:#f8f6ff;border-radius:12px;padding:11px 13px;margin:12px 0;color:#30254d}
+.satria-rup-class-summary span{font-size:12px;line-height:1.45}
+.satria-rup-identity{display:flex;flex-wrap:wrap;gap:5px 8px;align-items:center;margin:8px 0;font-size:12px}
+.satria-rup-identity>span{border-radius:999px;border:1px solid #dfdcec;background:#f6f4ff;padding:5px 8px}
+.satria-rup-identity>small{flex-basis:100%;line-height:1.45}
+.satria-rup-classifier{margin:9px 0 13px;border:1px solid #ddd8ee;border-radius:10px;background:#fff;padding:9px 11px}
+.satria-rup-classifier summary{cursor:pointer;font-size:12px;font-weight:700;color:#43357a}
+.satria-rup-classifier-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));align-items:end;gap:8px;margin:10px 0}
+.satria-rup-classifier-fields label{display:grid;gap:5px;font-size:12px;font-weight:650}
+.satria-rup-classifier-fields select{min-width:0;width:100%}
+.satria-rup-classifier-fields button{min-height:42px}
+.satria-rup-classifier>small{display:block;font-size:11px;line-height:1.45;margin:5px 0}
+@media (prefers-color-scheme:dark){.satria-rup-class-summary,.satria-rup-classifier,.satria-rup-identity>span{color:var(--text,#ddd);background:var(--surface,#252236);border-color:var(--bd,#474054)}}

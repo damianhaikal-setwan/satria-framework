@@ -17,7 +17,7 @@
   const isSpse=p.jalurPengadaan==='SPSE_MONITOR'||!!p.spseMonitoring;
   const can=userCanWrite(p),working=pending.get(String(p.id))||{},date=String(working.date??p.tglMulaiPemilihan??''),basis=String(working.basis??p.dasarRegulasi??'');
   const choices=plan.docs.map(d=>`<li><b>${esc(d.label)}</b> — ${d.available?(isSpse?'Rancangan bantuan tersedia untuk cetak/PDF':'Tersedia di menu dokumen SATRIA'):'Belum tersedia; jangan gunakan template pengganti tanpa konfirmasi'}</li>`).join('');
-  const actions=isSpse?`<div class="pbj-actions">${plan.docs.filter(d=>d.available).map(d=>`<button type="button" class="g" data-pbj-print="${esc(d.code)}" data-pbj-pid="${esc(p.id)}">Cetak draf ${esc(d.label)}</button>`).join('')}</div>`:'<p class="pbj-note">Gunakan tombol <b>Cetak / PDF</b> dan pilihan template DPP yang telah tersedia di menu ini. Dokumen HRS belum dibuat sampai nama/formatnya terverifikasi.</p>';
+  const actions=isSpse?`<div class="pbj-actions">${plan.docs.filter(d=>d.available&&d.code!=='pemilihan').map(d=>`<button type="button" class="g" data-pbj-print="${esc(d.code)}" data-pbj-pid="${esc(p.id)}">Cetak draf ${esc(d.label)}</button>`).join('')}</div>`:'<p class="pbj-note">Gunakan tombol <b>Cetak / PDF</b> dan pilihan template DPP yang telah tersedia di menu ini. Dokumen HRS belum dibuat sampai nama/formatnya terverifikasi.</p>';
   return `<section class="card no-print pbj-panel" data-pbj-panel="${esc(p.id)}" aria-label="Paket dokumen pendukung PBJ 2026">
    <h3>📁 Paket Dokumen Pendukung Sistem Resmi</h3>
    <p><a href="#kerja/${encodeURIComponent(p.id)}"><b>↗ Buka Ruang Kerja PP Terpadu — E-Purchasing / Pengadaan Langsung</b></a></p>
@@ -36,6 +36,7 @@
    </details>`:`<p class="pbj-note">Paket e-Purchasing: tidak perlu memilih transisi Perlem 3/2026. Pedoman katalog adalah Perlem LKPP 2/2026; tanggal/proses resmi tetap diperiksa.</p>`}
    ${isSpse?`<p><b>Rute SPSE:</b> ${esc(feature.message)}</p>`:''}
    ${root.SATRIA_PP_KERTAS_KERJA?.panel?.(p)||''}
+   ${isSpse?root.SATRIA_SPSE_SELECTION?.panel?.(p)||'':''}
    <strong>Dokumen yang dibantu SATRIA</strong><ul>${choices}</ul><p class="pbj-note">${esc(plan.note)}</p>${actions}
    <p class="pbj-source">Rujukan: <a href="${policy.SOURCES.penyedia}" target="_blank" rel="noopener noreferrer">Perlem 3/2026</a> · <a href="${policy.SOURCES.transisi}" target="_blank" rel="noopener noreferrer">SE transisi 3/2026</a> · <a href="${policy.SOURCES.katalog}" target="_blank" rel="noopener noreferrer">Perlem 2/2026 katalog</a></p>
    </section>`;

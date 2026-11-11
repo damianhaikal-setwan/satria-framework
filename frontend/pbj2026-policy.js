@@ -32,8 +32,11 @@
    return {jalur,docs,note:value===50000000?'Nilai tepat Rp50 juta belum diklasifikasikan oleh instruksi internal yang tersedia; pastikan persyaratan unggahan.':value>50000000?'Susunan DPP + HRS mengikuti kebutuhan operasional, bukan ketentuan Perlem 3/2026. HRS tidak digenerasikan sebelum nama/formatnya terverifikasi.':value>0?'DPP sesuai kebutuhan operasional yang disampaikan; tetap cocokkan kewajiban unggahan pada sistem resmi.':'Nilai paket belum tersedia untuk memilih kebutuhan unggahan.',needsReview:!(value>0)||value===50000000||value>50000000};
   }
   if(jalur!=='pengadaan-langsung')return {jalur,docs:[],note:'Metode pemilihan ini belum terbukti sebagai Pengadaan Langsung dalam kewenangan Pejabat Pengadaan. SATRIA tidak menerbitkan draf dokumen pemilihan untuk Tender/Seleksi atau metode tidak teridentifikasi.',needsReview:true};
-  const docs=[{code:'pemilihan',label:'Dokumen Pemilihan (draf)',available:true},{code:'reviu-dpp',label:'BA Reviu DPP (draf)',available:true},{code:'analisa-pasar',label:'Analisa Pasar PP (draf)',available:true}];
-  return {jalur,docs,note:'Untuk Pengadaan Langsung melalui SPSE oleh Pejabat Pengadaan: berkas bantuan/draf kerja berdasarkan data tercatat; periksa kewenangan, dokumen unggah, dan aturan paket pada SPSE resmi.',needsReview:false};
+  const jenis=upper(p?.jenisPengadaan);
+  if(!jenis||!(jenis.includes('barang')||jenis.includes('jasa lainnya')||jenis.includes('konstruksi')||jenis.includes('konsultan')))return {jalur,docs:[],note:'Jenis pengadaan pada paket belum dikenali. Konfirmasi data SiRUP dan jenis pekerjaan sebelum memilih model dokumen.',needsReview:true};
+  const hasBuilder=jenis.includes('barang')||jenis.includes('jasa lainnya');
+  const docs=[{code:'pemilihan',label:hasBuilder?'Dokumen Pemilihan (draf Barang/Jasa Lainnya)':'Dokumen Pemilihan khusus jenis ini (model belum tersedia)',available:hasBuilder},{code:'reviu-dpp',label:'BA Reviu DPP (draf)',available:true},{code:'analisa-pasar',label:'Analisa Pasar PP (draf)',available:true}];
+  return {jalur,docs,note:hasBuilder?'Model draf Barang/Jasa Lainnya tersedia, tetapi tetap harus ditinjau menurut persyaratan SPSE dan Perlem 3/2026.':'Model untuk kategori ini belum tersedia; jangan memakai model Barang/Jasa Lainnya. Gunakan MDP resmi jenis yang sesuai.',needsReview:!hasBuilder};
  }
  function totalCheck({hps=0,pagu=0,penetapan=0}={}){const val=Number(penetapan),h=Number(hps),b=Number(pagu);const errors=[];
   if(!Number.isFinite(val)||val<=0)errors.push('Total penetapan tidak valid');
