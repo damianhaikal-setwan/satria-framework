@@ -127,3 +127,11 @@ Uji di Penawaran & Negosiasi: isi alasan dan bukti, centang pemeriksaan, Simpan 
 ## Tambahan 3.0.59.26 — koreksi nama tayang
 
 Tidak ada migrasi Supabase. Ganti `index.html`, `sw.js`, dan `manifest.json`; file lainnya tetap. Periksa referensi katalog dan simpan bukti asli sebelum koreksi.
+
+### Pembaruan SATRIA NEXT 3.0.59.55 dari 3.0.59.54
+
+**Tidak ada SQL baru** pada versi ini. Backup commit `main` dan snapshot data, pasang file patch dengan struktur root yang sama, lalu pastikan deployment selesai dan cache PWA menampilkan 3.0.59.55. Uji Dokumen Pengadaan -> generator HPS (Excel/PDF), SPSE -> catatan dasar transisi, pemilihan paket, pembatasan akses, dan persistensi Supabase dengan akun penguji. Jangan hapus IndexedDB. HPS hanya draf, dan perbedaan total akibat mode pajak *sebelum pajak* harus dikonfirmasi sebelum dipakai. Lihat `docs/PENGEMBANGAN-HPS-PPKERJA-TRANSISI-3.0.59.55.md`.
+
+### Pembaruan SATRIA NEXT 3.0.59.56 — Ekosistem PP dari 3.0.59.55
+
+Jika `main` **persis** memakai rilis SATRIA NEXT 3.0.59.55, unggah isi **ZIP PATCH 3.0.59.56** ke root repositori dengan struktur direktori yang sama. Jika sudah ada commit lain, bandingkan setiap perubahan sebelum menimpa. Sebelum commit, backup Git dan snapshot data. Tidak diperlukan SQL baru atau reset IndexedDB. Setelah deployment, buka `#kerja` dan uji E-Purchasing, Pengadaan Langsung SPSE, metode Tender yang harus dibatasi, Viewer, scope OPD/tahun, penyimpanan catatan, dokumen, serta status cloud. Keberhasilan pengujian lokal tidak menjamin kompatibilitas Supabase produksi. Detail: `docs/EKOSISTEM-PEJABAT-PENGADAAN-3.0.59.56.md`.

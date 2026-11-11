@@ -135,3 +135,11 @@ Jika identitas penyedia penawaran dikoreksi, kolom **Nama penyedia tayang (verif
 ## Cara mencatat harga beberapa penyedia
 
 Pada setiap penyedia di Penawaran & Negosiasi, simpan produk yang ditawarkan pada setiap rincian barang. Pilihan lama **Referensi Utama** berarti **produk aktif untuk penyedia tersebut**, bukan penyedia pemenang atau referensi utama seluruh paket. Gunakan **Produk alternatif tambahan** hanya untuk variasi produk tambahan, bukan untuk mengganti penawaran Penyedia 2/3. Penyedia terpilih tetap ditentukan di bagian Penetapan. Laporan harga menampilkan seluruh penawaran dan menjelaskan bila produk belum dapat dibandingkan.
+
+### SATRIA NEXT 3.0.59.55 — Generator HPS dan kertas kerja PP
+
+Tersedia generator **Rincian HPS** pada Dokumen Pengadaan untuk mengunduh Excel `.xlsx` atau mencetak PDF A4 landscape berdasarkan rincian paket. Pemilihan pajak sudah termasuk/sebelum pajak bersifat eksplisit; keluaran adalah DRAF dan tidak mengubah HPS maupun nilai penetapan. Pada SPSE terdapat **Kertas Kerja PP** dan pengaturan catatan transisi yang opsional dan telah diperbaiki agar dropdown tidak reset. Untuk E-Purchasing, dropdown transisi Perlem 3/2026 tidak ditampilkan. Tidak ada migrasi SQL. Detail dan pengujian: [`docs/PENGEMBANGAN-HPS-PPKERJA-TRANSISI-3.0.59.55.md`](docs/PENGEMBANGAN-HPS-PPKERJA-TRANSISI-3.0.59.55.md).
+
+### SATRIA NEXT 3.0.59.56 — Ekosistem Ruang Kerja Pejabat Pengadaan
+
+Menu **Ruang Kerja PP** baru menyatukan paket e-Purchasing dan Pengadaan Langsung SPSE sesuai filter OPD/tahun/hak akses. Dari paket yang dipilih, SATRIA membaca tahapan, menautkan generator dokumen relevan, dan menyimpan catatan kerja serta referensi bukti opsional dengan data paket yang sudah ada. Tidak ada alur persetujuan berjenjang baru ataupun database kedua. Draf dokumen bukan pengganti SPSE/INAPROC. Lihat [panduan pengembangan 3.0.59.56](docs/EKOSISTEM-PEJABAT-PENGADAAN-3.0.59.56.md) dan pastikan uji Supabase staging sebelum produksi.
