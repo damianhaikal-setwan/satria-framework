@@ -42,7 +42,7 @@ INJECT=r"""
   rpc:async(name,args)=>{
    if(name==='satria_get_scoped_state'){
     return {data:{payload:clone(server.payload),version:server.version,updated_at:new Date().toISOString(),updated_by:'mock',
-      scope:{opd_ids:(server.payload.opd||[]).map(x=>x.id),years:server.payload.tahun||[2026]}},error:null};
+      scope:{role:server.role,opd_ids:(server.payload.opd||[]).map(x=>x.id),years:server.payload.tahun||[2026],can_write:server.role==='operator'}},error:null};
    }
    if(name==='satria_archive_record'){
     if(server.denied)return {data:null,error:{message:'Simulated SQL permission denied'}};

@@ -3,6 +3,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 from legacy_index_source import read_index
 html = read_index()
+scope = (ROOT / 'frontend/satria-cloud-scope.js').read_text()
 sql = (ROOT / 'supabase/migrations/20261024053200_satria_scoped_access_and_years.sql').read_text()
 create = (ROOT / 'supabase/functions/admin-create-user/index.ts').read_text()
 roster = (ROOT / 'supabase/functions/admin-list-users/index.ts').read_text()
@@ -32,8 +33,8 @@ checks = {
   'Non-admin full reset/global OPD and year edits are blocked': "['addopd','addyear','delyear','rmlogo','reset','clearsample','uadd','utoggle','udel']" in html,
   'Bank RUP included in per-record delta allowlist': "const ARRAY_DELTAS=['rupBank'" in html,
   'Bank RUP cleared at cloud logout': 'penyedia:[],rupBank:[],paket:[]' in html,
-  'Bank RUP scoped after operator pull': 'S.rupBank=(S.rupBank||[]).filter(r=>allowedOpdSet.has' in html,
-  'Scoped state is used for local reports/export after authentication': 'Object.assign(S,data.payload' in html and 'function csvExport' in html,
+  'Bank RUP scoped before operator pull': "const projected=member.role==='admin'?null:cloudScope.project(" in html and 'rupBank:copy(payload.rupBank.filter(' in scope,
+  'Scoped state is used for local reports/export only after projection': 'Object.assign(S,safePayload' in html and 'const safePayload=projected?projected.payload:data.payload;' in html and 'function csvExport' in html,
 }
 failed = False
 for title, ok in checks.items():

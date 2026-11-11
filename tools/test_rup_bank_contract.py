@@ -4,6 +4,7 @@ import re, subprocess, tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
 html=__import__('legacy_index_source').read_index()
+scope=(ROOT/'frontend/satria-cloud-scope.js').read_text()
 sql=(ROOT/'supabase/migrations/20261028010000_satria_rup_bank_cloud_compat.sql').read_text()
 checks={
     'delta RPC protects user membership and expected version': 'Active organization membership required' in sql and 'Version conflict:' in sql,
@@ -16,7 +17,7 @@ checks={
     'bank referenced by package cannot be deleted': 'Bank RUP is linked to procurement packages and cannot be deleted' in sql,
     'fiscal-year in bank cannot be deleted': 'Cannot remove a fiscal year still used by Bank RUP' in sql,
     'bank data cannot cross scope on logout': 'penyedia:[],rupBank:[],paket:[]' in html,
-    'frontend uses scoped rupBank after pull': 'S.rupBank=(S.rupBank||[]).filter(r=>allowedOpdSet.has' in html,
+    'frontend uses scoped rupBank before pull commits state': "const projected=member.role==='admin'?null:cloudScope.project(" in html and 'rupBank:copy(payload.rupBank.filter(' in scope,
     '14 document templates retained': all(x in html for x in ['bahepe','bahp','nodis','idkb','rfi','sppbj']),
 }
 for name,ok in checks.items():print(('PASS' if ok else 'FAIL')+' — '+name)
