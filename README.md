@@ -143,3 +143,25 @@ Tersedia generator **Rincian HPS** pada Dokumen Pengadaan untuk mengunduh Excel 
 ### SATRIA NEXT 3.0.59.56 — Ekosistem Ruang Kerja Pejabat Pengadaan
 
 Menu **Ruang Kerja PP** baru menyatukan paket e-Purchasing dan Pengadaan Langsung SPSE sesuai filter OPD/tahun/hak akses. Dari paket yang dipilih, SATRIA membaca tahapan, menautkan generator dokumen relevan, dan menyimpan catatan kerja serta referensi bukti opsional dengan data paket yang sudah ada. Tidak ada alur persetujuan berjenjang baru ataupun database kedua. Draf dokumen bukan pengganti SPSE/INAPROC. Lihat [panduan pengembangan 3.0.59.56](docs/EKOSISTEM-PEJABAT-PENGADAAN-3.0.59.56.md) dan pastikan uji Supabase staging sebelum produksi.
+
+
+## Pengembangan 3.0.59.57 — Dokumen Pemilihan SPSE
+
+- Perubahan source: generator Dokumen Pemilihan Pengadaan Langsung Barang/Jasa Lainnya berbasis data paket, kriteria, instruksi, jadwal, formulir dan rancangan SPK dari PPK.
+- Gunakan menu Dokumen Pengadaan → Paket Dokumen Pendukung Sistem Resmi → Penyusun Dokumen Pemilihan.
+- Simpan isian melalui transaksi SATRIA; perubahan HPS atau paket mewajibkan pemeriksaan dan penyimpanan ulang sebelum cetak lengkap.
+- Kategori konstruksi/konsultansi, paket hanya pencatatan, dan Tender tidak diizinkan memakai cetak lengkap ini.
+- Tidak ada migrasi SQL baru; jangan hapus IndexedDB. Backup dan uji Supabase staging sebelum deployment ke main.
+- Dokumen cetak tetap harus diperiksa, ditetapkan/ditandatangani sesuai kewenangan dan ketentuan SPSE; SATRIA tidak mengunggah berkas otomatis.
+- Rincian dan batasan: `docs/GENERATOR-DOKUMEN-PEMILIHAN-SPSE-3.0.59.57.md`.
+
+## Pengembangan 3.0.59.58 — Klasifikasi Bank RUP tanpa asumsi
+- Jenis & metode pengadaan pada Bank RUP tampil jelas, bisa dikoreksi per RUP dengan tombol Simpan.
+- Impor SiRUP yang tidak memuat kolom klasifikasi tidak lagi menciptakan label Barang/E-Purchasing.
+- Paket lama tidak diubah otomatis; klasifikasi yang belum diketahui harus diperiksa terhadap sumber resmi.
+- Catatan teknis: [`docs/BANK-RUP-KLASIFIKASI-3.0.59.58.md`](docs/BANK-RUP-KLASIFIKASI-3.0.59.58.md).
+
+
+## Pembaruan 3.0.59.59 — dua format JSON SiRUP
+
+Lihat [panduan impor `data` dan `aaData`](docs/IMPOR-SIRUP-DUA-FORMAT-3.0.59.59.md). Gunakan `data` lengkap untuk klasifikasi jenis/metode; `aaData` hanya daftar ringkas dan tidak boleh mengisi jenis secara otomatis. Metode `Dikecualikan` dipertahankan terpisah.

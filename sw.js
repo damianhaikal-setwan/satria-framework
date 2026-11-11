@@ -1,5 +1,5 @@
 /* SATRIA PWA: network-first, precache all refactored assets for offline use. */
-const CACHE_NAME = 'satria-v3.0.59.56-pbj-2026-20261111-ruang-kerja-pp-integrated';
+const CACHE_NAME = 'satria-v3.0.59.59-pbj-2026-20261111-sirup-dua-format';
 const APP_ASSETS = [
   "./",
   "./index.html",
@@ -10,6 +10,8 @@ const APP_ASSETS = [
   "./frontend/refactor/maintenance/care-center.js",
   "./frontend/refactor/maintenance/care-center.css",
   "./frontend/pbj2026-policy.js",
+  "./frontend/satria-spse-selection-document.js",
+  "./frontend/satria-spse-selection-document.css",
   "./frontend/pbj2026-workspace.js",
   "./frontend/pbj2026-ppkerja-adapter.js",
   "./frontend/satria-hps-generator.js",

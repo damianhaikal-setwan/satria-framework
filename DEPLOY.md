@@ -135,3 +135,17 @@ Tidak ada migrasi Supabase. Ganti `index.html`, `sw.js`, dan `manifest.json`; fi
 ### Pembaruan SATRIA NEXT 3.0.59.56 — Ekosistem PP dari 3.0.59.55
 
 Jika `main` **persis** memakai rilis SATRIA NEXT 3.0.59.55, unggah isi **ZIP PATCH 3.0.59.56** ke root repositori dengan struktur direktori yang sama. Jika sudah ada commit lain, bandingkan setiap perubahan sebelum menimpa. Sebelum commit, backup Git dan snapshot data. Tidak diperlukan SQL baru atau reset IndexedDB. Setelah deployment, buka `#kerja` dan uji E-Purchasing, Pengadaan Langsung SPSE, metode Tender yang harus dibatasi, Viewer, scope OPD/tahun, penyimpanan catatan, dokumen, serta status cloud. Keberhasilan pengujian lokal tidak menjamin kompatibilitas Supabase produksi. Detail: `docs/EKOSISTEM-PEJABAT-PENGADAAN-3.0.59.56.md`.
+
+
+## Deploy 3.0.59.57 — Dokumen Pemilihan SPSE
+
+- Perubahan source: generator Dokumen Pemilihan Pengadaan Langsung Barang/Jasa Lainnya berbasis data paket, kriteria, instruksi, jadwal, formulir dan rancangan SPK dari PPK.
+- Gunakan menu Dokumen Pengadaan → Paket Dokumen Pendukung Sistem Resmi → Penyusun Dokumen Pemilihan.
+- Simpan isian melalui transaksi SATRIA; perubahan HPS atau paket mewajibkan pemeriksaan dan penyimpanan ulang sebelum cetak lengkap.
+- Kategori konstruksi/konsultansi, paket hanya pencatatan, dan Tender tidak diizinkan memakai cetak lengkap ini.
+- Tidak ada migrasi SQL baru; jangan hapus IndexedDB. Backup dan uji Supabase staging sebelum deployment ke main.
+- Dokumen cetak tetap harus diperiksa, ditetapkan/ditandatangani sesuai kewenangan dan ketentuan SPSE; SATRIA tidak mengunggah berkas otomatis.
+- Rincian dan batasan: `docs/GENERATOR-DOKUMEN-PEMILIHAN-SPSE-3.0.59.57.md`.
+
+## Patch 3.0.59.58 — Bank RUP
+Gunakan patch hanya pada source SATRIA 3.0.59.57 yang identik dengan rilis dasar. Simpan backup commit dan data yang belum tersinkron. Tidak ada SQL/migrasi baru. Sesudah deployment, cek cache PWA, impor JSON, Bank RUP, koreksi jenis/metode, hak akses, dan alur dokumen. Uji dengan JSON SiRUP asli sebelum dipakai untuk keputusan pengadaan; format `data`/`aaData` baru diuji memakai fixture sintetis.
