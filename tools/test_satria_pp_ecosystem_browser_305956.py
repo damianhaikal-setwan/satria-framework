@@ -26,7 +26,7 @@ with sync_playwright() as play:
  page.evaluate('''() => {
     const first=JSON.parse(JSON.stringify(SEED.paket[0]));
     first.id='pp-ep'; first.rup='RUP-EP-UJI';first.nama='Pengadaan Barang melalui Katalog';first.tahun=2026;
-    first.pagu=100000000;first.metodePemilihan='E-Purchasing dengan Negosiasi Harga';
+    first.pagu=100000000;first.metodePemilihan='E-Purchasing dengan Negosiasi Harga';first.jenisPengadaan='Barang';
     first.items=[{id:'i',nama:'Printer',vol:2,hs:7000000,satuan:'Unit'}];first.penawaran=[];
     const second=JSON.parse(JSON.stringify(first));
     second.id='pp-pl'; second.rup='RUP-PL-UJI';second.nama='Pengadaan Langsung Kertas';second.pagu=18000000;
@@ -76,7 +76,8 @@ with sync_playwright() as play:
  page.locator('#ppWorkspaceSelect').select_option('pp-pl')
  page.wait_for_timeout(200)
  assert page.locator('.pp-hero-badge').inner_text()=='Pengadaan Langsung'
- assert page.locator('[data-pp-draft]').count()==3
+ assert page.locator('[data-pp-draft]').count()==2, 'BA reviu dan analisa pasar draf remain'
+ assert page.locator('[data-pp-go="spse-docs"]').count()==1, 'selection doc is opened through its own generator'
  assert page.locator('.pp-alert').count()==1
  page.evaluate('''() => {window.__printed='';window.open=()=>({document:{open(){},write(s){window.__printed=s},close(){}},focus(){},print(){}})}''')
  page.locator('[data-pp-draft="analisa-pasar"]').click()

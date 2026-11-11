@@ -23,7 +23,7 @@ with sync_playwright() as w:
  page.add_script_tag(content=(root/'frontend/pbj2026-workspace.js').read_text())
  assert page.evaluate('typeof window.SATRIA_PBJ_WORKSPACE')=='object'
  page.evaluate("document.querySelector('#host').innerHTML=window.SATRIA_PBJ_WORKSPACE.panel(window.__pkg)")
- assert page.locator('[data-pbj-print]').count()==3
+ assert page.locator('[data-pbj-print]').count()==2
  assert page.locator('[data-pbj-save]').count()==1
  page.locator('details').evaluate('(el)=>el.open=true')
  page.locator('[data-pbj-start]').fill('2026-09-23')
@@ -42,4 +42,4 @@ with sync_playwright() as w:
  assert page.locator('[data-pbj-save]').count()==0,'Readonly user must not edit context'
  assert not errors,errors
  b.close()
-print('PASS PBJ 2026 browser: scoped date save via SATRIA.tx, 3 draft helpers, Tender blocked, read-only, no fabricated approval or data changes on print')
+print('PASS PBJ 2026 browser: scoped date save via SATRIA.tx, 2 legacy draft helpers (pemilihan uses detailed authoring form), Tender blocked, read-only, no fabricated approval or data changes on print')

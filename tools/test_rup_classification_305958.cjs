@@ -1,0 +1,57 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const vm=require('node:vm');
+const root=path.resolve(__dirname,'..');
+const src=fs.readFileSync(path.join(root,'frontend/refactor/js/01-app-core.js'),'utf8');
+const section=(start,end)=>{
+ const a=src.indexOf(start),b=src.indexOf(end,a+1);
+ assert(a>=0&&b>a,`Missing extraction markers ${start} / ${end}`);
+ return src.slice(a,b);
+};
+const S={ui:{tahun:2026,opd:'o1'},tahun:[2026],opd:[{id:'o1',nama:'Badan Perencanaan Daerah',singkat:'Bappeda'}],kode:[],unit:[],rupBank:[],paket:[],pemda:{sumber:'APBD'}};
+const context={S,console,
+ satriaValidSubCode:()=>'',activeCloudScope:()=>null,uid:(prefix)=>prefix+'-'+Math.random().toString(36).slice(2),
+ satriaPemdaOfficial:()=> 'APBD',pjId:()=>'',O:()=>({nama:'Bappeda',singkat:'Bappeda',tempat:'Pontianak'}),
+ esc:x=>String(x).replace(/&/g,'&amp;').replace(/"/g,'&quot;')};
+vm.createContext(context);
+vm.runInContext(section('function uniqSumber(', 'function satriaRupLinks(')+section('function satriaRupSourcePatch(', 'const rupPreview=')+section('function satriaBankRow(', '/* SATRIA 3.0.42'),context);
+const {rupParseRow,rupReadJson,satriaRupSourcePatch,satriaRupClassState,satriaBankRow}=context;
+const original={data:[{id:'01009182',paket:'Belanja peralatan uji',pagu:75000000,satuanKerja:'Bappeda',pemilihan:'November 2026'}],recordsTotal:1};
+let parsed=rupReadJson(JSON.stringify(original),'o1','','skip');
+assert.equal(parsed.errs.length,0);
+assert.equal(parsed.rows.length,1);
+assert.equal(parsed.rows[0].rup,'01009182');
+assert.equal(parsed.rows[0].jenisPengadaan,'');
+assert.equal(parsed.rows[0].metodePemilihan,'');
+assert.equal(parsed.warnings.some(w=>/jenis atau metode/i.test(w)),true);
+let bank=satriaBankRow(parsed.rows[0]);
+assert.equal(bank.jenisPengadaan,'');
+assert.equal(bank.metodePemilihan,'');
+assert.equal(bank.klasifikasiSumber,'Perlu verifikasi');
+assert.equal(satriaRupClassState(bank).missing.length,2);
+const aaData=[['09910022','Pekerjaan konstruksi uji','175.000.000','Pengadaan Langsung','APBD','', 'November 2026']];
+parsed=rupReadJson(JSON.stringify({aaData}),'o1','','skip');
+assert.equal(parsed.errs.length,0);
+assert.equal(parsed.rows[0].metodePemilihan,'Pengadaan Langsung');
+assert.equal(parsed.rows[0].jenisPengadaan,'','7-column SiRUP must not infer kind');
+const explicit={rup:'0099012',nama:'Jasa survei',tahun:2026,opd:'o1',pagu:8000000,jenisPengadaan:'Jasa Lainnya',metodePemilihan:'Pengadaan Langsung'};
+let row=rupParseRow(explicit,0,2026,'o1');
+assert.equal(row.ok,true);
+assert.equal(row.p.jenisPengadaan,'Jasa Lainnya');
+assert.equal(row.p.metodePemilihan,'Pengadaan Langsung');
+let ambiguous=rupParseRow({...explicit,jenisPengadaan:undefined,jenisBelanja:'Barang'},0,2026,'o1');
+assert.equal(ambiguous.ok,true);
+assert.equal(ambiguous.p.jenisPengadaan,'','jenisBelanja must not infer procurement category');
+assert.equal(JSON.stringify(Object.keys(satriaRupSourcePatch({id:'0099012',paket:'Jasa survei',pagu:8000000},row.p)).sort()),JSON.stringify(['nama','pagu']),'an import without classification must not overwrite manually checked values');
+assert(src.includes("metodePemilihan:r.metodePemilihan||'',jenisPengadaan:r.jenisPengadaan||''"),'Package creation must not guess missing classification');
+assert(src.includes("jenisPengadaan:p.jenisPengadaan||'',metodePemilihan:p.metodePemilihan||''"),'Normalization must not guess missing classification');
+const policy=require(path.join(root,'frontend/pbj2026-policy.js'));
+const missing=policy.documentPlan({metodePemilihan:'Pengadaan Langsung',jenisPengadaan:'',pagu:100000000});
+assert.equal(missing.docs.length,0,'Unknown category must not offer a selection document');
+const construction=policy.documentPlan({metodePemilihan:'Pengadaan Langsung',jenisPengadaan:'Pekerjaan Konstruksi',pagu:100000000});
+assert.equal(construction.docs.find(d=>d.code==='pemilihan').available,false,'Construction cannot use generic Barang/Jasa final template');
+const goods=policy.documentPlan({metodePemilihan:'Pengadaan Langsung',jenisPengadaan:'Barang',pagu:100000000});
+assert.equal(goods.docs.find(d=>d.code==='pemilihan').available,true);
+console.log('PASS 3.0.59.58: JSON SiRUP data/aaData, no fabricated kind/method, source-safe updates, safe document routing.');

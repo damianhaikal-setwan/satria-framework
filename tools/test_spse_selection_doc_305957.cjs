@@ -1,0 +1,24 @@
+'use strict';
+const assert=require('node:assert/strict');
+const policy=require('../frontend/pbj2026-policy.js');
+global.SATRIA_PBJ_POLICY=policy;
+const doc=require('../frontend/satria-spse-selection-document.js');
+const p={id:'p1',jalurPengadaan:'SPSE_MONITOR',spseMonitoring:{method:'Pengadaan Langsung'},jenisPengadaan:'Barang',nama:'Paket Barang SIMULASI',rup:'SIM-010',opd:'opd1',tahun:2026,pagu:180000000,tglMulaiPemilihan:'2026-11-02',dasarRegulasi:'perlem-3-2026',items:[{id:'i1',nama:'Barang uji',spesifikasi:'Kualitas dan standar barang uji',vol:3,hs:40000000,satuan:'unit'}]};
+const input={};for(const [k,,type] of doc.FIELDS)input[k]=type==='date'?'2026-11-03':type==='datetime-local'?'2026-11-04T09:00':('Ketentuan lengkap '+k+' dilampirkan sebagaimana ditetapkan pejabat berwenang dan digunakan hanya pada paket simulasi. ');
+input.rancanganSpk='ISI RANCANGAN SPK SIMULASI. '.repeat(24);
+function check(expected,description){const res=doc.assessment(p,input,true);assert.equal(res.ready,expected,description+': '+res.reasons.join(' | '));}
+check(true,'valid package');
+assert(doc.html(p,input,true).includes('DOKUMEN KERJA LENGKAP'));
+for(const x of ['I. UNDANGAN','II. INSTRUKSI','III. LEMBAR','IV. SPESIFIKASI','V. DAFTAR','VI. FORMULIR PENAWARAN','VII. FORMULIR ISIAN','VIII. RANCANGAN'])assert(doc.html(p,input,true).includes(x),'missing '+x);
+assert(doc.html(p,input,true).includes('Rp 120.000.000'));
+assert(!doc.assessment(p,input,false).ready,'explicit review required');
+assert(doc.html(p,input,false).includes('DRAF'));
+const keep={...input};delete input.rancanganSpk;check(false,'missing PPK contract');Object.assign(input,keep);
+p.spseMonitoring.method='Tender';check(false,'tender blocked');p.spseMonitoring.method='Pengadaan Langsung';
+p.pagu=40000000;check(false,'record-only under 50m blocked');p.pagu=180000000;
+p.jenisPengadaan='Pekerjaan Konstruksi';check(false,'construction requires other annex');p.jenisPengadaan='Barang';
+p.items[0].spesifikasi='';check(false,'missing technical specs');p.items[0].spesifikasi='Kualitas dan standar barang uji';
+p.items[0].hs=70000000;check(false,'HPS exceeds pagu');p.items[0].hs=40000000;
+input.penyedia='<img src=x onerror=alert(1)>';assert(doc.html(p,input,false).includes('&lt;img')&&!doc.html(p,input,false).includes('<img'));
+assert(!doc.html(p,input,true).includes('<script'), 'safe escaping');
+console.log('PASS SPSE doc engine: 8 sections, price, eligibility, completeness, official attestation, injection escaping');
