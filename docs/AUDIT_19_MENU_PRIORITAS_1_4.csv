@@ -1,0 +1,21 @@
+﻿No,Route,Menu,Status pengembangan,Bukti uji lokal,Belum terverifikasi
+1,dash,Ringkasan Utama,Widget risiko lintas modul,QA rendering + indikator,Staging KPI
+2,paket,Paket Pengadaan,Audit Paket/HPS/penawaran; source Stage 9,Unit integritas + pemulihan lokal,RPC staging nyata
+3,kerja,Ruang Kerja PP,Logika HPS sudah bersama,QA rendering + uji stage3 lama,E2E semua langkah
+4,kalk,Kalkulator Nego,Perhitungan lama dipertahankan,Regression numeric existing,Kasus pajak nyata
+5,input,Input RUP,Pemeriksaan keterkaitan RUP,Unit mismatch OPD/tahun,Impor sumber SiRUP nyata
+6,spse,Monitoring SPSE,Monitoring sudah ada,QA rendering,Verifikasi sumber SPSE
+7,monitor,Pusat Monitoring,Ringkasan kualitas terpadu,QA rendering,Notifikasi real-time nyata
+8,finance,Keuangan & Kontrak,Ringkasan kualitas terpadu,QA rendering,Rekonsiliasi buku besar
+9,quality,Kualitas Data,Aturan integritas lintas modul,Unit test + QA rendering,Audit bukti dan log backend
+10,brief,Executive Briefing 4.1,Menggunakan ringkasan kualitas baru,QA rendering,Cetak PDF semua skenario
+11,satria360,SATRIA 360°,Peringatan paket detail,QA rendering,Audit timeline data nyata
+12,dok,Dokumen Pengadaan,Konsistensi mesin hitung lama,Regresi dokumen,15 template end-to-end
+13,lap,Laporan dan Analisis,Laporan lama dipertahankan,QA rendering,CSV/PDF versus transaksi nyata
+14,master,Data Master,Pemeriksaan referensi penyedia,Unit missing supplier,CRUD semua entitas
+15,set,Pengaturan Sistem,Akses keyboard global,QA rendering,Backup restore konfigurasi
+16,care,Perawatan SATRIA,Status lokal sudah ada,QA rendering,Monitor kesehatan cloud nyata
+17,user,Pengguna dan Hak Akses,Menu Viewer lokal diuji,QA render + pembatasan menu,RLS server JWT live
+18,panduan,Panduan Penggunaan,Navigasi keyboard global,QA rendering,Bantuan kontekstual per fitur
+19,chat,Asisten SATRIA,Membaca temuan kualitas baru,QA rendering,Akurasi terhadap data nyata
+20,sampah,Sampah & Pemulihan,Source Stage9 digabung; paginasi tetap,QA rendering + tes Stage9 lokal,Arsip pulih cloud nyata
