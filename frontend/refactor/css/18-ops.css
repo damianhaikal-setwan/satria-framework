@@ -3,3 +3,16 @@
 /* Monitoring SATRIA: desain ringan, hanya scoped pada konten ops. */
 .ops-page{display:flex;flex-direction:column;gap:16px;min-width:0}.ops-hero{background:linear-gradient(130deg,#effaf7,#eef6ff);border:1px solid #cce8e1;border-radius:18px;padding:20px 22px}.ops-hero h2{margin:0 0 8px;color:#0f4c47;font-size:23px}.ops-hero p{margin:5px 0;color:#435569;font-size:12px;line-height:1.5}.ops-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px}.ops-kpi{background:var(--card-solid);border:1px solid var(--bd);border-radius:14px;padding:16px;min-width:0;display:flex;flex-direction:column;gap:6px}.ops-kpi small{font-size:10px;color:var(--mut);font-weight:800;text-transform:uppercase}.ops-kpi strong{font-size:20px;line-height:1.2;color:var(--ink);overflow-wrap:anywhere}.ops-kpi span{font-size:11px;color:var(--mut)}.ops-tablewrap{overflow:auto;max-width:100%;border:1px solid var(--bd);border-radius:12px}.ops-tablewrap table{width:100%;min-width:750px;border-collapse:collapse;font-size:12px}.ops-tablewrap th,.ops-tablewrap td{padding:9px 10px;white-space:normal;vertical-align:top;font-size:12px;line-height:1.45}.ops-tablewrap td small{display:block;margin-top:3px;color:var(--mut);font-size:10px}.ops-priority{padding:3px 8px;border-radius:999px;background:#eef2f7;font-weight:700;font-size:10px}.ops-priority.ops-high{background:#fee2e2;color:#991b1b}.ops-priority.ops-medium{background:#fef3c7;color:#92400e}.ops-brief-links{gap:12px}.ops-brief-links a{font-size:12px;color:var(--acc);font-weight:700}.ops-page .card{overflow:visible}@media(max-width:680px){.ops-hero{padding:16px}.ops-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ops-kpi{padding:11px}.ops-kpi strong{font-size:16px}.ops-page .card{padding:14px}}@media print{.ops-page{gap:7px}.ops-page .card{box-shadow:none;border:0;padding:6px}.ops-brief-links{display:none}.ops-kpi{padding:6px}.ops-kpi strong{font-size:12px}.ops-tablewrap{border:0;overflow:visible}.ops-tablewrap table{min-width:0;font-size:9px}.ops-tablewrap th,.ops-tablewrap td{font-size:9px;padding:3px}}
 
+
+/* Audit priority 1-4: consistent, accessible read-only quality warning across modules */
+.ops-risk-summary{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-inline-start:4px solid #0f766e}
+.ops-risk-summary p{margin:5px 0 0}
+.ops-risk-summary a{font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.ops-risk-summary a:focus-visible{outline:3px solid #0f766e;outline-offset:4px;border-radius:3px}
+@media (max-width:680px){.ops-risk-summary{align-items:stretch;flex-direction:column}.ops-risk-summary a{min-height:44px;display:inline-flex;align-items:center}}
+@media (prefers-reduced-motion:reduce){.ops-risk-summary *{animation:none!important;transition:none!important}}
+
+.satria-skip-to-main{position:fixed;z-index:100001;top:8px;left:12px;transform:translateY(-180%);padding:12px 16px;background:#0f766e;color:#fff!important;border-radius:12px;box-shadow:0 4px 20px #0004;font-weight:800}
+.satria-skip-to-main:focus-visible{transform:translateY(0);outline:3px solid #fef08a;outline-offset:2px}
+#main:focus{outline:none}
+#nav a[aria-current=page]{text-decoration-thickness:2px;text-underline-offset:4px}
