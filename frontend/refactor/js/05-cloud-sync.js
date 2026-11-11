@@ -6,6 +6,16 @@
   let clientConfigUrl='', clientConfigKey='', sessionRestorePromise=null, explicitSignOut=false;
   let lastSyncedPayload=null, autoSaveTimer=null, autoSaveInFlight=false, autosyncRequested=false, realtimeChannel=null, remoteNoticePending=false, remoteNoticeVersion=0, conflictActive=false, realtimeRefreshTimer=null, autoRetryTimer=null, autoRetryAttempt=0;
   let lastCloudConfirmedAt=null, lastCloudErrorAt=null;
+  // Every asynchronous response belongs to exactly one authenticated session.
+  // A later login, logout, or client replacement invalidates old responses.
+  let sessionEpoch=0, pullEpoch=0, pendingScopedSave=null;
+  function captureSession(){return {epoch:sessionEpoch,client,member,orgId}}
+  function sameSession(token){return Boolean(token&&token.epoch===sessionEpoch&&token.client===client&&token.member===member&&token.orgId===orgId)}
+  function invalidateSession(){
+    sessionEpoch++;pullEpoch++;
+    autoSaveInFlight=false;autosyncRequested=false;trashBusy=false;
+    return sessionEpoch;
+  }
   const $id=id=>document.getElementById(id);
   const modal=$id('satriaCloudModal');
   const status=(msg,kind='')=>{const e=$id('scStatus');if(e){e.textContent=msg;e.dataset.kind=kind}};
@@ -101,6 +111,7 @@
   }
   async function performCloudTrash(operation,collectionOrId,recordId){
     trashCanMutate();
+    const context=captureSession();
     if(operation==='archive'&& !['paket','rupBank','opd','unit','pejabat','penyedia','akun','kode'].includes(collectionOrId))
       throw Error('Jenis data tidak mendukung Sampah cloud. Tidak ada penghapusan.');
     if(operation==='archive'&&member.role==='operator'&&!['paket','rupBank'].includes(collectionOrId))
@@ -117,13 +128,16 @@
       }else args.p_trash_id=collectionOrId;
       syncIndicator(operation==='archive'?'Mengarsipkan cloud…':'Memulihkan cloud…','wait');
       const {data,error}=await client.rpc(rpc,args);
+      if(!sameSession(context))return false;
       if(error)throw Error('Transaksi Sampah cloud gagal atau belum terkonfirmasi. Segarkan cloud sebelum mengulangi: '+error.message);
       if(!data||data.status!==(operation==='archive'?'archived':'restored')||!Number.isFinite(Number(data.version)))
         throw Error('Respons server tidak lengkap. Periksa Sampah sebelum mengulangi operasi.');
       clearCloudTrash();
       await pull({discardConfirmed:true,source:'trash'});
+      if(!sameSession(context))return false;
       if(!cloudStateReady)throw Error('Transaksi selesai di server, tetapi pemuatan ulang data cloud gagal. Tarik cloud secara manual.');
       await loadCloudTrash(true);
+      if(!sameSession(context))return false;
       if(operation==='archive'&&collectionOrId==='paket'){
         S.ui.pid=null;location.hash='#paket';
       }
@@ -131,14 +145,16 @@
       toast(operation==='archive'?'Data tersimpan di Sampah cloud.':'Data berhasil dipulihkan dari Sampah cloud.');
       return data;
     }catch(err){
+      if(!sameSession(context))return false;
       syncIndicator('Periksa Sampah cloud / sinkronisasi','error');
       throw err;
-    }finally{trashBusy=false}
+    }finally{if(sameSession(context))trashBusy=false}
   }
   // Nested transactions are separate from the older top-level archive RPC.
   // Never mutate local arrays optimistically; refresh only after server commit.
   async function archiveNested(collection,parentId,recordId){
     trashCanMutate();
+    const context=captureSession();
     if(!['penawaran','item','media'].includes(collection))throw Error('Jenis arsip bersarang belum didukung.');
     if(member.role==='operator'&&collection==='media')throw Error('Media hanya dapat diarsipkan Admin.');
     trashBusy=true;cancelAutosaveTimer();
@@ -148,18 +164,21 @@
         p_organization_id:orgId,p_expected_version:version,p_collection:collection,
         p_parent_id:String(parentId),p_record_id:String(recordId)
       });
+      if(!sameSession(context))return false;
       if(error)throw Error('Arsip bersarang ditolak / migrasi cloud belum dipasang: '+error.message);
       if(data?.status!=='archived'||!Number.isFinite(Number(data.version)))
         throw Error('Respons server belum dapat dipastikan. Periksa Sampah sebelum mengulang.');
       clearCloudTrash();
       await pull({discardConfirmed:true,source:'trash'});
+      if(!sameSession(context))return false;
       if(!cloudStateReady)throw Error('Transaksi selesai, tetapi tarikan cloud belum berhasil. Muat ulang Sampah.');
       await loadCloudTrash(true);
+      if(!sameSession(context))return false;
       if(typeof route==='function')route();
       toast('Data tersimpan di Sampah cloud dan dapat dipulihkan.');
       return data;
-    }catch(err){syncIndicator('Periksa Sampah / status cloud','error');throw err}
-    finally{trashBusy=false}
+    }catch(err){if(!sameSession(context))return false;syncIndicator('Periksa Sampah / status cloud','error');throw err}
+    finally{if(sameSession(context))trashBusy=false}
   }
   window.SATRIA_CLOUD_TRASH=Object.freeze({
     get items(){return trashRows.slice()}, get loaded(){return trashLoaded},
@@ -202,6 +221,7 @@
     if(!url||!key)throw new Error('Konfigurasi Supabase belum lengkap.');
     if(client&&clientConfigUrl===url&&clientConfigKey===key)return client;
     if(client){try{client.auth?.dispose?.()}catch(_){} }
+    invalidateSession();
     client=window.supabase.createClient(url,key,{
       auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:sessionStorageKey(url)}
     });
@@ -218,10 +238,14 @@
   }
 
   async function loadMembership(){
+    const loginClient=client,loginOrg=orgId,loginEpoch=sessionEpoch;
+    const loginIsCurrent=()=>client===loginClient&&orgId===loginOrg&&sessionEpoch===loginEpoch;
     const {data:{user},error:userErr}=await client.auth.getUser();
+    if(!loginIsCurrent())return false;
     if(userErr||!user) throw new Error('Sesi belum masuk. Periksa email/kata sandi atau status akun Auth. Detail: '+(userErr?.message||'no user'));
     
     const {data,error}=await client.from('satria_memberships').select('role,active').eq('organization_id',orgId).eq('user_id',user.id).maybeSingle();
+    if(!loginIsCurrent())return false;
     if(error){
       if(/does not exist|relation.*not.*exist/i.test(error.message)){
         throw new Error('Tabel satria_memberships belum ada. Jalankan SQL setup di Supabase SQL Editor dulu. Lihat panduan di tab Panduan -> Cloud.');
@@ -236,6 +260,7 @@
     }
     if(!membership||!membership.active) throw new Error('Membership tidak aktif. Hubungi admin untuk aktivasi.');
     
+    invalidateSession();
     clearCloudTrash();
     window.dispatchEvent(new Event('satria:cloud-session-reset'));
     member={id:user.id,email:user.email||'Pengguna Supabase',role:membership.role,account_type:membership.role==='operator'&&user.app_metadata?.satria_account_type==='ppkom'?'ppkom':'standard',scope:null};
@@ -336,15 +361,20 @@
       }
       // Keluar dari perangkat lain / sesi dicabut: data cloud harus kembali terkunci.
       if(event==='SIGNED_OUT'&&!explicitSignOut){
-        setTimeout(()=>{
+        setTimeout(async()=>{
           if(c!==client||!member)return;
+          const logoutEpoch=invalidateSession();
           cancelAutosaveTimer();stopRealtime();
           clearCloudTrash();member=null;version=0;cloudStateReady=false;lastSyncedPayload=null;conflictActive=false;
           window.dispatchEvent(new Event('satria:cloud-session-reset'));
           window.SATRIA_CLOUD_ROLE=null;window.SATRIA_CLOUD_MEMBER=null;
           window.SATRIA_MEDIA?.clear?.();resetCloudScopedView();
           localUsersBackup=null;
-          try{if(typeof DB!=='undefined'&&DB?.kv)DB.kv.delete('main').catch(()=>{})}catch(_){}
+          // An earlier scoped IndexedDB write must finish before cache deletion.
+          const pending=pendingScopedSave;
+          if(pending)try{await pending}catch(_){}
+          if(logoutEpoch!==sessionEpoch)return; // New login must retain its own cache.
+          try{if(typeof DB!=='undefined'&&DB?.kv)await DB.kv.delete('main')}catch(_){}
           if(typeof render==='function')render();applyUserLock();
           open();status('Sesi telah berakhir atau akses dicabut. Silakan masuk lagi.','error');
         },0);
@@ -460,6 +490,13 @@
   }
   async function pull(options={}){
     const opts=(options&&typeof options==='object'&&('source' in options||'silent' in options||'discardConfirmed' in options))?options:{};
+    if(autoSaveInFlight){
+      if(opts.source==='realtime')return false;
+      throw new Error('Sinkronisasi kirim masih berlangsung. Selesaikan dahulu sebelum menarik data cloud.');
+    }
+    const context=captureSession();
+    const requestEpoch=++pullEpoch;
+    const current=()=>sameSession(context)&&requestEpoch===pullEpoch;
     if(member&&S.dirty&&!opts.discardConfirmed&&(cloudStateReady||member.role==='admin')){
       if(opts.source==='realtime'){handleRealtimeNotice({version:version+1,updated_by:null});return false}
       if(!confirm('Ada perubahan lokal yang belum tersinkron. Menarik data cloud akan mengganti perubahan lokal ini. Unduh Backup JSON terlebih dahulu jika ingin menyimpannya. Lanjutkan tarik data?'))return false;
@@ -482,6 +519,7 @@
           data={payload:scoped.payload,version:scoped.version,updated_at:scoped.updated_at,updated_by:scoped.updated_by};
         }
       }
+      if(!current())return false; // Ignore late replies from another user or older pull.
       if(error)throw error;
       if(!data)throw new Error('Snapshot/scoped state belum tersedia. Admin harus menginisialisasi snapshot dan menetapkan minimal satu OPD serta satu tahun untuk akun non-admin.');
       if(!data.payload||typeof data.payload!=='object'||!Array.isArray(data.payload.paket)||!Array.isArray(data.payload.opd))throw new Error('Respons snapshot tidak memiliki struktur SATRIA yang valid.');
@@ -513,17 +551,23 @@
         if(!S.tahun.includes(Number(S.ui.tahun)))S.ui.tahun=S.tahun[0];
         // Persist only the scoped projection. In memory mode, remove the old full-snapshot cache instead of leaving it available to a later offline startup.
         if(ENGINE==='dexie'&&typeof persistNow==='function'){
-          const persisted=await persistNow();
+          const writing=Promise.resolve().then(()=>persistNow());
+          pendingScopedSave=writing;
+          let persisted;
+          try{persisted=await writing}finally{if(pendingScopedSave===writing)pendingScopedSave=null}
+          if(!current())return false;
           if(!persisted&&DB&&DB.kv){try{await DB.kv.delete('main')}catch(_) {}}
         }else if(DB&&DB.kv){try{await DB.kv.delete('main')}catch(_) {}}
 
       }
+      if(!current())return false;
       if(typeof route==='function')route();applyUserLock();
       lastSyncedPayload=currentPayload();conflictActive=false;S.dirty=false;
       const scopeText=member.role==='admin'?'seluruh organisasi':`${member.scope.opd_ids.length} OPD · TA ${member.scope.years.join(', ')}`;
       status(accountName()+' · Data cloud dimuat sesuai scope '+scopeText+'. Versi '+version+' · diperbarui '+(data.updated_at||'waktu tidak tersedia')+'.','ok');
       syncIndicator('Tersinkron · versi '+version,'');
     }catch(e){
+      if(!current())return false; // Do not clear data belonging to a newer session.
       // Fail closed for every role: a failed cloud pull must never leave seed/stale data pushable.
       resetCloudScopedView();
       cloudStateReady=false;version=0;lastSyncedPayload=null;conflictActive=false;
@@ -540,6 +584,7 @@
     if(!cloudStateReady||!lastSyncedPayload)throw new Error('Baseline cloud belum tersedia. Tarik data Supabase terlebih dahulu.');
     if(conflictActive)throw new Error('Terdapat konflik versi. Buat backup lokal, tarik versi terbaru, lalu terapkan kembali perubahan yang diperlukan.');
     if(autoSaveInFlight){autosyncRequested=true;return}
+    const context=captureSession();
     autoSaveInFlight=true;autosyncRequested=false;
     try{
       const targetPayload=currentPayload();
@@ -556,6 +601,7 @@
         const {data,error}=await client.rpc('satria_apply_state_delta',{
           p_organization_id:orgId,p_expected_version:version,p_changes:batch
         });
+        if(!sameSession(context))return false; // Old session may have committed on server; never apply locally.
         if(error)throw error;
         const returnedVersion=Number(data?.version??data);
         if(!Number.isFinite(returnedVersion)||returnedVersion<=version)throw new Error('Respons delta sync tidak menyertakan versi baru yang valid. Periksa migrasi 20261028010000_satria_rup_bank_cloud_compat.sql dan migrasi sebelumnya.');
@@ -577,6 +623,7 @@
       }
       applyUserLock();
     }catch(e){
+      if(!sameSession(context))return false;
       const msg=String(e?.message||e||'Sinkronisasi gagal.');
       if(/version conflict|40001|newer data|pull latest/i.test(msg)){
         conflictActive=true;cancelAutosaveTimer();
@@ -596,6 +643,7 @@
       }
       if(manual)throw e;
     }finally{
+      if(sameSession(context)){
       autoSaveInFlight=false;
       if(remoteNoticePending){
         const pendingVersion=remoteNoticeVersion;remoteNoticePending=false;remoteNoticeVersion=0;
@@ -605,6 +653,7 @@
         }
       }
       if(autosyncRequested&&!conflictActive&&S.dirty){autosyncRequested=false;cancelAutosaveTimer();autoSaveTimer=setTimeout(()=>{autoSaveTimer=null;saveDeltaChanges(false).catch(showError)},100)}
+      }
     }
   }
   async function push(){
@@ -616,7 +665,9 @@
         const payload=currentPayload();
         if(!confirm('Pemulihan Admin: kirim seluruh snapshot dari backup yang baru diimpor untuk menginisialisasi/memulihkan organisasi? Tindakan ini mengganti snapshot cloud. Lanjutkan hanya setelah memeriksa backup.'))return;
         status('Mengirim snapshot Admin secara eksplisit untuk bootstrap/pemulihan…');
+        const context=captureSession();
         const {data,error}=await client.rpc('satria_save_state',{p_organization_id:orgId,p_expected_version:version,p_payload:payload});
+        if(!sameSession(context))return; // Ignore old administrator bootstrap reply.
         if(error)throw error;
         version=Number(data)||version+1;lastSyncedPayload=cloneJson(payload);S.dirty=false;cloudStateReady=true;conflictActive=false;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;
         status('Snapshot pemulihan tersimpan. Versi '+version+'.','ok');syncIndicator('Tersinkron · versi '+version,'');applyUserLock();return;
@@ -628,13 +679,19 @@
     try{
       if(S.dirty&&!confirm('Ada perubahan lokal yang belum dikirim ke Supabase. Keluar akan mengosongkan cache data aktif pada browser ini. Unduh backup sesuai kewenangan Anda atau simpan perubahan terlebih dahulu. Tetap keluar?'))return;
       explicitSignOut=true;
+      const logoutEpoch=invalidateSession();
       cancelAutosaveTimer();if(autoRetryTimer){clearTimeout(autoRetryTimer);autoRetryTimer=null}stopRealtime();if(client)await client.auth.signOut();
+      if(logoutEpoch!==sessionEpoch)return; // A different login took over during sign-out.
       window.SATRIA_MEDIA?.clear();
       clearCloudTrash();member=null;version=0;cloudStateReady=false;lastSyncedPayload=null;conflictActive=false;lastCloudConfirmedAt=null;
       window.dispatchEvent(new Event('satria:cloud-session-reset'));
       // `lastCloudErrorAt` and related state remain reset in the assignment below.
       lastCloudErrorAt=null;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;orgId=$id('scOrg').value.trim();window.SATRIA_CLOUD_ROLE=null;window.SATRIA_CLOUD_MEMBER=null;
       resetCloudScopedView();
+      // Never allow an old asynchronous scoped cache write to resurrect data after logout.
+      const pending=pendingScopedSave;
+      if(pending)try{await pending}catch(_){}
+      if(logoutEpoch!==sessionEpoch)return;
       try{if(DB&&DB.kv)await DB.kv.delete('main')}catch(e){console.warn('Cache SATRIA tidak dapat dihapus setelah logout',e)}
       localUsersBackup=null;
       if(typeof render==='function')render();
