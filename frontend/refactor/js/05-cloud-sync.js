@@ -87,6 +87,93 @@
   }
   window.SATRIA_AUTO_SYNC_REQUEST=requestAutosave;
 
+  // Stage 2: cloud Recycle Bin is server-owned and never mixed into S.sampah.
+  let trashRows=[], trashLoaded=false, trashLoading=null, trashBusy=false, trashError='', trashEpoch=0;
+  function clearCloudTrash(){trashEpoch++;trashRows=[];trashLoaded=false;trashError='';trashLoading=null}
+  function trashAuthorized(){
+    if(!window.SATRIA_CLOUD_CONFIGURED||!client||!member||!cloudStateReady)
+      throw Error('Masuk Supabase dan tarik snapshot cloud sebelum memakai Sampah.');
+  }
+  function trashCanMutate(){
+    trashAuthorized();
+    if(member.role==='viewer')throw Error('Viewer hanya boleh melihat Sampah.');
+    if(trashBusy||autoSaveInFlight||autoSaveTimer||conflictActive||S.dirty||
+       !lastSyncedPayload||!payloadEqual(currentPayload(),lastSyncedPayload))
+      throw Error('Masih ada perubahan lokal, sinkronisasi, atau konflik. Selesaikan sinkronisasi sebelum menggunakan Sampah cloud.');
+  }
+  async function loadCloudTrash(force=false){
+    trashAuthorized();
+    if(force)clearCloudTrash();
+    if(trashLoaded)return trashRows;
+    if(trashLoading)return trashLoading;
+    const epoch=trashEpoch;
+    const subject=member.id,organization=orgId;
+    trashLoading=(async()=>{
+      const {data,error}=await client.from('satria_trash_entries')
+        .select('id,collection,record_id,record_summary,deleted_at,deleted_by,opd_id,fiscal_year,retain_until')
+        .eq('organization_id',organization).is('restored_at',null)
+        .order('deleted_at',{ascending:false}).limit(250);
+      if(error)throw Error('Sampah cloud belum tersedia / migrasi Tahap 2 belum dipasang: '+error.message);
+      if(epoch===trashEpoch&&member?.id===subject&&orgId===organization){
+        trashRows=Array.isArray(data)?data.map(x=>({
+          id:x.id,collection:x.collection,originalId:x.record_id,record:{nama:x.record_summary},
+          deletedAt:x.deleted_at,deletedBy:x.deleted_by,retainUntil:x.retain_until
+        })):[];
+        trashLoaded=true;trashError='';
+      }
+      return trashRows;
+    })().catch(err=>{
+      if(epoch===trashEpoch){trashError=String(err.message||err);trashLoaded=true;trashRows=[]}
+      return trashRows;
+    }).finally(()=>{
+      if(epoch===trashEpoch){trashLoading=null;if(S?.ui?.page==='sampah'&&typeof route==='function')route()}
+    });
+    return trashLoading;
+  }
+  async function performCloudTrash(operation,collectionOrId,recordId){
+    trashCanMutate();
+    if(operation==='archive'&& !['paket','rupBank','opd','unit','pejabat','penyedia','akun','kode'].includes(collectionOrId))
+      throw Error('Jenis data tidak mendukung Sampah cloud. Tidak ada penghapusan.');
+    if(operation==='archive'&&member.role==='operator'&&!['paket','rupBank'].includes(collectionOrId))
+      throw Error('Master organisasi hanya boleh dipindahkan ke Sampah oleh Admin.');
+    if(operation==='restore'&&!trashRows.some(x=>x.id===collectionOrId))
+      throw Error('Item Sampah tidak tersedia untuk akun ini. Segarkan daftar Sampah.');
+    trashBusy=true;cancelAutosaveTimer();
+    try{
+      const rpc=operation==='archive'?'satria_archive_record':'satria_restore_record';
+      const args={p_organization_id:orgId,p_expected_version:version};
+      if(operation==='archive'){
+        args.p_collection=collectionOrId;args.p_record_id=String(recordId);
+      }else args.p_trash_id=collectionOrId;
+      syncIndicator(operation==='archive'?'Mengarsipkan cloud…':'Memulihkan cloud…','wait');
+      const {data,error}=await client.rpc(rpc,args);
+      if(error)throw Error('Transaksi Sampah cloud gagal atau belum terkonfirmasi. Segarkan cloud sebelum mengulangi: '+error.message);
+      if(!data||data.status!==(operation==='archive'?'archived':'restored')||!Number.isFinite(Number(data.version)))
+        throw Error('Respons server tidak lengkap. Periksa Sampah sebelum mengulangi operasi.');
+      clearCloudTrash();
+      await pull({discardConfirmed:true,source:'trash'});
+      if(!cloudStateReady)throw Error('Transaksi selesai di server, tetapi pemuatan ulang data cloud gagal. Tarik cloud secara manual.');
+      await loadCloudTrash(true);
+      if(operation==='archive'&&collectionOrId==='paket'){
+        S.ui.pid=null;location.hash='#paket';
+      }
+      if(typeof route==='function')route();
+      toast(operation==='archive'?'Data tersimpan di Sampah cloud.':'Data berhasil dipulihkan dari Sampah cloud.');
+      return data;
+    }catch(err){
+      syncIndicator('Periksa Sampah cloud / sinkronisasi','error');
+      throw err;
+    }finally{trashBusy=false}
+  }
+  window.SATRIA_CLOUD_TRASH=Object.freeze({
+    get items(){return trashRows.slice()}, get loaded(){return trashLoaded},
+    get loading(){return Boolean(trashLoading)},get error(){return trashError},
+    get ready(){return Boolean(client&&member&&cloudStateReady)},
+    ensureLoaded:()=>loadCloudTrash(false),refresh:()=>loadCloudTrash(true),
+    archive:(collection,id)=>performCloudTrash('archive',collection,id),
+    restore:id=>performCloudTrash('restore',id)
+  });
+
   const roleName=r=>({admin:'Admin',operator:'Operator',viewer:'Viewer'}[r]||'Viewer');
   const accountName=()=>member?.role==='operator'&&member?.account_type==='ppkom'?'PPKom':roleName(member?.role);
   const config=()=>{let local={};try{local=JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}')}catch(_){}const embedded=window.SATRIA_EMBEDDED_SUPABASE_CONFIG||{};return {url:local.url||embedded.url||'',key:local.key||embedded.key||'',org:local.org||embedded.org||''}};
@@ -194,6 +281,7 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
     
     if(!membership||!membership.active) throw new Error('Membership tidak aktif. Hubungi admin untuk aktivasi.');
     
+    clearCloudTrash();
     member={id:user.id,email:user.email||'Pengguna Supabase',role:membership.role,account_type:membership.role==='operator'&&user.app_metadata?.satria_account_type==='ppkom'?'ppkom':'standard',scope:null};
     cloudStateReady=false;
     window.SATRIA_CLOUD_ROLE=member.role;
@@ -219,7 +307,7 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
     Object.assign(S,{
       pemda:{nama:'',kota:'',provinsi:'',sumber:''},meta:{},penomoran:{},tahun:[currentYear],
       users:[{id:'cloud-login-required',nama:'Login Supabase diperlukan',username:'',role:'Viewer',opd:'all',aktif:false}],
-      akun:[],kode:[],opd:[],unit:[],pejabat:[],penyedia:[],rupBank:[],paket:[],
+      akun:[],kode:[],opd:[],unit:[],pejabat:[],penyedia:[],rupBank:[],paket:[],sampah:[],
       ui,log:[],dirty:false,chat:[],chatCtx:null,persistError:''
     });
     S.ui.user=S.users[0].id;
@@ -311,7 +399,7 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
         setTimeout(()=>{
           if(c!==client||!member)return;
           cancelAutosaveTimer();stopRealtime();
-          member=null;version=0;cloudStateReady=false;lastSyncedPayload=null;conflictActive=false;
+          clearCloudTrash();member=null;version=0;cloudStateReady=false;lastSyncedPayload=null;conflictActive=false;
           window.SATRIA_CLOUD_ROLE=null;window.SATRIA_CLOUD_MEMBER=null;
           window.SATRIA_MEDIA?.clear?.();resetCloudScopedView();
           localUsersBackup=null;
@@ -375,7 +463,8 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
   }
   function currentPayload(){
     const o=JSON.parse(JSON.stringify(S));
-    ['ui','log','dirty','chat','chatCtx','persistError'].forEach(k=>delete o[k]);
+    // Local recycle entries are device-only. Cloud trash uses its own RLS table, never the snapshot payload.
+    ['ui','log','dirty','chat','chatCtx','persistError','sampah'].forEach(k=>delete o[k]);
     // Browser-side user list is not an identity store; persist only the authenticated principal's display role.
     o.users=member?[{id:'auth-'+member.id,nama:member.account_type==='ppkom'?'PPKom · '+member.email:member.email,username:member.email,role:roleName(member.role),opd:'all',aktif:true}]:[];
     return o;
@@ -461,7 +550,9 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
       const assignedYears=member.role==='admin'?null:(Array.isArray(member.scope?.years)?member.scope.years.map(Number).filter(Number.isFinite):[]);
       S.users=[{id:'auth-'+member.id,nama:member.account_type==='ppkom'?'PPKom · '+member.email:member.email,username:member.email,role:roleName(member.role),opd:assignedOpds,years:assignedYears,aktif:true}];S.ui.user=S.users[0].id;
       if(typeof normalizeData==='function')normalizeData();
+      const previousCloudVersion=version;
       version=Number(data.version)||0;S.dirty=false;cloudStateReady=true;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;
+      if(version!==previousCloudVersion)clearCloudTrash(); // another device may have archived or restored records
       if(member.role!=='admin'){
         const allowedOpds=assignedOpds;
         const allowedYears=assignedYears||[];
@@ -598,7 +689,7 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
       explicitSignOut=true;
       cancelAutosaveTimer();if(autoRetryTimer){clearTimeout(autoRetryTimer);autoRetryTimer=null}stopRealtime();if(client)await client.auth.signOut();
       window.SATRIA_MEDIA?.clear();
-      member=null;version=0;cloudStateReady=false;lastSyncedPayload=null;conflictActive=false;lastCloudConfirmedAt=null;lastCloudErrorAt=null;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;orgId=$id('scOrg').value.trim();window.SATRIA_CLOUD_ROLE=null;
+      clearCloudTrash();member=null;version=0;cloudStateReady=false;lastSyncedPayload=null;conflictActive=false;lastCloudConfirmedAt=null;lastCloudErrorAt=null;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;orgId=$id('scOrg').value.trim();window.SATRIA_CLOUD_ROLE=null;window.SATRIA_CLOUD_MEMBER=null;
       resetCloudScopedView();
       try{if(DB&&DB.kv)await DB.kv.delete('main')}catch(e){console.warn('Cache SATRIA tidak dapat dihapus setelah logout',e)}
       localUsersBackup=null;
@@ -717,241 +808,8 @@ INSERT INTO satria_memberships (organization_id, user_id, role, active) VALUES (
       .satria-user-modal button.primary{background:#0f766e;border-color:#0f766e;color:#fff}
       .satria-user-modal button:disabled{opacity:.6;cursor:not-allowed}
     
-/* ===== SATRIA DATA MASTER PERFECTED - Lead Dev Patch 24 Okt 2026 ===== */
-.satria-scope-card{display:flex;gap:14px;padding:16px 18px;border-radius:16px;border:1px solid var(--bd);background:linear-gradient(135deg, rgba(15,118,110,.06), rgba(14,165,233,.05));position:relative;overflow:hidden;margin-bottom:18px}
-.satria-scope-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--acc-grad-kh)}
-.satria-scope-card.scope-admin{background:linear-gradient(135deg, rgba(37,99,235,.06), rgba(15,118,110,.06))}
-.satria-scope-card .scope-icon{width:36px;height:36px;border-radius:10px;background:var(--acc-soft);color:var(--acc);display:grid;place-items:center;flex-shrink:0}
-.satria-scope-card .scope-icon svg{width:20px;height:20px}
-.satria-scope-card b{color:var(--ink)}
-.satria-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
-@media(max-width:1180px){.satria-kpi-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:640px){.satria-kpi-grid{grid-template-columns:1fr}}
-.satria-kpi-card{background:var(--card);backdrop-filter:blur(16px) saturate(160%);border:1px solid var(--bd);border-radius:20px;padding:18px 20px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:all .26s var(--ease);min-height:132px;display:flex;flex-direction:column;justify-content:space-between}
-.satria-kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-kh);opacity:.9}
-.satria-kpi-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--bd-strong)}
-.satria-kpi-card .kpi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.satria-kpi-card .kpi-icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg, var(--acc-soft), var(--acc-soft-2));color:var(--acc);display:grid;place-items:center;border:1px solid var(--bd)}
-.satria-kpi-card .kpi-icon svg{width:20px;height:20px}
-.satria-kpi-card .kpi-badge{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);background:var(--acc-soft);border:1px solid var(--bd);padding:4px 8px;border-radius:9999px;display:flex;align-items:center;gap:5px}
-.satria-kpi-card .kpi-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--acc-ring);animation:pulseDot 2s infinite}
-.satria-kpi-card .kpi-label{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
-.satria-kpi-card .kpi-value{font-size:32px;font-weight:800;line-height:1;color:var(--ink);letter-spacing:-.03em}
-.satria-kpi-card .kpi-foot{margin-top:12px;font-size:11.5px;color:var(--mut);display:flex;align-items:center;gap:6px}
-.live-dot{width:8px;height:8px;border-radius:50%;background:#10B981;box-shadow:0 0 0 3px rgba(16,185,129,.18);position:relative}
-.live-dot::after{content:'';position:absolute;inset:0;border-radius:50%;background:#10B981;animation:pulseDot 2s infinite}
-@keyframes pulseDot{0%{box-shadow:0 0 0 0 var(--acc-ring)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
-.satria-master-nav-card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:14px;box-shadow:var(--shadow-sm);margin-bottom:18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
-.master-tabs{display:flex;flex-wrap:wrap;gap:8px}
-.master-tab{height:38px;padding:0 16px;border-radius:9999px;border:1px solid var(--bd);background:var(--card-solid);color:var(--ink-2);font-size:13px;font-weight:600;transition:all .18s var(--ease);cursor:pointer}
-.master-tab:hover{background:var(--bg-2);color:var(--ink);transform:translateY(-1px)}
-.master-tab.active{background:var(--acc-grad-kh);color:white;border-color:transparent;box-shadow:0 6px 18px rgba(15,118,110,.28);transform:translateY(-1px)}
-.master-search-wrap{position:relative;flex:1;min-width:280px;max-width:420px}
-.master-search-wrap .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--mut-2);pointer-events:none}
-.master-search{width:100%;height:42px;padding:0 14px 0 38px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--ink);font-size:13.5px;transition:all .18s var(--ease)}
-.master-search:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 4px var(--acc-ring);background:var(--card-solid)}
-.satria-form-card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:22px;box-shadow:var(--shadow-sm);margin-bottom:18px;position:relative;overflow:hidden}
-.satria-form-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-soft);opacity:.8}
-.form-card-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.form-card-head .title-accent{width:4px;height:18px;border-radius:3px;background:var(--acc-grad-kh);box-shadow:0 2px 6px rgba(15,118,110,.3)}
-.form-card-head h3{margin:0;font-size:15px;font-weight:800;letter-spacing:-.01em}
-.satria-shared-note{display:flex;gap:12px;padding:12px 14px;border-radius:12px;background:#fef3c7;border:1px solid #fde68a;color:#92400e;font-size:13px;margin-bottom:16px}
-.satria-shared-note .shared-icon{width:28px;height:28px;border-radius:8px;background:#fff7ed;color:#f59e0b;display:grid;place-items:center;flex-shrink:0}
-.satria-form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-@media(max-width:1024px){.satria-form-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:640px){.satria-form-grid{grid-template-columns:1fr}}
-.fg label{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);display:flex;align-items:center;gap:6px}
-.fg label::before{content:'';width:3px;height:10px;border-radius:2px;background:var(--acc);display:inline-block}
-.satria-input,.satria-select{height:44px !important;padding:0 14px !important;border-radius:12px !important;border:1px solid var(--bd) !important;background:var(--card-solid) !important;transition:all .18s var(--ease) !important}
-.satria-input:focus,.satria-select:focus{outline:none !important;border-color:var(--acc) !important;box-shadow:0 0 0 4px var(--acc-ring) !important}
-.form-actions{display:flex;justify-content:flex-end;margin-top:18px}
-.satria-btn-primary{height:42px;padding:0 20px;border-radius:9999px;background:var(--acc-grad-kh);color:white;border:none;font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 20px rgba(15,118,110,.28);cursor:pointer;transition:all .18s var(--ease)}
-.satria-btn-primary:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(15,118,110,.35)}
-.satria-btn-primary:active{transform:translateY(0) scale(.98)}
-.satria-table-card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:0;box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:18px}
-.table-card-head{padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
-.table-card-head .table-title{display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px}
-.table-card-head .title-accent{width:4px;height:16px;border-radius:3px;background:var(--acc-grad-kh)}
-.count-badge{background:var(--bg-2);border:1px solid var(--bd);padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:700;color:var(--mut)}
-.satria-table-card .table-wrap{margin:0;border:none;box-shadow:none;border-radius:0}
-.satria-master-note{font-size:12.5px;color:var(--mut);padding:0 4px;margin-top:4px}
 
-
-/* ===== SATRIA GLOBAL PERFORMANCE OPTIMIZATION - Lead Dev 24 Okt 2026 ===== */
-/* Goal: ringan di desktop, Android, iPhone tanpa hilangkan premium look */
-
-/* 1. Reduce heavy effects on all devices, disable on mobile */
-@media (max-width: 768px){
-  .bg-blobs, .blob, .noise, body::before{display:none !important}
-  .card, .satria-kpi-card, .satria-form-card, .satria-table-card{backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
-  :root{--shadow-sm:0 2px 8px rgba(15,23,42,.06);--shadow-md:0 6px 16px rgba(15,23,42,.08);--shadow-lg:0 12px 24px rgba(15,23,42,.10);--shadow-glow:0 4px 12px rgba(15,118,110,.14)}
-  .card:hover, .satria-kpi-card:hover{transform:none !important}
-}
-@media (prefers-reduced-motion: reduce){
-  *, *::before, *::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
-  .bg-blobs, .blob{display:none !important}
-}
-
-/* 2. Optimize header & nav for mobile */
-header{backdrop-filter:blur(12px) saturate(140%) !important;-webkit-backdrop-filter:blur(12px) saturate(140%) !important}
-@media (max-width: 768px){
-  :root{--header-h:64px;--nav-h:52px}
-  header{padding:0 12px !important;gap:8px !important}
-  #nav{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:sticky;top:var(--header-h);z-index:9;background:var(--bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd)}
-  #nav::-webkit-scrollbar{display:none}
-  .nav-track{flex-wrap:nowrap !important;overflow:visible !important}
-  main{padding:16px 12px !important}
-  .satria-kpi-grid{grid-template-columns:1fr 1fr !important;gap:12px !important}
-  .satria-form-grid{grid-template-columns:1fr !important}
-  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  table{min-width:600px}
-  .row{flex-wrap:wrap}
-  input, select, textarea, button{min-height:44px} /* Apple HIG & Android touch target */
-}
-
-/* 3. Ultra-light cards on mobile, premium on desktop */
-.card, .satria-kpi-card, .satria-form-card, .satria-table-card, .satria-master-nav-card, .satria-scope-card{
-  will-change:auto; /* remove will-change heavy */
-  contain:layout style; /* CSS containment for performance */
-}
-@media (min-width: 769px){
-  .card:hover{transform:translateY(-2px)}
-}
-
-/* 4. Optimize fonts & rendering */
-html{font-display:swap}
-body{content-visibility:auto;contain-intrinsic-size:1px 1000px}
-*{-webkit-tap-highlight-color:rgba(15,118,110,.15)}
-input, select, textarea, button{font-size:16px !important} /* Prevent iOS zoom on focus - 16px minimum */
-@media (min-width: 769px){
-  input, select, textarea{font-size:14px !important}
-}
-
-/* 5. Optimize images & media */
-img{max-width:100%;height:auto;content-visibility:auto}
-svg{flex-shrink:0}
-
-/* 6. Sticky header optimization */
-header{position:sticky;top:0;z-index:100;will-change:transform;transform:translateZ(0)}
-
-/* 7. Table performance */
-.table-wrap{contain:layout}
-table{border-collapse:collapse;table-layout:auto}
-th, td{white-space:nowrap}
-@media (max-width: 768px){
-  th, td{white-space:normal;word-break:break-word}
-}
-
-/* 8. Button & interactive optimization */
-button, [data-act]{touch-action:manipulation;user-select:none;-webkit-user-select:none}
-button:active{transform:scale(.97)}
-
-/* 9. Reduce paint areas */
-.satria-kpi-card::before, .card::before, .card::after{pointer-events:none}
-
-/* 10. Dark mode mobile optimization */
-:root[data-theme="dark"] .bg-blobs{display:none}
-:root[data-theme="dark"] .card{backdrop-filter:none}
-
-/* 11. Loading & skeleton optimization */
-.mut{will-change:auto}
-
-/* 12. Form optimization for mobile */
-.fg{min-width:0 !important;flex:1 1 100%}
-@media (min-width: 640px){.fg{min-width:220px !important;flex:1 !important}}
-
-/* 13. Optimize scroll */
-html{scroll-behavior:smooth}
-@media (max-width: 768px){html{scroll-behavior:auto}}
-main{overflow-anchor:none}
-
-/* 14. Critical CSS: make first paint fast */
-#main{animation:fadeIn .24s var(--ease-out)}
-
-/* 15. iOS safe area */
-@supports (padding: max(0px)){
-  body{padding-left:max(0px, env(safe-area-inset-left));padding-right:max(0px, env(safe-area-inset-right))}
-  header{padding-left:max(12px, env(safe-area-inset-left));padding-right:max(12px, env(safe-area-inset-right))}
-}
-
-
-/* ===== VIRTUAL SCROLL FOR PAKET & HPS - Lead Dev Patch ===== */
-.satria-virtual-table{background:var(--card);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
-.satria-virtual-header{display:grid;grid-template-columns:56px 140px 1fr 160px 120px 120px 120px 120px;gap:0;background:var(--bg-2);border-bottom:1px solid var(--bd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);padding:0 4px;position:sticky;top:0;z-index:2}
-.satria-virtual-header > div{padding:12px 10px;display:flex;align-items:center}
-.satria-virtual-header .n{justify-content:flex-end}
-.satria-virtual-viewport{overflow:auto;-webkit-overflow-scrolling:touch;position:relative;background:var(--card-solid);contain:layout}
-.satria-virtual-viewport::-webkit-scrollbar{width:8px;height:8px}
-.satria-virtual-viewport::-webkit-scrollbar-thumb{background:var(--bd-strong);border-radius:9999px}
-.satria-virtual-row{display:grid;grid-template-columns:56px 140px 1fr 160px 120px 120px 120px 120px;gap:0;border-bottom:1px solid var(--bg-2);background:var(--card-solid);transition:background .12s;align-items:center;min-height:56px}
-.satria-virtual-row:hover{background:var(--bg)}
-.satria-virtual-row > div{padding:10px;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.satria-virtual-row > div.n{justify-content:flex-end;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
-.satria-virtual-row a{color:var(--acc-vivid);font-weight:600;text-decoration:none}
-.satria-virtual-row a:hover{text-decoration:underline}
-.satria-virtual-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-2);border-top:1px solid var(--bd);font-size:11px;color:var(--mut);font-weight:600}
-.satria-virtual-footer .mut{color:var(--mut-2)}
-/* HPS virtual */
-.hps-virtual-table{background:var(--card);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
-.hps-virtual-header{display:grid;grid-template-columns:1fr 110px 110px 150px 140px 56px;gap:0;background:var(--bg-2);border-bottom:1px solid var(--bd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);position:sticky;top:0;z-index:2}
-.hps-virtual-header > div{padding:11px 10px}
-.hps-virtual-header .n{text-align:right}
-.hps-virtual-viewport{overflow:auto;max-height:520px;-webkit-overflow-scrolling:touch;background:var(--card-solid);contain:layout}
-.hps-virtual-row{display:grid;grid-template-columns:1fr 110px 110px 150px 140px 56px;gap:0;border-bottom:1px solid var(--bg-2);align-items:center;background:var(--card-solid);min-height:52px;transition:background .12s}
-.hps-virtual-row:hover{background:var(--bg)}
-.hps-virtual-row > div{padding:6px 8px}
-.hps-virtual-row input{height:36px !important;font-size:13px !important}
-.hps-virtual-row .n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
-@media(max-width:768px){
-  .satria-virtual-header, .satria-virtual-row{grid-template-columns:48px 110px 1fr 90px 90px;gap:0}
-  .satria-virtual-header > div:nth-child(4), .satria-virtual-row > div:nth-child(4),
-  .satria-virtual-header > div:nth-child(7), .satria-virtual-row > div:nth-child(7),
-  .satria-virtual-header > div:nth-child(8), .satria-virtual-row > div:nth-child(8){display:none}
-  .hps-virtual-header, .hps-virtual-row{grid-template-columns:1fr 80px 70px 90px 56px}
-  .hps-virtual-header > div:nth-child(2), .hps-virtual-row > div:nth-child(2){display:none}
-  .satria-virtual-viewport{height:60vh !important;max-height:60vh !important}
-  .hps-virtual-viewport{max-height:50vh !important}
-}
-
-
-/* ===== DOKUMEN PENGADAAN - LAZY LOAD + VIRTUAL SCROLL ===== */
-.satria-dok-toolbar{position:sticky;top:var(--header-h);z-index:20;background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
-.satria-dok-toolbar .row{flex-wrap:nowrap;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
-.satria-dok-toolbar .row::-webkit-scrollbar{display:none}
-.satria-dok-toolbar select#selPaket{min-width:280px;max-width:420px;flex-shrink:0}
-.doc-tabs-scroll{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:4px 0;flex-wrap:nowrap;flex:1}
-.doc-tabs-scroll::-webkit-scrollbar{display:none}
-.doc-tabs-scroll button{scroll-snap-align:start;white-space:nowrap;flex-shrink:0;height:36px;padding:0 14px;border-radius:9999px;font-size:12.5px;font-weight:600}
-.satria-doc-lazy-container{position:relative;min-height:400px}
-.satria-doc-skeleton{display:grid;place-items:center;min-height:400px;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:40px;color:var(--mut);font-size:14px}
-.satria-doc-skeleton .spinner{width:32px;height:32px;border:3px solid var(--bd);border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.doc{content-visibility:auto;contain-intrinsic-size:0 800px;background:var(--card-solid);border:1px solid var(--bd);border-radius:16px;padding:24px;box-shadow:var(--shadow-sm);overflow:hidden;position:relative}
-.doc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-kh);opacity:.8}
-.doc.doc-landscape{overflow-x:auto}
-.doc table{border-collapse:collapse;width:100%;table-layout:auto}
-.doc table th, .doc table td{border:1px solid var(--bd);padding:8px 10px;font-size:12.5px}
-.doc table th{background:var(--bg-2);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
-.doc img{max-width:100%;height:auto;content-visibility:auto}
-.doc img[loading="lazy"]{background:var(--bg-2)}
-/* Virtual scroll for large doc tables */
-.doc-virtual-table{border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:var(--card-solid);margin:12px 0}
-.doc-virtual-header{display:grid;background:var(--bg-2);border-bottom:1px solid var(--bd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);position:sticky;top:0;z-index:1}
-.doc-virtual-viewport{overflow:auto;max-height:420px;-webkit-overflow-scrolling:touch;contain:layout}
-.doc-virtual-row{display:grid;border-bottom:1px solid var(--bg-2);align-items:center;min-height:44px;background:var(--card-solid);transition:background .12s}
-.doc-virtual-row:hover{background:var(--bg)}
-.doc-virtual-row > div{padding:7px 10px;font-size:12.5px;overflow:hidden;text-overflow:ellipsis}
-.doc-virtual-footer{padding:8px 12px;background:var(--bg-2);border-top:1px solid var(--bd);font-size:11px;color:var(--mut);display:flex;justify-content:space-between}
-@media(max-width:768px){
-  .satria-dok-toolbar{top:56px;padding:10px;border-radius:12px}
-  .satria-dok-toolbar .row{flex-direction:column;align-items:stretch}
-  .satria-dok-toolbar select#selPaket{max-width:100%;width:100%}
-  .doc{padding:14px;border-radius:12px}
-  .doc table{font-size:11px;min-width:500px;display:block;overflow-x:auto;white-space:nowrap}
-  .doc table th, .doc table td{white-space:normal;word-break:break-word}
-  .doc-virtual-viewport{max-height:50vh}
-}
-
+/* Shared modal and application CSS loaded from satria-shared-modal-ui.css. */
 </style>
     <section class="satria-user-modal" role="dialog" aria-modal="true" aria-labelledby="satriaUserModalTitle">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
@@ -1775,241 +1633,8 @@ main{overflow-anchor:none}
         .satria-edit-opd-actions button:disabled{opacity:.55;cursor:not-allowed}
         #satriaEditUserOpdMessage{min-height:20px;white-space:pre-wrap;font-size:13px}#satriaEditUserOpdMessage[data-kind=error]{color:#b42318}#satriaEditUserOpdMessage[data-kind=ok]{color:#067647}
       
-/* ===== SATRIA DATA MASTER PERFECTED - Lead Dev Patch 24 Okt 2026 ===== */
-.satria-scope-card{display:flex;gap:14px;padding:16px 18px;border-radius:16px;border:1px solid var(--bd);background:linear-gradient(135deg, rgba(15,118,110,.06), rgba(14,165,233,.05));position:relative;overflow:hidden;margin-bottom:18px}
-.satria-scope-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--acc-grad-kh)}
-.satria-scope-card.scope-admin{background:linear-gradient(135deg, rgba(37,99,235,.06), rgba(15,118,110,.06))}
-.satria-scope-card .scope-icon{width:36px;height:36px;border-radius:10px;background:var(--acc-soft);color:var(--acc);display:grid;place-items:center;flex-shrink:0}
-.satria-scope-card .scope-icon svg{width:20px;height:20px}
-.satria-scope-card b{color:var(--ink)}
-.satria-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
-@media(max-width:1180px){.satria-kpi-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:640px){.satria-kpi-grid{grid-template-columns:1fr}}
-.satria-kpi-card{background:var(--card);backdrop-filter:blur(16px) saturate(160%);border:1px solid var(--bd);border-radius:20px;padding:18px 20px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:all .26s var(--ease);min-height:132px;display:flex;flex-direction:column;justify-content:space-between}
-.satria-kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-kh);opacity:.9}
-.satria-kpi-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--bd-strong)}
-.satria-kpi-card .kpi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.satria-kpi-card .kpi-icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg, var(--acc-soft), var(--acc-soft-2));color:var(--acc);display:grid;place-items:center;border:1px solid var(--bd)}
-.satria-kpi-card .kpi-icon svg{width:20px;height:20px}
-.satria-kpi-card .kpi-badge{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);background:var(--acc-soft);border:1px solid var(--bd);padding:4px 8px;border-radius:9999px;display:flex;align-items:center;gap:5px}
-.satria-kpi-card .kpi-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--acc-ring);animation:pulseDot 2s infinite}
-.satria-kpi-card .kpi-label{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
-.satria-kpi-card .kpi-value{font-size:32px;font-weight:800;line-height:1;color:var(--ink);letter-spacing:-.03em}
-.satria-kpi-card .kpi-foot{margin-top:12px;font-size:11.5px;color:var(--mut);display:flex;align-items:center;gap:6px}
-.live-dot{width:8px;height:8px;border-radius:50%;background:#10B981;box-shadow:0 0 0 3px rgba(16,185,129,.18);position:relative}
-.live-dot::after{content:'';position:absolute;inset:0;border-radius:50%;background:#10B981;animation:pulseDot 2s infinite}
-@keyframes pulseDot{0%{box-shadow:0 0 0 0 var(--acc-ring)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
-.satria-master-nav-card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:14px;box-shadow:var(--shadow-sm);margin-bottom:18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
-.master-tabs{display:flex;flex-wrap:wrap;gap:8px}
-.master-tab{height:38px;padding:0 16px;border-radius:9999px;border:1px solid var(--bd);background:var(--card-solid);color:var(--ink-2);font-size:13px;font-weight:600;transition:all .18s var(--ease);cursor:pointer}
-.master-tab:hover{background:var(--bg-2);color:var(--ink);transform:translateY(-1px)}
-.master-tab.active{background:var(--acc-grad-kh);color:white;border-color:transparent;box-shadow:0 6px 18px rgba(15,118,110,.28);transform:translateY(-1px)}
-.master-search-wrap{position:relative;flex:1;min-width:280px;max-width:420px}
-.master-search-wrap .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--mut-2);pointer-events:none}
-.master-search{width:100%;height:42px;padding:0 14px 0 38px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--ink);font-size:13.5px;transition:all .18s var(--ease)}
-.master-search:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 4px var(--acc-ring);background:var(--card-solid)}
-.satria-form-card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:22px;box-shadow:var(--shadow-sm);margin-bottom:18px;position:relative;overflow:hidden}
-.satria-form-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-soft);opacity:.8}
-.form-card-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.form-card-head .title-accent{width:4px;height:18px;border-radius:3px;background:var(--acc-grad-kh);box-shadow:0 2px 6px rgba(15,118,110,.3)}
-.form-card-head h3{margin:0;font-size:15px;font-weight:800;letter-spacing:-.01em}
-.satria-shared-note{display:flex;gap:12px;padding:12px 14px;border-radius:12px;background:#fef3c7;border:1px solid #fde68a;color:#92400e;font-size:13px;margin-bottom:16px}
-.satria-shared-note .shared-icon{width:28px;height:28px;border-radius:8px;background:#fff7ed;color:#f59e0b;display:grid;place-items:center;flex-shrink:0}
-.satria-form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-@media(max-width:1024px){.satria-form-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:640px){.satria-form-grid{grid-template-columns:1fr}}
-.fg label{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);display:flex;align-items:center;gap:6px}
-.fg label::before{content:'';width:3px;height:10px;border-radius:2px;background:var(--acc);display:inline-block}
-.satria-input,.satria-select{height:44px !important;padding:0 14px !important;border-radius:12px !important;border:1px solid var(--bd) !important;background:var(--card-solid) !important;transition:all .18s var(--ease) !important}
-.satria-input:focus,.satria-select:focus{outline:none !important;border-color:var(--acc) !important;box-shadow:0 0 0 4px var(--acc-ring) !important}
-.form-actions{display:flex;justify-content:flex-end;margin-top:18px}
-.satria-btn-primary{height:42px;padding:0 20px;border-radius:9999px;background:var(--acc-grad-kh);color:white;border:none;font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 20px rgba(15,118,110,.28);cursor:pointer;transition:all .18s var(--ease)}
-.satria-btn-primary:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(15,118,110,.35)}
-.satria-btn-primary:active{transform:translateY(0) scale(.98)}
-.satria-table-card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:0;box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:18px}
-.table-card-head{padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
-.table-card-head .table-title{display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px}
-.table-card-head .title-accent{width:4px;height:16px;border-radius:3px;background:var(--acc-grad-kh)}
-.count-badge{background:var(--bg-2);border:1px solid var(--bd);padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:700;color:var(--mut)}
-.satria-table-card .table-wrap{margin:0;border:none;box-shadow:none;border-radius:0}
-.satria-master-note{font-size:12.5px;color:var(--mut);padding:0 4px;margin-top:4px}
 
-
-/* ===== SATRIA GLOBAL PERFORMANCE OPTIMIZATION - Lead Dev 24 Okt 2026 ===== */
-/* Goal: ringan di desktop, Android, iPhone tanpa hilangkan premium look */
-
-/* 1. Reduce heavy effects on all devices, disable on mobile */
-@media (max-width: 768px){
-  .bg-blobs, .blob, .noise, body::before{display:none !important}
-  .card, .satria-kpi-card, .satria-form-card, .satria-table-card{backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
-  :root{--shadow-sm:0 2px 8px rgba(15,23,42,.06);--shadow-md:0 6px 16px rgba(15,23,42,.08);--shadow-lg:0 12px 24px rgba(15,23,42,.10);--shadow-glow:0 4px 12px rgba(15,118,110,.14)}
-  .card:hover, .satria-kpi-card:hover{transform:none !important}
-}
-@media (prefers-reduced-motion: reduce){
-  *, *::before, *::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
-  .bg-blobs, .blob{display:none !important}
-}
-
-/* 2. Optimize header & nav for mobile */
-header{backdrop-filter:blur(12px) saturate(140%) !important;-webkit-backdrop-filter:blur(12px) saturate(140%) !important}
-@media (max-width: 768px){
-  :root{--header-h:64px;--nav-h:52px}
-  header{padding:0 12px !important;gap:8px !important}
-  #nav{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:sticky;top:var(--header-h);z-index:9;background:var(--bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd)}
-  #nav::-webkit-scrollbar{display:none}
-  .nav-track{flex-wrap:nowrap !important;overflow:visible !important}
-  main{padding:16px 12px !important}
-  .satria-kpi-grid{grid-template-columns:1fr 1fr !important;gap:12px !important}
-  .satria-form-grid{grid-template-columns:1fr !important}
-  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  table{min-width:600px}
-  .row{flex-wrap:wrap}
-  input, select, textarea, button{min-height:44px} /* Apple HIG & Android touch target */
-}
-
-/* 3. Ultra-light cards on mobile, premium on desktop */
-.card, .satria-kpi-card, .satria-form-card, .satria-table-card, .satria-master-nav-card, .satria-scope-card{
-  will-change:auto; /* remove will-change heavy */
-  contain:layout style; /* CSS containment for performance */
-}
-@media (min-width: 769px){
-  .card:hover{transform:translateY(-2px)}
-}
-
-/* 4. Optimize fonts & rendering */
-html{font-display:swap}
-body{content-visibility:auto;contain-intrinsic-size:1px 1000px}
-*{-webkit-tap-highlight-color:rgba(15,118,110,.15)}
-input, select, textarea, button{font-size:16px !important} /* Prevent iOS zoom on focus - 16px minimum */
-@media (min-width: 769px){
-  input, select, textarea{font-size:14px !important}
-}
-
-/* 5. Optimize images & media */
-img{max-width:100%;height:auto;content-visibility:auto}
-svg{flex-shrink:0}
-
-/* 6. Sticky header optimization */
-header{position:sticky;top:0;z-index:100;will-change:transform;transform:translateZ(0)}
-
-/* 7. Table performance */
-.table-wrap{contain:layout}
-table{border-collapse:collapse;table-layout:auto}
-th, td{white-space:nowrap}
-@media (max-width: 768px){
-  th, td{white-space:normal;word-break:break-word}
-}
-
-/* 8. Button & interactive optimization */
-button, [data-act]{touch-action:manipulation;user-select:none;-webkit-user-select:none}
-button:active{transform:scale(.97)}
-
-/* 9. Reduce paint areas */
-.satria-kpi-card::before, .card::before, .card::after{pointer-events:none}
-
-/* 10. Dark mode mobile optimization */
-:root[data-theme="dark"] .bg-blobs{display:none}
-:root[data-theme="dark"] .card{backdrop-filter:none}
-
-/* 11. Loading & skeleton optimization */
-.mut{will-change:auto}
-
-/* 12. Form optimization for mobile */
-.fg{min-width:0 !important;flex:1 1 100%}
-@media (min-width: 640px){.fg{min-width:220px !important;flex:1 !important}}
-
-/* 13. Optimize scroll */
-html{scroll-behavior:smooth}
-@media (max-width: 768px){html{scroll-behavior:auto}}
-main{overflow-anchor:none}
-
-/* 14. Critical CSS: make first paint fast */
-#main{animation:fadeIn .24s var(--ease-out)}
-
-/* 15. iOS safe area */
-@supports (padding: max(0px)){
-  body{padding-left:max(0px, env(safe-area-inset-left));padding-right:max(0px, env(safe-area-inset-right))}
-  header{padding-left:max(12px, env(safe-area-inset-left));padding-right:max(12px, env(safe-area-inset-right))}
-}
-
-
-/* ===== VIRTUAL SCROLL FOR PAKET & HPS - Lead Dev Patch ===== */
-.satria-virtual-table{background:var(--card);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
-.satria-virtual-header{display:grid;grid-template-columns:56px 140px 1fr 160px 120px 120px 120px 120px;gap:0;background:var(--bg-2);border-bottom:1px solid var(--bd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);padding:0 4px;position:sticky;top:0;z-index:2}
-.satria-virtual-header > div{padding:12px 10px;display:flex;align-items:center}
-.satria-virtual-header .n{justify-content:flex-end}
-.satria-virtual-viewport{overflow:auto;-webkit-overflow-scrolling:touch;position:relative;background:var(--card-solid);contain:layout}
-.satria-virtual-viewport::-webkit-scrollbar{width:8px;height:8px}
-.satria-virtual-viewport::-webkit-scrollbar-thumb{background:var(--bd-strong);border-radius:9999px}
-.satria-virtual-row{display:grid;grid-template-columns:56px 140px 1fr 160px 120px 120px 120px 120px;gap:0;border-bottom:1px solid var(--bg-2);background:var(--card-solid);transition:background .12s;align-items:center;min-height:56px}
-.satria-virtual-row:hover{background:var(--bg)}
-.satria-virtual-row > div{padding:10px;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.satria-virtual-row > div.n{justify-content:flex-end;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
-.satria-virtual-row a{color:var(--acc-vivid);font-weight:600;text-decoration:none}
-.satria-virtual-row a:hover{text-decoration:underline}
-.satria-virtual-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-2);border-top:1px solid var(--bd);font-size:11px;color:var(--mut);font-weight:600}
-.satria-virtual-footer .mut{color:var(--mut-2)}
-/* HPS virtual */
-.hps-virtual-table{background:var(--card);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
-.hps-virtual-header{display:grid;grid-template-columns:1fr 110px 110px 150px 140px 56px;gap:0;background:var(--bg-2);border-bottom:1px solid var(--bd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);position:sticky;top:0;z-index:2}
-.hps-virtual-header > div{padding:11px 10px}
-.hps-virtual-header .n{text-align:right}
-.hps-virtual-viewport{overflow:auto;max-height:520px;-webkit-overflow-scrolling:touch;background:var(--card-solid);contain:layout}
-.hps-virtual-row{display:grid;grid-template-columns:1fr 110px 110px 150px 140px 56px;gap:0;border-bottom:1px solid var(--bg-2);align-items:center;background:var(--card-solid);min-height:52px;transition:background .12s}
-.hps-virtual-row:hover{background:var(--bg)}
-.hps-virtual-row > div{padding:6px 8px}
-.hps-virtual-row input{height:36px !important;font-size:13px !important}
-.hps-virtual-row .n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
-@media(max-width:768px){
-  .satria-virtual-header, .satria-virtual-row{grid-template-columns:48px 110px 1fr 90px 90px;gap:0}
-  .satria-virtual-header > div:nth-child(4), .satria-virtual-row > div:nth-child(4),
-  .satria-virtual-header > div:nth-child(7), .satria-virtual-row > div:nth-child(7),
-  .satria-virtual-header > div:nth-child(8), .satria-virtual-row > div:nth-child(8){display:none}
-  .hps-virtual-header, .hps-virtual-row{grid-template-columns:1fr 80px 70px 90px 56px}
-  .hps-virtual-header > div:nth-child(2), .hps-virtual-row > div:nth-child(2){display:none}
-  .satria-virtual-viewport{height:60vh !important;max-height:60vh !important}
-  .hps-virtual-viewport{max-height:50vh !important}
-}
-
-
-/* ===== DOKUMEN PENGADAAN - LAZY LOAD + VIRTUAL SCROLL ===== */
-.satria-dok-toolbar{position:sticky;top:var(--header-h);z-index:20;background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
-.satria-dok-toolbar .row{flex-wrap:nowrap;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
-.satria-dok-toolbar .row::-webkit-scrollbar{display:none}
-.satria-dok-toolbar select#selPaket{min-width:280px;max-width:420px;flex-shrink:0}
-.doc-tabs-scroll{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:4px 0;flex-wrap:nowrap;flex:1}
-.doc-tabs-scroll::-webkit-scrollbar{display:none}
-.doc-tabs-scroll button{scroll-snap-align:start;white-space:nowrap;flex-shrink:0;height:36px;padding:0 14px;border-radius:9999px;font-size:12.5px;font-weight:600}
-.satria-doc-lazy-container{position:relative;min-height:400px}
-.satria-doc-skeleton{display:grid;place-items:center;min-height:400px;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:40px;color:var(--mut);font-size:14px}
-.satria-doc-skeleton .spinner{width:32px;height:32px;border:3px solid var(--bd);border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.doc{content-visibility:auto;contain-intrinsic-size:0 800px;background:var(--card-solid);border:1px solid var(--bd);border-radius:16px;padding:24px;box-shadow:var(--shadow-sm);overflow:hidden;position:relative}
-.doc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-kh);opacity:.8}
-.doc.doc-landscape{overflow-x:auto}
-.doc table{border-collapse:collapse;width:100%;table-layout:auto}
-.doc table th, .doc table td{border:1px solid var(--bd);padding:8px 10px;font-size:12.5px}
-.doc table th{background:var(--bg-2);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
-.doc img{max-width:100%;height:auto;content-visibility:auto}
-.doc img[loading="lazy"]{background:var(--bg-2)}
-/* Virtual scroll for large doc tables */
-.doc-virtual-table{border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:var(--card-solid);margin:12px 0}
-.doc-virtual-header{display:grid;background:var(--bg-2);border-bottom:1px solid var(--bd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);position:sticky;top:0;z-index:1}
-.doc-virtual-viewport{overflow:auto;max-height:420px;-webkit-overflow-scrolling:touch;contain:layout}
-.doc-virtual-row{display:grid;border-bottom:1px solid var(--bg-2);align-items:center;min-height:44px;background:var(--card-solid);transition:background .12s}
-.doc-virtual-row:hover{background:var(--bg)}
-.doc-virtual-row > div{padding:7px 10px;font-size:12.5px;overflow:hidden;text-overflow:ellipsis}
-.doc-virtual-footer{padding:8px 12px;background:var(--bg-2);border-top:1px solid var(--bd);font-size:11px;color:var(--mut);display:flex;justify-content:space-between}
-@media(max-width:768px){
-  .satria-dok-toolbar{top:56px;padding:10px;border-radius:12px}
-  .satria-dok-toolbar .row{flex-direction:column;align-items:stretch}
-  .satria-dok-toolbar select#selPaket{max-width:100%;width:100%}
-  .doc{padding:14px;border-radius:12px}
-  .doc table{font-size:11px;min-width:500px;display:block;overflow-x:auto;white-space:nowrap}
-  .doc table th, .doc table td{white-space:normal;word-break:break-word}
-  .doc-virtual-viewport{max-height:50vh}
-}
-
+/* Shared modal and application CSS loaded from satria-shared-modal-ui.css. */
 </style>
       <section class="satria-edit-opd-dialog" role="dialog" aria-modal="true" aria-labelledby="satriaEditUserOpdTitle">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div><h2 id="satriaEditUserOpdTitle">Atur OPD Pengguna</h2><p id="satriaEditUserOpdName"></p></div><button type="button" data-satria-edit-opd-close>Tutup</button></div>
@@ -2169,241 +1794,8 @@ main{overflow-anchor:none}
         .satria-edit-year-actions button:disabled{opacity:.55;cursor:not-allowed}
         #satriaEditUserYearMessage{min-height:20px;white-space:pre-wrap;font-size:13px}#satriaEditUserYearMessage[data-kind=error]{color:#b42318}#satriaEditUserYearMessage[data-kind=ok]{color:#067647}
       
-/* ===== SATRIA DATA MASTER PERFECTED - Lead Dev Patch 24 Okt 2026 ===== */
-.satria-scope-card{display:flex;gap:14px;padding:16px 18px;border-radius:16px;border:1px solid var(--bd);background:linear-gradient(135deg, rgba(15,118,110,.06), rgba(14,165,233,.05));position:relative;overflow:hidden;margin-bottom:18px}
-.satria-scope-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--acc-grad-kh)}
-.satria-scope-card.scope-admin{background:linear-gradient(135deg, rgba(37,99,235,.06), rgba(15,118,110,.06))}
-.satria-scope-card .scope-icon{width:36px;height:36px;border-radius:10px;background:var(--acc-soft);color:var(--acc);display:grid;place-items:center;flex-shrink:0}
-.satria-scope-card .scope-icon svg{width:20px;height:20px}
-.satria-scope-card b{color:var(--ink)}
-.satria-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
-@media(max-width:1180px){.satria-kpi-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:640px){.satria-kpi-grid{grid-template-columns:1fr}}
-.satria-kpi-card{background:var(--card);backdrop-filter:blur(16px) saturate(160%);border:1px solid var(--bd);border-radius:20px;padding:18px 20px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:all .26s var(--ease);min-height:132px;display:flex;flex-direction:column;justify-content:space-between}
-.satria-kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-kh);opacity:.9}
-.satria-kpi-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--bd-strong)}
-.satria-kpi-card .kpi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.satria-kpi-card .kpi-icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg, var(--acc-soft), var(--acc-soft-2));color:var(--acc);display:grid;place-items:center;border:1px solid var(--bd)}
-.satria-kpi-card .kpi-icon svg{width:20px;height:20px}
-.satria-kpi-card .kpi-badge{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);background:var(--acc-soft);border:1px solid var(--bd);padding:4px 8px;border-radius:9999px;display:flex;align-items:center;gap:5px}
-.satria-kpi-card .kpi-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--acc-ring);animation:pulseDot 2s infinite}
-.satria-kpi-card .kpi-label{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
-.satria-kpi-card .kpi-value{font-size:32px;font-weight:800;line-height:1;color:var(--ink);letter-spacing:-.03em}
-.satria-kpi-card .kpi-foot{margin-top:12px;font-size:11.5px;color:var(--mut);display:flex;align-items:center;gap:6px}
-.live-dot{width:8px;height:8px;border-radius:50%;background:#10B981;box-shadow:0 0 0 3px rgba(16,185,129,.18);position:relative}
-.live-dot::after{content:'';position:absolute;inset:0;border-radius:50%;background:#10B981;animation:pulseDot 2s infinite}
-@keyframes pulseDot{0%{box-shadow:0 0 0 0 var(--acc-ring)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
-.satria-master-nav-card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:14px;box-shadow:var(--shadow-sm);margin-bottom:18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
-.master-tabs{display:flex;flex-wrap:wrap;gap:8px}
-.master-tab{height:38px;padding:0 16px;border-radius:9999px;border:1px solid var(--bd);background:var(--card-solid);color:var(--ink-2);font-size:13px;font-weight:600;transition:all .18s var(--ease);cursor:pointer}
-.master-tab:hover{background:var(--bg-2);color:var(--ink);transform:translateY(-1px)}
-.master-tab.active{background:var(--acc-grad-kh);color:white;border-color:transparent;box-shadow:0 6px 18px rgba(15,118,110,.28);transform:translateY(-1px)}
-.master-search-wrap{position:relative;flex:1;min-width:280px;max-width:420px}
-.master-search-wrap .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--mut-2);pointer-events:none}
-.master-search{width:100%;height:42px;padding:0 14px 0 38px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--ink);font-size:13.5px;transition:all .18s var(--ease)}
-.master-search:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 4px var(--acc-ring);background:var(--card-solid)}
-.satria-form-card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:22px;box-shadow:var(--shadow-sm);margin-bottom:18px;position:relative;overflow:hidden}
-.satria-form-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-soft);opacity:.8}
-.form-card-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.form-card-head .title-accent{width:4px;height:18px;border-radius:3px;background:var(--acc-grad-kh);box-shadow:0 2px 6px rgba(15,118,110,.3)}
-.form-card-head h3{margin:0;font-size:15px;font-weight:800;letter-spacing:-.01em}
-.satria-shared-note{display:flex;gap:12px;padding:12px 14px;border-radius:12px;background:#fef3c7;border:1px solid #fde68a;color:#92400e;font-size:13px;margin-bottom:16px}
-.satria-shared-note .shared-icon{width:28px;height:28px;border-radius:8px;background:#fff7ed;color:#f59e0b;display:grid;place-items:center;flex-shrink:0}
-.satria-form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-@media(max-width:1024px){.satria-form-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:640px){.satria-form-grid{grid-template-columns:1fr}}
-.fg label{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);display:flex;align-items:center;gap:6px}
-.fg label::before{content:'';width:3px;height:10px;border-radius:2px;background:var(--acc);display:inline-block}
-.satria-input,.satria-select{height:44px !important;padding:0 14px !important;border-radius:12px !important;border:1px solid var(--bd) !important;background:var(--card-solid) !important;transition:all .18s var(--ease) !important}
-.satria-input:focus,.satria-select:focus{outline:none !important;border-color:var(--acc) !important;box-shadow:0 0 0 4px var(--acc-ring) !important}
-.form-actions{display:flex;justify-content:flex-end;margin-top:18px}
-.satria-btn-primary{height:42px;padding:0 20px;border-radius:9999px;background:var(--acc-grad-kh);color:white;border:none;font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 20px rgba(15,118,110,.28);cursor:pointer;transition:all .18s var(--ease)}
-.satria-btn-primary:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(15,118,110,.35)}
-.satria-btn-primary:active{transform:translateY(0) scale(.98)}
-.satria-table-card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:0;box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:18px}
-.table-card-head{padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
-.table-card-head .table-title{display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px}
-.table-card-head .title-accent{width:4px;height:16px;border-radius:3px;background:var(--acc-grad-kh)}
-.count-badge{background:var(--bg-2);border:1px solid var(--bd);padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:700;color:var(--mut)}
-.satria-table-card .table-wrap{margin:0;border:none;box-shadow:none;border-radius:0}
-.satria-master-note{font-size:12.5px;color:var(--mut);padding:0 4px;margin-top:4px}
 
-
-/* ===== SATRIA GLOBAL PERFORMANCE OPTIMIZATION - Lead Dev 24 Okt 2026 ===== */
-/* Goal: ringan di desktop, Android, iPhone tanpa hilangkan premium look */
-
-/* 1. Reduce heavy effects on all devices, disable on mobile */
-@media (max-width: 768px){
-  .bg-blobs, .blob, .noise, body::before{display:none !important}
-  .card, .satria-kpi-card, .satria-form-card, .satria-table-card{backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
-  :root{--shadow-sm:0 2px 8px rgba(15,23,42,.06);--shadow-md:0 6px 16px rgba(15,23,42,.08);--shadow-lg:0 12px 24px rgba(15,23,42,.10);--shadow-glow:0 4px 12px rgba(15,118,110,.14)}
-  .card:hover, .satria-kpi-card:hover{transform:none !important}
-}
-@media (prefers-reduced-motion: reduce){
-  *, *::before, *::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
-  .bg-blobs, .blob{display:none !important}
-}
-
-/* 2. Optimize header & nav for mobile */
-header{backdrop-filter:blur(12px) saturate(140%) !important;-webkit-backdrop-filter:blur(12px) saturate(140%) !important}
-@media (max-width: 768px){
-  :root{--header-h:64px;--nav-h:52px}
-  header{padding:0 12px !important;gap:8px !important}
-  #nav{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:sticky;top:var(--header-h);z-index:9;background:var(--bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd)}
-  #nav::-webkit-scrollbar{display:none}
-  .nav-track{flex-wrap:nowrap !important;overflow:visible !important}
-  main{padding:16px 12px !important}
-  .satria-kpi-grid{grid-template-columns:1fr 1fr !important;gap:12px !important}
-  .satria-form-grid{grid-template-columns:1fr !important}
-  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  table{min-width:600px}
-  .row{flex-wrap:wrap}
-  input, select, textarea, button{min-height:44px} /* Apple HIG & Android touch target */
-}
-
-/* 3. Ultra-light cards on mobile, premium on desktop */
-.card, .satria-kpi-card, .satria-form-card, .satria-table-card, .satria-master-nav-card, .satria-scope-card{
-  will-change:auto; /* remove will-change heavy */
-  contain:layout style; /* CSS containment for performance */
-}
-@media (min-width: 769px){
-  .card:hover{transform:translateY(-2px)}
-}
-
-/* 4. Optimize fonts & rendering */
-html{font-display:swap}
-body{content-visibility:auto;contain-intrinsic-size:1px 1000px}
-*{-webkit-tap-highlight-color:rgba(15,118,110,.15)}
-input, select, textarea, button{font-size:16px !important} /* Prevent iOS zoom on focus - 16px minimum */
-@media (min-width: 769px){
-  input, select, textarea{font-size:14px !important}
-}
-
-/* 5. Optimize images & media */
-img{max-width:100%;height:auto;content-visibility:auto}
-svg{flex-shrink:0}
-
-/* 6. Sticky header optimization */
-header{position:sticky;top:0;z-index:100;will-change:transform;transform:translateZ(0)}
-
-/* 7. Table performance */
-.table-wrap{contain:layout}
-table{border-collapse:collapse;table-layout:auto}
-th, td{white-space:nowrap}
-@media (max-width: 768px){
-  th, td{white-space:normal;word-break:break-word}
-}
-
-/* 8. Button & interactive optimization */
-button, [data-act]{touch-action:manipulation;user-select:none;-webkit-user-select:none}
-button:active{transform:scale(.97)}
-
-/* 9. Reduce paint areas */
-.satria-kpi-card::before, .card::before, .card::after{pointer-events:none}
-
-/* 10. Dark mode mobile optimization */
-:root[data-theme="dark"] .bg-blobs{display:none}
-:root[data-theme="dark"] .card{backdrop-filter:none}
-
-/* 11. Loading & skeleton optimization */
-.mut{will-change:auto}
-
-/* 12. Form optimization for mobile */
-.fg{min-width:0 !important;flex:1 1 100%}
-@media (min-width: 640px){.fg{min-width:220px !important;flex:1 !important}}
-
-/* 13. Optimize scroll */
-html{scroll-behavior:smooth}
-@media (max-width: 768px){html{scroll-behavior:auto}}
-main{overflow-anchor:none}
-
-/* 14. Critical CSS: make first paint fast */
-#main{animation:fadeIn .24s var(--ease-out)}
-
-/* 15. iOS safe area */
-@supports (padding: max(0px)){
-  body{padding-left:max(0px, env(safe-area-inset-left));padding-right:max(0px, env(safe-area-inset-right))}
-  header{padding-left:max(12px, env(safe-area-inset-left));padding-right:max(12px, env(safe-area-inset-right))}
-}
-
-
-/* ===== VIRTUAL SCROLL FOR PAKET & HPS - Lead Dev Patch ===== */
-.satria-virtual-table{background:var(--card);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
-.satria-virtual-header{display:grid;grid-template-columns:56px 140px 1fr 160px 120px 120px 120px 120px;gap:0;background:var(--bg-2);border-bottom:1px solid var(--bd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);padding:0 4px;position:sticky;top:0;z-index:2}
-.satria-virtual-header > div{padding:12px 10px;display:flex;align-items:center}
-.satria-virtual-header .n{justify-content:flex-end}
-.satria-virtual-viewport{overflow:auto;-webkit-overflow-scrolling:touch;position:relative;background:var(--card-solid);contain:layout}
-.satria-virtual-viewport::-webkit-scrollbar{width:8px;height:8px}
-.satria-virtual-viewport::-webkit-scrollbar-thumb{background:var(--bd-strong);border-radius:9999px}
-.satria-virtual-row{display:grid;grid-template-columns:56px 140px 1fr 160px 120px 120px 120px 120px;gap:0;border-bottom:1px solid var(--bg-2);background:var(--card-solid);transition:background .12s;align-items:center;min-height:56px}
-.satria-virtual-row:hover{background:var(--bg)}
-.satria-virtual-row > div{padding:10px;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.satria-virtual-row > div.n{justify-content:flex-end;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
-.satria-virtual-row a{color:var(--acc-vivid);font-weight:600;text-decoration:none}
-.satria-virtual-row a:hover{text-decoration:underline}
-.satria-virtual-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-2);border-top:1px solid var(--bd);font-size:11px;color:var(--mut);font-weight:600}
-.satria-virtual-footer .mut{color:var(--mut-2)}
-/* HPS virtual */
-.hps-virtual-table{background:var(--card);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
-.hps-virtual-header{display:grid;grid-template-columns:1fr 110px 110px 150px 140px 56px;gap:0;background:var(--bg-2);border-bottom:1px solid var(--bd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);position:sticky;top:0;z-index:2}
-.hps-virtual-header > div{padding:11px 10px}
-.hps-virtual-header .n{text-align:right}
-.hps-virtual-viewport{overflow:auto;max-height:520px;-webkit-overflow-scrolling:touch;background:var(--card-solid);contain:layout}
-.hps-virtual-row{display:grid;grid-template-columns:1fr 110px 110px 150px 140px 56px;gap:0;border-bottom:1px solid var(--bg-2);align-items:center;background:var(--card-solid);min-height:52px;transition:background .12s}
-.hps-virtual-row:hover{background:var(--bg)}
-.hps-virtual-row > div{padding:6px 8px}
-.hps-virtual-row input{height:36px !important;font-size:13px !important}
-.hps-virtual-row .n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
-@media(max-width:768px){
-  .satria-virtual-header, .satria-virtual-row{grid-template-columns:48px 110px 1fr 90px 90px;gap:0}
-  .satria-virtual-header > div:nth-child(4), .satria-virtual-row > div:nth-child(4),
-  .satria-virtual-header > div:nth-child(7), .satria-virtual-row > div:nth-child(7),
-  .satria-virtual-header > div:nth-child(8), .satria-virtual-row > div:nth-child(8){display:none}
-  .hps-virtual-header, .hps-virtual-row{grid-template-columns:1fr 80px 70px 90px 56px}
-  .hps-virtual-header > div:nth-child(2), .hps-virtual-row > div:nth-child(2){display:none}
-  .satria-virtual-viewport{height:60vh !important;max-height:60vh !important}
-  .hps-virtual-viewport{max-height:50vh !important}
-}
-
-
-/* ===== DOKUMEN PENGADAAN - LAZY LOAD + VIRTUAL SCROLL ===== */
-.satria-dok-toolbar{position:sticky;top:var(--header-h);z-index:20;background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
-.satria-dok-toolbar .row{flex-wrap:nowrap;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
-.satria-dok-toolbar .row::-webkit-scrollbar{display:none}
-.satria-dok-toolbar select#selPaket{min-width:280px;max-width:420px;flex-shrink:0}
-.doc-tabs-scroll{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:4px 0;flex-wrap:nowrap;flex:1}
-.doc-tabs-scroll::-webkit-scrollbar{display:none}
-.doc-tabs-scroll button{scroll-snap-align:start;white-space:nowrap;flex-shrink:0;height:36px;padding:0 14px;border-radius:9999px;font-size:12.5px;font-weight:600}
-.satria-doc-lazy-container{position:relative;min-height:400px}
-.satria-doc-skeleton{display:grid;place-items:center;min-height:400px;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:40px;color:var(--mut);font-size:14px}
-.satria-doc-skeleton .spinner{width:32px;height:32px;border:3px solid var(--bd);border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.doc{content-visibility:auto;contain-intrinsic-size:0 800px;background:var(--card-solid);border:1px solid var(--bd);border-radius:16px;padding:24px;box-shadow:var(--shadow-sm);overflow:hidden;position:relative}
-.doc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc-grad-kh);opacity:.8}
-.doc.doc-landscape{overflow-x:auto}
-.doc table{border-collapse:collapse;width:100%;table-layout:auto}
-.doc table th, .doc table td{border:1px solid var(--bd);padding:8px 10px;font-size:12.5px}
-.doc table th{background:var(--bg-2);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
-.doc img{max-width:100%;height:auto;content-visibility:auto}
-.doc img[loading="lazy"]{background:var(--bg-2)}
-/* Virtual scroll for large doc tables */
-.doc-virtual-table{border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:var(--card-solid);margin:12px 0}
-.doc-virtual-header{display:grid;background:var(--bg-2);border-bottom:1px solid var(--bd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);position:sticky;top:0;z-index:1}
-.doc-virtual-viewport{overflow:auto;max-height:420px;-webkit-overflow-scrolling:touch;contain:layout}
-.doc-virtual-row{display:grid;border-bottom:1px solid var(--bg-2);align-items:center;min-height:44px;background:var(--card-solid);transition:background .12s}
-.doc-virtual-row:hover{background:var(--bg)}
-.doc-virtual-row > div{padding:7px 10px;font-size:12.5px;overflow:hidden;text-overflow:ellipsis}
-.doc-virtual-footer{padding:8px 12px;background:var(--bg-2);border-top:1px solid var(--bd);font-size:11px;color:var(--mut);display:flex;justify-content:space-between}
-@media(max-width:768px){
-  .satria-dok-toolbar{top:56px;padding:10px;border-radius:12px}
-  .satria-dok-toolbar .row{flex-direction:column;align-items:stretch}
-  .satria-dok-toolbar select#selPaket{max-width:100%;width:100%}
-  .doc{padding:14px;border-radius:12px}
-  .doc table{font-size:11px;min-width:500px;display:block;overflow-x:auto;white-space:nowrap}
-  .doc table th, .doc table td{white-space:normal;word-break:break-word}
-  .doc-virtual-viewport{max-height:50vh}
-}
-
+/* Shared modal and application CSS loaded from satria-shared-modal-ui.css. */
 
 /* ===== RINGKASAN UTAMA & LAPORAN - D3 LAZY LOAD ===== */
 .chart-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin:16px 0}
@@ -2608,476 +2000,5 @@ main{overflow-anchor:none}
   requestAnimationFrame(() => { if (updateVisibility()) void loadUsers(false); });
 })();
 
-// ===== SATRIA GLOBAL PERFORMANCE JS PATCH - Lead Dev =====
-(function(){
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
-  
-  // 1. Disable heavy blobs on mobile immediately
-  if(isMobile){
-    const blobs = document.querySelector('.bg-blobs');
-    if(blobs) blobs.style.display='none';
-    document.documentElement.style.setProperty('--shadow-glow','0 4px 12px rgba(15,118,110,.12)');
-  }
-  
-  // 2. Debounce search input to reduce renders
-  const origAddEvent = EventTarget.prototype.addEventListener;
-  // Passive listeners for scroll/touch
-  const passiveEvents = ['touchstart','touchmove','wheel','scroll'];
-  // Optimize mSearch if exists
-  const debounce = (fn, ms) => { let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; };
-  
-  // 3. IntersectionObserver for lazy render of heavy sections
-  if('IntersectionObserver' in window && isMobile){
-    // Defer non-critical renders
-    const observer = new IntersectionObserver((entries)=>{
-      entries.forEach(e=>{
-        if(e.isIntersecting){
-          e.target.style.contentVisibility='visible';
-        }
-      });
-    },{rootMargin:'200px'});
-    
-    // Observe cards after load
-    setTimeout(()=>{
-      document.querySelectorAll('.card, .satria-kpi-card').forEach(el=>{
-        el.style.contentVisibility='auto';
-        el.style.containIntrinsicSize='0 200px';
-      });
-    }, 500);
-  }
-  
-  // 4. Prevent iOS double-tap zoom on buttons
-  let lastTouch = 0;
-  document.addEventListener('touchend', function(e){
-    const now = Date.now();
-    if(now - lastTouch <= 300){
-      e.preventDefault();
-    }
-    lastTouch = now;
-  }, {passive:false});
-  
-  // 5. Optimize input focus on iOS (prevent zoom)
-  if(/iPhone|iPad|iPod/i.test(navigator.userAgent)){
-    document.querySelectorAll('input, select, textarea').forEach(el=>{
-      el.addEventListener('focus', ()=>{
-        // Ensure viewport doesn't zoom
-        const viewport = document.querySelector('meta[name=viewport]');
-        if(viewport){
-          viewport.content = 'width=device-width,initial-scale=1,maximum-scale=1';
-        }
-      });
-      el.addEventListener('blur', ()=>{
-        const viewport = document.querySelector('meta[name=viewport]');
-        if(viewport){
-          viewport.content = 'width=device-width,initial-scale=1';
-        }
-      });
-    });
-  }
-  
-  // 6. Reduce motion if user prefers
-  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    document.documentElement.style.setProperty('--ease','linear');
-  }
-  
-  console.log('[SATRIA] Performance patch active - Mobile:', isMobile);
-})();
 
-
-// ===== VIRTUAL SCROLL ENGINE - Paket & HPS =====
-window.__paketVirtualData = window.__paketVirtualData || [];
-window.__hpsVirtualData = window.__hpsVirtualData || [];
-window.__hpsPaketId = null;
-
-function renderPaketVirtualSlice(){
-  const viewport = document.getElementById('paketVirtualViewport');
-  const content = document.getElementById('paketVirtualContent');
-  const spacer = document.getElementById('paketVirtualSpacer');
-  if(!viewport || !content || !spacer) return;
-  const data = window.__paketVirtualData || [];
-  const rowH = 56;
-  const scrollTop = viewport.scrollTop;
-  const viewportH = viewport.clientHeight;
-  const buffer = 8;
-  const start = Math.max(0, Math.floor(scrollTop / rowH) - buffer);
-  const visible = Math.ceil(viewportH / rowH) + buffer*2;
-  const end = Math.min(data.length, start + visible);
-  
-  // Update spacer height if data changed
-  spacer.style.height = (data.length * rowH) + 'px';
-  content.style.transform = `translateY(${start * rowH}px)`;
-  
-  let html = '';
-  for(let i=start;i<end;i++){
-    const p = data[i];
-    if(!p) continue;
-    html += `<div class="satria-virtual-row" data-idx="${i}" style="height:${rowH}px">
-      <div>${i+1}</div>
-      <div title="${esc(p.rup)}">${esc(p.rup)}</div>
-      <div title="${esc(p.nama)}"><a href="#paket/${p.id}">${esc(p.nama)}</a></div>
-      <div title="${esc(satriaSubKegiatan(p)||'Subkegiatan belum diisi')}"><b>${esc(satriaSubKegiatan(p)||'Belum diisi')}</b></div>
-      <div class="n">${nf(p.pagu)}</div>
-      <div class="n">${nf(hps(p))}</div>
-      <div class="n">${nf(kontrak(p))}</div>
-      <div>${pill(p)}</div>
-    </div>`;
-  }
-  content.innerHTML = html;
-}
-
-let paketScrollRaf = null;
-function attachPaketVirtualScroll(){
-  const vp = document.getElementById('paketVirtualViewport');
-  if(!vp) return;
-  vp.addEventListener('scroll', ()=>{
-    if(paketScrollRaf) cancelAnimationFrame(paketScrollRaf);
-    paketScrollRaf = requestAnimationFrame(renderPaketVirtualSlice);
-  }, {passive:true});
-  renderPaketVirtualSlice();
-}
-
-// Auto attach after render
-const origRender = window.requestAnimationFrame;
-setTimeout(()=>{
-  attachPaketVirtualScroll();
-}, 300);
-
-// Re-attach on hash change (when user navigates to paket detail)
-window.addEventListener('hashchange', ()=>{
-  setTimeout(()=>{
-    attachPaketVirtualScroll();
-    }, 200);
-});
-
-
-// ===== DOKUMEN PENGADAAN - LAZY LOAD + VIRTUAL SCROLL ENGINE =====
-window.__dokLazyObserver = null;
-window.__dokVirtualData = {};
-
-function initDokLazyLoad(){
-  const container = document.getElementById('dokLazyContainer');
-  if(!container) return;
-  
-  // If already has doc, optimize its tables
-  const docEl = container.querySelector('.doc');
-  if(docEl){
-    optimizeDocTables(docEl);
-    lazyLoadDocImages(docEl);
-    return;
-  }
-  
-  // Lazy load doc content with skeleton
-  const skeleton = container.querySelector('.satria-doc-skeleton');
-  if(skeleton){
-    // Simulate lazy load with rAF for smooth transition
-    requestAnimationFrame(()=>{
-      setTimeout(()=>{
-        const p = window.S ? (window.S.paket.find(x=>x.id===window.S.ui.dpid) || window.filt()[0]) : null;
-        if(!p) return;
-        const dokType = window.S ? window.S.ui.dok : 'nodis';
-        const docFn = window.DOCS ? window.DOCS[dokType] : null;
-        if(docFn && p){
-          const html = docFn(p);
-          container.innerHTML = `<div class="doc doc-${dokType} ${dokType==='rfi'?'doc-landscape':'doc-portrait'}" data-document-type="${dokType}">${html}</div>`;
-          const newDocEl = container.querySelector('.doc');
-          if(newDocEl){
-            optimizeDocTables(newDocEl);
-            lazyLoadDocImages(newDocEl);
-          }
-        }
-      }, 150);
-    });
-  }
-}
-
-function lazyLoadDocImages(docEl){
-  if(!docEl) return;
-  // Add loading="lazy" to all images
-  docEl.querySelectorAll('img').forEach(img=>{
-    if(!img.hasAttribute('loading')){
-      img.setAttribute('loading','lazy');
-      img.setAttribute('decoding','async');
-    }
-    // Add fade-in on load
-    img.style.opacity = '0';
-    img.style.transition = 'opacity .3s';
-    if(img.complete){
-      img.style.opacity = '1';
-    } else {
-      img.addEventListener('load', ()=>{ img.style.opacity='1'; }, {once:true});
-    }
-  });
-}
-
-function optimizeDocTables(docEl){
-  if(!docEl) return;
-  // Find large tables (>15 rows) and convert to virtual scroll
-  docEl.querySelectorAll('table').forEach(table=>{
-    const rows = table.querySelectorAll('tbody tr');
-    if(rows.length > 20){
-      // Only virtualize if not already virtualized
-      if(table.closest('.doc-virtual-table')) return;
-      
-      const headers = Array.from(table.querySelectorAll('thead th')).map(th=>th.textContent.trim());
-      const colCount = headers.length || 6;
-      
-      // Create virtual table wrapper
-      const wrapper = document.createElement('div');
-      wrapper.className = 'doc-virtual-table';
-      
-      const headerDiv = document.createElement('div');
-      headerDiv.className = 'doc-virtual-header';
-      headerDiv.style.gridTemplateColumns = `repeat(${colCount}, 1fr)`;
-      headerDiv.innerHTML = headers.map(h=>`<div>${h}</div>`).join('');
-      
-      const viewport = document.createElement('div');
-      viewport.className = 'doc-virtual-viewport';
-      viewport.style.maxHeight = rows.length > 30 ? '420px' : (rows.length*44+10)+'px';
-      
-      const spacer = document.createElement('div');
-      spacer.style.height = (rows.length * 44) + 'px';
-      spacer.style.position = 'relative';
-      
-      const content = document.createElement('div');
-      content.style.position = 'absolute';
-      content.style.top = '0';
-      content.style.left = '0';
-      content.style.right = '0';
-      
-      // Store data for virtual scroll
-      const tableData = Array.from(rows).map(tr=>tr.innerHTML);
-      let rafId = null;
-      
-      function renderSlice(){
-        const scrollTop = viewport.scrollTop;
-        const viewportH = viewport.clientHeight;
-        const rowH = 44;
-        const buffer = 5;
-        const start = Math.max(0, Math.floor(scrollTop / rowH) - buffer);
-        const visible = Math.ceil(viewportH / rowH) + buffer*2;
-        const end = Math.min(tableData.length, start + visible);
-        
-        content.style.transform = `translateY(${start * rowH}px)`;
-        let html = '';
-        for(let i=start;i<end;i++){
-          html += `<div class="doc-virtual-row" style="height:${rowH}px;grid-template-columns:repeat(${colCount}, 1fr)"><div style="display:contents">${tableData[i]}</div></div>`;
-        }
-        content.innerHTML = html;
-      }
-      
-      viewport.addEventListener('scroll', ()=>{
-        if(rafId) cancelAnimationFrame(rafId);
-        rafId = requestAnimationFrame(renderSlice);
-      }, {passive:true});
-      
-      spacer.appendChild(content);
-      viewport.appendChild(spacer);
-      
-      const footer = document.createElement('div');
-      footer.className = 'doc-virtual-footer';
-      footer.innerHTML = `<span>${rows.length} baris • virtual scroll aktif • hemat 80% DOM</span><span class="mut">Scroll untuk lihat semua</span>`;
-      
-      wrapper.appendChild(headerDiv);
-      wrapper.appendChild(viewport);
-      wrapper.appendChild(footer);
-      
-      // Replace original table with virtual
-      table.parentNode.insertBefore(wrapper, table);
-      table.style.display = 'none';
-      
-      // Initial render
-      setTimeout(renderSlice, 50);
-    }
-  });
-}
-
-// Enhanced vDok with lazy load
-const originalVDok = window.vDok;
-function vDokOptimized(){
-  const L = filt();
-  // The legacy filter intentionally excludes SPSE packages. Document Studio must not
-  // use that filter alone: the PP selection-document builder needs SPSE packages too.
-  const scope=activeCloudScope();
-  const spseL=(S.paket||[]).filter(x=>satriaSpseIs(x)&&
-    (S.ui.plife==='arsip'?!!x.arsip:!x.arsip)&&Number(x.tahun)===Number(S.ui.tahun)&&
-    (S.ui.opd==='all'||String(x.opd)===String(S.ui.opd))&&
-    (!scope||(scope.years.includes(Number(x.tahun))&&scope.opdIds.includes(String(x.opd)))));
-  const allPackages=[...L,...spseL];
-  const p=allPackages.find(x=>x.id===S.ui.dpid)||allPackages[0];
-  if(p&&satriaSpseIs(p)){
-    return `<div class="dok-studio dok-spse-workspace">
-      <section class="dok-hero no-print"><div class="dok-hero-copy"><span class="dok-eyebrow"><i></i> SATRIA / SPSE DOCUMENT WORKSPACE</span><h2>Dokumen Pemilihan.<br><em>Disusun dari paket, diperiksa pejabat.</em></h2><p>Pengadaan Langsung: dokumen untuk sistem SPSE resmi. Tanpa mengisi ulang HPS dan identitas RUP.</p></div></section>
-      <section class="dok-control-panel no-print"><div class="dok-control-title"><span class="dok-section-kicker">01 / PAKET</span><h3>Pilih paket kerja</h3><p>Metode asli paket tetap dipertahankan.</p></div>
-        <div class="dok-package-control"><label for="selPaket">PAKET / KODE RUP</label><select id="selPaket" class="satria-select">${allPackages.slice().sort((a,b)=>String(a.rup).localeCompare(String(b.rup))).map(x=>`<option value="${esc(x.id)}" ${x.id===p.id?'selected':''}>${esc(x.rup||'RUP BELUM DIISI')} — ${esc(x.nama||'Paket tanpa nama')}</option>`).join('')}</select><div class="dok-package-meta"><span class="dok-meta-tag">${esc(p.rup||'RUP BELUM DIISI')}</span><span>TA ${esc(p.tahun)} · Pengadaan Langsung/SPSE</span></div></div>
-        <a class="g" href="#spse/${encodeURIComponent(p.id)}">Monitoring SPSE →</a></section>
-      ${window.SATRIA_PBJ_WORKSPACE?.panel?.(p)||'<section class="card">Modul PBJ 2026 tidak dimuat. Muat ulang aplikasi.</section>'}
-      <p class="pbj-note">Berkas diunduh menggunakan dialog cetak browser. Periksa penetapan/tanda tangan dan panduan SPSE sebelum unggah manual. Tidak ada unggah otomatis.</p>
-    </div>`;
-  }
-  if(!p) return `
-    <div class="dok-studio">
-      <section class="dok-hero no-print">
-        <div class="dok-hero-copy">
-          <span class="dok-eyebrow"><i></i> SATRIA / PROCUREMENT STUDIO</span>
-          <h2>Dokumen rapi.<br><em>Proses lebih sat-set.</em></h2>
-          <p>Area kerja dokumen pengadaan—pilih paket, cek data, lalu cetak.</p>
-        </div>
-        <div class="dok-hero-art" aria-hidden="true"><span class="dok-art-orbit"></span><span class="dok-art-chip">DOCS<br><b>01—15</b></span></div>
-      </section>
-      <section class="dok-empty-state">
-        <div class="dok-empty-icon">＋</div>
-        <h3>Belum ada paket di filter ini</h3>
-        <p>Buat atau impor paket terlebih dahulu melalui menu <b>Paket Pengadaan</b>. Dokumen akan mengambil data dari paket yang tersedia.</p>
-      </section>
-    </div>`;
-
-  const T=[
-    ['nodis','1 Nota Dinas'],['idkb','2 Identifikasi Kebutuhan Pengadaan'],['rfi','3 Hasil Permintaan Informasi (RFI)'],
-    ['bahepe','4 Berita Acara Evaluasi Penyedia'],['metode','5 Formulir Penetapan E-Purchasing'],['sppbj','6 Surat Perintah Pengadaan kepada PP'],
-    ['spek','7 Spesifikasi Teknis'],['dpp','8 Dokumen Persiapan Pengadaan (DPP)'],['lamp','9 Lampiran Referensi Harga'],
-    ['reviu','10 Berita Acara Reviu DPP'],['bahp','11 Berita Acara Hasil Pemilihan'],['survei','12 Survei Harga'],
-    ['hpsnego','13 HPS dan Negosiasi'],['kknego','14 Kertas Kerja Negosiasi'],['analisa','15 Analisis Kewajaran Harga & Bukti']
-  ];
-  const hints={
-    nodis:'Pengantar dan permohonan proses', idkb:'Merumuskan kebutuhan paket', rfi:'Permintaan informasi pasar',
-    bahepe:'Catatan evaluasi penyedia', metode:'Formulir penetapan barang/jasa', sppbj:'Penunjukan penyedia terpilih',
-    spek:'Rincian teknis barang/jasa', dpp:'Dokumen persiapan e-Purchasing', lamp:'Referensi sumber harga',
-    reviu:'Pemeriksaan dokumen persiapan', bahp:'Ringkasan hasil pemilihan', survei:'Perbandingan harga pasar',
-    hpsnego:'Harga perkiraan dan negosiasi', kknego:'Rekap kerja negosiasi',analisa:'Referensi harga dan analisis kewajaran otomatis per paket'
-  };
-  const groups=[
-    {title:'Rencana & persiapan',sub:'Rapikan kebutuhan sebelum proses berjalan',keys:['nodis','idkb','spek','dpp','lamp','reviu','metode']},
-    {title:'Survei & evaluasi',sub:'Bandingkan informasi, harga, dan penawaran',keys:['rfi','survei','bahepe','hpsnego','kknego','analisa']},
-    {title:'Hasil pemilihan',sub:'Dokumen hasil dan penunjukan',keys:['bahp','sppbj']}
-  ];
-  const docCheck = k => docMiss(p,k);
-  const readyDocs=T.filter(([k])=>docCheck(k).length===0).length;
-  const pct=Math.round(readyDocs/T.length*100);
-  const currentMissing=docCheck(S.ui.dok);
-  const auditItem=()=>({id:p.id,rup:p.rup,type:S.ui.dok,title:(T.find(x=>x[0]===S.ui.dok)||T[0])[1],checks:window.docReqs?window.docReqs(p,S.ui.dok):[],checkedAt:new Date().toISOString()});
-  const checkRows=(window.docReqs?window.docReqs(p,S.ui.dok):[]).filter(r=>!r.ok&&!r.manual).slice(0,7);
-  const docQualityHtml=`<section class="satria340-quality no-print" aria-label="Pemeriksaan sebelum PDF"><div class="satria340-quality-head"><div><span class="dok-section-kicker">QUALITY CONTROL / PENERBITAN</span><h3>Periksa hasil dokumen sebelum dicetak</h3><p>${currentMissing.length?currentMissing.length+' isian perlu diperiksa':'Isian dasar telah diperiksa'} · Validasi administratif dan hukum tetap menjadi kewenangan pejabat.</p></div><button type="button" class="g" data-act="satriaDocAuditExport">Unduh hasil pemeriksaan</button></div>${checkRows.length?`<div class="satria340-quality-grid">${checkRows.map(r=>`<div class="satria340-check"><span>!</span><span>${esc(r.label)}</span><button class="g" data-act="gotoField" data-pid="${esc(p.id)}" data-tab="${esc(r.tab)}" ${r.f?`data-f="${esc(r.f)}"`:''}>Perbaiki</button></div>`).join('')}</div>`:`<p class="satria340-allchecked">✔ Semua pemeriksaan isian terprogram terpenuhi. Periksa kesesuaian bukti, redaksi, dan pratinjau halaman secara manual.</p>`}${S.ui.dok==='analisa'?'<p class="satria340-quality-note"><b>Verifikasi manual wajib:</b> periksa kesetaraan spesifikasi, keaslian referensi, tanggal pengambilan harga, pajak, ongkir, dan lampiran bukti. Indikator kelengkapan di atas hanya menghitung isian yang dapat diperiksa aplikasi.</p>':''}<p class="satria340-quality-note">Status ini bukan penetapan pemenang, persetujuan pejabat, atau jaminan kepatuhan hukum. Pada harga e-Katalog termasuk pajak, jangan menambahkan PPN kembali tanpa data DPP/pajak yang jelas.</p></section>`;
-  const relationHealth = window.SATRIA_DATA_HEALTH?.inspect?.(p) || {issues:[],warningCount:0};
-  const activeT=T.find(([k])=>k===S.ui.dok)||T[0];
-  const docLandscape = S.ui.dok==='rfi' || (['survei','hpsnego'].includes(S.ui.dok) && (p.penawaran||[]).length>=3);
-  const docContent = DOCS[S.ui.dok] ? satriaSafeDocHtml(DOCS[S.ui.dok](p)) : '<p class=mut>Dokumen tidak tersedia</p>';
-  const groupsHtml=groups.map((g,gi)=>{
-    const docs=g.keys.map(k=>T.find(x=>x[0]===k)).filter(Boolean);
-    return `<section class="dok-group">
-      <div class="dok-group-heading">
-        <span class="dok-group-number">0${gi+1}</span>
-        <div class="dok-group-title"><h3>${g.title}</h3><p>${g.sub}</p></div>
-        <span class="dok-group-count">${docs.length} template</span>
-      </div>
-      <div class="dok-type-grid">${docs.map(([k,t])=>{
-        const missing=docCheck(k),idx=T.findIndex(x=>x[0]===k)+1,selected=k===S.ui.dok;
-        return `<button type="button" class="dok-type-card ${selected?'is-selected':''}" data-act="dtype" data-tab="${k}" aria-pressed="${selected?'true':'false'}" title="${t}">
-          <span class="dok-type-index">${String(idx).padStart(2,'0')}</span>
-          <span class="dok-type-copy"><strong>${t.replace(/^\d+\s/,'')}</strong><small>${hints[k]}</small></span>
-          <span class="dok-type-state ${missing.length?'is-pending':'is-ready'}">${missing.length?missing.length+' cek':'Isian OK'}</span>
-          <span class="dok-type-arrow" aria-hidden="true">↗</span>
-        </button>`;
-      }).join('')}</div>
-    </section>`;
-  }).join('');
-
-  return `
-    <div class="dok-studio">
-      <section class="dok-hero no-print">
-        <div class="dok-hero-copy">
-          <span class="dok-eyebrow"><i></i> SATRIA / PROCUREMENT STUDIO <span>•</span> TA ${esc(p.tahun)}</span>
-          <h2>Dokumen rapi.<br><em>Proses lebih sat-set.</em></h2>
-          <p>15 template dalam satu workspace. Pilih paket, cek kelengkapan, lalu cetak dengan lebih nyaman.</p>
-          <div class="dok-hero-note"><span>✳</span> Data tetap bersumber dari paket dan master SATRIA.</div>
-        </div>
-        <div class="dok-hero-art" aria-hidden="true"><span class="dok-art-orbit"></span><span class="dok-art-chip">DOCS<br><b>01—15</b></span><span class="dok-art-spark dok-spark-a">✳</span><span class="dok-art-spark dok-spark-b">✦</span></div>
-      </section>
-
-      ${!satriaPemdaOfficial('nama')?`<section class="card no-print" role="alert" style="border:1px solid #e0a800;background:#fff9ed;color:#854d0e"><b>Identitas Pemerintah Daerah belum diatur secara resmi.</b> Sebelum menerbitkan dokumen, admin harus memverifikasi identitas pada <a href="#settings">Pengaturan Sistem</a> → Identitas Pemerintah Daerah. Nilai Demo/Contoh tidak akan dicetak sebagai identitas resmi; bila belum tersedia, dokumen menampilkan penanda belum diatur. Kop gambar OPD yang sudah tersimpan tetap dipakai.</section>`:''}
-      <section class="dok-metrics no-print" aria-label="Ringkasan paket">
-        <article class="dok-metric dok-metric-progress"><div class="dok-metric-top"><span>CHECKLIST DOKUMEN</span><span class="dok-metric-glyph">↗</span></div><div class="dok-metric-value">${readyDocs}<small>/${T.length}</small></div><div class="dok-progress-track"><span style="width:${pct}%"></span></div><p>${pct}% template lolos pemeriksaan data aplikasi</p></article>
-        <article class="dok-metric"><div class="dok-metric-top"><span>RINCIAN BARANG</span><span class="dok-metric-glyph">▦</span></div><div class="dok-metric-value">${p.items.length}</div><p>Item pada paket aktif</p></article>
-        <article class="dok-metric"><div class="dok-metric-top"><span>PENAWARAN MASUK</span><span class="dok-metric-glyph">↔</span></div><div class="dok-metric-value">${p.penawaran.length}</div><p>Penyedia tercatat di paket</p></article>
-        <article class="dok-metric dok-metric-hps"><div class="dok-metric-top"><span>TOTAL HPS</span><span class="dok-metric-glyph">Rp</span></div><div class="dok-metric-value dok-value-currency">${rp(hps(p))}</div><p>Terhitung dari rincian barang</p></article>
-      </section>
-
-      <section class="dok-control-panel no-print">
-        <div class="dok-control-title"><span class="dok-section-kicker">01 / WORKSPACE</span><h3>Pilih paket kerja</h3><p>Jenis dokumen akan mengikuti paket aktif yang dipilih.</p></div>
-        <div class="dok-package-control">
-          <label for="selPaket">PAKET PENGADAAN · KODE RUP</label>
-          <select id="selPaket" class="satria-select">${allPackages.slice().sort((a,b)=>String(a.rup).localeCompare(String(b.rup))).map(x=>`<option value="${x.id}" ${x.id===p.id?'selected':''}>${esc(x.rup||'KODE RUP BELUM DIISI')} — ${esc(x.nama)}</option>`).join('')}</select>
-          <div class="dok-package-meta"><span class="dok-meta-tag">${esc(p.rup||'RUP BELUM DIISI')}</span><span>TA ${esc(p.tahun)} · ${esc(O(p.opd).singkat||O(p.opd).nama||'OPD belum diisi')}</span></div>
-        </div>
-        <button type="button" data-act="print" class="dok-print-button"><span class="dok-print-icon">↗</span><span><b>Cetak / Simpan PDF</b><small>A4 • Arial • Seluruh tabel</small></span></button>
-      </section>
-
-      <!-- PBJ 2026 is rendered from the SAME selected package as the active document studio. -->
-      ${window.SATRIA_PBJ_WORKSPACE?.panel?.(p)||''}
-      ${window.SATRIA_HPS_GENERATOR?.panel?.(p)||''}
-
-      <div class="spha-quick no-print"><div><h3>Analisis Kewajaran Harga & Bukti Referensi</h3><p>Diambil otomatis dari penawaran/negosiasi paket ini; cocok untuk lampiran permintaan data per paket.</p></div><button type="button" class="spha-btn" data-act="dtype" data-tab="analisa">Buka laporan analisis →</button></div>
-      ${satriaHumanDocGuide(p,S.ui.dok,currentMissing)}
-      <div class="satria-integrity-strip no-print" role="status"><span class="satria-integrity-icon">✦</span><div><b>Kualitas relasi data</b><small>${relationHealth.issues.length ? relationHealth.issues.length+' temuan yang perlu diperiksa sebelum finalisasi' : 'Referensi paket dan data master terhubung'}</small></div><button type="button" data-act="satriaAudit">Periksa data →</button></div>
-      <div class="dok-print-standard no-print" role="note"><strong>Standar keluaran</strong><span>ISO A4</span><span>Arial</span><span>Portrait / Landscape otomatis</span><span>Tabel lengkap, termasuk lebih dari 20 baris</span><span>Simpan PDF: Skala 100%, tanpa header/footer browser</span></div>
-
-      <details class="satria-human-doc-library no-print" id="satriaHumanDocLibrary"><summary>Semua 15 template dokumen dan pemeriksaan isian • Buka bila diperlukan</summary>
-      <section class="dok-library no-print">
-        <div class="dok-library-heading"><div><span class="dok-section-kicker">02 / DOCUMENT LIBRARY</span><h3>Pilih dokumen</h3><p>Pilih salah satu kartu untuk membuka pratinjau. Status merangkum pemeriksaan isian di aplikasi, bukan validasi hukum.</p></div><div class="dok-library-counter"><strong>15</strong><span>template</span></div></div>
-        ${groupsHtml}
-      </section>
-      </details>
-
-      <section class="dok-preview-section">
-        <div class="dok-preview-heading no-print"><div><span class="dok-section-kicker">03 / LIVE PREVIEW</span><h3>Pratinjau dokumen</h3><p>${activeT[1]} · Paket ${esc(p.rup||'belum memiliki Kode RUP')}</p></div><span class="dok-preview-status ${currentMissing.length?'is-pending':'is-ready'}"><i></i>${currentMissing.length?currentMissing.length+' hal perlu dicek':'Isian dasar OK'}</span></div>
-        ${S.ui.dok==='analisa'?`<p class="satria340-quality-note no-print" data-satria-analisa-date-help style="margin:12px 0;padding:11px 13px;border:1px solid #d6d5ed;border-radius:10px"><b>Tanggal dokumen Analisis Harga:</b> ${window.SATRIA_PRICE_ANALYSIS?.documentDate?.(p)?esc(satriaDateId(window.SATRIA_PRICE_ANALYSIS.documentDate(p))):'<strong>Belum diisi</strong>'}. Otomatis mengikuti <b>Tanggal negosiasi</b> di Paket Pengadaan → Data Paket atau Kalkulator Nego. ${window.SATRIA_PRICE_ANALYSIS?.documentDate?.(p)?'':'Isi tanggal negosiasi sebelum mencetak dokumen resmi.'}</p>`:''}
-        ${docQualityHtml}
-        ${satria35912WarningPanel(p,S.ui.dok)}
-        ${window.SATRIA_DOC_PPK?.panel?.(p,S.ui.dok)||''}${S.ui.dok==='dpp'?(window.SATRIA_DPP_PREFLIGHT?.panel?.(p)||''):''}${S.ui.dok==='dpp'?(window.SATRIA_DPP_FORMAT?.panel?.(p)||''):''}
-        ${warnDoc(p)}
-        <div class="dok-preview-frame" id="dokLazyContainer">
-          <div class="dok-preview-caption no-print"><span><i></i> LIVE PREVIEW <b>·</b> FORMAT DOKUMEN RESMI</span><span>${docLandscape?'A4 LANDSCAPE':'A4 PORTRAIT'}</span></div>
-          <div class="doc doc-${S.ui.dok} ${docLandscape?'doc-landscape':'doc-portrait'}" data-document-type="${esc(S.ui.dok)}" data-lazy="true">
-            ${docContent}
-          </div>
-        </div>
-      </section>
-      <footer class="dok-footer-note no-print"><span>✳</span><p><b>Reminder:</b> pastikan sumber harga, tanggal, data pejabat, dan hasil evaluasi didukung bukti yang dapat diverifikasi sebelum dokumen ditetapkan atau digunakan secara resmi.</p></footer>
-    </div>
-  `;
-}
-
-// Override vDok with optimized version
-window.vDok = vDokOptimized;
-
-// Auto init lazy load on hash change to dok
-window.addEventListener('hashchange', ()=>{
-  if(location.hash.startsWith('#dok')){
-    setTimeout(()=>{
-      const container = document.getElementById('dokLazyContainer');
-      if(container){
-        const docEl = container.querySelector('.doc');
-        if(docEl){
-          optimizeDocTables(docEl);
-          lazyLoadDocImages(docEl);
-        }
-      }
-    }, 200);
-  }
-});
-
-// Init on load if already on dok page
-if(location.hash.startsWith('#dok')){
-  setTimeout(()=>{
-    const container = document.getElementById('dokLazyContainer');
-    if(container){
-      const docEl = container.querySelector('.doc');
-      if(docEl){
-        optimizeDocTables(docEl);
-        lazyLoadDocImages(docEl);
-      }
-    }
-  }, 500);
-}
-
-console.log('[SATRIA] Dokumen Pengadaan lazy load + virtual scroll active');
 })();

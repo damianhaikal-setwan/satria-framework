@@ -44,12 +44,12 @@
  function verificationRows(p){return [
   ['Nomor/kode RUP',p.rup],['Nama paket',p.nama],['OPD',typeof O==='function'?O(p.opd)?.nama:''],['Tahun anggaran',p.tahun],
   ['Jenis pengadaan',p.jenisPengadaan],['Metode pemilihan',p.spseMonitoring?.method||p.metodePemilihan],
-  ['Pagu paket',money(p.pagu)],['HPS paket',Array.isArray(p.items)&&p.items.length?money(p.items.reduce((s,i)=>s+Number(i.vol||0)*Number(i.hs||0),0)):'Belum ada rincian HPS'],
+  ['Pagu paket',money(p.pagu)],['HPS paket',Array.isArray(p.items)&&p.items.length?money(root.SATRIA_PROCUREMENT_CORE.hpsTotal(p)):'Belum ada rincian HPS'],
   ['Tanggal mulai pemilihan (bila diketahui)',p.tglMulaiPemilihan]
  ];}
  function table(rows){return `<table><tbody>${rows.map(([k,v])=>`<tr><th>${esc(k)}</th><td>${value(v)}</td></tr>`).join('')}</tbody></table>`;}
  function itemsTable(p){const items=Array.isArray(p.items)?p.items:[];
-  return `<table><thead><tr><th>No.</th><th>Uraian/spesifikasi</th><th>Volume</th><th>HPS/unit</th><th>HPS item</th></tr></thead><tbody>${items.map((i,n)=>`<tr><td>${n+1}</td><td>${value(i.nama)}<small>${value(i.spesifikasi)}</small></td><td>${value(i.vol)} ${value(i.satuan)}</td><td>${money(i.hs)}</td><td>${money(Number(i.vol||0)*Number(i.hs||0))}</td></tr>`).join('')||'<tr><td colspan="5">Rincian paket belum tersedia; jangan tandatangani sebelum dilengkapi.</td></tr>'}</tbody></table>`;
+  return `<table><thead><tr><th>No.</th><th>Uraian/spesifikasi</th><th>Volume</th><th>HPS/unit</th><th>HPS item</th></tr></thead><tbody>${items.map((i,n)=>`<tr><td>${n+1}</td><td>${value(i.nama)}<small>${value(i.spesifikasi)}</small></td><td>${value(i.vol)} ${value(i.satuan)}</td><td>${money(i.hs)}</td><td>${money(root.SATRIA_PROCUREMENT_CORE.hpsItem(i))}</td></tr>`).join('')||'<tr><td colspan="5">Rincian paket belum tersedia; jangan tandatangani sebelum dilengkapi.</td></tr>'}</tbody></table>`;
  }
  function sourcesTable(p){const offers=Array.isArray(p.penawaran)?p.penawaran:[];
   let rows=[];for(const w of offers){const supplier=typeof PY==='function'?PY(w.pen)?.nama:String(w.pen||'');for(const it of p.items||[]){rows.push([supplier,it.nama,w.harga?.[it.id],w.nego?.[it.id],w.sumberHarga,w.tanggalHarga]);}}

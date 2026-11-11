@@ -1,0 +1,38 @@
+/* SATRIA NEXT — Tahap 4: accessible touch-friendly responsive controls. */
+@media screen {
+  button, a, select, input, textarea { touch-action: manipulation; }
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 3px solid #0f766e;
+    outline-offset: 3px;
+  }
+  .satria-trash-page table { width: 100%; }
+  .satria-trash-page td, .satria-trash-page th { vertical-align: middle; }
+  @media (max-width: 640px) {
+    .satria-trash-page .row { flex-wrap: wrap; }
+    .satria-trash-page button { min-height: 42px; }
+    #satriaCloudModal .sc-actions { flex-wrap: wrap; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .satria-virtual-row, .doc-virtual-row, .satria-trash-page * { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+/* Original semantic table stays available to assistive tech while visual preview is virtualized. */
+@media screen {
+  .doc table.satria-sr-only-table {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    border: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0,0,0,0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+  }
+}
+/* Full rows must remain present in generated PDF/print (no virtual table in print). */
+@media print {
+  .doc-virtual-table { display: none !important; }
+  .doc table.satria-sr-only-table { display: table !important; position: static !important; width: 100% !important; height: auto !important; margin: 0 !important; overflow: visible !important; clip: auto !important; clip-path: none !important; white-space: normal !important; }
+}

@@ -22,18 +22,20 @@
   if(s.tarif!==''&&s.tarif!==null&&s.tarif!==undefined){taxRate=Number(s.tarif);if(!Number.isFinite(taxRate)||taxRate<0||taxRate>100)errors.push('Tarif pajak harus 0–100% atau dikosongkan.');}
   if(!['included','excluded'].includes(s.mode))errors.push('Pilih dasar penghitungan pajak yang benar.');
   if(s.tanggal&&!safeDate(s.tanggal))errors.push('Tanggal penyusunan tidak valid.');
-  const raw=Array.isArray(p.items)?p.items:[];
-  const rows=raw.map((i,j)=>{
-   const qty=num(i.vol),price=num(i.hs),base=Math.round(qty*price),tax=s.mode==='excluded'?Math.round(base*taxRate/100):taxRate>0?Math.round(base*taxRate/(100+taxRate)):0;
-   if(!(qty>0)||!(price>=0)||!Number.isSafeInteger(base)||price===0)errors.push('Rincian '+(j+1)+' belum memiliki volume/harga HPS yang valid.');
-   return {no:j+1,name:String(i.nama||''),spec:String(i.spesifikasi||''),unit:String(i.sat||i.satuan||''),qty,price,tax,base,total:s.mode==='excluded'?base+tax:base,notes:String(i.keterangan||i.kelengkapan||'')};
+  const computed=root.SATRIA_PROCUREMENT_CORE.documentHps(p,{mode:s.mode,rate:taxRate});
+  const {rows,before,tax,total}=computed;
+  rows.forEach((item,j)=>{
+   if(!(item.qty>0)||!(item.price>=0)||!Number.isSafeInteger(item.base)||item.price===0)
+    errors.push('Rincian '+(j+1)+' belum memiliki volume/harga HPS yang valid.');
   });
   if(!rows.length)errors.push('Rincian HPS paket belum tersedia.');
-  const before=rows.reduce((a,x)=>a+x.base,0),tax=rows.reduce((a,x)=>a+x.tax,0),total=rows.reduce((a,x)=>a+x.total,0);
   if(total>Number(p.pagu||0)&&Number(p.pagu)>0)warnings.push('Total perhitungan melebihi pagu paket: periksa rincian sebelum diterbitkan.');
   if(s.mode==='excluded')warnings.push('Mode harga sebelum pajak menghasilkan total berbeda dari penjumlahan harga HPS tersimpan. Konfirmasi bahwa harga sumber memang belum termasuk pajak; SATRIA tidak mengubah HPS paket.');
   if(s.tarif==='')warnings.push('Tarif pajak belum diisi; SATRIA tidak menebak tarif atau nilai pajak.');
   if(!s.tanggal||!s.tempat||!s.pptkNama||!s.ppkNama)warnings.push('Tempat, tanggal, dan identitas penyusun/penetap perlu dilengkapi sebelum dokumen digunakan.');
+  // Tautan Bank RUP bermasalah hanya memunculkan peringatan; tidak menambah gate/persetujuan.
+  if(typeof S!=='undefined'&&Array.isArray(S.rupBank))
+   warnings.push(...root.SATRIA_PROCUREMENT_CORE.rupLinkStatus(p,S.rupBank).issues);
   return {s,rows,before,tax,total,errors,warnings,rate:taxRate};
  }
  function panel(p){if(!p)return '';const s=settings(p),m=evaluate(p,s),w=mayEditHps(p);

@@ -2,6 +2,7 @@
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const satriaSafeMediaSrc=value=>esc(window.SATRIA_CORE_GUARDS.imageSrc(value));
 const nf=n=>Math.round(+n||0).toLocaleString('id-ID');
 const rp=n=>'Rp '+nf(n);
 /* SATRIA 3.0.59.18 — tanggal dokumen memakai zona tanggal lokal; tidak mengubah tanggal sumber. */
@@ -23,10 +24,10 @@ const O=id=>S.opd.find(o=>o.id===id)||{nama:'-',singkat:'-',unit:'',bidang:'',al
 const PJ=id=>S.pejabat.find(x=>x.id===id)||{nama:'-',nip:'-'};
 const PY=id=>S.penyedia.find(y=>y.id===id)||{nama:'(penyedia dihapus)'};
 const kodeNama=c=>(S.kode.find(k=>k.kode===c)||{nama:c}).nama;
-const hps=p=>sum(p.items,i=>Math.max(0,+i.vol||0)*Math.max(0,+i.hs||0));
+const hps=p=>window.SATRIA_PROCUREMENT_CORE.hpsTotal(p);
 // Pecahan bruto per unit (mis. 498,39) dipertahankan hingga penjumlahan total,
 // baru total penawaran dibulatkan ke rupiah. Harga lama integer tidak berubah.
-const totPw=(p,w,nego=false)=>Math.round(sum(p.items,i=>Math.max(0,+i.vol||0)*Math.max(0,+((nego&&w.nego&&w.nego[i.id]!=null)?w.nego[i.id]:(w.harga&&w.harga[i.id])||0))));
+const totPw=(p,w,nego=false)=>window.SATRIA_PROCUREMENT_CORE.offerGoodsTotal(p,w,nego);
 /* SATRIA 3.0.59.52 — batas total HPS dan pagu; harga item di atas HPS
    ditandai untuk penilaian kewajaran tanpa mekanisme persetujuan tambahan.
    Catatan review historis lama dipertahankan sebagai arsip opsional. */
@@ -154,7 +155,7 @@ kode:[{id:'KODE-DEMO-001',kode:'KODE-DEMO-001',nama:'Kegiatan Simulasi'}],
 paket:[{id:'k1',tahun:2026,opd:'o1',unit:'unit-demo',seq:1,nama:'PAKET DEMO — JANGAN DIGUNAKAN UNTUK TRANSAKSI',rup:'DEMO-RUP-0001',pagu:1000000,sumber:'Dana Simulasi',sub:'KODE-DEMO-001',ppk:'p1',pp:'p2',kabid:'p3',masaHk:7,tglNodis:'',tglDpp:'',tglBahp:'',tglSppbj:'',batas:'',pemenangId:null,lokasiPengiriman:'Lokasi Contoh',jenisPengadaan:'Barang (Simulasi)',metodePemilihan:'Metode Simulasi',tglSurvei:'',tglNego:'',tglPenetapan:'',tglEvaluasi:'',items:[{id:'i1',nama:'Barang Contoh',spesifikasi:'Spesifikasi simulasi',merek:'Contoh',pdn:'Perlu verifikasi',linkProduk:'',vol:1,satuan:'Unit',hs:100000}],penawaran:[]}]
 };
 let S;
-function init(){S=JSON.parse(JSON.stringify(SEED));S.rupBank=[];normalizeData();S.ui={page:'dash',tahun:S.tahun[0],opd:'all',pid:null,dpid:'k1',dok:'nodis',ptab:'data',mtab:'ppk'};S.log=[];S.dirty=false;S.chat=[];S.chatCtx=null;S.ui.user=S.users[0].id}
+function init(){S=JSON.parse(JSON.stringify(SEED));S.rupBank=[];S.sampah=[];normalizeData();S.ui={page:'dash',tahun:S.tahun[0],opd:'all',pid:null,dpid:'k1',dok:'nodis',ptab:'data',mtab:'ppk'};S.log=[];S.dirty=false;S.chat=[];S.chatCtx=null;S.ui.user=S.users[0].id}
 
 /* SATRIA 2026-11-02 — guard identitas resmi: nilai SEED/demo tidak boleh menjadi identitas dokumen.
    Tidak mengubah state, snapshot cloud, atau data historis yang disimpan. */
@@ -434,14 +435,14 @@ document.addEventListener('click',e=>{if(e.target?.id!=='rupCsvTemplate')return;
  const csv='rup,nama,opd,tahun,pagu,sub,sumber,masaHk,jenisPengadaan,metodePemilihan,lokasiPengiriman,bulan\r\n"67122699","Contoh Paket ATK","",2026,1924800,"","APBD",7,"Barang","E-Purchasing dengan Negosiasi Harga","","Oktober 2026"\r\n';
  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='SATRIA-Template-Input-RUP.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);
 });
-const NAV=[['dash','Ringkasan Utama'],['paket','Paket Pengadaan'],['kerja','Ruang Kerja PP'],['kalk','Kalkulator Nego'],['input','Input RUP'],['spse','Monitoring SPSE'],['monitor','Pusat Monitoring'],['finance','Keuangan & Kontrak'],['quality','Kualitas Data'],['brief','Executive Briefing 4.1'],['satria360','SATRIA 360°'],['dok','Dokumen Pengadaan'],['lap','Laporan dan Analisis'],['master','Data Master'],['set','Pengaturan Sistem'],['care','Perawatan SATRIA'],['user','Pengguna dan Hak Akses'],['panduan','Panduan Penggunaan'],['chat','Asisten SATRIA']];
+const NAV=[['dash','Ringkasan Utama'],['paket','Paket Pengadaan'],['kerja','Ruang Kerja PP'],['kalk','Kalkulator Nego'],['input','Input RUP'],['spse','Monitoring SPSE'],['monitor','Pusat Monitoring'],['finance','Keuangan & Kontrak'],['quality','Kualitas Data'],['brief','Executive Briefing 4.1'],['satria360','SATRIA 360°'],['dok','Dokumen Pengadaan'],['lap','Laporan dan Analisis'],['master','Data Master'],['set','Pengaturan Sistem'],['care','Perawatan SATRIA'],['user','Pengguna dan Hak Akses'],['panduan','Panduan Penggunaan'],['chat','Asisten SATRIA'],['sampah','Sampah & Pemulihan']];
 const kpi=(l,v)=>`<div class="card kpi"><span>${l}</span><b>${v}</b></div>`;
 const pill=p=>`<span class=pill title="Kelengkapan: ${esc((window.SATRIA&&SATRIA.lifecycle)?({draf:'Draf',berjalan:'Berjalan',lengkap:'Lengkap',arsip:'Diarsipkan'})[SATRIA.lifecycle(p)]:'-')}">${stt(p)}</span>`;
 function tabelPaket(L){
   if(!L.length) return '<p class=mut>Belum ada paket pada filter ini.</p>';
   const sorted = L.slice().sort((a,b)=>a.seq-b.seq);
   if(window.matchMedia && window.matchMedia('(max-width: 767px)').matches){
-    return `<div class="satria-mobile-paket-list">${sorted.map(p=>`<article class="satria-mobile-paket-card"><div class="satria-mobile-paket-meta"><span>RUP ${esc(p.rup||'-')}</span><span>TA ${esc(p.tahun)}</span></div><a class="satria-mobile-paket-title" href="#paket/${p.id}">${esc(p.nama||'Paket tanpa nama')}</a><div class="satria-mobile-paket-sub">${esc(satriaSubKegiatan(p)||'Belum diisi')}</div><div class="satria-mobile-paket-amount"><div><small>Pagu</small><b>${rp(p.pagu)}</b></div><div><small>HPS</small><b>${rp(hps(p))}</b></div></div><div class="satria-mobile-paket-footer">${pill(p)}<a href="#paket/${p.id}">Buka detail →</a></div></article>`).join('')}</div>`;
+    return `<div class="satria-mobile-paket-list">${sorted.map(p=>`<article class="satria-mobile-paket-card"><div class="satria-mobile-paket-meta"><span>RUP ${esc(p.rup||'-')}</span><span>TA ${esc(p.tahun)}</span></div><a class="satria-mobile-paket-title" href="#paket/${esc(p.id)}">${esc(p.nama||'Paket tanpa nama')}</a><div class="satria-mobile-paket-sub">${esc(satriaSubKegiatan(p)||'Belum diisi')}</div><div class="satria-mobile-paket-amount"><div><small>Pagu</small><b>${rp(p.pagu)}</b></div><div><small>HPS</small><b>${rp(hps(p))}</b></div></div><div class="satria-mobile-paket-footer">${pill(p)}<a href="#paket/${esc(p.id)}">Buka detail →</a></div></article>`).join('')}</div>`;
   }
   window.__paketVirtualData = sorted;
   // Defer render to after DOM
@@ -715,8 +716,7 @@ function rupBankKey(p){return String(p.opd)+'|'+Number(p.tahun)+'|'+String(p.rup
    rupBankId dipertahankan untuk kompatibilitas backup/dokumen lama.
    rupBankIds adalah referensi tambahan untuk konsolidasi; identitas Paket selalu p.id. */
 function satriaRupLinks(p){
- const ids=[p?.rupBankId,...(Array.isArray(p?.rupBankIds)?p.rupBankIds:[])].filter(x=>x!==null&&x!==undefined&&String(x).trim());
- return [...new Set(ids.map(String))];
+ return window.SATRIA_PROCUREMENT_CORE.rupLinks(p);
 }
 function satriaRupLinked(p,r){
  return satriaRupLinks(p).includes(String(r.id))||(!satriaRupLinks(p).length&&rupBankKey(p)===rupBankKey(r));
@@ -1468,9 +1468,9 @@ const vf=n=>(+n||0).toLocaleString('id-ID',{maximumFractionDigits:2});
 const OP=p=>O(p.opd);
 const unitOf=p=>(S.unit||[]).find(u=>u.id===p.unit)||(S.unit||[]).find(u=>u.opd===p.opd)||{kode:'',bidang:''};
 const nomor=(t,p)=>`${S.penomoran?.[t]||'[KODE DOKUMEN]'}/${p.rup||'[KODE RUP]'}/${OP(p).singkat||'[SINGKATAN OPD]'}${unitOf(p).kode?'/'+unitOf(p).kode:''}`;
-const kop=p=>{const o=OP(p);if(o.kop)return `<div class="kop kop-image"><img src="${o.kop}" alt="Kop ${esc(o.singkat)}" style="width:100%;display:block;max-height:42mm;object-fit:contain"></div>`;const namaPemda=satriaPemdaOfficial('nama');return `<div class="kop kop-text" style="text-align:center;margin-bottom:10px">${S.pemda.logo?`<img src="${esc(S.pemda.logo)}" alt="Logo pemerintah daerah" style="height:56px;max-width:100%;object-fit:contain;margin-bottom:6px"><br>`:''}<div style="font-size:15px;font-weight:bold">${esc(namaPemda||'[Nama pemerintah daerah belum diatur]')}</div><div style="font-size:14px;font-weight:bold">${esc(satriaIdentityPlaceholder(o.nama)?'[Nama OPD belum diatur]':o.nama.toUpperCase())}</div><div style="font-size:11px;margin-top:4px">${esc(o.alamat)}</div><div style="font-size:11px">${esc(o.kontak||'')}</div><hr style="border:0;border-top:2.5px solid #000;margin:10px 0 4px"></div>`};
+const kop=p=>{const o=OP(p);if(satriaSafeMediaSrc(o.kop))return `<div class="kop kop-image"><img src="${satriaSafeMediaSrc(o.kop)}" alt="Kop ${esc(o.singkat)}" style="width:100%;display:block;max-height:42mm;object-fit:contain"></div>`;const namaPemda=satriaPemdaOfficial('nama');return `<div class="kop kop-text" style="text-align:center;margin-bottom:10px">${S.pemda.logo?`<img src="${satriaSafeMediaSrc(S.pemda.logo)}" alt="Logo pemerintah daerah" style="height:56px;max-width:100%;object-fit:contain;margin-bottom:6px"><br>`:''}<div style="font-size:15px;font-weight:bold">${esc(namaPemda||'[Nama pemerintah daerah belum diatur]')}</div><div style="font-size:14px;font-weight:bold">${esc(satriaIdentityPlaceholder(o.nama)?'[Nama OPD belum diatur]':o.nama.toUpperCase())}</div><div style="font-size:11px;margin-top:4px">${esc(o.alamat)}</div><div style="font-size:11px">${esc(o.kontak||'')}</div><hr style="border:0;border-top:2.5px solid #000;margin:10px 0 4px"></div>`};
 const SATRIA_FOOTER='';
-const sig=(x,jab)=>`<div style="float:right;text-align:center;width:300px;margin-top:24px">${jab}<br>${(x.ttd||x.cap)?`<div style="height:70px">${x.ttd?`<img src="${x.ttd}" style="height:60px;vertical-align:middle">`:''}${x.cap?`<img src="${x.cap}" style="height:65px;vertical-align:middle;margin-left:-16px">`:''}</div>`:'<br><br><br>'}<b><u>${esc(x.nama)}</u></b><br>NIP. ${esc(x.nip)}</div><div style="clear:both"></div>`;
+const sig=(x,jab)=>`<div style="float:right;text-align:center;width:300px;margin-top:24px">${jab}<br>${(x.ttd||x.cap)?`<div style="height:70px">${x.ttd?`<img src="${satriaSafeMediaSrc(x.ttd)}" alt="Tanda tangan" style="height:60px;vertical-align:middle">`:''}${x.cap?`<img src="${satriaSafeMediaSrc(x.cap)}" alt="Stempel" style="height:65px;vertical-align:middle;margin-left:-16px">`:''}</div>`:'<br><br><br>'}<b><u>${esc(x.nama)}</u></b><br>NIP. ${esc(x.nip)}</div><div style="clear:both"></div>`;
 const itemLabel=i=>esc(i.nama);
 function tabelItems(p){const H=hps(p);return `<table class="tbl-items-standard"><thead><tr><th>No</th><th>Nama Barang dan Spesifikasi</th><th>Vol</th><th>Satuan</th><th>Harga Satuan (Rp)</th><th>Jumlah (Rp)</th></tr></thead><tbody>${p.items.map((i,n)=>`<tr><td>${n+1}</td><td>${itemLabel(i)}</td><td>${vf(i.vol)}</td><td>${esc(i.satuan)}</td><td style="text-align:right">${nf(i.hs)}</td><td style="text-align:right">${nf(i.vol*i.hs)}</td></tr>`).join('')}<tr><th colspan=5 style="text-align:right">Jumlah</th><th style="text-align:right">${nf(H)}</th></tr></tbody></table><p><i>Terbilang: ${terb(H)}</i></p>`}
 
@@ -1494,660 +1494,8 @@ function satriaDocPricing(p,w){
  return {net:netRounded,tax:valid?grossRounded-netRounded:Math.round(tax),gross:grossRounded,
   shipping,total:Math.round(gross+shipping),verified:valid};
 }
-function nodis(p){
-const k=PJ(p.kabid),o=OP(p),u=unitOf(p);
-const dari=esc(u.bidang||o.nama);
-const B='border:1px solid #000;padding:3px 6px;vertical-align:top';
-const N='border:0;padding:2px 0;vertical-align:top';
-const tglID=d=>d?new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}):'-';
-const en=n=>nf(n); // Rupiah bulat dengan pemisah ribuan Indonesia
-const akun=S.akun.find(a=>a.id===p.akunId);
-const rekening=akun?`${esc(akun.kode)} ${esc(akun.nama)}`:'-';
-const baris=p.items.map((i,n)=>`<tr><td style="${B};text-align:center">${n+1}</td><td style="${B}">${itemLabel(i)}</td><td style="${B};text-align:center">${vf(i.vol)}</td><td style="${B};text-align:center">${esc(i.satuan)}</td><td style="${B};text-align:right">${en(i.hs)}</td><td style="${B};text-align:right">${en(i.vol*i.hs)}</td></tr>`).join('');
-const rincian=`<table style="border-collapse:collapse;width:100%"><thead><tr><th style="${B};text-align:center">No</th><th style="${B}">Nama Barang</th><th style="${B}">Vol</th><th style="${B}">Satuan</th><th style="${B}">Harga Satuan (Rp)</th><th style="${B}">Jumlah (Rp)</th></tr></thead><tbody>${baris}</tbody></table>`;
-const meta=[['Yth.','Pejabat Pembuat Komitmen (PPK)'],['Dari',dari],['Tanggal',tglID(p.tglNodis)],['Nomor',nomor('NODIS',p)],['Sifat','Biasa'],['Lampiran','1 (satu) rangkap'],['Perihal',`Penyampaian Pengajuan ${esc(p.nama)}`]]
- .map(([a,b])=>`<tr><td style="${N};width:100px">${a}</td><td style="${N};width:12px">:</td><td style="${N}">${b}</td></tr>`).join('');
-const rows=[['1.','Nama Program',esc(progOf(p)).replace(/\n/g,'<br>')],['2.','Nama Kegiatan',esc(kegOf(p)).replace(/\n/g,'<br>')],['3.','Nama Sub Kegiatan',esc(subOf(p)).replace(/\n/g,'<br>')],['4.','Nama Paket',esc(p.nama)],['5.','Kode Rekening Belanja',rekening],['6.','Pagu Anggaran','Rp '+en(p.pagu)]]
- .map(([a,b,c])=>`<tr><td style="${B};text-align:center;width:36px">${a}</td><td style="${B};width:190px">${b}</td><td style="${B}">${c}</td></tr>`).join('');
-return `${kop(p)}
-<table style="border:0;margin-top:16px">${meta}</table>
-<p style="margin:14px 0 8px">Terlampir disampaikan pengajuan dengan rincian sebagai berikut:</p>
-<table style="border-collapse:collapse;width:100%">${rows}${p.items.length>8?`<tr><td style="${B};text-align:center">7.</td><td colspan="2" style="${B}">Rincian Belanja — daftar per item pada tabel berikut</td></tr></table>${rincian}`:`<tr><td style="${B};text-align:center">7.</td><td style="${B}">Rincian Belanja</td><td style="${B};padding:0">${rincian}</td></tr></table>`}
-<p style="margin-top:14px">Demikian disampaikan untuk dapat dipergunakan sebagaimana mestinya.</p>
-<div style="margin-top:28px;margin-left:auto;width:320px;text-align:left;line-height:1.4">${dari}<br>${sigImg(k)}<b>${esc(k.nama)}</b><br>NIP. ${esc(k.nip)}</div>`;
-}
-const sigImg=x=>(x.ttd||x.cap)?`<div style="height:70px">${x.ttd?`<img src="${x.ttd}" style="height:60px;vertical-align:middle">`:''}${x.cap?`<img src="${x.cap}" style="height:65px;vertical-align:middle;margin-left:-16px">`:''}</div>`:'<br><br><br>';
-/* SATRIA NEXT 3.0.53 — referensi resmi DPP: tempat, PPK penandatangan, TTD & cap. */
-function satriaDppOfficialPlace(p){
-  const opd=O(p.opd);
-  const bad=v=>!v||/^(?:kota|lokasi|tempat|alamat|kabupaten|provinsi)\s+contoh\b|\b(?:demo|simulasi)\b/i.test(v.trim());
-  const tempat=String(opd.tempat||'').trim();
-  const pemda=satriaPemdaOfficial('kota');
-  if(!bad(tempat))return tempat;
-  if(!bad(pemda))return pemda;
-  return '[Tempat belum diatur]';
-}
-function satriaDppSigner(p){
-  const id=String(p.dppPpkId||p.ppk||'');
-  return S.pejabat.find(x=>String(x.id)===id && String(x.opd)===String(p.opd) && x.peran==='PPK')||null;
-}
-function satriaDppPicture(src,kind){
-  const v=String(src||'').trim();
-  if(!/^data:image\/(?:png|jpeg|jpg|gif|webp);base64,[a-z0-9+/=\s]+$/i.test(v) && !/^satria-media:\/\/[a-f0-9-]+\/(?:opd|shared)\//i.test(v))return '';
-  const isCap=kind==='cap';
-  return `<img class="${isCap?'satria-dpp-cap':'satria-dpp-ttd'}" src="${esc(v)}" alt="${isCap?'Cap atau stempel PPK':'Tanda tangan PPK'}" decoding="async">`;
-}
-function satriaDppSignerVisual(x,p){
- const stamp=x?satriaDppPicture(x.cap,'cap'):'';
- const signature=x?satriaDppPicture(x.ttd,'ttd'):'';
- // Cap kiri, TTD kanan dengan sedikit tumpang tindih, tetap dalam satu bidang tetap.
- // Cap lebih dulu agar garis TTD berada di atas cap bila gambarnya transparan.
- return `<div class="satria-dpp-ppk-images" style="${globalThis.SATRIA_DPP_SIGN_LAYOUT?.inlineStyle?.(p)||''}" aria-label="Tanda tangan dan cap PPK terpilih">${stamp}${signature}</div>`;
-}
-function satriaDppPpkControl(p){
- const current=String(p.dppPpkId||p.ppk||'');
- const eligible=(S.pejabat||[]).filter(x=>x.peran==='PPK'&&String(x.opd)===String(p.opd)&&(x.aktif!==false||String(x.id)===current));
- const selected=eligible.find(x=>String(x.id)===current);
- const sign=selected||null;
- const place=satriaDppOfficialPlace(p);
- return `<section class="satria352-ppk-panel no-print" aria-label="Pejabat penandatangan DPP">
-   <div class="satria352-ppk-title"><span>✍</span><div><b>Penandatangan Dokumen Persiapan Pengadaan</b><p>Pilih PPK dari Data Master pada OPD paket. Pilihan hanya berlaku pada DPP paket ini.</p></div></div>
-   <div class="satria352-ppk-grid"><div class="fg"><label for="satriaDppSignerSelect">Pejabat Pembuat Komitmen (PPK)</label>
-   <select id="satriaDppSignerSelect" data-pid="${esc(p.id)}" ${!canWrite()?'disabled':''}>
-     <option value="" ${!selected?'selected':''}>— pilih PPK penandatangan DPP —</option>
-     ${eligible.map(x=>`<option value="${esc(x.id)}" ${String(x.id)===current?'selected':''}>${esc(x.nama)} · NIP ${esc(x.nip||'-')}${x.aktif===false?' (nonaktif)':''}</option>`).join('')}
-   </select></div><div class="satria352-ppk-meta"><small>Tempat penandatanganan dari Pengaturan Sistem</small><b>${esc(place)}</b><small>${sign?(sign.ttd?'✓ TTD':'⚠ TTD belum diunggah')+' · '+(sign.cap?'✓ Cap':'⚠ Cap belum diunggah'):'Pilih PPK terlebih dahulu'}</small></div></div>
-   ${!eligible.length?'<p class="satria352-ppk-warning">Belum ada PPK untuk OPD ini. Tambahkan di Data Master → PPK/KPA, lalu unggah tanda tangan dan cap.</p>':''}
-   <p class="satria352-ppk-help">Gambar TTD dan cap berasal dari Data Master → PPK/KPA. Jika gambar belum tersedia, area tanda tangan dibiarkan kosong untuk penandatanganan manual; aplikasi tidak membuat tanda tangan palsu.</p>
- </section>`;
-}
+/* Template dokumen dipisahkan ke satria-document-templates.js (Tahap 4). */
 
-/* SATRIA DPP 2026-11-02: format contoh per paket; tidak mengubah data HPS, RUP, atau dokumen lainnya. */
-function satriaDppOptions(p){
- const f=p?.dppFormat&&typeof p.dppFormat==='object'&&!Array.isArray(p.dppFormat)?p.dppFormat:{};
- const tableMode=f.tableMode==='lengkap'?'lengkap':'contoh';
- const brandPolicy=['unreviewed','no_specific','reference','specific'].includes(f.brandPolicy)?f.brandPolicy:'unreviewed';
- return {tableMode,brandPolicy,brandReason:String(f.brandReason||'').trim(),brandEvidence:String(f.brandEvidence||'').trim(),docNumber:String(f.docNumber||'').trim(),includePhotos:f.includePhotos!==false};
-}
-function satriaDppNumber(p){return satriaDppOptions(p).docNumber||nomor('DPP',p);}
-function satriaDppMetaLines(p,key){
- const base={program:progOf(p),kegiatan:kegOf(p),subKeg:subOf(p)}[key]||'';
- const values=[base];
- const linked=[p?.rupBankId,...(Array.isArray(p?.rupBankIds)?p.rupBankIds:[])].filter(Boolean).map(String);
- // Hanya referensi RUP tersambung dengan OPD & tahun paket yang sama; bukan data OPD lainnya.
- const seenIds=new Set();
- for(const id of linked){
-  if(seenIds.has(id))continue;seenIds.add(id);
-  const r=(S.rupBank||[]).find(x=>String(x.id)===id&&String(x.opd)===String(p.opd)&&Number(x.tahun)===Number(p.tahun));
-  if(!r)continue;
-  const subCode=String(r.subKegKode||r.sub||'').trim();
-  const bankKode=(S.kode||[]).find(x=>String(x.kode)===subCode);
-  const subName=String(r.subKegNama||bankKode?.nama||'').trim();
-  const extra=key==='subKeg'?(r.subKeg||(subCode&&subName?subCode+' - '+subName:subName||subCode)):(r[key]||bankKode?.[key]||'');
-  if(extra)values.push(String(extra));
- }
- const lines=[];const seen=new Set();
- for(const value of values){
-  for(const part of String(value||'').split(/\r?\n/)){
-   const t=part.trim();if(!t||/^(?:-|KODE-DEMO-001|Program Demo|Kegiatan Simulasi)$/i.test(t)||/\b(?:instansi pemerintah demo|dana simulasi)\b/i.test(t))continue;
-   const k=t.toLocaleLowerCase('id-ID').replace(/\s+/g,' ');if(!seen.has(k)){seen.add(k);lines.push(t);}
-  }
- }
- return lines.length?lines.map(x=>esc(x)).join('<br>'):'<em>[Belum diisi]</em>';
-}
-function satriaDppBrandText(p){
- const f=satriaDppOptions(p),reason=esc(f.brandReason),evidence=esc(f.brandEvidence);
- const refs=(p.items||[]).filter(i=>String(i.merek||'').trim()).map(i=>esc(i.nama||'Barang')+': '+esc(i.merek));
- const refText=refs.length?`<br><span class="satria-dpp-brand-refs">Merek/tipe yang tercatat dalam data barang: ${refs.join('; ')}.</span>`:'';
- if(f.brandPolicy==='no_specific')return 'Tidak mensyaratkan merek tertentu. Penyebutan merek/model pada rincian, bila ada, bukan syarat merek tunggal; kesesuaian dinilai terhadap spesifikasi teknis yang ditetapkan.'+(reason?'<br>Catatan PPK: '+reason:'')+refText;
- if(f.brandPolicy==='reference')return 'Merek/model yang disebut digunakan sebagai referensi karakteristik dan kompatibilitas; produk yang memenuhi spesifikasi teknis tetap dapat dievaluasi.'+(reason?'<br>Pertimbangan teknis PPK: '+reason:'')+refText;
- if(f.brandPolicy==='specific')return 'Persyaratan merek/tipe tertentu memerlukan justifikasi teknis dan bukti pendukung yang disetujui PPK.'+(reason?'<br>Justifikasi PPK: '+reason:'<br><b>[Alasan teknis belum diisi]</b>')+(evidence?'<br>Dokumen pendukung: '+evidence:'<br><b>[Bukti pendukung belum diisi]</b>')+refText;
- return '<b>[Status penggunaan merek belum ditetapkan PPK]</b> Tentukan status dan alasan melalui pengaturan DPP sebelum penerbitan resmi.'+refText;
-}
-function dpp(p){const o=OP(p),H=hps(p),dppSigner=satriaDppSigner(p);
-const TS=d=>d?new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}):'-';
-// Sumber dana hanya dari paket; jangan gabungkan nama default instansi yang bisa berisi Demo.
-const cleanSumber=String(p.sumber||'').trim();
-const dppFunding=(/\b(?:demo|contoh|dummy|simulasi|test)\b/i.test(cleanSumber)||!cleanSumber)?'':(cleanSumber+(String(p.tahun||'').trim()&&!/\bTA\s*\d{4}\b/i.test(cleanSumber)?' TA '+p.tahun:''));
-const fDpp=satriaDppOptions(p);
-const subs=satriaDppMetaLines(p,'subKeg');
-const five=fDpp.tableMode==='contoh';
-const P_=(n,t)=>`<p style="margin:4px 0;text-align:justify">${n}${t}</p>`;
-const L=(a,t)=>`<tr><td style="border:0;width:150px;vertical-align:top">${a}</td><td style="border:0;width:10px;vertical-align:top">:</td><td style="border:0">${t}</td></tr>`;
-const items=p.items.map((i,n)=>`<tr><td>${n+1}.</td><td>${itemLabel(i)}</td><td style="text-align:right">${vf(i.vol)}</td><td>${esc(i.satuan)}</td><td style="text-align:right">${nf(i.hs)}</td>${five?'':`<td style="text-align:right">${nf((+i.vol||0)*(+i.hs||0))}</td>`}</tr>`).join('');
-return `${kop(p)}
-<p class="doc-title" style="text-align:center;margin:6px 0 12px"><u><b>DOKUMEN PERSIAPAN PENGADAAN (DPP) E-PURCHASING</b></u></p>
-<table class="tbl-letter-meta" style="border:0;margin-bottom:10px">
-${L('Nomor',esc(satriaDppNumber(p)))}${L('Tanggal',TS(p.tglDpp))}${L('Program',satriaDppMetaLines(p,'program'))}${L('Kegiatan',satriaDppMetaLines(p,'kegiatan'))}${L('Sub Kegiatan',subs)}${L('Lokasi',esc(p.lokasiPengiriman||o.tempat||o.alamat||o.nama))}${L('Nama Paket Pengadaan',esc(p.nama))}${L('Sumber Dana',esc(dppFunding))}${L('Pagu Dana',rp(p.pagu))}${L('RUP',esc(p.rup))}</table>
-
-<p style="margin:10px 0 4px"><b>I. Spesifikasi Teknis</b></p>
-<p style="margin:4px 0">Penyusunan spesifikasi teknis telah menguraikan hal-hal sebagai berikut antara lain:</p>
-<ol style="margin:4px 0 8px 22px;padding:0">
-${['Kesesuaian spesifikasi teknis dengan kebutuhan;','Karakteristik: ukuran, dimensi, bentuk, bahan, warna, komposisi, dan lain-lain;','Kinerja: ketahanan, efisiensi, batas pemakaian, dan lain-lain;','Standar yang digunakan: SNI, JIS, ASTM, ISO, dan lain-lain;','Validitas standar yang digunakan;','Pengepakan dan cara pengiriman;','Macam, jenis, kapasitas dan jumlah peralatan;','Aspek layanan meliputi waktu penyelesaian, ketepatan pengiriman, dan responsivitas penyedia;','Output atau hasil pekerjaan sesuai volume dan kualitas yang dipersyaratkan;','Higienitas dan keamanan (khusus pengadaan makan minum);','Kompatibilitas teknis (khusus bahan komputer);','Ketentuan garansi atau penggantian atas ketidaksesuaian barang/jasa.'].map(x=>`<li>${x}</li>`).join('')}
-</ol>
-<p style="margin:4px 0">Spesifikasi teknis paket pengadaan/pekerjaan adalah sebagai berikut:</p>
-<p class="doc-section-heading" style="margin:4px 0"><b>a. Spesifikasi Jenis, Mutu Barang/Bahan/Material, Jumlah, Satuan dan Harga</b></p>
-<table class="tbl-dpp-items ${five?'satria-dpp-example-five':'satria-dpp-six'}"><thead><tr><th>No</th><th>Nama/Jenis Barang, Spesifikasi Mutu/Bahan/Material</th><th>Jumlah</th><th>Satuan</th><th>Harga Satuan (Rp)</th>${five?'':'<th>Jumlah (Rp)</th>'}</tr></thead><tbody>
-${items}
-${five?'':`<tr><th colspan="5" style="text-align:right">Total HPS</th><th style="text-align:right">${nf(H)}</th></tr>`}
-</tbody></table>
-<p style="margin:6px 0 4px"><b>b. Justifikasi Teknis Dalam Penggunaan Merek (Jika ada)</b><br>${satriaDppBrandText(p)}</p>
-<p style="margin:4px 0"><b>c. Spesifikasi Waktu</b><br>Pelaksanaan pekerjaan mulai dari diterbitkannya surat pesanan sampai dengan tanggal ${TS(p.batas)}.</p>
-<p class="satria594-spec-block" style="margin:4px 0"><b>d. Spesifikasi Tempat</b><br>Pengiriman sampai ke lokasi yaitu ${esc(p.lokasiPengiriman||o.tempat||o.alamat||o.nama||'-')}<br>Lokasi pengantaran: langsung ke tempat/lokasi tujuan.<br>Jarak dan akses lokasi diperhitungkan oleh penyedia tanpa biaya tambahan di luar harga satuan e-Katalog.</p>
-<p class="satria-dpp-service-block" style="margin:4px 0"><b>e. Spesifikasi Layanan</b><br>Penyedia wajib memenuhi tingkat layanan meliputi ketepatan waktu, kesesuaian spesifikasi, kualitas hasil, ketepatan jumlah, responsivitas, pengemasan dan pengiriman, jaminan/garansi, fleksibilitas layanan, kepatuhan administratif, serta standar keamanan dan kepatuhan. Penyedia juga wajib menindaklanjuti setiap ketidaksesuaian melalui perbaikan atau penggantian tanpa biaya tambahan sesuai ketentuan yang disepakati serta bertanggung jawab penuh atas pengadaan.</p>
-
-<p style="margin:8px 0 4px"><b>II. Prioritas Penggunaan Produk Dalam Negeri</b></p>
-${P_('', 'Berdasarkan Pasal 66 ayat (1) dan (2) Peraturan Presiden Nomor 46 Tahun 2025 tentang Perubahan Kedua Atas Peraturan Presiden Nomor 16 Tahun 2018 tentang Pengadaan Barang/Jasa Pemerintah, maka PPK/PP yang akan melakukan e-Purchasing memilih barang/jasa pada Katalog Elektronik dengan urutan/prioritas sebagai berikut:')}
-<ol style="margin:4px 0 8px 22px;padding:0">
-${['Apabila barang/jasa yang dibutuhkan pada Katalog Elektronik terdapat produk dalam negeri yang memiliki jumlah nilai TKDN dan nilai BMP minimal 40% (empat puluh persen) maka PPK/PP memilih produk dalam negeri dengan nilai TKDN paling sedikit 25% (dua puluh lima persen);','Dalam hal kondisi pada angka 1 di atas tidak dapat dipenuhi, maka PPK/PP dapat memilih produk dalam negeri dengan nilai TKDN kurang dari 25% (dua puluh lima persen);','Dalam hal kondisi pada angka 1 dan 2 di atas tidak dapat dipenuhi, maka PPK/PP dapat memilih produk dengan label PDN namun belum mempunyai nilai TKDN;','Dalam hal kondisi pada angka 1, 2, dan 3 di atas tidak dapat dipenuhi, maka PPK/PP dapat memilih produk impor; dan','Dalam hal kondisi pada angka 1, 2, 3, dan 4 di atas tidak dapat dipenuhi, maka PPK/PP dapat menggunakan metode lain selain e-Purchasing Katalog sesuai ketentuan peraturan perundang-undangan.'].map(x=>`<li>${x}</li>`).join('')}
-</ol>
-
-<p style="margin:8px 0 4px"><b>III. Prioritas Penggunaan Produk dari Penyedia dengan Kualifikasi Usaha Kecil serta Koperasi</b></p>
-${P_('', 'Berdasarkan Pasal 65 ayat (3) dan (4) Peraturan Presiden Nomor 46 Tahun 2025 tentang Perubahan Kedua Atas Peraturan Presiden Nomor 16 Tahun 2018 tentang Pengadaan Barang/Jasa Pemerintah, maka PPK/PP yang akan melakukan e-Purchasing Katalog memilih barang/jasa pada Katalog Elektronik dengan urutan/prioritas sebagai berikut:')}
-<ol style="margin:4px 0 8px 22px;padding:0">
-${['Apabila nilai paket pengadaan barang/jasa dengan nilai pagu anggaran sampai dengan Rp15.000.000.000,00 (lima belas miliar rupiah) maka PPK/PP memilih Penyedia dengan Kualifikasi Usaha Kecil atau Koperasi untuk barang/jasa yang dibutuhkan yang tersedia pada Katalog Elektronik;','Dalam hal kondisi pada angka 1 di atas tidak dapat dipenuhi maka PPK/PP dapat memilih Penyedia Katalog Elektronik dengan Kualifikasi Usaha Non Kecil.'].map(x=>`<li>${x}</li>`).join('')}
-</ol>
-
-<p style="margin:8px 0 4px"><b>IV. Pengumpulan Referensi Harga</b></p>
-${P_('', 'PPK/PP mempersiapkan referensi harga yang berfungsi sebagai referensi untuk melakukan Negosiasi Harga. Pengumpulan referensi harga dilakukan dengan memperhatikan hal-hal sebagai berikut:')}
-<p style="margin:4px 0">1. Referensi harga disusun dengan sumber data sebagai berikut:</p>
-<ol type="a" style="margin:4px 0 8px 42px;padding:0">
-${['Mencari produk dengan harga terbaik yang tercantum pada Katalog Elektronik sesuai dengan spesifikasi teknis yang dibutuhkan dengan memperhatikan ketentuan terkait Prioritas Penggunaan Produk Dalam Negeri dan Prioritas Penggunaan Produk dari Penyedia dengan Kualifikasi Usaha Kecil serta Koperasi;','Mencari harga pembanding produk sejenis di luar aplikasi Katalog Elektronik (apabila ada);','Informasi biaya/harga satuan yang dipublikasikan secara resmi oleh Kementerian/Lembaga/Pemerintah Daerah (apabila ada); dan','Dokumen lainnya yang dapat dipertanggungjawabkan (apabila ada).'].map(x=>`<li>${x}</li>`).join('')}
-</ol>
-${P_('2. ', 'Selain referensi harga, PPK/PP juga dapat mempersiapkan kebutuhan terkait layanan teknis pendukung dari barang/jasa untuk dijadikan referensi dalam melakukan negosiasi dengan Penyedia apabila diperlukan. Layanan teknis pendukung adalah layanan yang dapat diberikan Penyedia untuk mendukung penggunaan dari barang/jasa yang akan dibeli. Negosiasi layanan teknis pendukung tidak digunakan untuk menegosiasi teknis barang seperti mengubah/menambah spesifikasi barang/jasa yang telah tayang pada Katalog Elektronik.')}
-${P_('3. ', 'Pengumpulan referensi harga tidak diperlukan jika harga produk yang tayang pada aplikasi Katalog Elektronik berupa fixed price atau harga tidak bisa dinegosiasi.')}
-
-<p style="margin:8px 0 4px"><b>V. Rancangan Kontrak</b></p>
-${P_('', 'Rancangan Kontrak menggunakan Surat Pesanan sesuai yang tertuang di aplikasi e-Purchasing.')}
-
-<p style="margin:8px 0 4px"><b>VI. Rencana Metode Pemilihan Penyedia</b></p>
-${P_('', 'Rencana metode pemilihan penyedia Katalog Elektronik menggunakan: <b>Negosiasi Harga</b>.')}
-
-<section class="satria594-closing-signature satria-dpp-closing">
-<p style="margin:8px 0 4px"><b>VII. Penutup</b></p>
-<p style="margin:4px 0;text-align:justify">Demikian Dokumen Persiapan e-Purchasing dibuat untuk dapat diketahui bersama sebagai acuan bagi pelaksanaan proses pengadaan barang/jasa bagi pihak terkait dan dibuat untuk digunakan sebagaimana mestinya.</p>
-<div class="satria-dpp-signature" style="width:330px;max-width:100%;margin:22px 0 0 auto;line-height:1.5;text-align:center;break-inside:avoid;page-break-inside:avoid">
-${esc(satriaDppOfficialPlace(p))}, ${TS(p.tglDpp)}<br>Ditetapkan oleh:<br>Pejabat Pembuat Komitmen (PPK)<br>${esc(o.nama)}
-${satriaDppSignerVisual(dppSigner,p)}<b><u>${esc(dppSigner?.nama||'[PPK belum dipilih]')}</u></b><br>NIP. ${esc(dppSigner?.nip||'-')}
-</div></section>`}
-
-function sppbj(p){
- // 3.0.59.20 — Surat Perintah Pengadaan tanpa bingkai/kotak sesuai pedoman pengguna.
- // Nama instansi harus berasal dari OPD paket, bukan seed S.pemda.nama yang bisa berupa demo.
- const o=OP(p),pej=PJ(p.ppk);
- const institution=String(o.nama||'').trim();
- const opdName=institution&&institution!=='-'&&!/\b(?:demo|dummy|contoh|simulasi)\b/i.test(institution)?institution:'[Nama OPD belum diisi]';
- const place=satriaDppOfficialPlace(p);
- const pemdaName=satriaPemdaOfficial('nama');
- const pemdaSafe=pemdaName&&!/\b(?:demo|dummy|contoh|simulasi|instansi pemerintah)\b/i.test(pemdaName)?pemdaName:'';
- const orgKop=o.kop?kop(p):`<div class="kop kop-text" style="text-align:center;margin-bottom:10px">${S.pemda?.logo?`<img src="${esc(S.pemda.logo)}" alt="Logo pemerintah daerah" style="height:56px;max-width:100%;object-fit:contain;margin-bottom:6px"><br>`:''}${pemdaSafe?`<div style="font-size:15px;font-weight:bold">${esc(pemdaSafe)}</div>`:''}<div style="font-size:14px;font-weight:bold">${esc(opdName.toUpperCase())}</div><div style="font-size:11px;margin-top:4px">${esc(o.alamat||'')}</div><div style="font-size:11px">${esc(o.kontak||'')}</div><hr style="border:0;border-top:2.5px solid #000;margin:10px 0 4px"></div>`;
- const subject='Perintah Pengadaan Barang & Jasa';
- const meta=(label,value)=>`<div class="sppbj-meta-row"><span class="sppbj-meta-label">${label}</span><span class="sppbj-meta-colon">:</span><span class="sppbj-meta-value">${value}</span></div>`;
- const tahun=String(p.tahun||S.tahun||'').trim();
- return `${orgKop}
- <div class="sppbj-pdf-layout satria-sppbj-official">
- <div class="sppbj-letter-heading">
- <div class="sppbj-letter-meta" aria-label="Identitas surat perintah pengadaan">
- ${meta('Nomor',esc(nomor('PPBJ',p)))}${meta('Sifat','Biasa')}${meta('Lampiran','1 (satu) rangkap')}${meta('Perihal',esc(subject))}</div>
- <div class="sppbj-letter-place">${esc(place)}, ${tg(p.tglSppbj)}</div>
- </div>
- <div class="sppbj-destination">Yth. &nbsp; Pejabat Pengadaan pada ${esc(opdName)}<br>di -<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${esc(place)}</div>
- <p class="sppbj-body-text">Sehubungan dengan akan dilaksanakannya kegiatan pengadaan barang/jasa di lingkungan ${esc(opdName)}${tahun?' Tahun Anggaran '+esc(tahun):''} melalui <b><i>E-Purchasing</i></b>, maka dengan ini disampaikan untuk segera melakukan proses kegiatan dimaksud sebagai dasar pelaksanaan dan berikut lampiran:</p>
- <ol class="sppbj-attachments"><li>Spesifikasi Teknis Barang/Jasa;</li><li>Dokumen Persiapan Pengadaan Barang/Jasa.</li></ol>
- <p class="sppbj-body-text">Dalam melakukan proses kegiatan tersebut harus berpedoman pada peraturan perundang-undangan yang berlaku dengan tetap memperhatikan batasan waktu yang tersedia.</p>
- <p class="sppbj-closing">Demikian disampaikan untuk dapat dipergunakan sebagaimana mestinya.</p>
- <div class="sppbj-signature-layout"><div class="sppbj-signature-left" aria-hidden="true"></div><div class="sppbj-signature-cell">Pejabat Pembuat Komitmen (PPKom)<br>${esc(opdName)}<div class="sppbj-signature-space"></div><b><u>${esc(pej.nama&&pej.nama!=='-'?pej.nama:'[PPK belum dipilih]')}</u></b><br>NIP. ${esc(pej.nip&&pej.nip!=='-'?pej.nip:'-')}</div></div>
- </div>`;
-}
-
-/* 3.0.59.18 — BAHP mengikuti tata letak TTD/cap DPP tanpa mengubah pejabat BAHP. */
-function satriaBahpPicture(src,kind){
-  const safe=satriaDppPicture(src,kind); // Utamakan sumber yang sama dengan DPP (Storage privat/Base64).
-  if(safe)return safe;
-  // Pertahankan kompatibilitas berkas gambar HTTPS lama yang sebelumnya didukung sigImg.
-  const v=String(src||'').trim();
-  if(/^https:\/\/[^\s"'<>]+$/i.test(v)){
-    return `<img class="${kind==='cap'?'satria-dpp-cap':'satria-dpp-ttd'}" src="${esc(v)}" alt="${kind==='cap'?'Cap atau stempel pejabat':'Tanda tangan pejabat'}" decoding="async">`;
-  }
-  return '';
-}
-function satriaBahpSignerVisual(pejabat,p){
-  const cap=satriaBahpPicture(pejabat?.cap,'cap');
-  const ttd=satriaBahpPicture(pejabat?.ttd,'ttd');
-  // Foto stempel HARUS lebih dulu (di kiri), TTD di atasnya (kanan) sebagaimana DPP.
-  if(!cap&&!ttd)return '<div class="satria-bahp-signature-spacer" aria-hidden="true"></div>';
-  const layout=globalThis.SATRIA_DPP_SIGN_LAYOUT?.inlineStyle?.(p)||'';
-  return `<div class="satria-bahp-ppk-images" style="${layout}" aria-label="Tanda tangan dan cap pejabat">${cap}${ttd}</div>`;
-}
-function bahp(p){
- const offers=p.penawaran||[], W=pemenang(p), chosen=W?.w||null;
- const officer=PJ(p.pp),approver=PJ(p.ppk), H=hps(p), chosenName=chosen?PY(chosen.pen).nama:'[Belum ditetapkan]';
- const rows=(p.items||[]), date=p.tglBahp?tg(p.tglBahp):'[Tanggal BAHP belum diisi]';
- const money=n=>nf(n), val=(x,fallback='-')=>String(x??'').trim()||fallback;
- const head=(titles,nums)=>`<thead><tr>${titles.map(t=>`<th>${t}</th>`).join('')}</tr><tr class="bahp-number-row">${nums.map(n=>`<th>${n}</th>`).join('')}</tr></thead>`;
- const metar=(k,v)=>`<div class="bahp-info-line"><span>${k}</span><span>:</span><span>${esc(v??'-')}</span></div>`;
- const refs=offers.map((w,n)=>{
-   const y=PY(w.pen);
-   const lines=rows.map((it,i)=>{const price=+(w.harga?.[it.id]||0);return `<div class="bahp-ref-row"><span>${i+1})</span><span>${itemLabel(it)}</span><span>${price?rp(price):'-'}</span><span>${price?'Spesifikasi perlu diverifikasi dengan bukti etalase produk':'Harga belum dicatat'}</span></div>`}).join('');
-   return `<div class="bahp-ref-block"><div>${n+1}. &nbsp; <b>${esc(y.nama)}</b></div>${lines}</div>`;
- }).join('')||'<p>Referensi harga penyedia belum dicatat.</p>';
- const assessments=offers.map((w,n)=>{
-   const y=PY(w.pen);
-   const data=rows.map((it,i)=>{
-    const supplied=+(w.harga?.[it.id]||0)>0;
-    return `<tr><td class="bahp-center">${i+1}</td><td>${itemLabel(it)}</td><td>${supplied?itemLabel(it):'Spesifikasi belum dicatat'}</td><td class="bahp-center">${supplied?'Perlu verifikasi':'-'}</td></tr>`;
-   }).join('')||'<tr><td colspan="4">Rincian barang belum tersedia.</td></tr>';
-   return `<div class="bahp-assessment"><p class="bahp-inset"><b>${n+1}) &nbsp; ${esc(y.nama)}</b></p><table class="bahp-grid bahp-spec-table">${head(['No.','Kebutuhan Spesifikasi Teknis','Spesifikasi Penyedia','Hasil'],[1,2,3,4])}<tbody>${data}</tbody></table></div>`;
- }).join('')||'<p>Belum ada penyedia untuk dievaluasi.</p>';
- const negotable=rows.map((it,n)=>{
-   const unit=chosen?+(chosen.nego?.[it.id]??chosen.harga?.[it.id]??0):0;
-   const shipping=0; // ongkir dicatat satu kali pada baris total paket
-   return `<tr><td class="bahp-center">${n+1}</td><td>${itemLabel(it)}</td><td class="bahp-center">${vf(it.vol)} ${esc(it.satuan||'')}</td><td class="bahp-money">${unit?'Rp '+Number(unit).toLocaleString('id-ID',{maximumFractionDigits:2}):'-'}</td><td class="bahp-money">${shipping?rp(shipping):'-'}</td><td class="bahp-money">${unit?rp((+it.vol||0)*unit):'-'}</td></tr>`;
- }).join('')||'<tr><td colspan="6">Rincian barang belum tersedia.</td></tr>';
- const base=chosen?sum(rows,it=>(+it.vol||0)*(+(chosen.nego?.[it.id]??chosen.harga?.[it.id]??0)||0)):0;
- const shipping=chosen?+(chosen.ongkir||0):0;
- const final=base+shipping;
- const selected=chosen?PY(chosen.pen):{};
- const pricing=chosen?satriaDocPricing(p,chosen):null;
- const ppnNote=pricing?.verified?'PPN merupakan bagian dari harga satuan hasil negosiasi (bruto), bukan tambahan atas subtotal.':'Komponen sebelum PPN dan PPN pada sebagian rincian belum lengkap/selaras; harga satuan dalam tabel adalah harga akhir termasuk pajak yang tersimpan. Verifikasi sebelum pengesahan.';
- return `${kop(p)}<div class="bahp-reference-layout ${rows.length>12||offers.length>3?'bahp-many':''}">
- <p class="bahp-document-title"><b><u>BERITA ACARA HASIL PEMILIHAN E-PURCHASING</u></b><span>Nomor : ${esc(nomor('BAHP',p))}</span></p>
- <p>Pada Hari ini ${esc(date)} kami yang bertandatangan di bawah ini Pengguna Anggaran selaku Pejabat Pembuat Komitmen (PPKom) bersama Pejabat Pengadaan pada ${esc(OP(p).nama)} telah melaksanakan proses pemilihan melalui E-Purchasing, dengan hasil sebagai berikut :</p>
- <p class="bahp-section"><b>A. &nbsp; DATA UMUM</b></p>
- <div class="bahp-info">${metar('Sub kegiatan',subOf(p))}${metar('Kode RUP',p.rup)}${metar('Pagu',rp(p.pagu))}${metar('Metode',p.metodePemilihan||'Perlu verifikasi')}${metar('Nama Paket',p.nama)}</div>
- <p class="bahp-section"><b>B. &nbsp; PERSIAPAN PENGADAAN</b></p>
- <p>Menyusun identifikasi sesuai kebutuhan terdiri atas :</p><ol class="bahp-list">${rows.map(it=>`<li>${itemLabel(it)}</li>`).join('')}</ol>
- <p>Dengan rincian kebutuhan dan harga satuan :</p><div class="bahp-pricing-list">${rows.map((it,n)=>`<div><span>${n+1}.</span><span>${itemLabel(it)}</span><span>${vf(it.vol)}</span><span>${esc(it.satuan||'')}</span><span>${rp(it.hs)}</span></div>`).join('')}</div>
- <p>Hasil pengumpulan referensi harga dan spesifikasi minimal dari beberapa pelaku usaha :</p>${refs}
- <p class="bahp-section"><b>C. &nbsp; PELAKSANAAN E-PURCHASING</b></p>
- <p class="bahp-inset">1) &nbsp; <b>Pemilihan Produk</b>, dilakukan melalui katalog elektronik sesuai ketentuan yang berlaku dengan memperhatikan kesesuaian spesifikasi, kebutuhan produk, dan dokumen persiapan pengadaan.</p>
- <p class="bahp-inset">2) &nbsp; <b>Referensi Harga</b>, berdasarkan data referensi dari pelaku usaha yang tercatat dalam paket dan bukti Request For Information (RFI) atau sumber resmi lainnya. Bukti dan kesesuaiannya harus diverifikasi.</p>
- <p class="bahp-section"><b>D. &nbsp; HASIL PELAKSANAAN E-PURCHASING</b></p>
- <p class="bahp-section"><b>D.1. Pemenuhan Kriteria Spesifikasi</b></p>${assessments}
- <p>Berdasarkan hasil penilaian terhadap pemenuhan spesifikasi minimal maka pilihan diprioritaskan kepada :</p>
- <div class="bahp-info">${metar('Pelaku Usaha',chosenName)}${metar('Bentuk Usaha',selected.bentuk||selected.bentukUsaha||'-')}${metar('Status',selected.status||'-')}${metar('Tipe Penyedia',selected.tipe||'-')}${metar('Alamat',selected.alamat||'-')}</div>
- <p>Penetapan terhadap pelaku usaha tersebut di atas diambil dengan pertimbangan :</p><ol class="bahp-list"><li>Kesesuaian spesifikasi dan ketersediaan produk harus dibuktikan melalui hasil pemeriksaan dokumen dan etalase.</li><li>Harga dan bukti referensi dibandingkan melalui data penawaran/RFI yang tercatat; keputusan tetap memerlukan verifikasi Pejabat Pengadaan.</li></ol>
- <p class="bahp-section"><b>D.2. Negosiasi Teknis dan Harga</b></p>
- <p class="bahp-inset">a) &nbsp; <b>Negosiasi Teknis</b> dilakukan terhadap layanan yang diberikan agar dapat menyelesaikan sesuai spesifikasi yang disepakati, dengan tetap memperhatikan waktu.</p>
- <p class="bahp-inset">b) &nbsp; <b>Negosiasi harga</b> dilakukan berdasarkan riwayat harga transaksi terakhir/struktur pembentuk harga (bila ada), fitur harga terbaik pada aplikasi katalog elektronik (bila ada), sumber RFI dan/atau hasil pencarian internet yang dapat diverifikasi.</p>
- <p class="bahp-inset">c) &nbsp; Hasil negosiasi harga sebagai berikut :</p>
- <table class="bahp-grid bahp-negotiation">${head(['No.','Jenis Barang/Jasa','Vol.','Harga Satuan Hasil Negosiasi','Ongkos Kirim','Jumlah Total Hasil Negosiasi'],[1,2,3,4,5,6])}<tbody>${negotable}<tr><td colspan="5" class="bahp-right">Sub Total</td><td class="bahp-money">${chosen?rp(base):'-'}</td></tr><tr><td colspan="5" class="bahp-right">PPN (termasuk dalam harga satuan, informasi)</td><td class="bahp-money">${pricing?.verified?rp(pricing.tax):'-'}</td></tr><tr><td colspan="5" class="bahp-right">Ongkos kirim paket (tidak dialokasikan per rincian)</td><td class="bahp-money">${chosen?rp(shipping):'-'}</td></tr><tr><td colspan="5" class="bahp-right"><b>Total${shipping?' (termasuk ongkir)':''}</b></td><td class="bahp-money"><b>${chosen?rp(final):'-'}</b></td></tr></tbody></table>
- <p class="bahp-small">${ppnNote} ${shipping?'Ongkos kirim total yang dicatat: '+rp(shipping)+'; pembebanan per item belum tersedia.':''} ${chosen?'Penyedia dicatat sebagai pemenang manual; seluruh bukti administrasi dan teknis tetap perlu diverifikasi.':'Penetapan akhir penyedia belum tervalidasi.'}</p>
- <p>Demikian berita acara ini dibuat untuk dipergunakan sebagaimana mestinya.</p>
- <div class="bahp-signatures"><div><span>Disetujui oleh,</span><span>PA / KPA / PPK</span>${satriaBahpSignerVisual(approver,p)}<b><u>${esc(approver.nama)}</u></b><span>NIP. ${esc(approver.nip||'-')}</span></div><div><span>Dipesan oleh,</span><span>Pejabat Pengadaan</span>${satriaBahpSignerVisual(officer,p)}<b><u>${esc(officer.nama)}</u></b><span>NIP. ${esc(officer.nip||'-')}</span></div></div></div>`;
-}
-const LT=rows=>`<table class="tbl-meta" style="border:0">${rows.map(([a,b])=>`<tr><td style="border:0;width:170px">${a}</td><td style="border:0">: ${esc(b)}</td></tr>`).join('')}</table>`;
-const KAB=()=>satriaPemdaOfficial('nama').replace(/^PEMERINTAH (KABUPATEN )?/,'');
-function idkb(p){
- // Pedoman Identifikasi Kebutuhan: formulir dua kolom pengesahan pada AKHIR dokumen.
- // Nilai berasal dari paket dan Data Master, tidak menyalin angka/nama pada foto pedoman.
- const k=PJ(p.ppk),o=OP(p);
- const staf=(S.pejabat||[]),penId=String(p.idkbPenyusunId||p.pp||'');
- const penyusun=staf.find(x=>String(x.id)===penId&&String(x.opd)===String(p.opd))||null;
- const text=x=>esc(String(x??'')), nl=x=>text(x||'-').replace(/\r?\n/g,'<br>');
- const titleCase=x=>String(x||'').toLowerCase().replace(/(^|\s)[a-z]/g,m=>m.toUpperCase());
- const dateLong=x=>{
-   if(!x)return 'Belum diisi';
-   const d=new Date(String(x).slice(0,10)+'T00:00:00');
-   return Number.isNaN(d.valueOf())?text(x):d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
- };
- const itemRows=(p.items||[]).map((it,n)=>`<li>${itemLabel(it)}</li>`).join('')||'<li>Rincian barang/jasa belum dicatat.</li>';
- const volRows=(p.items||[]).map((it,n)=>`<tr><td class="idkb-desc">${n+1}. ${itemLabel(it)}</td><td class="idkb-eq">=</td><td class="idkb-vol">${vf(it.vol)} ${text(it.satuan||'')}</td></tr>`).join('')||'<tr><td colspan="3">Belum ada rincian kebutuhan.</td></tr>';
- const suppliers=(p.penawaran||[]).map((w,n)=>{
-   const pen=PY(w.pen)||{};
-   const source=String(pen.link||'').trim();
-   const safeLink=/^https:\/\/[^\s\"'<>]+$/i.test(String(source))?String(source):'';
-   return `<li><b>${text(pen.nama||'Penyedia belum dilengkapi')}</b>${safeLink?`<div class="idkb-link"><a href="${text(safeLink)}">${text(safeLink)}</a></div>`:'<div class="idkb-muted">Link katalog belum dicatat</div>'}</li>`;
- }).join('')||'<li>Belum ada referensi penyedia pada paket.</li>';
- const jawaban=(p.idkbJabatanPenyusun||penyusun?.jabatan||penyusun?.namaJabatan||penyusun?.bidang||'').trim();
- const namaPenyusun=penyusun?.nama||'Belum ditentukan';
- const nipPenyusun=penyusun?.nip||'-';
- const province=titleCase(satriaPemdaOfficial('nama')||'[Nama pemerintah daerah belum diatur]');
- const row=(key,val)=>`<tr><td class="idkb-label">${key}</td><td class="idkb-colon">:</td><td class="idkb-value">${val}</td></tr>`;
- const info=[
-  row('Pemerintah Daerah',text(province)),
-  row('PA/KPA/PPK *)',text(k.nama||'Belum ditentukan')),
-  row('Program',nl(progOf(p))),row('Kegiatan',nl(kegOf(p))),row('Sub Kegiatan',nl(subOf(p))),
-  row('Output',nl(outOf(p))),row('Jenis Pengadaan',`<b><u>${text(p.jenisPengadaan||'Belum diisi')}</u></b>`)
- ].join('');
- const priorities=String(p.prioritasBarang||p.prioritas||'').trim();
- const prefer=priorities?nl(priorities):'Prioritas PDN, TKDN, UMKM dan produk lokal diperiksa sesuai informasi paket serta ketentuan pengadaan yang berlaku.';
- // Rangka pengesahan khusus dua kolom sesuai foto pedoman. Tidak boleh masuk ke metadata/Output.
- const approvedBy=`Ditetapkan oleh,<br>PA/KPA/PPK<br>${text(o.nama||'')}`;
- const assembledBy=`Disusun oleh,${jawaban?`<br>${nl(jawaban)}`:'<br>Jabatan penyusun belum dicatat'}`;
- return `<div class="satria-idkb-form${(p.items||[]).length>18?' idkb-long':''}" data-satria-idkb-reference="pedoman-2026">
-  <p class="satria-idkb-title"><b><u>FORMULIR IDENTIFIKASI KEBUTUHAN</u></b></p>
-  <div class="satria-idkb-sheet">
-   <table class="satria-idkb-info-table" data-satria-idkb-section="metadata"><tbody>${info}</tbody></table>
-   <section class="satria-idkb-section"><h3>A. Identifikasi Jenis/Tipe Barang/Jasa</h3>
-    <div class="idkb-subhead">a) Identifikasi barang/jasa yang dibutuhkan :</div><ol class="idkb-list">${itemRows}</ol>
-    <div class="idkb-subhead">b) Jumlah kebutuhan barang/jasa :</div>
-    <table class="idkb-quantity-table"><tbody>${volRows}</tbody></table>
-    <table class="idkb-extra-table"><tbody>
-     ${row('c) Waktu pemanfaatan barang/jasa',nl(p.bulanPelaksanaan||'Belum diisi'))}
-     ${row('d) Perkiraan waktu (termasuk pengiriman)',`${p.masaHk?text(p.masaHk)+' Hari Kalender':'Belum diisi'}`)}
-     ${row('e) Terdapat di Katalog LKPP',nl(p.katalogRef||'Belum dicatat'))}
-     ${row('f) Perkiraan Biaya',p.pagu>0?`Rp ${nf(p.pagu)}`:'Belum diisi')}
-    </tbody></table>
-   </section>
-   <section class="satria-idkb-section"><h3>B. Spesifikasi Teknis Minimal Barang/Jasa</h3>
-    ${(p.items||[]).length>12?`<p>Spesifikasi minimal untuk ${p.items.length} rincian tercantum pada daftar kebutuhan bagian A dan dokumen spesifikasi teknis per barang; kesesuaian produk wajib diverifikasi.</p>`:`<ol class="idkb-list">${itemRows}</ol>`}
-   </section>
-   <section class="satria-idkb-section"><h3>C. Ketersediaan Produk dan Pelaku Usaha</h3>
-    <p>Referensi ketersediaan produk dan penyedia sesuai informasi yang tercatat untuk paket:</p><ol class="idkb-suppliers">${suppliers}</ol>
-   </section>
-   <section class="satria-idkb-section"><h3>E. Penentuan Prioritas Barang/Jasa</h3><p>${prefer}</p></section>
-  </div>
-  <table class="satria-idkb-sign-table" data-satria-idkb-section="signatures"><tbody>
-   <tr class="idkb-date-row"><td>Disusun pada tanggal</td><td>${dateLong(p.tglIdkb||p.tglNodis)}</td></tr>
-   <tr class="idkb-approval-row"><td class="satria-idkb-approval-cell" data-satria-idkb-section="approval">
-     ${approvedBy}<div class="idkb-sig-media">${sigImg(k)}</div>
-     <div class="idkb-sign-identity"><b><u>${text(k.nama||'Belum ditentukan')}</u></b><div>NIP. ${text(k.nip||'-')}</div></div>
-    </td><td class="idkb-preparer-cell">${assembledBy}
-      <div class="idkb-preparer-space" aria-hidden="true"></div>
-      <div class="idkb-sign-identity"><b><u>${text(namaPenyusun)}</u></b><div>NIP. ${text(nipPenyusun)}</div></div>
-    </td></tr>
-  </tbody></table>
- </div>`;
-}
-function rfi(p){const rows=[];p.penawaran.forEach(w=>p.items.forEach(i=>{if((+w.harga[i.id]||0)>0)rows.push({w,i,h:+w.harga[i.id]})}));
-const en2=n=>nf(n); // Harga rupiah dibulatkan, tanpa .00 dan koma ribuan Inggris
-const vTot=p.items.reduce((s,x)=>s+(+x.vol||0),0)||1;
-const TH='border:1px solid #000;background:#c8c8c8;font-weight:700;text-align:center;vertical-align:middle';
-const TD='border:1px solid #000;vertical-align:top';
-const W=[3,8,12,6,4,4,6,4,6,7,6,8,4,8,9,5];const cg='<colgroup>'+W.map(w=>`<col style="width:${w}%">`).join('')+'</colgroup>';
-const head=`<thead><tr><th rowspan=2 style="${TH}">NO</th><th rowspan=2 style="${TH}">PENYEDIA</th><th rowspan=2 style="${TH}">NAMA PRODUK TAYANG</th><th colspan=12 style="${TH}">UNSUR PENILAIAN</th><th rowspan=2 style="${TH}">KET.</th></tr><tr>${['Spesifikasi','PDN Produk','UMKM','LOKASI','PDN Penyedia','STATUS KATALOG','HARGA SATUAN','ONGKIR','HARGA SATUAN + ONGKIR','QTY','TOTAL HARGA','LINK'].map(t=>`<th style="${TH}">${t}</th>`).join('')}</tr></thead>`;
-const body=rows.map(({w,i,h},n)=>{const y=PY(w.pen);const ref=(w.catalogRefs||{})[i.id]||{};const ong=+w.ongkir||0;const ongU=0; // ongkir paket tidak dialokasikan ke setiap barang tanpa dasar
-
-return `<tr class="${rows.length>=7&&rows.length<=12&&n===Math.ceil(rows.length/2)?'satria35912-rfi-half-break':''}"><td style="${TD};text-align:center">${n+1}</td><td style="${TD}"><b>${esc(y.nama)}</b></td><td style="${TD}">${esc(ref.name||i.nama)}</td><td style="${TD};text-align:center">${esc(ref.spec||i.spesifikasi||'Spesifikasi perlu dicocokkan')}</td><td style="${TD};text-align:center">${esc(i.pdn||'Perlu verifikasi')}</td><td style="${TD};text-align:center">${y.tipe==='UMKM'?'Ya':(y.tipe?'Tidak':'Perlu verifikasi')}</td><td style="${TD};text-align:center">${esc(y.kabupaten||y.alamat||'-')}</td><td style="${TD};text-align:center">${esc(y.pdn||i.pdn||'Perlu verifikasi')}</td><td style="${TD};text-align:center">${esc(y.statusKatalog||'Perlu verifikasi')}</td><td style="${TD};text-align:right;white-space:nowrap">Rp ${en2(h)}</td><td style="${TD};text-align:right;white-space:nowrap">${ong?'Ongkir paket': 'Rp -'}</td><td style="${TD};text-align:right;white-space:nowrap">Rp ${en2(h+ongU)}</td><td style="${TD};text-align:center;white-space:nowrap">${vf(i.vol)}</td><td style="${TD};text-align:right;white-space:nowrap">Rp ${en2(i.vol*(h+ongU))}</td><td style="${TD};word-break:break-all">${(ref.link||y.link)?`<a href="${esc(ref.link||y.link)}" style="color:#1d4ed8;text-decoration:underline">${esc(ref.link||y.link)}</a>`:'-'}</td><td style="${TD}"></td></tr>`}).join('');
-return `<p style="text-align:center;margin:0 0 10px"><b><u>HASIL REQUEST FOR INFORMATION (RFI) PENYEDIA BARANG/JASA ATAU ANALISIS PASAR PRA E-PURCHASING</u></b></p>
-<table class="tbl-rfi" style="border-collapse:collapse;width:100%;table-layout:fixed">${cg}${head}<tbody>${body||`<tr><td colspan=16 style="${TD}">Belum ada data RFI; lengkapi penyedia dan harga tayang pada menu Penawaran dan Negosiasi.</td></tr>`}</tbody></table><p class="doc-note"><b>Catatan ongkos kirim:</b> Ongkir disimpan per penyedia dan tidak dibagi per unit barang tanpa dasar alokasi. ${p.penawaran.map(w=>`${esc(PY(w.pen).nama)}: ${rp(Number(w.ongkir)||0)}`).join(' · ')}. Total pada tabel hanya harga tayang barang; tambah ongkir sekali di ringkasan paket bila relevan.</p>`;}
-function survei(p){const W=p.penawaran,H=hps(p);return `${kop(p)}<p class="doc-title" style="text-align:center"><b><u>SURVEI PASAR / REFERENSI HARGA</u></b></p>
-${LT([['Nama Paket',p.nama],['Kode RUP',p.rup],['Pagu',rp(p.pagu)],['Nilai HPS',rp(H)],['Sumber referensi','Sumber bukti harga dan tanggal yang dicatat pada masing-masing penawaran penyedia']])}
-<p class="doc-section-heading"><b>A. Perbandingan harga per barang</b></p><table class="tbl-price-matrix"><thead><tr><th>No</th><th>Item Barang dan Spesifikasi Minimal</th><th>Volume</th><th>Satuan</th><th class=n>Harga Satuan HPS</th><th class=n>Jumlah HPS</th>${W.map(w=>`<th class=n>${esc(PY(w.pen).nama)}<br>Harga Satuan</th>`).join('')}</tr></thead><tbody>
-${p.items.map((i,n)=>`<tr><td>${n+1}</td><td>${itemLabel(i)}</td><td class=n>${vf(i.vol)}</td><td>${esc(i.satuan)}</td><td class=n>${nf(i.hs)}</td><td class=n>${nf(i.vol*i.hs)}</td>${W.map(w=>`<td class=n>${(+w.harga[i.id]||0)?nf(w.harga[i.id]):'-'}</td>`).join('')}</tr>`).join('')}
-<tr><th colspan=5 style="text-align:right">Total</th><th class=n>${nf(H)}</th>${W.map(w=>`<th class=n>${nf(totPw(p,w,false))}</th>`).join('')}</tr></tbody></table>
-<p class="doc-section-heading"><b>B. Profil penyedia dan sumber referensi</b></p><table class="tbl-supplier-profile"><thead><tr><th>No</th><th>Penyedia</th><th>Alamat</th><th>Status</th><th>Tipe</th><th>Link/Sumber</th><th>Sumber harga</th><th>Tanggal harga</th><th class=n>Ongkir (terpisah)</th><th class=n>Total harga tayang</th><th class=n>Total negosiasi</th></tr></thead><tbody>${W.map((w,n)=>{const y=PY(w.pen);return `<tr><td>${n+1}</td><td>${esc(y.nama)}</td><td>${esc(y.alamat||'-')}</td><td>${esc(y.status||'-')}</td><td>${esc(y.tipe||'-')}</td><td>${y.link?`<a href="${esc(y.link)}">${esc(y.link)}</a>`:'Belum dicatat'}</td><td>${esc(satriaOfferPriceSource(w)||'Belum dicatat')}</td><td>${tg(w.tanggalHarga)}</td><td class=n>${nf(w.ongkir||0)}</td><td class=n>${nf(totPw(p,w,false))}</td><td class=n>${nf(totPw(p,w,true))}</td></tr>`}).join('')||'<tr><td colspan=11>Belum ada referensi penyedia.</td></tr>'}</tbody></table>
-<p><b>Catatan analisis:</b> bandingkan kesesuaian spesifikasi, harga satuan, ongkos kirim, status katalog, lokasi, PDN/UMKM, serta kelengkapan bukti. Nilai kosong tidak diperlakukan sebagai harga nol.</p>${sig(PJ(p.pp),'Pejabat Pengadaan,')}`}
-function bahepe(p){
-const W=Array.isArray(p.penawaran)?p.penawaran:[],o=OP(p);
-const en0=n=>nf(n);
-const money=n=>(n===null||n===undefined||n==='')?'Rp -':`Rp ${en0(n)}`;
-const quoteMoney=n=>(+n>0)?money(n):'Rp -';
-const sat=['','Satu','Dua','Tiga','Empat','Lima','Enam','Tujuh','Delapan','Sembilan'];
-const eja=n=>{n=Math.floor(Math.abs(+n||0));if(n<10)return sat[n];if(n===10)return 'Sepuluh';if(n===11)return 'Sebelas';if(n<20)return sat[n-10]+' Belas';const t=Math.floor(n/10),r=n%10;return (sat[t]||String(t))+' Puluh'+(r?' '+sat[r]:'')};
-const ejaTahun=y=>y>=2000?'Dua Ribu'+(y%1000?' '+eja(y%1000):''):eja(y);
-const d=p.tglEvaluasi?new Date(p.tglEvaluasi+'T00:00:00'):null;
-const cap=s=>s?String(s).charAt(0).toUpperCase()+String(s).slice(1):'';
-const hariTanggal=d?`${cap(d.toLocaleDateString('id-ID',{weekday:'long'}))} Tanggal ${eja(d.getDate())} Bulan ${d.toLocaleDateString('id-ID',{month:'long'})} Tahun ${ejaTahun(d.getFullYear())}`:'[hari dan tanggal evaluasi belum diisi]';
-const TB='border:1px solid #000;padding:3px 4px;vertical-align:middle';
-const NB='border:0;padding:1px 0;vertical-align:top;text-align:left';
-const nama=w=>w?String((PY(w.pen)||{}).nama||'Penyedia belum ditentukan'):'Belum ada penyedia';
-const PCols=W.length?W:[null];
-const asp=[
- ['NIB/OSS; NPWP',(y,w)=>y.nib&&y.npwp?'Ada':null],
- ['KBLI',(y,w)=>y.kbli?'Ada':null],
- ['Tidak sedang dikenakan Sanksi Daftar Hitam',(y,w)=>!y.daftarHitam||y.daftarHitam==='Perlu verifikasi'?null:(y.daftarHitam==='Tidak'?'Ya':'Tidak')],
- ['Status Penyedia Terdaftar aktif di katalog elektronik LKPP',(y,w)=>y.statusKatalog&&y.statusKatalog!=='Perlu verifikasi'?y.statusKatalog:null],
- ['Jenis Penyedia UMKM',(y,w)=>!y.tipe||y.tipe==='Perlu verifikasi'?null:(y.tipe==='UMKM'||y.tipe==='Koperasi'?'Ya':'Tidak')],
- ['Alamat penyedia sesuai wilayah instansi',(y,w)=>{const wilayah=satriaPemdaOfficial('kota');if(!y.kabupaten||!wilayah)return null;return String(y.kabupaten).toLocaleLowerCase('id-ID').includes(wilayah.toLocaleLowerCase('id-ID'))?'Ya':'Tidak'}],
- ['Barang di Etalase minimal menampilkan (Nama produk, harga, no. KBKI, satuan produk, berat produk dan dimensi produk)',(y,w)=>null],
- ['Jenis Produk PDN',(y,w)=>y.pdn==='PDN'?'Ya':y.pdn==='Impor'?'Tidak':null],
- ['Spesifikasi',(y,w)=>p.items.length&&p.items.every(i=>String(i.spesifikasi||'').trim())?'Sesuai Kebutuhan':null],
- ['Jaminan Bebas Cacat Mutu dan Garansi',null],
- ['Menjamin ketersediaan Barang dan/atau Jasa yang sesuai dengan spesifikasi',null],
- ['Memastikan kesesuaian informasi Barang dan/atau Jasa Produk yang diunggah pada Katalog Elektronik sesuai',null],
- ['Penyedia bersedia memberikan layanan tambahan yang diperjanjikan seperti instalasi, testing, asuransi dan pelatihan (apabila ada).',null],
- ['Layanan jasa pengiriman disiapkan oleh Penyedia',null]
-];
-const evalValue=(fn,w)=>{if(!w)return 'Perlu verifikasi';const y=PY(w.pen)||{};const v=fn?fn(y,w,p):null;return v===null||v===undefined||v===''?'Perlu verifikasi':String(v)};
-const admCompact=W.length<=3;
-const admColWidths=admCompact?[`<col style="width:6%">`,`<col style="width:32%">`,...PCols.map(()=>`<col style="width:${(51/PCols.length).toFixed(3)}%">`),`<col style="width:11%">`].join(''):[`<col style="width:4%">`,`<col style="width:36%">`,...PCols.map(()=>`<col style="width:${(48/PCols.length).toFixed(3)}%">`),`<col style="width:12%">`].join('');
-const aspRows=asp.map(([a,fn],n)=>`<tr><td style="${TB};text-align:center">${n+1}</td><td style="${TB}">${esc(a)}</td>${PCols.map(w=>`<td style="${TB};text-align:center">${esc(evalValue(fn,w))}</td>`).join('')}<td style="${TB}"></td></tr>`).join('');
-const low=i=>{const arr=W.map(w=>({w,price:+(((w||{}).harga||{})[i.id])||0})).filter(x=>x.price>0);if(!arr.length)return null;const m=Math.min(...arr.map(x=>x.price));return {m,winners:arr.filter(x=>x.price===m).map(x=>x.w)};};
-const itemColWidths=[`<col style="width:4%">`,`<col style="width:27%">`,`<col style="width:12%">`,...PCols.map(()=>`<col style="width:${(30/PCols.length).toFixed(3)}%">`),`<col style="width:10%">`,`<col style="width:17%">`].join('');
-const itemRows=p.items.map((i,n)=>{const l=low(i);return `<tr><td style="${TB};text-align:center">${n+1}</td><td style="${TB}">${itemLabel(i)}</td><td style="${TB};text-align:right;white-space:nowrap">${money(i.hs)}</td>${PCols.map(w=>`<td style="${TB};text-align:right;white-space:nowrap">${w?quoteMoney((((w||{}).harga||{})[i.id])):'-'}</td>`).join('')}<td style="${TB};text-align:right;white-space:nowrap">${l?quoteMoney(l.m):'-'}</td><td style="${TB};overflow-wrap:anywhere">${l?esc(l.winners.map(w=>nama(w)).join(', ')):'Belum ada harga'}</td></tr>`}).join('');
-const cnt=w=>p.items.filter(i=>{const l=low(i);return l&&l.winners.some(x=>x===w)}).length;
-const rank=W.map((w,index)=>({w,cnt:cnt(w),index})).sort((a,b)=>b.cnt-a.cnt||a.index-b.index);
-const maxCnt=rank.length?rank[0].cnt:0;
-let rankNumber=0,previousCount=null;
-const rankRows=rank.map((x,n)=>{if(previousCount===null||x.cnt!==previousCount)rankNumber=n+1;previousCount=x.cnt;const follow=maxCnt>0&&x.cnt===maxCnt?'Pembanding utama':'Pembanding lain';return `<tr><td style="${TB};text-align:center">${rankNumber}</td><td style="${TB}">${esc(nama(x.w))}</td><td style="${TB};text-align:center">${x.cnt}</td><td style="${TB}">${follow}</td></tr>`}).join('');
-const top=rank.find(x=>maxCnt>0&&x.cnt===maxCnt);
-const subKegiatanLines=value=>{
- const raw=String(value??'').replace(/\r\n?/g,'\n').trim();
- if(!raw)return '-';
- const separated=raw.replace(/([^\n])\s+(?=\d{1,2}\.\d{2}\.\d{2}\.\d{1,2}\.\d{2}\.\d{4}\s*[-–])/g,'$1\n');
- return separated.split(/\n+/).map(line=>line.trim()).filter(Boolean).map(line=>`<div class="bahepe-sub-line">${esc(line)}</div>`).join('');
-};
-const dataUmum=[['Sub Kegiatan',subOf(p)||'-'],['Kode RUP',p.rup||'-'],['Pagu',money(p.pagu)],['Metode',p.metodePemilihan||'Perlu verifikasi'],['Nama Paket',p.nama||'-']].map(([a,b])=>{const value=a==='Sub Kegiatan'?subKegiatanLines(b):esc(b);return `<tr><td style="${NB};width:155px">${esc(a)}</td><td style="${NB};width:12px">:</td><td style="${NB}">${value}</td></tr>`}).join('');
-const supplierCount=W.filter(w=>p.items.some(i=>(+(((w||{}).harga||{})[i.id])||0)>0)).length;
-const kabupaten=satriaPemdaOfficial('nama').replace(/^PEMERINTAH (KABUPATEN |KOTA )?/,'').split(' ').filter(Boolean).map(w=>w[0]+w.slice(1).toLowerCase()).join(' ');
-return `${kop(p)}<div class="bahepe-body">
-<p class="bahepe-title"><b><u>BERITA ACARA HASIL EVALUASI PENYEDIA E-PURCHASING</u></b></p>
-<p class="bahepe-number"><b>Nomor : ${esc(nomor('BAHEPE',p))}</b></p>
-<p class="bahepe-intro">Pada hari ini ${esc(hariTanggal)} yang bertanda tangan di bawah ini selaku Pejabat Pengadaan pada ${esc(o.nama||'instansi')} telah melaksanakan verifikasi penyedia jasa melalui E-Purchasing, dengan hasil sebagai berikut:</p>
-<p class="bahepe-section"><b>A. DATA UMUM</b></p>
-<table class="tbl-letter-meta bahepe-meta" style="border:0;width:100%"><tbody>${dataUmum}</tbody></table>
-<p class="bahepe-section"><b>B. EVALUASI ADMINISTRASI DAN TEKNIS</b></p>
-<p class="bahepe-subtitle">Verifikasi Penyedia Jasa (berdasarkan persyaratan penyedia yang tercantum pada Dokumen Pengumuman Pendaftaran)</p>
-<table class="tbl-bahepe-admin ${W.length<=3?'compact':'wide'}"><colgroup>${admColWidths}</colgroup><thead><tr><th rowspan="2">No</th><th rowspan="2">Aspek penilaian</th><th colspan="${PCols.length}">Penyedia</th><th rowspan="2">Ket</th></tr><tr>${PCols.map(w=>`<th>${esc(nama(w))}</th>`).join('')}</tr></thead><tbody>${aspRows}</tbody></table>
-<p class="bahepe-section bahepe-section-c"><b>C. SURVEY HARGA PEMBANDING DENGAN NILAI TERENDAH</b></p>
-<table class="tbl-bahepe-price"><colgroup>${itemColWidths}</colgroup><thead><tr><th>No</th><th>Item Barang dan Spek Minimal</th><th>Harga Satuan HPS</th>${PCols.map(w=>`<th>${esc(nama(w))}</th>`).join('')}<th>Terendah</th><th>Penyedia harga terendah (pembanding)</th></tr></thead><tbody>${itemRows||`<tr><td colspan="${PCols.length+5}">Belum ada rincian barang pada paket.</td></tr>`}</tbody></table>
-<p class="bahepe-note">Dari beberapa penyedia yang mencantumkan harga masing-masing produk pada E-Katalog lokal ${esc(kabupaten||'-')} yang produknya sesuai dengan kebutuhan dan spesifikasi pada paket pekerjaan tersebut sebanyak ${supplierCount} penyedia. Hasil tangkap layar harga satuan tayang masing-masing penyedia terlampir pada lampiran Dokumen Persiapan Pengadaan (DPP).</p>
-<div class="bahepe-rank-block"><p class="bahepe-section bahepe-section-d"><b>D. PERENGKINGAN HARGA TERENDAH</b></p>
-<table class="tbl-bahepe-rank"><colgroup><col style="width:10%"><col style="width:40%"><col style="width:20%"><col style="width:30%"></colgroup><thead><tr><th>Rank</th><th>Nama Penyedia</th><th>Item Terendah</th><th>Status harga pembanding</th></tr></thead><tbody>${rankRows||`<tr><td colspan="4">Belum ada data penawaran penyedia.</td></tr>`}</tbody></table></div>
-<p class="bahepe-note">Berdasarkan jumlah item dengan harga tayang terendah (informasi pembanding harga, bukan keputusan otomatis mengenai kualifikasi atau penetapan pemenang), penyedia pembanding teratas adalah:</p>
-<p class="bahepe-selected"><b>${top?esc(nama(top.w)):'Belum dapat ditentukan'}</b></p>
-<p class="bahepe-note"><b>Penyedia yang ditetapkan secara manual:</b> ${pemenang(p)?esc(PY(pemenang(p).w.pen).nama):'Belum ditetapkan'}. Peringkat harga di atas hanya alat bantu perbandingan. Proses selanjutnya memerlukan verifikasi administratif, teknis, persetujuan pejabat berwenang, dan bukti pendukung.</p>
-<p class="bahepe-note">Demikian Berita Acara Pemilihan Calon Penyedia ini dibuat untuk dapat digunakan sebagaimana mestinya.</p>
-<div class="bahepe-signature">${esc(o.nama||'')}<br>Pejabat Pengadaan<br>${sigImg(PJ(p.pp))}<b><u>${esc(PJ(p.pp).nama)}</u></b><br>NIP. ${esc(PJ(p.pp).nip)}</div>
-</div>`;}
-function metode(p){
- const o=OP(p), ppk=PJ(p.ppk), pp=PJ(p.pp);
- const tanggal=p.tglPenetapan||p.tglDpp||'';
- const tglRingkas=d=>d?new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}):'-';
- const h=s=>esc(s==null||String(s).trim()===''?'-':String(s)).replace(/\r\n?/g,'\n').replace(/\n/g,'<br>');
- const kepala=o.kop?`<div class=\"metode-letterhead-image\"><img src=\"${esc(o.kop)}\" alt=\"Kop surat OPD\"></div>`:`<table class=\"metode-kop-table\"><tbody><tr><td class=\"metode-kop-logo\">${S.pemda.logo?`<img src=\"${esc(S.pemda.logo)}\" alt=\"Logo pemerintah daerah\">`:''}</td><td class=\"metode-kop-text\"><div class=\"metode-kop-pemda\">${h(satriaPemdaOfficial('nama')||'[Nama pemerintah daerah belum diatur]')}</div><div class=\"metode-kop-opd\">${h(String(o.nama||'').toLocaleUpperCase('id-ID'))}</div><div class=\"metode-kop-address\">${h(o.alamat||'')}</div><div class=\"metode-kop-contact\">${h(o.kontak||'')}</div></td></tr></tbody></table><div class=\"metode-kop-rule\"></div>`;
- const pengadaan=String(p.jenisPengadaan||'jenis pengadaan belum diverifikasi').trim();
- const pengadaanDisplay=/^pengadaan\s+/i.test(pengadaan)?pengadaan:'Pengadaan '+pengadaan;
- const pengadaanRingkas=pengadaan.replace(/^pengadaan\s+/i,'');
- const metodeSumber=String(p.metodePemilihan||'Perlu verifikasi');
- const metodeLabel=/negosiasi/i.test(metodeSumber)?'Negosiasi Harga':metodeSumber;
- const specs=i=>{
-   const name=String(i.nama||'').trim(), spec=String(i.spesifikasi||'').trim(), brand=String(i.merek||'').trim();
-   const parts=[name||'-'];
-   if(spec && !/spesifikasi\s*:/i.test(name)) parts.push('Spesifikasi: '+spec);
-   if(brand && !parts.join(' ').toLocaleLowerCase('id-ID').includes(brand.toLocaleLowerCase('id-ID'))) parts.push('Merek/tipe: '+brand);
-   return h(parts.join('  '));
- };
- const metaRows=[
-  ['Pemerintah Daerah',satriaPemdaOfficial('nama')||'[Nama pemerintah daerah belum diatur]'],
-  ['PA/KPA/PPK *)',ppk.nama||'-',true],
-  ['Sub Kegiatan',subOf(p)||'-',false],
-  ['Masa Pelaksanaan',(p.masaHk||'-')+' Hari Kerja',true],
-  ['Output',outOf(p)||'-',false],
-  ['Jenis Pengadaan',pengadaanDisplay,true],
-  ['Nama Paket',p.nama||'-',true]
- ].map(([a,b,bold=false])=>`<tr><td class="metode-meta-label">${h(a)}</td><td class="metode-meta-colon">:</td><td class="metode-meta-value">${bold?`<b>${h(b)}</b>`:h(b)}</td></tr>`).join('');
- const rowsA=(p.items||[]).map((i,n)=>`<tr><td class="metode-no">${n+1}.</td><td>${h(i.nama||'-')}</td><td class="metode-qty">${vf(i.vol)}</td><td>${h(i.satuan||'-')}</td></tr>`).join('')||'<tr><td colspan="4" class="metode-empty">Belum ada rincian barang/jasa.</td></tr>';
- const rowsB=(p.items||[]).map((i,n)=>`<tr><td class="metode-no">${n+1}.</td><td colspan="3">${specs(i)}</td></tr>`).join('')||'<tr><td class="metode-no">1.</td><td colspan="3">Spesifikasi minimal belum diisi.</td></tr>';
- const criteria=[
-  ['Cara pengiriman','Perlu konfirmasi berdasarkan ketentuan paket'],
-  ['Cara pengangkutan','Perlu konfirmasi berdasarkan ketentuan paket'],
-  ['Cara pemasangan','-'],
-  ['Cara penyimpanan','Perlu konfirmasi berdasarkan ketentuan paket'],
-  ['Cara pengoperasian/penggunaan','-'],
-  ['Kebutuhan pelatihan untuk pengoperasian/pemeliharaan Barang','Perlu konfirmasi berdasarkan ketentuan paket'],
-  ['Jaminan Bebas Cacat Mutudan Garansi','Perlu konfirmasi berdasarkan ketentuan paket'],
-  ['Menjamin ketersediaan Barang dan/atau Jasa yang sesuai dengan spesifikasi','Perlu konfirmasi berdasarkan ketentuan paket'],
-  ['Aspek pengadaan berkelanjutan','Perlu konfirmasi berdasarkan ketentuan paket'],
-  ['Metode Pemilihan','Perlu konfirmasi berdasarkan ketentuan paket'],
-  ['Metode Pembayaran','Perlu konfirmasi berdasarkan ketentuan paket']
- ].map(([a,b],n)=>`<tr><td class="metode-no">${n+1}.</td><td>${h(a)}</td><td colspan="2">${h(b)}</td></tr>`).join('');
- const signImage=x=>`<div class="metode-sign-visual">${(x.ttd||x.cap)?`${x.ttd?`<img class="metode-ttd" src="${esc(x.ttd)}" alt="Tanda tangan">`:''}${x.cap?`<img class="metode-cap" src="${esc(x.cap)}" alt="Cap/stempel">`:''}`:''}</div>`;
- return `${kepala}
- <div class="metode-form-body">
-  <p class="metode-form-title"><b><u>FORMULIR PENETAPAN BARANG/JASA E-PURCHASING</u></b></p>
-  <table class="metode-change-table"><tbody>
-   <tr><td>Perubahan ke :</td><td></td></tr>
-   <tr><td>Tanggal :</td><td>${h(tglRingkas(tanggal))}</td></tr>
-  </tbody></table>
-  <table class="metode-meta-table"><tbody>${metaRows}</tbody></table>
-  <table class="metode-main-table">
-   <colgroup><col class="metode-col-no"><col class="metode-col-label"><col class="metode-col-qty"><col class="metode-col-unit"></colgroup>
-   <thead><tr class="metode-column-head"><th>No</th><th>JENIS BARANG/JASA</th><th>JUMLAH</th><th>SATUAN</th></tr></thead>
-   <tbody>
-    <tr class="metode-section"><td>A</td><td colspan="3">Meliputi Pengadaan ${h(pengadaanRingkas)} :</td></tr>
-    ${rowsA}
-    <tr class="metode-section"><td>B</td><td colspan="3">Spesifikasi Minimal</td></tr>
-    ${rowsB}
-    <tr class="metode-section"><td>C</td><td colspan="3">Persyaratan Lain Yang Diperlukan</td></tr>
-    ${criteria}
-    <tr class="metode-section satria35912-page-second"><td>D</td><td colspan="3">PENETAPAN METODE E-PURCHASING</td></tr>
-    <tr><td class="metode-no">1.</td><td>Penetapan Metode E-Purchasing</td><td colspan="2">${h(metodeLabel)}</td></tr>
-    <tr class="metode-basis-row"><td class="metode-no">2.</td><td>Dasar Pemilihan Metode E-Purchasing <i>(termasuk justifikasi memilih penyedia secara berulang)</i></td><td colspan="2">
-     Dasar memilih Metode E-Purchasing dengan Negosiasi melalui Katalog Elektronik LKPP dipilih berdasarkan pertimbangan berikut:
-     <ol class="metode-reasons" type="a">
-      <li><b>Efisiensi Waktu:</b> E-Purchasing memungkinkan proses pengadaan yang lebih cepat dibandingkan metode lain, mengurangi waktu administratif dan prosedural.</li>
-      <li><b>Transparansi:</b> Harga dan spesifikasi produk sudah tercantum dalam Katalog Elektronik, meningkatkan transparansi dan mengurangi risiko mark-up harga.</li>
-      <li><b>Kemudahan Komparasi:</b> Katalog Elektronik memungkinkan perbandingan langsung antara berbagai produk dan penyedia, memudahkan pemilihan opsi terbaik sesuai kebutuhan dan anggaran.</li>
-     </ol>
-    </td></tr>
-    <tr class="metode-section"><td>E</td><td colspan="3">CATATAN LAINNYA</td></tr>
-    <tr><td colspan="4" class="metode-notes">Penyedia wajib memenuhi tingkat layanan meliputi ketepatan waktu, kesesuaian spesifikasi, kualitas hasil, ketepatan jumlah, responsivitas, pengemasan dan pengiriman, jaminan/garansi, fleksibilitas layanan, kepatuhan administratif, serta standar keamanan dan kepatuhan. Penyedia juga wajib menindaklanjuti setiap ketidaksesuaian melalui perbaikan atau penggantian tanpa biaya tambahan sesuai ketentuan yang disepakati serta bertanggung jawab penuh atas pengadaan.</td></tr>
-   </tbody>
-  </table>
-  <table class="metode-signature-table"><tbody>
-   <tr class="metode-sign-date"><td>Ditetapkan pada tanggal</td><td>${h(tglRingkas(tanggal))}</td></tr>
-   <tr class="metode-sign-head"><td>Ditetapkan oleh<br>PA/KPA/PPK</td><td>Disusun oleh<br>Pejabat Pengadaan</td></tr>
-   <tr class="metode-sign-people">
-    <td>${signImage(ppk)}<b><u>${h(ppk.nama)}</u></b><br>NIP. ${h(ppk.nip||'-')}</td>
-    <td>${signImage(pp)}<b><u>${h(pp.nama)}</u></b><br>NIP. ${h(pp.nip||'-')}</td>
-   </tr>
-  </tbody></table>
-  <div class="metode-footnote"><b>Catatan :</b><br>Terlampir tahap persiapan melalui <i>Request For Information (RFI)</i> Pra E-Purchasing</div>
- </div>`;
-}
-function spek(p){
-const o=OP(p),W=p.penawaran||[];
-const TS=d=>d?new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}):'-';
-const H=hps(p);
-const lokasi=p.lokasiPengiriman||o.tempat||o.alamat||o.nama||'-';
-const daftarSub=String(subOf(p)||'-').replace(/\s+(?=\d{1,2}(?:\.\d{1,2}){4}\.\d{4}\s*[-–])/g,'\n').split(/\n|(?=\b\d{1,2}(?:\.\d{1,2}){4}\.\d{4}\s*[-–])/g).map(x=>x.trim()).filter(Boolean).map(x=>esc(x)).join('<br>');
-const itemRows=(p.items||[]).map((i,n)=>`<tr>
-<td style="text-align:center">${n+1}.</td>
-<td>${esc(i.nama||'-')}${i.spesifikasi?`<br>Spesifikasi: ${esc(i.spesifikasi)}`:''}</td>
-<td style="text-align:center">${vf(i.vol)}</td>
-<td style="text-align:center">${esc(i.satuan||'-')}</td>
-<td style="text-align:right;white-space:nowrap">${nf(i.hs)}</td>
-<td></td>
-</tr>`).join('')||'<tr><td colspan="6">Rincian barang belum diisi.</td></tr>';
-const catalog=W.map(w=>{const y=PY(w.pen);return y.link?`<a href="${esc(y.link)}">${esc(y.link)}</a>`:esc(y.nama||'')}).filter(Boolean).join('<br>')||'Belum dicatat';
-const cell='border:1px solid #222;padding:3px 4px;vertical-align:top;';
-const inner=`<table style="width:100%;border-collapse:collapse;font-size:9pt;table-layout:fixed">
-<thead><tr>
-<th style="${cell}width:6%">No</th><th style="${cell}width:48%">Nama Barang dan Spesifikasi</th><th style="${cell}width:10%">Kua</th><th style="${cell}width:11%">Satuan</th><th style="${cell}width:15%">Harga Satuan (Rp)</th><th style="${cell}width:10%">Ket.</th>
-</tr></thead><tbody>${itemRows}</tbody></table>`;
-return `${kop(p)}
-<div class="spek-pdf">
-<p class="spek-title">SPESIFIKASI TEKNIS PAKET E-PURCHASING</p>
-<table class="spek-meta">
-<tr><td class="label">Program</td><td class="colon">:</td><td class="value">${esc(progOf(p)||'-')}</td></tr>
-<tr><td class="label">Kegiatan</td><td class="colon">:</td><td class="value">${esc(kegOf(p)||'-')}</td></tr>
-<tr><td class="label">Sub Kegiatan</td><td class="colon">:</td><td class="value">${daftarSub}</td></tr>
-<tr><td class="label">Lokasi</td><td class="colon">:</td><td class="value">${esc(lokasi)}</td></tr>
-<tr><td class="label">Nama Paket Pengadaan</td><td class="colon">:</td><td class="value">${esc(p.nama||'-')}</td></tr>
-</table>
-<table class="spek-main">
-<colgroup><col class="no"><col class="element"><col class="description"><col class="note"></colgroup>
-<thead><tr><th>No</th><th>Elemen Spesifikasi</th><th>Uraian Spesifikasi</th><th>Keterangan</th></tr></thead>
-<tbody>
-${(p.items||[]).length>8 ? (p.items||[]).map((it,index)=>`<tr class="satria35911-long-item"><td class="no">${index===0?'1.':''}</td><td>${index===0?'Jenis, Spesifikasi, Kuantitas, Satuan dan Harga':'Rincian barang '+(index+1)}</td><td>${index+1}. ${esc(it.nama||'-')}${it.spesifikasi?`<div>Spesifikasi: ${esc(it.spesifikasi)}</div>`:''}<div>Volume ${vf(it.vol)} ${esc(it.satuan||'-')} · Harga satuan ${nf(it.hs)}</div></td><td></td></tr>`).join('') : `<tr><td class="no">1.</td><td>Jenis, Spesifikasi, Kuantitas, Satuan dan Harga</td><td style="padding:0">${inner}</td><td></td></tr>`}
-<tr><td class="no">2.</td><td>Tempat</td><td colspan="2">${esc(lokasi)}</td></tr>
-<tr><td class="no">3.</td><td>Waktu</td><td colspan="2">${esc(p.masaHk||'-')} Hari Kerja</td></tr>
-<tr><td class="no">4.</td><td>Tingkat Layanan</td><td colspan="2">Penyedia wajib memenuhi tingkat layanan meliputi ketepatan waktu, kesesuaian spesifikasi, kualitas hasil, ketepatan jumlah, responsivitas, pengemasan dan pengiriman, jaminan/garansi, fleksibilitas layanan, kepatuhan administratif, serta standar keamanan dan kepatuhan. Penyedia juga wajib menindaklanjuti setiap ketidaksesuaian melalui perbaikan atau penggantian tanpa biaya tambahan sesuai ketentuan yang disepakati serta bertanggung jawab penuh atas pengadaan.</td></tr>
-<tr><td colspan="4"><b>Link E-Catalog :</b><br>${catalog}<br><br>Di akses tanggal, &nbsp; ${TS(p.tglDpp)}</td></tr>
-</tbody></table>
-<div class="spek-sign">${esc(satriaDppOfficialPlace(p))}, ${TS(p.tglDpp)}<br>Ditetapkan oleh :<br>Pejabat Pembuat Komitmen (PPKom)<br>${esc(o.nama||'')}<br><br><br><b>${esc(PJ(p.ppk).nama||'-')}</b><br>NIP. ${esc(PJ(p.ppk).nip||'-')}</div>
-</div>`;
-}
-function lamp(p){const H=hps(p);return `${kop(p)}<p class="doc-title" style="text-align:center"><b><u>LAMPIRAN REFERENSI HARGA KATALOG ELEKTRONIK</u></b><br>Nomor Lampiran: ${satriaDppNumber(p)}</p>
-${LT([['Nama Paket',p.nama],['Kode RUP',p.rup],['Tanggal dokumen',tg(p.tglDpp)],['Nilai HPS',rp(H)]])}
-${p.penawaran.map((w,k)=>{const y=PY(w.pen),rows=p.items.map((i,n)=>({i,n,h:+w.harga[i.id]||0})).filter(x=>x.h>0);return `<p><b>Referensi Harga ${k+1}</b></p>${LT([['Penyedia',y.nama],['Alamat',y.alamat||'-'],['Status/Tipe',(y.status||'-')+' / '+(y.tipe||'-')],['Link toko',y.link||'Belum dicatat'],['Total harga tercatat',rp(totPw(p,w,false))]])}<table class="tbl-reference-items"><thead><tr><th>No</th><th>Nama Produk / Spesifikasi</th><th>Volume</th><th>Satuan</th><th class=n>Harga Satuan (Rp)</th><th class=n>Jumlah (Rp)</th></tr></thead><tbody>${rows.map(({i,n,h})=>`<tr><td>${n+1}</td><td>${itemLabel(i)}${(w.catalogRefs||{})[i.id]?.name?`<div class="satria-doc-subnote">Produk: ${esc(w.catalogRefs[i.id].name)}</div>`:''}${(w.catalogRefs||{})[i.id]?.link?`<div class="satria-doc-subnote">Tautan: ${esc(w.catalogRefs[i.id].link)}</div>`:''}${(w.catalogRefs||{})[i.id]?.date?`<div class="satria-doc-subnote">Tanggal referensi: ${esc(satriaDateId(w.catalogRefs[i.id].date))}</div>`:''}</td><td class=n>${vf(i.vol)}</td><td>${esc(i.satuan)}</td><td class=n>${nf(h)}</td><td class=n>${nf(i.vol*h)}</td></tr>`).join('')||'<tr><td colspan=6>Belum ada harga produk yang dicatat untuk penyedia ini.</td></tr>'}<tr><th colspan=5 style="text-align:right">Jumlah referensi</th><th class=n>${nf(sum(rows,r=>r.i.vol*r.h))}</th></tr></tbody></table>`}).join('')||'<p>Belum ada referensi harga yang dicatat.</p>'}
-<p><i>Catatan: tautan, harga tayang, tanggal akses, dan bukti pendukung perlu disimpan/diperiksa sebagai dasar audit.</i></p>`}
-function reviu(p){
- // Format diturunkan dari PDF contoh "Riviu DPP.pdf" (2 halaman).
- // Hasil pada referensi adalah contoh; jangan mengesahkan kondisi yang belum diperiksa.
- const o=OP(p), pp=PJ(p.pp), ppk=satriaDppSigner(p)||PJ(p.ppk);
- const e=esc;
- const list=(entries)=>entries.map(([no,act,res])=>`<tr><td class="rv-no">${e(no)}</td><td>${act}</td><td>${res}</td></tr>`).join('');
- const table=(n,title,entries)=>`<section class="rv-section"><div class="rv-section-title"><span>${n}</span><b>${title}</b></div><table class="rv-table"><colgroup><col style="width:6%"><col style="width:49%"><col style="width:45%"></colgroup><thead><tr><th>NO.</th><th>KEGIATAN</th><th>HASIL</th></tr><tr class="rv-numbering"><th>1</th><th>2</th><th>3</th></tr></thead><tbody>${list(entries)}</tbody></table></section>`;
- const sub=(letter,content)=>`<div class="rv-sub"><span>${letter}</span><span>${content}</span></div>`;
- const haveItems=(p.items||[]).length>0;
- const haveOffers=(p.penawaran||[]).length>0;
- const req=haveItems?'Spesifikasi teknis telah dicatat pada rincian paket; kesesuaiannya perlu diperiksa terhadap dokumen persiapan.':'Belum ada rincian spesifikasi teknis paket untuk diverifikasi.';
- const source=haveOffers?`${(p.penawaran||[]).length} data penawaran/referensi tercatat di SATRIA; kesesuaian sumber harga perlu diverifikasi dengan bukti RFI/katalog.`:'Referensi harga/RFI penyedia belum dicatat; pengumpulan sumber perlu diverifikasi.';
- const reviewNote='Perlu pemeriksaan dokumen dan bukti oleh pejabat berwenang.';
- const t1=table(1,'Kertas Kerja Evaluasi Spesifikasi Teknis',[
- ['1','Memastikan spesifikasi teknis telah dituangkan dengan lengkap sehingga peserta memahami dan mampu menyusun penawaran dengan baik.',req],
- ['2',`Memastikan spesifikasi teknis telah dijabarkan dengan :
- ${sub('a','Kesesuaian spesifikasi teknis dengan kebutuhan')}
- ${sub('b','Karakteristik antara lain ukuran, dimensi, bentuk, bahan, warna, komposisi')}
- ${sub('c','Kinerja : ketahanan, efisiensi, batas pemakaian, dst')}
- ${sub('d','Standar yang digunakan : SNI, JIS, ASTM, ISO, dst')}
- ${sub('e','Validitas : standar yang digunakan sudah tepat dan sesuai (SNI berlaku dan valid)')}
- ${sub('f','Pengepakan dan cara pengiriman disesuaikan dengan sifat dan/atau jenis barang')}
- ${sub('g','Mencantumkan macam, jenis, kapasitas dan jumlah peralatan')}`,
- `Spesifikasi teknis ditelaah menurut komponen berikut (isi hasil setelah pemeriksaan):
- ${sub('a',reviewNote)}${sub('b',reviewNote)}${sub('c',reviewNote)}${sub('d','Persyaratan ISO: perlu dikonfirmasi.')}${sub('e','Persyaratan SNI dan validitasnya: perlu dikonfirmasi.')}${sub('f','Pengepakan dan pengiriman: perlu dikonfirmasi berdasarkan DPP.')}${sub('g','Kapasitas/jumlah peralatan: perlu dikonfirmasi.')}`],
- ['3','Hal lain yang relevan dan perlu dilakukan reviu terkait spesifikasi teknis','Belum ada catatan reviu tambahan; isi sesuai hasil pemeriksaan.']
- ]);
- const t2=table(2,'Kertas Kerja Evaluasi terhadap Pengumpulan Referensi Harga',[
- ['1','Memastikan PPK telah mengumpulkan referensi harga yang cukup dan memadai sehingga dapat menjadi dasar penentuan harga.',source],
- ['2','Memastikan harga yang digunakan PPK relevan dengan harga pasar, kontrak sejenis yang pernah dilakukan, atau sumber lainnya.','Sumber dan kesesuaian harga pasar/katalog harus diverifikasi terhadap dokumen pendukung.'],
- ['3','Hal lain yang relevan dan perlu dilakukan reviu terkait referensi harga','Belum ada catatan reviu tambahan; isi sesuai hasil pemeriksaan.']
- ]);
- const t3=table(3,'Kertas Kerja Evaluasi terhadap Rancangan Kontrak (Surat Pesanan dan/atau Surat Perjanjian Kerja)',[
- ['1',`Memastikan Surat Pesanan/SPK telah dituangkan secara lengkap dan benar terkait dengan :${sub('a','Paket pengadaan')}${sub('b','Sumber dana')}${sub('c','Nilai kontrak termasuk pajak')}${sub('d','Jenis kontrak')}${sub('e','Waktu pelaksanaan')}`,
- `Rancangan Surat Pesanan/SPK perlu diperiksa meliputi:${sub('a',`Nama paket: ${e(p.nama||'-')}`)}${sub('b',`Sumber dana: ${e(p.sumber||'-')} (verifikasi)`)}${sub('c','Nilai kontrak termasuk pajak: belum diverifikasi.')}${sub('d','Jenis kontrak: perlu diverifikasi.')}${sub('e',`Waktu pelaksanaan: ${e(p.masaHk||'-')} hari kerja (verifikasi).`)}`],
- ['2','Memastikan Syarat-Syarat Umum Kontrak dan Syarat-Syarat Khusus Kontrak','Kesesuaian syarat kontrak dengan rancangan Surat Pesanan/SPK perlu diperiksa.'],
- ['3','Memastikan jenis kontrak dalam SPK sudah sesuai dengan dokumen persiapan lainnya','Kesesuaian jenis kontrak dengan dokumen persiapan perlu diperiksa.'],
- ['4','Hal lain yang relevan dan perlu dilakukan reviu terkait rancangan kontrak','Belum ada catatan reviu tambahan; isi sesuai hasil pemeriksaan.']
- ]);
- const t4=table(4,'Kertas Kerja Evaluasi terhadap Rencana Metode Pemilihan Penyedia',[
- ['1','Memastikan PPK telah menentukan metode pemilihan penyedia','Metode E-Purchasing tercantum dalam konteks paket; penetapannya perlu dikonfirmasi.'],
- ['2',`Memastikan kesesuaian metode pemilihan penyedia yang dipilih PPK dengan ketentuan :${sub('a','Negosiasi harga dilakukan terhadap harga satuan produk dengan mempertimbangkan kualitas, kuantitas produk, ongkos kirim, biaya instalasi, mobilisasi, SMKK, dan ketersediaan produk')}${sub('b','<i>Mini kompetisi</i> dilakukan terhadap 2 (dua) atau lebih penyedia katalog elektronik yang memiliki produk yang sama atau produk dengan spesifikasi sejenis yang dibutuhkan oleh PPK/PP dengan tujuan mendapatkan harga terbaik; atau')}${sub('c','<i>Competitive Catalogue</i> memuat data dan informasi yang ditawarkan oleh Penyedia Katalog Elektronik dalam lingkup pekerjaan konstruksi berupa komponen dasar konstruksi yang kemudian dikompetisikan melalui sistem.')}`,
- `Memastikan metode yang dipilih:${sub('a','Negosiasi harga: pemeriksaan metode dan dokumentasi negosiasi diperlukan.')}${sub('b','Mini kompetisi: periksa apakah metode ini digunakan.')}${sub('c','Competitive Catalogue: periksa apakah metode ini digunakan.')}`],
- ['3','Hal lain yang relevan dan perlu dilakukan reviu terkait metode pemilihan penyedia','Belum ada catatan reviu tambahan; isi sesuai hasil pemeriksaan.']
- ]);
- const t10=table(10,'Kertas Kerja Evaluasi terhadap Ketersediaan Produk di Katalog Elektronik',[
- ['1','Memastikan ketersediaan produk di katalog elektronik.','Ketersediaan produk pada katalog elektronik harus dicek terhadap RFI/bukti katalog yang berlaku.'],
- ['2','Memastikan berapa banyak penyedia katalog yang menyediakan produk yang akan di-purchase.',source],
- ['3','Hal lain yang relevan dan perlu dilakukan reviu terkait dengan ketersediaan produk di katalog elektronik.','Belum ada catatan reviu tambahan; isi sesuai hasil pemeriksaan.']
- ]);
- const sign=(who,whoRole,label)=>`<div class="rv-sign-col"><div>${label}</div><div>${whoRole}</div><div class="rv-sign-space"></div><b><u>${e(who.nama||'-')}</u></b><div>NIP. ${e(who.nip||'-')}</div></div>`;
- return `<div class="rv-document"><div class="rv-title"><b><u>BERITA ACARA REVIU DOKUMEN PERSIAPAN PENGADAAN <i>E-PURCHASING</i></u></b><div>Nomor : ${e(nomor('BAHR',p))}${p.tahun?'/'+e(p.tahun):''}</div></div>
- <table class="rv-meta"><tbody><tr><td>OPD</td><td>:</td><td>${e(o.nama||'-')}</td></tr><tr><td>PAKET</td><td>:</td><td><b>${e(p.nama||'-')}</b></td></tr></tbody></table>
- ${t1}${t2}${t3}${t4}${t10}
- <div class="rv-signatures">${sign(ppk,'PA / KPA / PPK','Disusun/ditetapkan oleh :')}${sign(pp,'Pejabat Pengadaan','Diperiksa / Direviu')}</div>
- </div>`;
-}
-function hpsnego(p){const W=p.penawaran,H=hps(p),ev=evalPw(p);return `${kop(p)}<p class="doc-title" style="text-align:center"><b><u>LEMBAR HARGA PERKIRAAN SENDIRI (HPS) DAN NEGOSIASI</u></b></p>
-${LT([['Pagu',rp(p.pagu)],['Nilai HPS',rp(H)],['Selisih Pagu - HPS',rp(p.pagu-H)],['Nama Paket',p.nama],['Kode RUP',p.rup],['Sub Kegiatan',subOf(p)]])}
-<p class="doc-section-heading"><b>A. Rincian HPS dan referensi harga</b></p><table class="tbl-price-matrix"><thead><tr><th>No</th><th>Nama Barang dan Spesifikasi</th><th class=n>Volume</th><th>Satuan</th><th class=n>Harga Satuan HPS</th><th class=n>Jumlah HPS</th>${W.map(w=>`<th class=n>${esc(PY(w.pen).nama)}<br>Harga Tayang</th>`).join('')}</tr></thead><tbody>
-${p.items.map((i,n)=>`<tr><td>${n+1}</td><td>${itemLabel(i)}</td><td class=n>${vf(i.vol)}</td><td>${esc(i.satuan)}</td><td class=n>${nf(i.hs)}</td><td class=n>${nf(i.vol*i.hs)}</td>${W.map(w=>`<td class=n>${(+w.harga[i.id]||0)?nf(w.harga[i.id]):'-'}</td>`).join('')}</tr>`).join('')}
-<tr><th colspan=5 style="text-align:right">Total</th><th class=n>${nf(H)}</th>${W.map(w=>`<th class=n>${nf(totPw(p,w,false))}</th>`).join('')}</tr></tbody></table>
-<p class="doc-section-heading"><b>B. Perbandingan hasil negosiasi</b></p><table class="tbl-negotiation-summary"><thead><tr><th>No</th><th>Penyedia</th><th class=n>Total Harga Tayang</th><th class=n>Total Harga Nego</th><th class=n>Terhadap HPS</th><th>Hasil sistem</th></tr></thead><tbody>${ev.map(({w,t,st},n)=>`<tr><td>${n+1}</td><td>${esc(PY(w.pen).nama)}</td><td class=n>${nf(totPw(p,w,false))}</td><td class=n>${nf(t)}</td><td class=n>${H?(t/H*100).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2}):'0'}%</td><td>${st}</td></tr>`).join('')||'<tr><td colspan=6>Belum ada data penawaran.</td></tr>'}</tbody></table>
-<p class="doc-section-heading"><b>C. Rekonsiliasi harga negosiasi dan pajak (informasi)</b></p><table class="tbl-negotiation-summary"><thead><tr><th>Penyedia</th><th class=n>Harga sebelum PPN</th><th class=n>PPN tercatat</th><th class=n>Subtotal bruto</th><th class=n>Ongkir</th><th class=n>Total akhir</th></tr></thead><tbody>${W.map(w=>{const a=satriaDocPricing(p,w);return `<tr><td>${esc(PY(w.pen).nama)}</td><td class=n>${a.verified?nf(a.net):'Perlu verifikasi'}</td><td class=n>${a.verified?nf(a.tax):'Perlu verifikasi'}</td><td class=n>${nf(a.gross)}</td><td class=n>${nf(a.shipping)}</td><td class=n>${nf(a.total)}</td></tr>`}).join('')}</tbody></table><p><i>PPN sudah termasuk dalam harga satuan bruto; tidak ditambahkan lagi ke total. Perbedaan perhitungan harus diverifikasi terhadap bukti transaksi.</i></p><p><b>Catatan:</b> HPS dan referensi harga harus ditopang sumber yang dapat diperiksa. Nilai ongkos kirim, tanggal akses, dan tautan bukti yang belum tersedia perlu dilengkapi sebelum penetapan.</p>${sig(PJ(p.pp),'Pejabat Pengadaan,')}`}
-function kknego(p){const pm=pemenang(p);if(!pm)return `${kop(p)}<p style="text-align:center"><b><u>KERTAS KERJA NEGOSIASI</u></b></p><p>Belum ada pemenang. Kertas kerja negosiasi dapat dibuat setelah data penawaran lengkap dan penyedia ditetapkan oleh pejabat berwenang.</p>`;const w=pm.w,H=hps(p);const rows=p.items.map((i,n)=>{const a=+w.harga[i.id]||0,nn=+(w.nego[i.id]??a)||0;return{n,i,a,nn}});const pricing=satriaDocPricing(p,w);const subTotal=sum(rows,r=>r.i.vol*r.nn);const shipping=Math.max(0,Number(w.ongkir)||0);const fin=subTotal+shipping;const terbilangFinal=terb(Math.round(fin));
-return `${kop(p)}<p style="text-align:center"><b><u>KERTAS KERJA NEGOSIASI</u></b><br>Nomor: ${nomor('KKNEGO',p)}</p>
-${LT([['Nama Paket',p.nama],['Kode RUP',p.rup],['Sub Kegiatan',subOf(p)],['Penyedia',PY(w.pen).nama],['Pagu',rp(p.pagu)],['HPS',rp(H)],['Tanggal',tg(p.tglNego)]])}
-<table class="tbl-knego-items"><thead><tr><th>No</th><th>Nama Barang dan Spesifikasi</th><th class=n>Volume</th><th>Satuan</th><th class=n>HPS Satuan</th><th class=n>Jumlah HPS</th><th class=n>Harga Satuan Awal</th><th class=n>Harga Satuan Nego</th><th class=n>Jumlah Harga Nego</th></tr></thead><tbody>
-${rows.map(r=>`<tr><td>${r.n+1}</td><td>${esc(r.i.nama)}</td><td class=n>${vf(r.i.vol)}</td><td>${esc(r.i.satuan)}</td><td class=n>${nf(r.i.hs)}</td><td class=n>${nf(r.i.vol*r.i.hs)}</td><td class=n>${nf(r.a)}</td><td class=n>${Number(r.nn).toLocaleString('id-ID',{maximumFractionDigits:2})}</td><td class=n>${nf(r.i.vol*r.nn)}</td></tr>`).join('')}
-<tr><th colspan=5 style="text-align:right">Subtotal harga akhir item (termasuk PPN)</th><th class=n>${nf(H)}</th><th></th><th></th><th class=n>${nf(subTotal)}</th></tr><tr><th colspan=8 style="text-align:right">Ongkos kirim paket (tidak dialokasikan per item)</th><th class=n>${nf(shipping)}</th></tr><tr><th colspan=8 style="text-align:right">Total akhir termasuk ongkos kirim</th><th class=n>${nf(fin)}</th></tr></tbody></table>
-<p>Selisih HPS dengan harga akhir: <b>${rp(H-fin)}</b>. Persentase selisih terhadap HPS: <b>${H?((H-fin)/H*100).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2}):'0'}%</b>. Terbilang nilai akhir <b>${esc(terbilangFinal)}</b> (berdasarkan total akhir ${rp(fin)}).</p>
-<p><b>Rincian PPN:</b> ${pricing.verified?`Harga sebelum PPN ${rp(pricing.net)} + PPN ${rp(pricing.tax)} = subtotal ${rp(pricing.gross)}; ongkir terpisah ${rp(shipping)}.`:'Komponen harga sebelum PPN/PPN belum lengkap atau belum konsisten pada seluruh rincian; nilai bruto yang tersimpan tidak dipajaki kembali.'}</p><p>Hasil negosiasi perlu dikonfirmasi dan didokumentasikan sesuai mekanisme e-Purchasing yang digunakan.</p>${sig(PJ(p.pp),'Pejabat Pengadaan,')}`}
-const DOCS={nodis,idkb,rfi,survei,bahepe,metode,sppbj,spek,dpp,lamp,reviu,hpsnego,kknego,bahp};
 
 /* SATRIA 3.0.40 — narrow document-output sanitizer (templates, not arbitrary rich HTML).
    This protects the document preview from user-supplied markup in fields. */
@@ -2273,12 +1621,7 @@ function satriaLaporanData(){
  }
  return [...byGroup.values()].sort((a,b)=>a.tahun-b.tahun||a.opd.localeCompare(b.opd,'id'));
 }
-function satriaLaporanCsvCell(value){
- // Prevent CSV/spreadsheet formula injection in imported organization/package names.
- let v=String(value??'').replace(/\r\n?/g,' ').replace(/\n/g,' ');
- if(/^[\s\uFEFF]*[=+@-]/.test(v))v="'"+v;
- return '"'+v.replace(/"/g,'""')+'"';
-}
+function satriaLaporanCsvCell(value){return window.SATRIA_CORE_GUARDS.csvCell(value)}
 function satriaLaporanDownloadCsv(filename,headers,rows){
  const lines=[headers,...rows].map(row=>row.map(satriaLaporanCsvCell).join(','));
  const url=URL.createObjectURL(new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}));
@@ -2616,7 +1959,7 @@ const ED=id=>S.ui.me===id;
 const hit=r=>{const q=(S.ui.ms||'').toLocaleLowerCase('id-ID').trim();if(!q)return true;const values=Object.entries(r).filter(([k])=>k!=='ttd'&&k!=='cap').map(([,v])=>v);if(r&&r.opd){const o=O(r.opd);values.push(o.nama,o.singkat)}return values.join(' ').toLocaleLowerCase('id-ID').includes(q)};
 const masterOpdLabel=id=>{const o=O(id);return [o.singkat,o.nama].filter((v,i,a)=>v&&a.indexOf(v)===i).join(' — ')||String(id||'-')};
 const thumb=src=>src?`<img src="${src}" style="height:40px;max-width:110px;vertical-align:middle">`:'<span class=mut>-</span>';
-function canDel(c,id){if(c==='pejabat')return !S.paket.some(p=>[p.ppk,p.pp,p.kabid].includes(id));if(c==='penyedia')return !S.paket.some(p=>p.penawaran.some(w=>w.pen===id));if(c==='kode')return !S.paket.some(p=>p.sub===id);if(c==='akun')return !S.paket.some(p=>p.akunId===id);if(c==='opd')return !S.paket.some(p=>p.opd===id)&&!S.pejabat.some(x=>x.opd===id)&&!S.unit.some(x=>x.opd===id);if(c==='unit')return !S.paket.some(p=>p.unit===id);return true}
+function canDel(c,id){const activeAndTrashed=[...S.paket,...(S.sampah||[]).filter(e=>e.collection==='paket').map(e=>e.record)];if(c==='pejabat')return !activeAndTrashed.some(p=>[p.ppk,p.pp,p.kabid].includes(id));if(c==='penyedia')return !activeAndTrashed.some(p=>p.penawaran.some(w=>w.pen===id));if(c==='kode')return !activeAndTrashed.some(p=>p.sub===id);if(c==='akun')return !activeAndTrashed.some(p=>p.akunId===id);if(c==='opd')return !activeAndTrashed.some(p=>p.opd===id)&&!S.pejabat.some(x=>x.opd===id)&&!S.unit.some(x=>x.opd===id);if(c==='unit')return !activeAndTrashed.some(p=>p.unit===id);return true}
 function tPejabat(peran){
  const sign=peran==='PPK';
  const L=S.pejabat.filter(x=>x.peran===peran&&hit(x));
@@ -2737,7 +2080,7 @@ function satMasterDashboard(){
 function satMasterExport(){
  const m=MTAB.some(t=>t[0]===S.ui.mtab)?S.ui.mtab:'ppk', arr=PERAN[m]?S.pejabat.filter(x=>x.peran===PERAN[m]):(S[m]||[]);
  const fields=PERAN[m]?['nama','nip','jabatan','peran','opd','aktif']:(COLS[m]||[]).map(x=>x[0]).concat(['aktif']);
- const csv=x=>'"'+String(x??'').replace(/"/g,'""')+'"';
+ const csv=x=>window.SATRIA_CORE_GUARDS.csvCell(x);
  const content='\uFEFF'+[fields.map(csv).join(','),...arr.map(r=>fields.map(f=>csv(r[f])).join(','))].join('\r\n');
  const url=URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='SATRIA-DataMaster-'+m+'.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
 }
@@ -2759,7 +2102,7 @@ function vMaster(){
    : (masterScope?`<div class="satria-scope-card"><div class="scope-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><b>Scope Operator:</b> master PPK/KPA, Pejabat Pengadaan, Kepala Bidang, dan Unit/Bagian hanya untuk OPD yang ditugaskan. Penyedia dan Akun Anggaran adalah katalog bersama organisasi. Setiap perubahan disimpan otomatis sebagai delta per-record ke Supabase setelah jeda singkat; pengguna lain diberi notifikasi melalui Supabase Realtime.</div></div>`:'');
  return `
  ${scopeNote}
- ${!satriaPemdaOfficial('nama')?`<div class="card no-print" role="alert" style="border:1px solid #e0a800;background:#fff9ed;color:#854d0e"><b>Identitas Pemerintah Daerah belum resmi.</b> Data Master dan dokumen tidak boleh memakai teks demo sebagai identitas instansi. Admin perlu membuka <a href="#settings">Pengaturan Sistem</a> → Identitas Pemerintah Daerah, mengisi nama, kota, provinsi, dan sumber dana yang benar. Data yang tersimpan tidak diubah otomatis.</div>`:''}
+ ${!satriaPemdaOfficial('nama')?`<div class="card no-print" role="alert" style="border:1px solid #e0a800;background:#fff9ed;color:#854d0e"><b>Identitas Pemerintah Daerah belum resmi.</b> Data Master dan dokumen tidak boleh memakai teks demo sebagai identitas instansi. Admin perlu membuka <a href="#set">Pengaturan Sistem</a> → Identitas Pemerintah Daerah, mengisi nama, kota, provinsi, dan sumber dana yang benar. Data yang tersimpan tidak diubah otomatis.</div>`:''}
  ${satMasterDashboard()}
  <div class="satria-kpi-grid">
    ${kpi.map(([label,count,path,key])=>`
@@ -2804,8 +2147,8 @@ function vMaster(){
 }
 function kopEditor(o){
  return `<div class="satria-settings-opd-kop" style="margin-top:12px"><label>Kop surat OPD (gambar)</label>
- <div class="satria-settings-opd-kop-preview">${o.kop?`<img src="${o.kop}" alt="Kop ${esc(o.singkat)}">`:'<span class=mut>Belum ada kop gambar. Dokumen memakai kop teks dari data OPD.</span>'}</div>
- <div class="satria-settings-opd-kop-actions"><input type=file accept="image/*" data-kopup="${o.id}"> ${o.kop?`<button class=d data-act="rmkop" data-id="${o.id}">Hapus kop</button>`:''}</div>
+ <div class="satria-settings-opd-kop-preview">${o.kop?`<img src="${satriaSafeMediaSrc(o.kop)}" alt="Kop ${esc(o.singkat)}">`:'<span class=mut>Belum ada kop gambar. Dokumen memakai kop teks dari data OPD.</span>'}</div>
+ <div class="satria-settings-opd-kop-actions"><input type=file accept="image/png,image/jpeg,image/webp,image/gif" data-kopup="${o.id}"> ${o.kop?`<button class=d data-act="rmkop" data-id="${o.id}">Hapus kop</button>`:''}</div>
  <div class=mut>PNG/JPG, maks. 1 MB. Jika tersedia, kop gambar menjadi kop utama dan menggantikan kop teks otomatis (logo pemda tidak ditambahkan lagi). Gunakan gambar yang sudah memuat identitas resmi dan pastikan keterbacaan saat dicetak.</div></div>`}
 function satriaSettingsCheck(){const groups={identitas:[],referensi:[],dokumen:[],data:[]};const add=(g,msg)=>groups[g].push(msg);
   if(!satriaPemdaOfficial('nama'))add('identitas','Nama pemerintah daerah kosong atau data contoh');
@@ -2847,12 +2190,12 @@ function vSet(){
   return `<div class="card satria-settings-opd-card"><div class="satria-settings-opd-header"><b class="satria-settings-opd-title">${esc(o.singkat||'(tanpa singkatan)')} — ${esc(o.nama)}</b><button class=d ${used?`disabled title="Dipakai ${used} paket"`:''} data-act="delrow" data-c="opd" data-id="${o.id}">Hapus OPD</button></div>
   <div class="satria-settings-opd-fields">${f('nama','Nama instansi')}${f('singkat','Singkatan')}${f('tempat','Tempat pelaksanaan')}${f('alamat','Alamat (kop baris 4)')}${f('kontak','Kontak (kop baris 5)')}</div>${kopEditor(o)}
   <p class=mut>Pejabat: PPK ${esc(pjNama(o,'PPK'))} · PP ${esc(pjNama(o,'PP'))} · Kabid ${esc(pjNama(o,'Kabid'))}. Kelola di <a href="#master">Data Master</a>.</p>${used?`<p class=mut>Dipakai ${used} paket, sehingga tidak bisa dihapus.</p>`:''}</div>`};
- const logo=S.pemda.logo?`<img src="${S.pemda.logo}" alt="logo" style="height:70px;border:1px solid #ddd;padding:4px;background:#fff">`:'<div class=mut style="width:120px">Belum ada logo</div>';
+ const logo=S.pemda.logo?`<img src="${satriaSafeMediaSrc(S.pemda.logo)}" alt="logo" style="height:70px;border:1px solid #ddd;padding:4px;background:#fff">`:'<div class=mut style="width:120px">Belum ada logo</div>';
  const years=S.tahun.slice().sort();
  const demo=S.paket.find(p=>p.opd===(k&&k.id))||{seq:1,opd:k&&k.id,tahun:S.ui.tahun};
  const docs=[['NODIS','Nota Dinas'],['PPBJ','SPPBJ'],['DPP','DPP & Lampiran Referensi Harga'],['BAHR','BA Reviu DPP'],['BAHEPE','BA Evaluasi Penyedia'],['BAHP','BA Hasil Pemilihan'],['KKNEGO','Kertas Kerja Negosiasi']];
  return `${diagnostics}${warns.length?`<div class=card style="border-color:#e0a800"><b class=warn>Perlu dilengkapi (${warns.length})</b><ul style="margin:6px 0 0">${warns.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></div>`:'<div class=card><span class=ok>✔ Pengaturan instansi sudah lengkap</span></div>'}
- <div class="card satria-settings-pemda-card"><h3>Identitas Pemerintah Daerah</h3><div class=row>${logo}<div><input type=file id=logoFile accept="image/*"> <button class=g data-act="rmlogo">Hapus logo</button><div class=mut>PNG/JPG, maks. 300 KB. Logo tampil pada kop teks otomatis. Jika OPD memakai kop gambar, gambar kop tersebut menggantikan kop teks termasuk logo ini.</div></div></div><br>
+ <div class="card satria-settings-pemda-card"><h3>Identitas Pemerintah Daerah</h3><div class=row>${logo}<div><input type=file id=logoFile accept="image/png,image/jpeg,image/webp,image/gif"> <button class=g data-act="rmlogo">Hapus logo</button><div class=mut>PNG/JPG, maks. 300 KB. Logo tampil pada kop teks otomatis. Jika OPD memakai kop gambar, gambar kop tersebut menggantikan kop teks termasuk logo ini.</div></div></div><br>
   <div class="satria-settings-pemda-fields">${inp('pemda','nama',S.pemda.nama,'Nama pemda (kop baris 1)')}${inp('pemda','kota',S.pemda.kota,'Kota tanda tangan')}${inp('pemda','provinsi',S.pemda.provinsi,'Provinsi')}${inp('pemda','sumber',S.pemda.sumber,'Sumber dana default')}</div></div>
  <div class=card><h3>Pratinjau Kop Surat per OPD</h3><p class=mut>Pratinjau mengikuti aturan yang dipakai saat cetak: kop gambar menggantikan kop teks; jika tidak ada kop gambar, identitas pemda dan OPD dirender dari data konfigurasi.</p>${S.opd.length?S.opd.map(o=>`<div style="margin:12px 0;background:#fff;border:1px solid var(--bd);padding:12px"><b style="color:#334155">${esc(o.singkat)} — ${esc(o.nama)}</b><div style="margin-top:8px">${kop({opd:o.id})}</div></div>`).join(''):'<span class=mut>Belum ada OPD.</span>'}</div>
  <div class=card><h3>Tahun Anggaran</h3><table><tr><th>Tahun</th><th class=n>Paket</th><th class=n>Total pagu</th><th></th></tr>
@@ -2868,8 +2211,8 @@ function vSet(){
 
 
 /* ===== ROLE & HAK AKSES ===== */
-const ROLE_PAGES={Operator:['dash','paket','kerja','kalk','input','spse','monitor','finance','quality','care','brief','satria360','analisa','dok','lap','master','panduan','chat'],Viewer:['dash','paket','kerja','kalk','spse','monitor','finance','quality','care','brief','satria360','analisa','dok','lap','panduan','chat']};
-const WRITE=['newpaket','rupsave','rupimport','rupmanualsave','rupclasssave','copy','delpaket','additem','delitem','delpw','winner','autowin','correctOfferProvider','saveHpsTotalReview','removeHpsTotalReview','addrow','delrow','addopd','addyear','delyear','rmlogo','reset','addunit','madd','mtoggle','medit','uadd','utoggle','udel','clearsample','rmkop','satriaFixDemoSub'];
+const ROLE_PAGES={Operator:['sampah','dash','paket','kerja','kalk','input','spse','monitor','finance','quality','care','brief','satria360','analisa','dok','lap','master','panduan','chat'],Viewer:['sampah','dash','paket','kerja','kalk','spse','monitor','finance','quality','care','brief','satria360','analisa','dok','lap','panduan','chat']};
+const WRITE=['newpaket','rupsave','rupimport','rupmanualsave','rupclasssave','copy','delpaket','additem','delitem','delpw','winner','autowin','correctOfferProvider','saveHpsTotalReview','removeHpsTotalReview','addrow','delrow','addopd','addyear','delyear','rmlogo','reset','addunit','madd','mtoggle','medit','uadd','utoggle','udel','clearsample','rmkop','satriaFixDemoSub','trashrestore'];
 const cur=()=>S.users.find(u=>u.id===S.ui.user)||{role:'Viewer',nama:'-'};
 const allowed=k=>{const r=cur().role;return !ROLE_PAGES[r]||ROLE_PAGES[r].includes(k)};
 const canWrite=()=>cur().role!=='Viewer';
@@ -3027,6 +2370,56 @@ function vPanduan(){const sec=(t,items)=>`<div class=card><h3>${t}</h3><ol style
  + sec('4. Hak akses',['Admin: akses penuh, termasuk Pengaturan Instansi dan Manajemen User.','Operator: mengelola paket dan master PPK/KPA, Pejabat Pengadaan, Kepala Bidang, serta Unit/Bagian pada OPD assignment; katalog Penyedia dan Akun Anggaran dikelola bersama seluruh Operator/Admin. Operator tidak mengubah pengaturan organisasi atau user.','Viewer: hanya melihat, mencetak, dan memakai chatbot.','Tidak bisa menonaktifkan atau menghapus user yang sedang dipakai, atau Admin aktif terakhir.'])
  + sec('5. Backup dan penyimpanan',['Dengan penyimpanan IndexedDB (Dexie), data tersimpan otomatis di browser ini. Tetap klik Backup di header secara berkala.','Muat lagi backup lewat Pengaturan Sistem → Backup & Pemulihan.','Pilih engine penyimpanan di header: IndexedDB (Dexie) atau memori sesi.']);}
 
+/* Sampah Tahap 1 & 2: IndexedDB lokal tetap mandiri; cloud memakai RPC arsip/pulih atomik.
+   Aksi tanpa kontrak arsip server tetap diblokir (fail closed). */
+function satriaRecycleBlocked(){
+ if(window.SATRIA_CLOUD_CONFIGURED){toast('Tindakan ini belum memiliki mekanisme Sampah cloud dan tetap diblokir. Tidak ada data yang dihapus.');return true}
+ if(ENGINE!=='dexie'){toast('Penyimpanan permanen tidak aktif. Aktifkan IndexedDB sebelum memindahkan data ke Sampah.');return true}
+ return false;
+}
+function satriaRecycleMove(collection,id){
+ if(window.SATRIA_CLOUD_CONFIGURED){
+   const api=window.SATRIA_CLOUD_TRASH;
+   if(!api?.ready){toast('Cloud belum siap atau akun belum masuk. Data tidak dihapus.');return false}
+   api.archive(collection,id).catch(err=>toast('Arsip cloud dibatalkan: '+err.message));
+   return false; // cloud mutation & refreshed state are asynchronous and server-owned
+ }
+ if(satriaRecycleBlocked())return false;
+ try{window.SATRIA_CORE_GUARDS.archive(S,collection,id,cur().nama);sync(collection==='paket'||collection==='rupBank'?'paket':'master','Dipindahkan ke Sampah: '+collection+' '+id);return true}
+ catch(err){toast('Tidak dapat memindahkan ke Sampah: '+err.message);return false}
+}
+function satriaRecycleDependencies(entry){
+ const r=entry.record;if(!r)return 'Snapshot tidak lengkap';
+ if(entry.collection==='paket'){
+   if(!S.opd.some(o=>String(o.id)===String(r.opd))||!S.tahun.includes(Number(r.tahun)))return 'OPD atau tahun sumber tidak tersedia';
+   if(r.rupBankId&&!S.rupBank.some(x=>String(x.id)===String(r.rupBankId)))return 'Bank RUP utama perlu dipulihkan terlebih dahulu';
+   if((r.rupBankIds||[]).some(id=>!S.rupBank.some(x=>String(x.id)===String(id))))return 'Bank RUP terkait perlu dipulihkan terlebih dahulu';
+   if(r.ppk&&!S.pejabat.some(x=>String(x.id)===String(r.ppk)))return 'PPK terkait perlu dipulihkan terlebih dahulu';
+   if(r.pp&&!S.pejabat.some(x=>String(x.id)===String(r.pp)))return 'Pejabat Pengadaan terkait perlu dipulihkan terlebih dahulu';
+   if((r.penawaran||[]).some(w=>!S.penyedia.some(y=>String(y.id)===String(w.pen))))return 'Penyedia terkait perlu dipulihkan terlebih dahulu';
+ }
+ if(entry.collection==='penawaran'&&(!S.paket.some(p=>String(p.id)===String(r.paketId))||!S.penyedia.some(y=>String(y.id)===String(r.offer?.pen))))return 'Paket/penyedia perlu dipulihkan terlebih dahulu';
+ if(entry.collection==='media'&&r.owner==='opd'&&!S.opd.some(o=>String(o.id)===String(r.opdId)))return 'OPD perlu dipulihkan terlebih dahulu';
+ if(entry.collection==='rupBank'&&(!S.opd.some(o=>String(o.id)===String(r.opd))||!S.tahun.includes(Number(r.tahun))))return 'OPD atau tahun Bank RUP perlu dipulihkan';
+ if(['pejabat','unit'].includes(entry.collection)&&r.opd&&!S.opd.some(o=>String(o.id)===String(r.opd)))return 'OPD terkait perlu dipulihkan';
+ return '';
+}
+function vSampah(){
+ const cloud=!!window.SATRIA_CLOUD_CONFIGURED;
+ const api=window.SATRIA_CLOUD_TRASH;
+ if(cloud&&api?.ready&&!api.loaded&&!api.loading)api.ensureLoaded();
+ const scope=activeCloudScope();
+ const records=(cloud?(api?.items||[]):(S.sampah||[])).filter(e=>{
+  if(cloud||!scope)return true;const r=e.record||{};
+  return e.collection!=='snapshot'&&scope.opdIds.includes(String(r.opd))&&scope.years.includes(Number(r.tahun));
+ });
+ const note=cloud?(api?.error?'⚠ '+esc(api.error):!api?.ready?'Masuk Supabase dan tarik data cloud untuk melihat Sampah.':api.loading?'Mengambil Sampah cloud…':'Sampah tersimpan di Supabase. Hapus/pulihkan bersifat atomik dan dapat dilihat lintas perangkat. Tidak ada hapus permanen otomatis.'):'Pemulihan tersimpan hanya di browser ini (IndexedDB) dan backup JSON, bukan di server.';
+ return `<section class="card satria-trash-page"><div class="row" style="justify-content:space-between;align-items:center;gap:12px"><div><h2>🗑️ Sampah & Pemulihan</h2><p class="mut">Data yang diarsipkan dapat dipulihkan tanpa persetujuan berjenjang.</p></div><b class="pill">${records.length} item</b></div>
+ <p class="mut" role="status">${note}</p>
+ ${cloud?'<div class="row"><button type="button" class="g" data-act="trashrefresh">↻ Segarkan Sampah cloud</button><span class="mut">Maksimal 250 item terbaru dalam daftar.</span></div>':''}
+ ${records.length?`<div style="overflow-x:auto"><table><thead><tr><th>Jenis</th><th>Nama / ID</th><th>Dihapus</th><th>Oleh</th><th>Aksi</th></tr></thead><tbody>${records.map(e=>{const r=e.record||{},issue=cloud?'':e.collection==='snapshot'?'':satriaRecycleDependencies(e);const name=r.nama||r.rup||r.username||(e.collection==='media'?(r.owner==='pemda'?'Logo Pemerintah Daerah':'Kop OPD '+String(r.opdId||'')):e.collection==='penawaran'?'Penawaran '+String(r.offer?.id||''):e.collection==='tahun'?'Tahun '+String(r.year||''):e.originalId)||'Snapshot data';return `<tr><td>${esc(e.collection==='snapshot'?'Snapshot reset':e.collection)}</td><td>${esc(name)}</td><td>${esc(e.deletedAt||'-')}</td><td>${esc(e.deletedBy||'-')}</td><td>${canWrite()&&(!cloud||api?.ready)?`<button type="button" class="g" data-act="trashrestore" data-id="${esc(e.id)}">Pulihkan</button>${issue?`<small class="mut"> ${esc(issue)}</small>`:''}`:'<span class="mut">Lihat saja</span>'}</td></tr>`}).join('')}</tbody></table></div>`:'<p>Belum ada data yang ditampilkan di Sampah.</p>'}
+ <div class="row"><a class="btn g" href="#paket">Kembali ke Paket</a>${!cloud?'<button data-act="export" type="button">Unduh backup JSON</button>':''}</div></section>`;
+}
 /* ===== RENDER & ROUTING ===== */
 function render(){
  if(S.ui.rupManualSkipCapture)S.ui.rupManualSkipCapture=false;
@@ -3051,14 +2444,14 @@ function render(){
  if(!allowed(u.page))u.page='dash';$('#selUser').innerHTML=S.users.filter(x=>x.aktif!==false).map(x=>`<option value="${x.id}" ${x.id===S.ui.user?'selected':''}>${esc(x.nama)} (${x.role})</option>`).join('');
  $('#nav').innerHTML=NAV.filter(([k])=>allowed(k)).map(([k,t])=>`<a href="#${k}" class="${u.page===k?'on':''}">${t}</a>`).join('');
  if(u.page==='paket'&&u.pid&&satriaSpseIs(P(u.pid))){u.page='spse';try{history.replaceState(null,'',location.pathname+location.search+'#spse/'+encodeURIComponent(u.pid))}catch(_){}}
- const V={dash:()=>vDash()+satriaOpsDashWidget(),monitor:satriaOpsMonitor,finance:satriaOpsFinance,quality:satriaOpsQuality,care:()=>window.SATRIA_CARE?.page?.()||'<section class="card">Perawatan SATRIA belum dimuat; periksa file aplikasi atau muat ulang halaman.</section>',paket:()=>u.pid?vDetail(P(u.pid)):vPaket(),kerja:()=>window.SATRIA_PP_ECOSYSTEM?.page?.((S.paket||[]).filter(p=>Number(p.tahun)===Number(u.tahun)&&(u.opd==='all'||String(p.opd)===String(u.opd))&&(!cloudScope||(cloudScope.opdIds.includes(String(p.opd))&&cloudScope.years.includes(Number(p.tahun))))),u.pid)||'<section class="card">Ruang Kerja PP belum dimuat. Periksa aset aplikasi.</section>',kalk:vKalk,input:vInputRup,spse:vSpse,brief:vBrief,satria360:()=>window.SATRIA_NEXT4?.vSatria360?.()||'<div class="card">SATRIA 360° sedang dimuat.</div>',analisa:()=>window.SATRIA_PRICE_ANALYSIS?.page?.()||'<div class="card">Analisis Harga belum dimuat. Muat ulang aplikasi.</div>',dok:vDok,lap:vLap,master:vMaster,set:vSet,user:vUser,panduan:vPanduan,chat:vChat};
+ const V={sampah:vSampah,dash:()=>vDash()+satriaOpsDashWidget(),monitor:satriaOpsMonitor,finance:satriaOpsFinance,quality:satriaOpsQuality,care:()=>window.SATRIA_CARE?.page?.()||'<section class="card">Perawatan SATRIA belum dimuat; periksa file aplikasi atau muat ulang halaman.</section>',paket:()=>u.pid?vDetail(P(u.pid)):vPaket(),kerja:()=>window.SATRIA_PP_ECOSYSTEM?.page?.((S.paket||[]).filter(p=>Number(p.tahun)===Number(u.tahun)&&(u.opd==='all'||String(p.opd)===String(u.opd))&&(!cloudScope||(cloudScope.opdIds.includes(String(p.opd))&&cloudScope.years.includes(Number(p.tahun))))),u.pid)||'<section class="card">Ruang Kerja PP belum dimuat. Periksa aset aplikasi.</section>',kalk:vKalk,input:vInputRup,spse:vSpse,brief:vBrief,satria360:()=>window.SATRIA_NEXT4?.vSatria360?.()||'<div class="card">SATRIA 360° sedang dimuat.</div>',analisa:()=>window.SATRIA_PRICE_ANALYSIS?.page?.()||'<div class="card">Analisis Harga belum dimuat. Muat ulang aplikasi.</div>',dok:vDok,lap:vLap,master:vMaster,set:vSet,user:vUser,panduan:vPanduan,chat:vChat};
  $('#main').innerHTML=(V[u.page]||vDash)();
  window.SATRIA_NEXT4?.enhance?.();
  window.SATRIA_OPERATOR_STUDIO?.enhance?.();
  if(u.page==='paket'&&u.ptab==='nego'&&u.knFocusWid){const focusWid=String(u.knFocusWid);u.knFocusWid=null;const target=[...document.querySelectorAll('[data-offer-wid]')].find(el=>el.dataset.offerWid===focusWid);if(target){target.classList.add('kn47-highlight');requestAnimationFrame(()=>target.scrollIntoView({behavior:'smooth',block:'start'}))}}
  schedulePersist();
 }
-function route(){const [pg,id]=(location.hash||'#dash').slice(1).split('/');S.ui.page=pg||'dash';S.ui.pid=id||null;render()}
+function route(){const [raw,id]=(location.hash||'#dash').slice(1).split('/');const pg=raw==='settings'?'set':raw;S.ui.page=pg||'dash';S.ui.pid=id||null;render()}
 function nextSeq(tahun,opd){return Math.max(0,...S.paket.filter(p=>p.tahun==tahun&&p.opd===opd).map(p=>p.seq))+1}
 const pjId=(opd,peran)=>(S.pejabat.find(x=>x.opd===opd&&x.peran===peran&&x.aktif!==false)||{}).id;
 
@@ -3105,6 +2498,10 @@ function validateBackup(o){
      for(const id of ids){const r=bankById.get(id);if(!r||String(r.opd)!==String(p.opd)||Number(r.tahun)!==Number(p.tahun)){if(p.rupBankIds!==undefined)throw new Error('Referensi Bank RUP paket tidak ditemukan atau berbeda OPD/tahun: '+id);/* backup lama tetap diterima untuk diperiksa melalui audit data */}}
    }
  }
+ if(o.sampah!==undefined){
+  if(!arr(o.sampah)||o.sampah.length>50000)throw new Error('Struktur Sampah tidak valid');
+  const ids=new Set();for(const e of o.sampah){if(!e||typeof e.id!=='string'||!e.id||ids.has(e.id)||!['snapshot',...window.SATRIA_CORE_GUARDS.COLLECTIONS,...window.SATRIA_CORE_GUARDS.EXTRAS].includes(e.collection)||!e.record||typeof e.record!=='object'||typeof e.deletedAt!=='string'||typeof e.deletedBy!=='string')throw new Error('Catatan Sampah tidak valid');ids.add(e.id);if(window.SATRIA_CORE_GUARDS.COLLECTIONS.includes(e.collection)&&String(e.record.id)!==String(e.originalId))throw new Error('ID arsip Sampah tidak valid');}
+ }
  if(o.users?.length&&!o.users.some(u=>u.role==='Admin'&&u.aktif!==false))throw new Error('Backup tidak memiliki Admin aktif');
  return true;
 }
@@ -3120,6 +2517,38 @@ function resetDetailIfOutsideFilter(){
 document.addEventListener('click',e=>{
  const t=e.target.closest('[data-act]');if(!t)return;
  const a=t.dataset.act,id=t.dataset.id,pid=t.dataset.pid,d=t.dataset;
+ if(a==='trashrefresh'){
+   if(!window.SATRIA_CLOUD_CONFIGURED)return;
+   const api=window.SATRIA_CLOUD_TRASH;
+   if(!api?.ready){toast('Login dan tarik cloud lebih dahulu.');return}
+   api.refresh().catch(err=>toast('Gagal memuat Sampah: '+err.message));return;
+ }
+ if(a==='trashrestore'){
+   if(!canWrite()){toast('Viewer hanya dapat melihat Sampah');return}
+   if(window.SATRIA_CLOUD_CONFIGURED){
+     if(!confirm('Pulihkan data ini dari Sampah cloud? Perubahan akan terlihat lintas perangkat.'))return;
+     const api=window.SATRIA_CLOUD_TRASH;
+     if(!api?.ready){toast('Cloud belum siap. Data tidak diubah.');return}
+     api.restore(id).catch(err=>toast('Pemulihan cloud dibatalkan: '+err.message));return;
+   }
+   if(satriaRecycleBlocked())return;
+   const entry=(S.sampah||[]).find(x=>String(x.id)===String(id));if(!entry){toast('Data di Sampah tidak ditemukan.');return}
+   if(entry.collection!=='snapshot'&&satriaRecycleDependencies(entry)){toast(satriaRecycleDependencies(entry));return}
+   if(!confirm('Pulihkan data ini dari Sampah ke daftar aktif?'))return;
+   try{
+     if(entry.collection==='snapshot'){
+       validateBackup(entry.record);
+       const ui=S.ui,old=JSON.parse(JSON.stringify(persistable()));delete old.sampah;
+       S.sampah=S.sampah.filter(x=>x.id!==entry.id);
+       const history=S.sampah;
+       Object.assign(S,JSON.parse(JSON.stringify(entry.record)),{ui,sampah:history,dirty:true});
+       normalizeData();
+       S.sampah.unshift({id:uid('trash'),collection:'snapshot',originalId:'snapshot',record:old,deletedAt:new Date().toISOString(),deletedBy:cur().nama});
+       S.ui.tahun=S.tahun.includes(Number(ui.tahun))?Number(ui.tahun):S.tahun[0];S.ui.opd='all';S.ui.pid=null;
+     }else window.SATRIA_CORE_GUARDS.restore(S,id);
+     sync('paket','Data dipulihkan dari Sampah: '+entry.collection);render();
+   }catch(err){toast('Pemulihan dibatalkan: '+err.message)}return;
+ }
  if(WRITE.concat(['rupcreate','rupremove']).includes(a)&&!canWrite()){toast('Akun Viewer hanya dapat melihat data');return}
  if(window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE&&window.SATRIA_CLOUD_ROLE!=='admin'){
    if(['addopd','addyear','delyear','rmlogo','reset','clearsample','uadd','utoggle','udel'].includes(a)){
@@ -3137,6 +2566,12 @@ document.addEventListener('click',e=>{
    if(a==='medit'&&['opd','kode'].includes(S.ui.mtab)){
      toast('Master organisasi ini hanya dapat diubah oleh admin.');return;
    }
+ }
+ if(window.SATRIA_CLOUD_CONFIGURED&&['udel','clearsample','reset','rmkop','rmlogo','delpw','delyear'].includes(a)){
+   satriaRecycleBlocked();return; // These actions lack a safe server recycle contract.
+ }
+ if(window.SATRIA_CLOUD_CONFIGURED&&a==='delrow'&&!['opd','unit','pejabat','penyedia','akun','kode'].includes(d.c)){
+   satriaRecycleBlocked();return;
  }
  if(a==='settingsReport'){const g=(function(){const report={dibuat:new Date().toISOString(),versi:'3.0.38',jumlahRUP:(S.rupBank||[]).length,jumlahPaket:S.paket.length,jumlahOPD:S.opd.length,tahun:[...S.tahun],peringatan:[]};(S.rupBank||[]).forEach(r=>{if(!S.opd.some(o=>o.id===r.opd)||!S.tahun.includes(+r.tahun))report.peringatan.push('Bank RUP '+r.rup+' memiliki OPD/tahun tidak terdaftar')});(S.paket||[]).forEach(p=>{if(hps(p)>+p.pagu)report.peringatan.push('HPS lebih tinggi dari pagu: '+p.rup)});return report})();const url=URL.createObjectURL(new Blob([JSON.stringify(g,null,2)],{type:'application/json'}));const anchor=document.createElement('a');anchor.href=url;anchor.download='SATRIA-Laporan-Pengaturan-'+new Date().toISOString().slice(0,10)+'.json';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),5000);return}
  if(a==='settingsBackup'){document.querySelector('[data-act=export]')?.click();return}
@@ -3280,7 +2715,7 @@ document.addEventListener('click',e=>{
    toast('Relasi RUP diperbarui. Periksa kode RUP utama dan pagu paket.');return render();
  }
 
- if(a==='rupremove'){const r=(S.rupBank||[]).find(x=>x.id===id);if(!r)return;if((S.paket||[]).some(p=>satriaRupLinked(p,r))){toast('RUP masih terhubung dengan paket. Jangan hapus referensi yang telah dipakai; buka paket terkait terlebih dahulu.');return}if(!confirm('Hapus RUP '+r.rup+' dari Bank RUP?'))return;S.rupBank=S.rupBank.filter(x=>x.id!==id);sync('paket','RUP dihapus dari bank');return render()}
+ if(a==='rupremove'){const r=(S.rupBank||[]).find(x=>x.id===id);if(!r)return;if([...(S.paket||[]),...(S.sampah||[]).filter(e=>e.collection==='paket').map(e=>e.record)].some(p=>satriaRupLinked(p,r))){toast('RUP masih terhubung dengan paket. Jangan hapus referensi yang telah dipakai; buka paket terkait terlebih dahulu.');return}if(!confirm('Pindahkan RUP '+r.rup+' ke Sampah? Bisa dipulihkan.'))return;if(satriaRecycleMove('rupBank',id))render();return}
  if(a==='satriaFixDemoSub'){
    const count=satriaSubDemoJumlah();
    if(!count){toast('Tidak ada subkegiatan demo pada paket/Bank RUP.');return render()}
@@ -3317,7 +2752,7 @@ document.addEventListener('click',e=>{
  }
  if(a==='newpaket'){S.ui.rupSearch='';location.hash='#input';toast('Pilih RUP dari Bank RUP untuk membuat paket pengadaan.');return render()}
  if(a==='copy'){const s=P(id);if(satriaSpseIs(s)){toast('Paket SPSE dicatat melalui Monitoring SPSE, bukan fitur salin e-Purchasing.');return;}if(window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE&&window.SATRIA_CLOUD_ROLE!=='admin'&&!S.tahun.includes(s.tahun+1)){toast('Tidak dapat menyalin ke tahun yang belum ditetapkan. Minta admin menambahkan assignment tahun lebih dahulu.');return}if(!S.tahun.includes(s.tahun+1)){S.tahun.push(s.tahun+1);S.tahun.sort()}const n=JSON.parse(JSON.stringify(s));Object.assign(n,{id:uid('k'),tahun:s.tahun+1,seq:nextSeq(s.tahun+1,s.opd),rup:'',rupBankId:'',rupBankIds:[],pemenangId:null,penawaran:[],tglNodis:'',tglSurvei:'',tglEvaluasi:'',tglNego:'',tglPenetapan:'',tglDpp:'',tglSppbj:'',tglBahp:''});delete n.ppDokumenPemilihan;S.paket.push(n);S.ui.tahun=n.tahun;location.hash='#paket/'+n.id;sync('paket','Paket disalin ke TA '+n.tahun);return render()}
- if(a==='delpaket'){if(!confirm('Hapus paket ini?'))return;S.paket=S.paket.filter(p=>p.id!==id);sync('paket','Paket dihapus');location.hash='#paket';return}
+ if(a==='delpaket'){const p=P(id);if(!p)return;if(!confirm('Pindahkan paket '+String(p.nama||p.id)+' ke Sampah? Dapat dipulihkan.'))return;if(satriaRecycleMove('paket',id)){location.hash='#paket';render()}return}
  if(a==='openOfferCalc'){const p=P(pid),w=p?.penawaran?.find(x=>String(x.id)===String(id));if(!p||!w){toast('Paket atau penyedia tidak ditemukan.');return}KN.pid=p.id;KN.wid=w.id;KN.scope='';KN.lastSaved=null;S.ui.tahun=Number(p.tahun);S.ui.opd=String(p.opd);S.ui.page='kalk';S.ui.pid=null;location.hash='#kalk';return render()}
  if(a==='ptab'){S.ui.ptab=d.tab;return render()}
  if(a==='satMasterAudit'){toast(satMasterIssues().length+' temuan pemeriksaan Data Master.');return render()}
@@ -3403,7 +2838,7 @@ document.addEventListener('click',e=>{
    toast('Nama penyedia terkoreksi menjadi '+newName+'. Periksa nilai dan dokumen, lalu tetapkan ulang jika memenuhi syarat.');
    return render();
  }
- if(a==='delpw'){if(!confirm('Hapus penawaran penyedia ini?'))return;const p=P(pid);p.penawaran=p.penawaran.filter(w=>w.id!==id);if(p.pemenangId===id)p.pemenangId=null;sync('nego','Penawaran dihapus');return render()}
+ if(a==='delpw'){const p=P(pid),w=p?.penawaran?.find(x=>String(x.id)===String(id));if(!p||!w||satriaRecycleBlocked())return;if(!confirm('Pindahkan penawaran penyedia ini ke Sampah?'))return;window.SATRIA_CORE_GUARDS.archiveSpecial(S,'penawaran',id,{paketId:p.id,offer:w},cur().nama);p.penawaran=p.penawaran.filter(x=>x.id!==id);if(p.pemenangId===id)p.pemenangId=null;sync('nego','Penawaran dipindah ke Sampah');return render()}
  if(a==='saveHpsTotalReview'){
    const p=P(pid),w=p?.penawaran?.find(w=>String(w.id)===String(id));if(!p||!w)return;
    const panel=[...document.querySelectorAll('.satria-hps-total-review')].find(el=>
@@ -3444,7 +2879,7 @@ document.addEventListener('click',e=>{
  if(a==='winner'){const p=P(pid);if(!p){toast('Paket tidak ditemukan.');return}const e=evalPw(p).find(x=>String(x.w.id)===String(id)),check=satriaOfferGate(p,e);if(!check.ready){alert('Penyedia belum dapat ditetapkan:\n• '+check.errors.join('\n• '));return}if(p.pemenangId===id){toast('Penyedia ini sudah ditetapkan.');return}const seller=PY(e.w.pen).nama;const prior=p.pemenangId?(p.penawaran||[]).find(w=>w.id===p.pemenangId):null;const text=(prior?'Ganti penyedia yang sebelumnya ditetapkan ('+PY(prior.pen).nama+')?\n\n':'')+'Tetapkan '+seller+' sebagai penyedia terpilih untuk paket '+String(p.nama||p.rup)+'?\nNilai hasil negosiasi: '+rp(e.t)+' (termasuk pajak).\n'+(satriaNegoAboveUnit(p,e.w).length?'\nPERHATIAN: Ada item di atas HPS satuan. Periksa kewajaran, spesifikasi, dan bukti, meskipun total paket memenuhi batas.\n':'')+'\nSistem mencatat pilihan manual. Periksa kelengkapan bukti serta kewenangan pejabat sebelum menerbitkan dokumen.';if(!confirm(text))return;p.pemenangId=id;if(p.koreksiPenyediaPerluVerifikasi){p.koreksiPenyediaPerluVerifikasi.ditetapkanUlangPada=new Date().toISOString();p.koreksiPenyediaPerluVerifikasi.ditetapkanUlangOleh=String(cur().nama||'-');}sync('pemenang','Penetapan manual penyedia: '+seller);toast('Penyedia '+seller+' berhasil ditetapkan.');return render()}
  if(a==='autowin'){P(pid).pemenangId=null;sync('pemenang','Penetapan pemenang dibatalkan; kandidat tetap dihitung otomatis');return render()}
  if(a==='addrow'){if(typeof MBLANK==='undefined'||!MBLANK[d.c]){toast('Gunakan formulir tambah pada tab ini.');return}S[d.c].push(MBLANK[d.c]());sync('master','Baris master ditambahkan: '+d.c);return render()}
- if(a==='delrow'){if(!confirm('Hapus data ini?'))return;if(!canDel(d.c,id)){toast('Data masih dipakai paket. Nonaktifkan atau ganti dulu.');return}if(d.c==='opd'&&(S.rupBank||[]).some(r=>r.opd===id)){toast('OPD masih digunakan Bank RUP. Hapus/relokasi RUP terlebih dahulu.');return}if(d.c==='opd')S.unit=S.unit.filter(u=>u.opd!==id);S[d.c]=S[d.c].filter(x=>x.id!==id);sync('master','Baris master dihapus: '+d.c);return render()}
+ if(a==='delrow'){if(!confirm('Pindahkan data ini ke Sampah?'))return;if(!canDel(d.c,id)){toast('Data masih dipakai paket. Nonaktifkan atau ganti dulu.');return}if(d.c==='opd'&&[...(S.rupBank||[]),...(S.sampah||[]).filter(e=>e.collection==='rupBank').map(e=>e.record)].some(r=>r.opd===id)){toast('OPD masih digunakan Bank RUP. Hapus/relokasi RUP terlebih dahulu.');return}if(satriaRecycleMove(d.c,id))render();return}
  if(a==='addopd'){S.opd.push({id:uid('o'),nama:'',singkat:'',unit:'',bidang:'',alamat:''});sync('settings','OPD ditambahkan');return render()}
  if(a==='addyear'){const raw=$('#newYear').value,v=Number(raw);if(!raw||!Number.isInteger(v)||v<2000||v>2200){toast('Masukkan tahun anggaran berupa bilangan bulat 2000–2200.');return}if(S.tahun.includes(v)){toast('Tahun anggaran sudah terdaftar.');return}S.tahun.push(v);S.tahun.sort((a,b)=>a-b);sync('settings','Tahun '+v+' ditambahkan');return render()}
   if(a==='uadd'){const row={id:uid('u'),aktif:true};document.querySelectorAll('[data-new]').forEach(i=>{row[i.dataset.new]=i.value.trim()});
@@ -3452,12 +2887,12 @@ document.addEventListener('click',e=>{
  if(S.users.some(x=>x.username.toLowerCase()===row.username.toLowerCase())){toast('Username sudah dipakai');return}
  S.users.push(row);sync('master','User ditambahkan: '+row.nama);return render()}
  if(a==='utoggle'){const u=S.users.find(x=>x.id===id);if(!u)return;if(u.aktif!==false){if(u.id===S.ui.user){toast('Tidak bisa menonaktifkan user yang sedang dipakai');return}if(isLastAdmin(id)){toast('Harus ada minimal satu Admin aktif');return}u.aktif=false}else u.aktif=true;sync('master',(u.aktif?'Diaktifkan: ':'Dinonaktifkan: ')+u.nama);return render()}
- if(a==='udel'){const u=S.users.find(x=>x.id===id);if(!u)return;if(u.id===S.ui.user){toast('Tidak bisa menghapus user yang sedang dipakai');return}if(isLastAdmin(id)){toast('Harus ada minimal satu Admin aktif');return}if(!confirm('Hapus user '+u.nama+'?'))return;S.users=S.users.filter(x=>x.id!==id);sync('master','User dihapus');return render()}
- if(a==='clearsample'){if(!confirm('PERINGATAN: tindakan ini menghapus semua paket, data pejabat, dan penyedia dari data aktif. Pastikan Anda sudah mengunduh backup JSON. Lanjutkan?'))return;if(!confirm('Konfirmasi terakhir: hapus paket, pejabat, dan penyedia sekarang?'))return;S.paket=[];S.pejabat=[];S.penyedia=[];sync('master','Paket, pejabat, dan penyedia dikosongkan');toast('Paket, pejabat, dan penyedia dikosongkan. Unduh backup baru setelah perubahan bila diperlukan.');return render()}
- if(a==='rmkop'){const o=S.opd.find(x=>x.id===id);if(o){delete o.kop;sync('settings','Kop '+o.singkat+' dihapus')}return render()}
- if(a==='rmlogo'){delete S.pemda.logo;sync('settings','Logo dihapus');return render()}
- if(a==='delyear'){const y=+d.y;if(S.paket.some(p=>+p.tahun===y)||(S.rupBank||[]).some(r=>+r.tahun===y)){toast('Tahun masih digunakan Paket Pengadaan atau Bank RUP.');return render()}if(S.tahun.length<=1){toast('Tahun anggaran terakhir tidak dapat dihapus. Tambahkan tahun pengganti terlebih dahulu.');return render()}if(!confirm('Hapus TA '+y+'? Tindakan ini hanya diizinkan bila tidak ada paket yang memakai tahun tersebut.'))return;S.tahun=S.tahun.filter(x=>+x!==y);if(+S.ui.tahun===y)S.ui.tahun=S.tahun[0];sync('settings','Tahun '+y+' dihapus');return render()}
- if(a==='reset'){if(!confirm('PERINGATAN: seluruh data aktif—paket, master, pengaturan, pengguna, dan penawaran—akan diganti dengan data awal. Unduh backup JSON terlebih dahulu. Lanjutkan?'))return;if(!confirm('Konfirmasi terakhir: ganti seluruh data aktif dengan data awal SATRIA?'))return;init();sync('settings','Data direset ke data awal');route();toast('Data awal dimuat ulang. Periksa konfigurasi dan unduh backup setelah pengisian.');return}
+ if(a==='udel'){const u=S.users.find(x=>x.id===id);if(!u)return;if(u.id===S.ui.user){toast('Tidak bisa menghapus user yang sedang dipakai');return}if(isLastAdmin(id)){toast('Harus ada minimal satu Admin aktif');return}if(!confirm('Pindahkan user '+u.nama+' ke Sampah?'))return;if(satriaRecycleMove('users',id))render();return}
+ if(a==='clearsample'){if(satriaRecycleBlocked())return;if(!confirm('Pindahkan semua paket, pejabat, dan penyedia aktif ke Sampah? Data bisa dipulihkan.'))return;for(const c of ['paket','pejabat','penyedia'])for(const row of [...S[c]])window.SATRIA_CORE_GUARDS.archive(S,c,row.id,cur().nama);sync('master','Paket, pejabat, dan penyedia dipindah ke Sampah');toast('Data contoh dipindahkan ke Sampah dan dapat dipulihkan.');return render()}
+ if(a==='rmkop'){const o=S.opd.find(x=>x.id===id);if(!o?.kop||satriaRecycleBlocked())return;window.SATRIA_CORE_GUARDS.archiveSpecial(S,'media',id,{owner:'opd',opdId:id,value:o.kop},cur().nama);delete o.kop;sync('settings','Kop '+o.singkat+' dipindahkan ke Sampah');return render()}
+ if(a==='rmlogo'){if(!S.pemda.logo||satriaRecycleBlocked())return;window.SATRIA_CORE_GUARDS.archiveSpecial(S,'media','pemda-logo',{owner:'pemda',value:S.pemda.logo},cur().nama);delete S.pemda.logo;sync('settings','Logo dipindahkan ke Sampah');return render()}
+ if(a==='delyear'){const y=+d.y;if([...S.paket,...(S.sampah||[]).filter(e=>e.collection==='paket').map(e=>e.record)].some(p=>+p.tahun===y)||[...(S.rupBank||[]),...(S.sampah||[]).filter(e=>e.collection==='rupBank').map(e=>e.record)].some(r=>+r.tahun===y)){toast('Tahun masih digunakan Paket Pengadaan atau Bank RUP.');return render()}if(S.tahun.length<=1){toast('Tahun anggaran terakhir tidak dapat dihapus. Tambahkan tahun pengganti terlebih dahulu.');return render()}if(satriaRecycleBlocked())return;if(!confirm('Pindahkan TA '+y+' ke Sampah? Bisa dipulihkan.'))return;window.SATRIA_CORE_GUARDS.archiveSpecial(S,'tahun',String(y),{year:y},cur().nama);S.tahun=S.tahun.filter(x=>+x!==y);if(+S.ui.tahun===y)S.ui.tahun=S.tahun[0];sync('settings','Tahun '+y+' dipindah ke Sampah');return render()}
+ if(a==='reset'){if(satriaRecycleBlocked())return;if(!confirm('Reset ke data awal? Snapshot seluruh data aktif akan dicadangkan ke Sampah lokal. Unduh backup JSON terpisah terlebih dahulu untuk keamanan tambahan.'))return;const before=persistable(),actor=cur().nama,previousTrash=JSON.parse(JSON.stringify(S.sampah||[]));init();S.sampah=previousTrash;delete before.sampah;S.sampah.unshift({id:uid('trash'),collection:'snapshot',originalId:'snapshot',record:before,deletedAt:new Date().toISOString(),deletedBy:actor});sync('settings','Data direset ke data awal; snapshot tersedia di Sampah');route();toast('Data awal dimuat; snapshot sebelum reset tersedia di Sampah.');return}
  if(a==='print')return window.print();
  if(a==='lapView'){
   const target=String(d.view||'overview');if(!['overview','rekening','audit','rup'].includes(target))return;
@@ -3599,10 +3034,10 @@ document.addEventListener('change',e=>{
  if(d.col==='users'&&d.f==='role'&&t.value!=='Admin'&&isLastAdmin(d.id)){toast('Harus ada minimal satu Admin aktif');return render()}
  if(t.id==='mSearch'){S.ui.ms=t.value;return render()}
  if(d.new!==undefined)return;
- if(d.kopup){const f=t.files[0];if(!f)return;if(f.size>1024*1024){toast('Gambar kop maksimal 1 MB');return render()}const rd=new FileReader();rd.onload=()=>{const o=S.opd.find(x=>x.id===d.kopup);if(o){o.kop=rd.result;sync('settings','Kop '+o.singkat+' diperbarui')}render()};rd.readAsDataURL(f);return}
+ if(d.kopup){const f=t.files[0];if(!f)return;if(f.size>1024*1024||!['image/png','image/jpeg','image/webp','image/gif'].includes(f.type)){toast('Kop harus PNG/JPG/WebP/GIF maks. 1 MB.');return render()}const rd=new FileReader();rd.onload=()=>{const o=S.opd.find(x=>x.id===d.kopup);if(o){o.kop=rd.result;sync('settings','Kop '+o.singkat+' diperbarui')}render()};rd.readAsDataURL(f);return}
  if(d.up){const f=t.files[0];if(!f)return;if(f.size>300*1024){toast('Gambar maksimal 300 KB');return render()}const rd=new FileReader();rd.onload=()=>{S.pejabat.find(x=>x.id===d.id)[d.up]=rd.result;sync('master','Gambar '+d.up+' diperbarui');render()};rd.readAsDataURL(f);return}
- if(t.id==='logoFile'){const f=t.files[0];if(!f)return;if(f.size>300*1024){toast('Ukuran logo maksimal 300 KB');return render()}const r=new FileReader();r.onload=()=>{S.pemda.logo=r.result;sync('settings','Logo instansi diperbarui');render()};r.readAsDataURL(f);return}
- if(t.id==='imp'){if(window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE!=='admin'){t.value='';toast('Impor backup penuh hanya tersedia bagi admin; Operator/Viewer hanya memakai data hasil scope server.');return}const f=t.files[0];if(!f)return;if(f.size>25*1024*1024){toast('File backup terlalu besar (maks. 25 MB).');t.value='';return}const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);validateBackup(o);const arr=v=>Array.isArray(v);if(!confirm('Impor akan MENGGANTI data aktif dengan isi backup ini. Unduh backup kondisi sekarang terlebih dahulu bila belum dilakukan. Lanjutkan impor?')){t.value='';return}const base=JSON.parse(JSON.stringify(SEED));Object.assign(S,base,o,{ui:S.ui,log:[],dirty:true,chat:[],chatCtx:null});if(!arr(S.users)||!S.users.length)S.users=[{id:'u1',nama:'Administrator',username:'admin',role:'Admin',opd:'all',aktif:true}];if(!arr(S.unit))S.unit=(S.opd||[]).map(x=>({id:'u'+x.id,opd:x.id,kode:x.unit||'',bidang:x.bidang||''}));if(!arr(S.akun))S.akun=[];if(!S.penomoran||typeof S.penomoran!=='object')S.penomoran=base.penomoran;normalizeData();S.tahun=[...new Set([...S.tahun.map(Number),...S.paket.map(p=>+p.tahun).filter(Number.isFinite)])].filter(Number.isInteger).sort((a,b)=>a-b);if(!S.tahun.length)S.tahun=[new Date().getFullYear()];S.ui.tahun=S.tahun.includes(+S.ui.tahun)?+S.ui.tahun:S.tahun[0];S.ui.opd='all';S.ui.pid=null;S.ui.user=(S.users.find(u=>u.aktif!==false)||S.users[0]).id;sync('settings','Backup JSON dipulihkan');if(window.SATRIA_CLOUD_ROLE==='admin')window.SATRIA_CLOUD_ADMIN_IMPORT_READY=true;toast('Backup berhasil dimuat dan divalidasi. Periksa indikator kelengkapan sebelum mencetak dokumen.');render()}catch(err){console.warn('Backup import ditolak',err);toast('Backup tidak valid atau strukturnya tidak didukung. Data aktif tidak diubah.')}finally{t.value=''}};r.readAsText(f);return}
+ if(t.id==='logoFile'){const f=t.files[0];if(!f)return;if(f.size>300*1024||!['image/png','image/jpeg','image/webp','image/gif'].includes(f.type)){toast('Logo harus PNG/JPG/WebP/GIF maks. 300 KB');return render()}const r=new FileReader();r.onload=()=>{S.pemda.logo=r.result;sync('settings','Logo instansi diperbarui');render()};r.readAsDataURL(f);return}
+ if(t.id==='imp'){if(window.SATRIA_CLOUD_CONFIGURED&&window.SATRIA_CLOUD_ROLE!=='admin'){t.value='';toast('Impor backup penuh hanya tersedia bagi admin; Operator/Viewer hanya memakai data hasil scope server.');return}const f=t.files[0];if(!f)return;if(f.size>25*1024*1024){toast('File backup terlalu besar (maks. 25 MB).');t.value='';return}const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);validateBackup(o);const arr=v=>Array.isArray(v);if(!confirm('Impor akan MENGGANTI data aktif dengan isi backup ini. Unduh backup kondisi sekarang terlebih dahulu bila belum dilakukan. Lanjutkan impor?')){t.value='';return}const base=JSON.parse(JSON.stringify(SEED));Object.assign(S,base,o,{ui:S.ui,log:[],dirty:true,chat:[],chatCtx:null,sampah:arr(o.sampah)?o.sampah:[]});if(!arr(S.users)||!S.users.length)S.users=[{id:'u1',nama:'Administrator',username:'admin',role:'Admin',opd:'all',aktif:true}];if(!arr(S.unit))S.unit=(S.opd||[]).map(x=>({id:'u'+x.id,opd:x.id,kode:x.unit||'',bidang:x.bidang||''}));if(!arr(S.akun))S.akun=[];if(!S.penomoran||typeof S.penomoran!=='object')S.penomoran=base.penomoran;normalizeData();S.tahun=[...new Set([...S.tahun.map(Number),...S.paket.map(p=>+p.tahun).filter(Number.isFinite)])].filter(Number.isInteger).sort((a,b)=>a-b);if(!S.tahun.length)S.tahun=[new Date().getFullYear()];S.ui.tahun=S.tahun.includes(+S.ui.tahun)?+S.ui.tahun:S.tahun[0];S.ui.opd='all';S.ui.pid=null;S.ui.user=(S.users.find(u=>u.aktif!==false)||S.users[0]).id;sync('settings','Backup JSON dipulihkan');if(window.SATRIA_CLOUD_ROLE==='admin')window.SATRIA_CLOUD_ADMIN_IMPORT_READY=true;toast('Backup berhasil dimuat dan divalidasi. Periksa indikator kelengkapan sebelum mencetak dokumen.');render()}catch(err){console.warn('Backup import ditolak',err);toast('Backup tidak valid atau strukturnya tidak didukung. Data aktif tidak diubah.')}finally{t.value=''}};r.readAsText(f);return}
  if(d.addpw){if(t.value){P(d.addpw).penawaran.push({id:uid('w'),pen:t.value,sumberHarga:satriaOfferSupplierCatalogLink({pen:t.value}),tanggalHarga:'',ongkir:0,catatan:'',harga:{},nego:{}});sync('nego','Penyedia ditambahkan ke survei')}return render()}
  if(d.rp){const n=+String(t.value).replace(/[^0-9]/g,'')||0;
   if(d.col==='item'){const p=P(d.pid),it=p?.items?.find(x=>x.id===d.id);if(!it)return;const items=p.items.map(x=>x.id===it.id?{...x,[d.f]:n}:x);const guard=satriaRupUjiPerubahanRincian(p,items);if(!guard.ok){toast(guard.msg);return render()}it[d.f]=n;sync('items','Harga satuan HPS diperbarui')}
@@ -3625,7 +3060,7 @@ window.addEventListener('hashchange',route);window.addEventListener('beforeunloa
 let DB=null,ENGINE='memory',pTimer=null,persistRevision=0,lastPersistedRevision=0;
 let satriaLocalBaseStamp=null,satriaLocalConflict=false;
 function dbInit(){if(typeof Dexie==='undefined')return false;try{DB=new Dexie('satria-framework-db');DB.version(1).stores({kv:'k'});ENGINE='dexie';return true}catch(e){console.warn('Dexie gagal dibuka',e);return false}}
-function normalizeData(){S.rupBank=Array.isArray(S.rupBank)?S.rupBank:[];S.pemda={nama:'',kota:'',provinsi:'',sumber:'',...(S.pemda||{})};S.penomoran={...SEED.penomoran,...(S.penomoran||{})};S.opd=S.opd||[];S.paket=(S.paket||[]).map(p=>({...p,seq:(Number.isInteger(+p.seq)&&+p.seq>0)?+p.seq:0,items:(p.items||[]).map(i=>({spesifikasi:'',merek:'',pdn:'Perlu verifikasi',linkProduk:'',...i})),penawaran:(p.penawaran||[]).map(w=>({sumberHarga:'',tanggalHarga:'',ongkir:0,catatan:'',...w,harga:w.harga||{},nego:w.nego||{}})),jenisPengadaan:p.jenisPengadaan||'',metodePemilihan:p.metodePemilihan||'',lokasiPengiriman:p.lokasiPengiriman||O(p.opd).tempat||O(p.opd).alamat||'',tglSurvei:p.tglSurvei||'',tglEvaluasi:p.tglEvaluasi||'',tglNego:p.tglNego||'',tglPenetapan:p.tglPenetapan||''}));
+function normalizeData(){S.sampah=Array.isArray(S.sampah)?S.sampah:[];S.rupBank=Array.isArray(S.rupBank)?S.rupBank:[];S.pemda={nama:'',kota:'',provinsi:'',sumber:'',...(S.pemda||{})};S.penomoran={...SEED.penomoran,...(S.penomoran||{})};S.opd=S.opd||[];S.paket=(S.paket||[]).map(p=>({...p,seq:(Number.isInteger(+p.seq)&&+p.seq>0)?+p.seq:0,items:(p.items||[]).map(i=>({spesifikasi:'',merek:'',pdn:'Perlu verifikasi',linkProduk:'',...i})),penawaran:(p.penawaran||[]).map(w=>({sumberHarga:'',tanggalHarga:'',ongkir:0,catatan:'',...w,harga:w.harga||{},nego:w.nego||{}})),jenisPengadaan:p.jenisPengadaan||'',metodePemilihan:p.metodePemilihan||'',lokasiPengiriman:p.lokasiPengiriman||O(p.opd).tempat||O(p.opd).alamat||'',tglSurvei:p.tglSurvei||'',tglEvaluasi:p.tglEvaluasi||'',tglNego:p.tglNego||'',tglPenetapan:p.tglPenetapan||''}));
  const maxSeqByScope=new Map();for(const p of S.paket){const key=String(p.tahun)+'|'+String(p.opd);if(Number.isInteger(+p.seq)&&+p.seq>0)maxSeqByScope.set(key,Math.max(maxSeqByScope.get(key)||0,+p.seq));}
  for(const p of S.paket){if(!p.seq){const key=String(p.tahun)+'|'+String(p.opd);const next=(maxSeqByScope.get(key)||0)+1;p.seq=next;maxSeqByScope.set(key,next)}}
  S.penyedia=(S.penyedia||[]).map(y=>({statusKatalog:'Perlu verifikasi',pdn:'Perlu verifikasi',tipe:'Perlu verifikasi',kbliSesuai:'Perlu verifikasi',daftarHitam:'Perlu verifikasi',...y,aktif:y.aktif!==false}));S.akun=(S.akun||[]).map(x=>({...x,aktif:x.aktif!==false}));S.unit=(S.unit||[]).map(x=>({...x,aktif:x.aktif!==false}));S.pejabat=(S.pejabat||[]).map(x=>({...x,aktif:x.aktif!==false}));S.kode=S.kode||[];S.tahun=[...new Set([...(S.tahun||[]).map(Number),...S.paket.map(p=>+p.tahun).filter(Number.isFinite)])].filter(Number.isInteger).sort((a,b)=>a-b);if(!S.tahun.length)S.tahun=[new Date().getFullYear()];}

@@ -4,6 +4,7 @@
  */
 (function(root){
 'use strict';
+const core=root?.SATRIA_PROCUREMENT_CORE || (typeof module === 'object' && module.exports ? require('./satria-procurement-core.js') : null);
 const no=(v)=>{if(v===null||v===undefined||v==='')return null;const n=Number(v);return Number.isFinite(n)&&n>=0?n:null};
 const positive=v=>{const n=no(v);return n!==null&&n>0?n:null};
 const clean=v=>String(v===null||v===undefined?'':v).trim();
@@ -35,7 +36,7 @@ function analyze(p,options={}){
  const offers=Array.isArray(p?.penawaran)?p.penawaran:[];
  const suppliers=options.suppliers||{};
  const nameFor=id=>clean(suppliers[String(id)])||'(penyedia tidak dikenal)';
- const H=sum(items.map(i=>(positive(i.vol)||0)*(positive(i.hs)||0)));
+ const H=core.hpsTotal(p);
  const pagu=positive(p?.pagu)||0;
  const issues=[];
  const add=(level,code,text)=>{if(!issues.some(x=>x.code===code&&x.text===text))issues.push({level,code,text})};
@@ -76,8 +77,8 @@ function analyze(p,options={}){
    // Even with complete metadata, similarity/equivalence of specifications cannot be certified automatically.
    return {id:String(i.id),specWarnings,comparisonEligible:evidenceOK&&!specWarnings.length,item:clean(i.nama),spec:clean(i.spesifikasi)||'Spesifikasi belum dirinci',qty:positive(i.vol)||0,unit:clean(i.satuan),hpsUnit:positive(i.hs)||0,listedUnit:list,negUnit:neg,refPrice,link,img,date,refName:clean(ref.name),refSpec:clean(ref.spec),refSeller:clean(ref.seller),source,sourceDate,evidenceOK,gaps};
   });
-  const tayangTotal=fullTayang&&shippingValid?money(sum(detail.map(x=>x.listedUnit*x.qty))+shipping):null;
-  const negoTotal=fullNego&&shippingValid?money(sum(detail.map(x=>x.negUnit*x.qty))+shipping):null;
+  const tayangTotal=fullTayang&&shippingValid?core.offerWithShipping(p,w,'harga',2):null;
+  const negoTotal=fullNego&&shippingValid?core.offerWithShipping(p,w,'nego',2):null;
   const completeEvidence=detail.length>0&&detail.every(x=>x.evidenceOK);
   const existsNego=detail.some(x=>x.negUnit!==null);
   if(!fullTayang)add('Sedang','OFFER_INCOMPLETE_'+w.id,`Harga tayang ${name} belum lengkap untuk seluruh barang`);

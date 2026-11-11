@@ -10,6 +10,7 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : null, function (root) {
   'use strict';
+  const core = root?.SATRIA_PROCUREMENT_CORE || (typeof module === 'object' && module.exports ? require('./satria-procurement-core.js') : null);
   const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt = n => 'Rp ' + Math.round(Number(n) || 0).toLocaleString('id-ID');
   const str = (v, max = 1000) => String(v ?? '').trim().slice(0, max);
@@ -30,7 +31,8 @@
   }
   function assess(p) {
     const mode = method(p), items = Array.isArray(p?.items) ? p.items : [], offers = Array.isArray(p?.penawaran) ? p.penawaran : [], m = p?.spseMonitoring || {};
-    const total = items.reduce((s, i) => s + Number(i.vol || 0) * Number(i.hs || 0), 0);
+    const cross = core.packageSnapshot(p, typeof S !== 'undefined' ? S.rupBank : []);
+    const total = cross.hps;
     const basic = !!str(p?.rup) && !!str(p?.nama) && Number(p?.pagu) > 0;
     const itemsGood = items.length > 0 && items.every(i => str(i.nama) && Number(i.vol) > 0 && Number(i.hs) > 0) && total <= Number(p.pagu) && Number.isSafeInteger(Math.round(total));
     const source = offers.some(w => str(w.sumberHarga) && str(w.tanggalHarga));
@@ -50,7 +52,7 @@
         detail:mode==='ep'?'Pilih DPP/HPS dan periksa pratinjau':'Draf pemilihan, BA reviu DPP dan analisa pasar harus diperiksa isinya'},
       {id:'arsip', name:'Bukti & catatan pekerjaan', recorded:refs.length > 0, detail:'Lampirkan tautan atau nomor referensi bukti; tidak mengunggah berkas ke sistem resmi'}
     ];
-    const concerns=[];
+    const concerns=[...cross.rup.issues];
     if(mode==='other') concerns.push('Metode belum dikenali sebagai E-Purchasing atau Pengadaan Langsung. Jangan membuat dokumen pemilihan yang tidak sesuai kewenangan.');
     if(!str(p?.jenisPengadaan)||!str(p?.metodePemilihan)&&!str(m.method)) concerns.push('Jenis atau metode belum lengkap. Cocokkan dengan SiRUP dan data paket sebelum menyiapkan dokumen.');
     if(total>Number(p?.pagu||0) && total>0) concerns.push('Total HPS tercatat melebihi pagu paket.');
@@ -58,7 +60,7 @@
     if(mode==='ep' && !source) concerns.push('Belum ada sumber harga dan tanggal referensi yang dapat diperiksa pada penawaran paket.');
     if(mode==='ep' && p?.pemenangId && !awardValid) concerns.push('Penetapan tercatat, tetapi hasil evaluasi penetapannya belum valid. Periksa total HPS dan pagu pada modul asal.');
     if(mode==='pl' && p?.jalurPengadaan!=='SPSE_MONITOR') concerns.push('Metode Pengadaan Langsung tercatat, namun paket belum terkait monitoring SPSE SATRIA; periksa pencatatannya.');
-    return {mode, total, stages, concerns, docs: root?.SATRIA_PBJ_POLICY?.documentPlan?.(p) || null, notes, refs, recorded:stages.filter(s=>s.recorded).length};
+    return {mode, total, rupStatus:cross.rup, stages, concerns, docs: root?.SATRIA_PBJ_POLICY?.documentPlan?.(p) || null, notes, refs, recorded:stages.filter(s=>s.recorded).length};
   }
   function canAccess(p, visible) { return !!p && (!Array.isArray(visible) || visible.some(x => String(x.id) === String(p.id))); }
   function canEdit(p) {
@@ -91,7 +93,7 @@
     const a=assess(p),readonly=!canEdit(p);
     return `<div class="pp-ecosystem" data-pp-panel="${safe(p.id)}"><div class="pp-hero"><div><span>✦ SATRIA • EKOSISTEM PEJABAT PENGADAAN</span><h2 style="color:#fff!important">Satu paket, satu ruang kerja.</h2><p>E-Purchasing dan Pengadaan Langsung dipisahkan otomatis. Data dipakai ulang; keputusan dan unggahan tetap di sistem resmi.</p></div><div class="pp-hero-badge">${a.mode==='ep'?'E-Purchasing':a.mode==='pl'?'Pengadaan Langsung':'Metode perlu diperiksa'}</div></div>
      <div class="pp-picker card"><label for="ppWorkspaceSelect">Pilih paket dari filter TA / OPD</label><select id="ppWorkspaceSelect" data-pp-select>${rows.map(x=>`<option value="${safe(x.id)}" ${x.id===p.id?'selected':''}>${safe(x.rup||'RUP belum diisi')} — ${safe(x.nama)} (${safe(x.jalurPengadaan==='SPSE_MONITOR'?'SPSE':'Paket')})</option>`).join('')}</select><div class="pp-headline"><div><b>${safe(p.nama)}</b><small>RUP ${safe(code(p))} · TA ${safe(p.tahun)} · OPD ${safe(typeof O === 'function' ? O(p.opd)?.nama || p.opd : p.opd)}</small></div><div><small>Alokasi paket</small><b>${fmt(p.pagu)}</b></div><div><small>HPS rincian tercatat</small><b>${fmt(a.total)}</b></div></div></div>
-     <section class="pp-block pp-summary"><h3>Alur kerja yang relevan</h3><p><b>${a.recorded}/${a.stages.length}</b> kelompok memiliki data pendukung di SATRIA. Indikator ini <b>bukan persetujuan atau penilaian kepatuhan</b>.</p>${steps(a)}${a.concerns.length?`<div class="pp-alert">${a.concerns.map(t=>`<p>⚠ ${safe(t)}</p>`).join('')}</div>`:''}</section>
+     <section class="pp-block pp-summary"><h3>Alur kerja yang relevan</h3><p><b>${a.recorded}/${a.stages.length}</b> kelompok memiliki data pendukung di SATRIA. Indikator ini <b>bukan persetujuan atau penilaian kepatuhan</b>.</p><p class="pp-muted">Relasi Bank RUP: ${a.rupStatus.ids.length?`${a.rupStatus.references.length}/${a.rupStatus.ids.length} tautan ditemukan`:'Belum ada tautan ID (paket manual/legacy)'}. Angka HPS memakai satu sumber perhitungan paket dan tidak mengubah data RUP.</p>${steps(a)}${a.concerns.length?`<div class="pp-alert">${a.concerns.map(t=>`<p>⚠ ${safe(t)}</p>`).join('')}</div>`:''}</section>
      ${docs(p,a)}${records(p,a,readonly)}<div class="pp-footer">Rujukan: <a href="https://jdih.lkpp.go.id/regulation/peraturan-lkpp/peraturan-lkpp-nomor-2-tahun-2026" target="_blank" rel="noopener noreferrer">Perlem LKPP 2/2026 (Katalog)</a> · <a href="https://jdih.lkpp.go.id/regulation/peraturan-lkpp/peraturan-lkpp-nomor-3-tahun-2026" target="_blank" rel="noopener noreferrer">Perlem LKPP 3/2026 (Melalui Penyedia)</a> · <a href="https://jdih.lkpp.go.id/regulation/surat-edaran-kepala-lkpp/surat-edaran-kepala-lkpp-nomor-3-tahun-2026" target="_blank" rel="noopener noreferrer">SE transisi</a></div></div>`;
   }
   function downloadable(p) {
