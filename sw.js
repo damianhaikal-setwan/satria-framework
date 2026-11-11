@@ -1,5 +1,5 @@
 /* SATRIA PWA: network-first, precache all refactored assets for offline use. */
-const CACHE_NAME = 'satria-v3.0.59.59-pbj-2026-20261111-cloud-stage5';
+const CACHE_NAME = 'satria-v3.0.59.59-pbj-2026-20261111-combined-p0p3';
 const APP_ASSETS = [
   "./",
   "./index.html",
@@ -51,12 +51,16 @@ const APP_ASSETS = [
   "./frontend/refactor/css/23-hps-draft-batch.css",
   "./frontend/refactor/css/24-laporan-rekening.css",
   "./frontend/satria-document-templates.js",
+  "./frontend/satria-controller-access.js",
+  "./frontend/satria-controller-master-settings.js",
+  "./frontend/satria-controller-recycle.js",
   "./frontend/satria-cloud-delta.js",
   "./frontend/satria-cloud-admin-create.js",
   "./frontend/satria-cloud-admin-roster.js",
   "./frontend/satria-view-performance.js",
   "./frontend/satria-shared-modal-ui.css",
   "./frontend/satria-stage4-ux.css",
+  "./frontend/satria-combined-ux.css",
   "./frontend/refactor/js/00-core-guards.js",
   "./frontend/refactor/js/01-app-core.js",
   "./frontend/refactor/js/02-premium-ui.js",
