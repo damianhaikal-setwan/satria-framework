@@ -3,7 +3,7 @@
 (function (root) {
  'use strict';
  const COLLECTIONS = Object.freeze(['paket', 'rupBank', 'pejabat', 'penyedia', 'unit', 'akun', 'kode', 'opd', 'users']);
- const EXTRAS=Object.freeze(['media','penawaran','tahun']);
+ const EXTRAS=Object.freeze(['media','penawaran','item','tahun']);
  function imageSrc(value) {
    const raw=typeof value==='string'?value.trim():'';
    if (!raw || raw.length>2_000_000 || /[\u0000-\u001f\u007f]/.test(raw)) return '';
@@ -64,6 +64,29 @@
        if(!(state.penyedia||[]).some(y=>String(y.id)===String(r.offer.pen)))throw Error('Penyedia perlu dipulihkan lebih dahulu');
        parent.penawaran.push(copy(r.offer));
        // Winner stays unset; the operator must choose again based on current calculations.
+     } else if(entry.collection==='item') {
+       const parent=(state.paket||[]).find(p=>String(p.id)===String(r.paketId));
+       if(!parent||!r.item||String(r.item.id)!==String(entry.originalId))throw Error('Paket induk/rincian tidak valid');
+       parent.items=parent.items||[];
+       if(parent.items.some(i=>String(i.id)===String(entry.originalId)))throw Error('Rincian dengan ID sama masih aktif');
+       const refs=Array.isArray(r.offerRefs)?r.offerRefs:[];
+       // Validate EVERY dependent price reference before mutating anything.
+       for(const ref of refs){
+         const offer=(parent.penawaran||[]).find(w=>String(w.id)===String(ref.offerId));
+         if(!offer)throw Error('Pulihkan penawaran penyedia terkait dahulu');
+         for(const field of ['harga','nego','negoDetails','catalogRefs'])if(Object.prototype.hasOwnProperty.call(ref.values||{},field)
+            &&Object.prototype.hasOwnProperty.call(offer[field]||{},String(r.item.id)))
+           throw Error('Harga/bukti item sudah dipakai; pemulihan tidak boleh menimpa');
+       }
+       parent.items.push(copy(r.item));
+       for(const ref of refs){
+         const offer=parent.penawaran.find(w=>String(w.id)===String(ref.offerId));
+         for(const [field,value] of Object.entries(ref.values||{})){
+           if(!['harga','nego','negoDetails','catalogRefs'].includes(field))continue;
+           if(!offer[field])offer[field]={};
+           offer[field][String(r.item.id)]=copy(value);
+         }
+       }
      }
      entries.splice(pos,1);
      return entry;

@@ -1,0 +1,20 @@
+/* SATRIA coordinated P0–P3 release. Small, scoped UX improvements, no global resets. */
+.satria-trash-page { max-width:100%; }
+.satria-trash-page [role="status"] { overflow-wrap:anywhere; }
+.satria-trash-page table { border-collapse:separate; border-spacing:0; min-width:600px; }
+.satria-trash-page th { position:sticky; top:0; background:var(--panel,#fff); z-index:1; }
+.satria-trash-page td { overflow-wrap:anywhere; max-width:300px; }
+.satria-trash-page button:focus-visible, .satria-care-page button:focus-visible {
+  outline:3px solid #0f766e; outline-offset:3px;
+}
+.satria-trash-page button, .satria-care-page button { min-height:44px; }
+.satria-care-storage-info { padding:10px 12px; border:1px solid #b7d4cd; border-radius:12px; background:#f0fdfa; color:#134e4a; }
+@media (max-width:430px) {
+  .satria-trash-page>.row { flex-wrap:wrap; }
+  .satria-trash-page .row button, .satria-trash-page .row a { flex:1 1 175px; }
+  .satria-care-page .satria-care-hero-actions { flex-wrap:wrap; }
+  .satria-care-page .satria-care-hero-actions>* { min-height:44px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .satria-trash-page *, .satria-care-page * { scroll-behavior:auto!important; transition-duration:0.01ms!important; animation-duration:0.01ms!important; }
+}

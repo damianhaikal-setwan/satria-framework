@@ -125,7 +125,7 @@
       <div class="satria-care-bottom">
         <section class="satria-care-panel"><h3>Diagnostik dan pemeriksaan teknis</h3><p>Pantau informasi browser dan rekam error tanpa menampilkan atau mengirim isi data paket maupun kredensial.</p>
           <ul class="satria-care-checks"><li><span>JavaScript inti</span><b>${rt?.coreReady?'Termuat':'Belum terverifikasi'}</b></li><li><span>Modul Analisa Harga</span><b>${rt?.priceAnalysisReady?'Termuat':'Belum terverifikasi'}</b></li><li><span>Aset CSS</span><b>${rt ? `${rt.stylesLoaded} / ${rt.stylesExpected}`:'—'}</b></li><li><span>Sinkronisasi Supabase</span><b>${s.sync?s.sync.conflict?'Konflik perlu tinjau':s.sync.pending?'Belum tersinkron':s.sync.authenticated&&s.sync.baselineLoaded?'Tidak ada perubahan tertunda (klien)':'Belum terverifikasi':'Status belum tersedia'}</b></li></ul>
-          <div class="satria-care-actions"><button type="button" class="satria-care-button secondary" data-care-action="diagnostic">Unduh Laporan Error</button>${s.admin?'<button type="button" class="satria-care-button secondary" data-care-action="debug">Buka SATRIA Debug</button>':''}</div>
+          <div class="satria-care-storage-info" id="satriaCareStorageInfo" role="status" aria-live="polite" hidden></div><div class="satria-care-actions"><button type="button" class="satria-care-button secondary" data-care-action="storage">Cek Kapasitas Browser</button><button type="button" class="satria-care-button secondary" data-care-action="diagnostic">Unduh Laporan Error</button>${s.admin?'<button type="button" class="satria-care-button secondary" data-care-action="debug">Buka SATRIA Debug</button>':''}</div>
         </section>
         <section class="satria-care-panel"><h3>Backup dan pemulihan</h3><p>Backup disimpan sebagai berkas JSON di perangkat Anda. Pemeriksaan ini tidak menjalankan reset, impor, atau perbaikan otomatis.</p>
           <div class="satria-care-actions">${s.admin?'<button type="button" class="satria-care-button primary" data-care-action="backup">Backup Data JSON</button><a class="satria-care-button secondary" href="#set">Pengaturan & Pemulihan</a>':'<span class="satria-care-muted">Backup dan pemulihan organisasi melalui akun Admin.</span>'}</div>
@@ -166,6 +166,26 @@
         if(location.hash.split('/')[0]!=='#care')return;
         const main=document.getElementById('main');main.innerHTML=page();
         main.querySelector('[data-care-action="scan"]')?.focus();
+        break;
+      }
+      case 'storage': {
+        const status=document.getElementById('satriaCareStorageInfo');
+        if(!status)return;
+        status.hidden=false;
+        status.textContent='Memeriksa perkiraan kapasitas penyimpanan browser…';
+        // estimate() is metadata-only; no files, credentials, or business records are read.
+        if(typeof navigator.storage?.estimate!=='function'){
+          status.textContent='Browser ini tidak menyediakan informasi kapasitas penyimpanan.';
+          return;
+        }
+        navigator.storage.estimate().then(info=>{
+          const used=Number(info.usage),total=Number(info.quota);
+          if(!Number.isFinite(used)||!Number.isFinite(total)||total<=0){
+            status.textContent='Kapasitas tidak dapat ditentukan oleh browser ini.';return;
+          }
+          const mb=n=>(n/1048576).toFixed(1);
+          status.textContent=`Perkiraan pemakaian: ${mb(used)} MB dari kuota ${mb(total)} MB (${Math.round(used/total*100)}%). Ini mencakup penyimpanan origin, bukan hanya data SATRIA atau backup cloud.`;
+        }).catch(()=>{status.textContent='Pemeriksaan kapasitas tidak tersedia. Data tidak diubah.'});
         break;
       }
       case 'diagnostic':

@@ -68,17 +68,28 @@
     const epoch=trashEpoch;
     const subject=member.id,organization=orgId;
     trashLoading=(async()=>{
-      const {data,error}=await client.from('satria_trash_entries')
-        .select('id,collection,record_id,record_summary,deleted_at,deleted_by,opd_id,fiscal_year,retain_until')
-        .eq('organization_id',organization).is('restored_at',null)
-        .order('deleted_at',{ascending:false}).limit(250);
-      if(error)throw Error('Sampah cloud belum tersedia / migrasi Tahap 2 belum dipasang: '+error.message);
+      // Read existing Stage 2 archives independently: a missing Stage 6 migration
+      // must NEVER hide an organization's existing (older) Recycle Bin contents.
+      const [base,nested]=await Promise.all([
+        client.from('satria_trash_entries')
+          .select('id,collection,record_id,record_summary,deleted_at,deleted_by,opd_id,fiscal_year,retain_until')
+          .eq('organization_id',organization).is('restored_at',null)
+          .order('deleted_at',{ascending:false}).limit(250),
+        client.from('satria_nested_trash_entries')
+          .select('id,collection,record_id,record_summary,deleted_at,deleted_by,opd_id,fiscal_year,retain_until')
+          .eq('organization_id',organization).is('restored_at',null)
+          .order('deleted_at',{ascending:false}).limit(250)
+      ]);
+      if(base.error)throw Error('Sampah cloud Tahap 2 tidak tersedia: '+base.error.message);
       if(epoch===trashEpoch&&member?.id===subject&&orgId===organization){
-        trashRows=Array.isArray(data)?data.map(x=>({
+        const normalize=(rows,nestedFlag)=>(Array.isArray(rows)?rows:[]).map(x=>({
           id:x.id,collection:x.collection,originalId:x.record_id,record:{nama:x.record_summary},
-          deletedAt:x.deleted_at,deletedBy:x.deleted_by,retainUntil:x.retain_until
-        })):[];
-        trashLoaded=true;trashError='';
+          deletedAt:x.deleted_at,deletedBy:x.deleted_by,retainUntil:x.retain_until,nested:nestedFlag
+        }));
+        trashRows=normalize(base.data,false).concat(normalize(nested.data,true))
+          .sort((a,b)=>String(b.deletedAt||'').localeCompare(String(a.deletedAt||''))).slice(0,250);
+        trashLoaded=true;
+        trashError=nested.error?'Arsip penawaran/media belum tersedia: pasang migrasi Tahap 6 di staging.':'';
       }
       return trashRows;
     })().catch(err=>{
@@ -95,11 +106,12 @@
       throw Error('Jenis data tidak mendukung Sampah cloud. Tidak ada penghapusan.');
     if(operation==='archive'&&member.role==='operator'&&!['paket','rupBank'].includes(collectionOrId))
       throw Error('Master organisasi hanya boleh dipindahkan ke Sampah oleh Admin.');
-    if(operation==='restore'&&!trashRows.some(x=>x.id===collectionOrId))
+    const selected=operation==='restore'?trashRows.find(x=>x.id===collectionOrId):null;
+    if(operation==='restore'&&!selected)
       throw Error('Item Sampah tidak tersedia untuk akun ini. Segarkan daftar Sampah.');
     trashBusy=true;cancelAutosaveTimer();
     try{
-      const rpc=operation==='archive'?'satria_archive_record':'satria_restore_record';
+      const rpc=operation==='archive'?'satria_archive_record':selected.nested?'satria_restore_nested':'satria_restore_record';
       const args={p_organization_id:orgId,p_expected_version:version};
       if(operation==='archive'){
         args.p_collection=collectionOrId;args.p_record_id=String(recordId);
@@ -124,13 +136,39 @@
       throw err;
     }finally{trashBusy=false}
   }
+  // Nested transactions are separate from the older top-level archive RPC.
+  // Never mutate local arrays optimistically; refresh only after server commit.
+  async function archiveNested(collection,parentId,recordId){
+    trashCanMutate();
+    if(!['penawaran','item','media'].includes(collection))throw Error('Jenis arsip bersarang belum didukung.');
+    if(member.role==='operator'&&collection==='media')throw Error('Media hanya dapat diarsipkan Admin.');
+    trashBusy=true;cancelAutosaveTimer();
+    try{
+      syncIndicator('Mengarsipkan data terkait…','wait');
+      const {data,error}=await client.rpc('satria_archive_nested',{
+        p_organization_id:orgId,p_expected_version:version,p_collection:collection,
+        p_parent_id:String(parentId),p_record_id:String(recordId)
+      });
+      if(error)throw Error('Arsip bersarang ditolak / migrasi cloud belum dipasang: '+error.message);
+      if(data?.status!=='archived'||!Number.isFinite(Number(data.version)))
+        throw Error('Respons server belum dapat dipastikan. Periksa Sampah sebelum mengulang.');
+      clearCloudTrash();
+      await pull({discardConfirmed:true,source:'trash'});
+      if(!cloudStateReady)throw Error('Transaksi selesai, tetapi tarikan cloud belum berhasil. Muat ulang Sampah.');
+      await loadCloudTrash(true);
+      if(typeof route==='function')route();
+      toast('Data tersimpan di Sampah cloud dan dapat dipulihkan.');
+      return data;
+    }catch(err){syncIndicator('Periksa Sampah / status cloud','error');throw err}
+    finally{trashBusy=false}
+  }
   window.SATRIA_CLOUD_TRASH=Object.freeze({
     get items(){return trashRows.slice()}, get loaded(){return trashLoaded},
     get loading(){return Boolean(trashLoading)},get error(){return trashError},
     get ready(){return Boolean(client&&member&&cloudStateReady)},
     ensureLoaded:()=>loadCloudTrash(false),refresh:()=>loadCloudTrash(true),
     archive:(collection,id)=>performCloudTrash('archive',collection,id),
-    restore:id=>performCloudTrash('restore',id)
+    archiveNested,restore:id=>performCloudTrash('restore',id)
   });
 
   const roleName=r=>({admin:'Admin',operator:'Operator',viewer:'Viewer'}[r]||'Viewer');
