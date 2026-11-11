@@ -1,0 +1,13 @@
+'use strict';
+const assert=require('node:assert/strict');
+const delta=require('../frontend/satria-cloud-delta.js');
+const base={opd:[{id:'o1'}],rupBank:[],paket:[{id:'p1',opd:'o1',tahun:2026}],tahun:[2026]};
+assert.throws(()=>delta.makeDelta({...base,paket:[{nama:'tanpa-id'}]},base),/tanpa ID/);
+assert.throws(()=>delta.makeDelta({...base,paket:[base.paket[0],base.paket[0]]},base),/duplikat/);
+assert.throws(()=>delta.makeDelta(base,{...base,paket:[base.paket[0],base.paket[0]]}),/duplikat/);
+assert.throws(()=>delta.applyDeltaToPayload(base,[{collection:'sampah',op:'delete',id:'x'}]),/tidak dikenal/);
+assert.throws(()=>delta.applyDeltaToPayload(base,[{collection:'__proto__',op:'replace',value:{x:1}}]),/tidak diizinkan/);
+assert.throws(()=>delta.applyDeltaToPayload(base,[{collection:'paket',op:'upsert',id:'p2',row:{id:'p3'}}]),/tidak konsisten/);
+assert.deepEqual(delta.makeDelta(base,base),[]);
+assert.deepEqual(delta.applyDeltaToPayload(base,[]),base);
+console.log('PASS delta integrity: corrupt baseline rejected, unknown operations blocked, valid snapshots unchanged');

@@ -33,7 +33,7 @@ function wait(name,event){let promise;hooks[name]({...event,waitUntil:p=>{promis
  assert.equal(asset.type,'error','offline missing JS must not receive HTML fallback');
  response=null;req={method:'GET',url:'https://satria.local/other-page',mode:'navigate'};
  hooks.fetch({request:req,respondWith:p=>{response=p}});
- assert.equal((await response).type,'error','navigation without cached index correctly fails');
+ assert.equal(response,null,'unknown navigation must bypass service worker cache');
  response=null;req={method:'GET',url:'https://test.supabase.co/rest/v1/secret',mode:'cors'};
  hooks.fetch({request:req,respondWith:p=>{response=p}});
  assert.equal(response,null,'Supabase endpoints must bypass cache');
