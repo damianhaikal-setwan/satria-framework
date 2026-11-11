@@ -1,5 +1,5 @@
 /* SATRIA PWA: network-first, precache all refactored assets for offline use. */
-const CACHE_NAME = 'satria-v3.0.59.59-pbj-2026-20261112-combined-p0p3-opt5-stability6';
+const CACHE_NAME = 'satria-v3.0.59.59-pbj-2026-20261112-combined-p0p3-opt5-stability6-scope7';
 const APP_ASSETS = [
   "./",
   "./index.html",
@@ -55,6 +55,7 @@ const APP_ASSETS = [
   "./frontend/satria-controller-master-settings.js",
   "./frontend/satria-controller-recycle.js",
   "./frontend/satria-cloud-delta.js",
+  "./frontend/satria-cloud-scope.js",
   "./frontend/satria-cloud-admin-create.js",
   "./frontend/satria-cloud-admin-roster.js",
   "./frontend/satria-view-performance.js",
