@@ -14,6 +14,9 @@ INJECT=r"""
    const q={filters:[],
     select(){return this},eq(key,val){this.filters.push([key,val]);return this},is(){return this},
     order(){return this},limit(){return Promise.resolve(this.result())},
+    range(start,end){const result=this.result();return Promise.resolve({
+      ...result,data:Array.isArray(result.data)?result.data.slice(start,end+1):result.data
+    })},
     maybeSingle(){return Promise.resolve(this.result())},
     result(){
       if(table==='satria_memberships')return {data:{role:server.role,active:true},error:null};
