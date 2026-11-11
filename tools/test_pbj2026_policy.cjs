@@ -12,7 +12,7 @@ assert.equal(p.documentPlan({...base,spseMonitoring:{method:'Tender'}}).docs.len
 assert.equal(p.regulatoryContext({...base,tglMulaiPemilihan:'2026-09-21'}).needsReview,true);
 assert.equal(p.regulatoryContext({...base,tglMulaiPemilihan:'2026-09-22'}).needsReview,true);
 assert.equal(p.regulatoryContext({...base,tglMulaiPemilihan:'2026-10-09'}).needsReview,true);
-assert.equal(p.regulatoryContext({...base,tglMulaiPemilihan:'2026-10-10'}).needsReview,false);
+assert.equal(p.regulatoryContext({...base,tglMulaiPemilihan:'2026-10-10'}).needsReview,true,'SE transisi masih memerlukan telaah pada 10 Oktober');
 assert.equal(p.regulatoryContext({...base,tglMulaiPemilihan:'2026-02-30'}).needsReview,true);
 const ep={metodePemilihan:'E-Purchasing dengan Negosiasi Harga',jenisPengadaan:'Jasa Lainnya',pagu:49999999};
 assert.equal(p.route(ep),'katalog');

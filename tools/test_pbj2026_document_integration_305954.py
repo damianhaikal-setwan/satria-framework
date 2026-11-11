@@ -1,4 +1,4 @@
-"""Real Document Studio regression for 3.0.59.54.
+"""Real Document Studio regression for 3.0.59.55.
 Offline simulation, no cloud writes or production data. Asserts the active optimized
 view (not the legacy vDok) displays policy assistance for the selected package.
 """
@@ -49,8 +49,9 @@ with sync_playwright() as w:
     assert 'HRS' in page.locator('.pbj-panel').inner_text()
     assert page.locator('[data-pbj-print]').count()==0, 'E-Purchasing must not offer SPSE drafts'
     # User can inspect settings and navigate to preview with no approval workflow.
-    assert page.locator('.pbj-panel [data-pbj-start]').count()==1
-    assert page.locator('.pbj-panel [data-pbj-basis]').count()==1
+    assert page.locator('.pbj-panel [data-pbj-start]').count()==0, 'Transisi Perlem 3 hanya untuk rute SPSE.'
+    assert page.locator('.pbj-panel [data-pbj-basis]').count()==0, 'E-Purchasing mengikuti ketentuan katalog.'
+    assert 'Perlem 2/2026' in page.locator('.pbj-panel').inner_text()
     assert page.locator('.dok-preview-section').count()==1
     # Risk test: route classifier cannot authorize Tender/Seleksi printing.
     policy=page.evaluate('''() => SATRIA_PBJ_POLICY.documentPlan({jalurPengadaan:'SPSE_MONITOR',spseMonitoring:{method:'Tender'},jenisPengadaan:'Barang',pagu:10000000}).docs.length''')
@@ -58,7 +59,7 @@ with sync_playwright() as w:
     # screenshot is a synthetic test fixture and never contains user production data
     page.evaluate("document.querySelectorAll('#satriaCloudModal, .sc-modal-backdrop, .satria-cloud-modal, .satria-cloud-overlay').forEach(e=>{e.hidden=true;e.style.display='none'})")
     page.locator('.pbj-panel').scroll_into_view_if_needed()
-    page.screenshot(path='/mnt/data/SATRIA_NEXT_3.0.59.54_TAMPILAN_PANEL_PBJ_UJI.png')
+    page.screenshot(path='/mnt/data/SATRIA_NEXT_3.0.59.55_TAMPILAN_PANEL_PBJ_UJI.png')
     assert not errors,errors
     browser.close()
 print('PASS real Document Studio: panel present, 15 templates, 2 package selection, correct DPP/HRS advisory, no SPSE drafts on e-P, preview retained, zero JS errors')
