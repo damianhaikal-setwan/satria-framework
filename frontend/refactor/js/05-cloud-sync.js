@@ -46,6 +46,8 @@
   const cloudDelta=window.SATRIA_CLOUD_DELTA;
   if(!cloudDelta)throw new Error('Mesin sinkronisasi SATRIA tidak termuat. Muat ulang seluruh aset versi yang sama.');
   const {cloneJson,payloadEqual,makeDelta,applyDeltaToPayload}=cloudDelta;
+  const cloudScope=window.SATRIA_CLOUD_SCOPE;
+  if(!cloudScope)throw new Error('Pengaman cakupan cloud SATRIA belum termuat. Muat ulang seluruh aset versi yang sama.');
   function cancelAutosaveTimer(){if(autoSaveTimer){clearTimeout(autoSaveTimer);autoSaveTimer=null}}
   function requestAutosave(reason=''){
     if(!member||member.role==='viewer'||!client||!cloudStateReady||!lastSyncedPayload)return;
@@ -444,10 +446,12 @@
   function startRealtime(){
     if(!client||!member||!orgId)return;
     stopRealtime();
+    const context=captureSession();
     const channelName='satria-sync-'+orgId;
     realtimeChannel=client.channel(channelName).on('postgres_changes',{
       event:'*',schema:'public',table:'satria_sync_events',filter:'organization_id=eq.'+orgId
-    },payload=>handleRealtimeNotice(payload?.new||payload?.old||{})).subscribe(async state=>{
+    },payload=>{if(sameSession(context))handleRealtimeNotice(payload?.new||payload?.old||{})}).subscribe(async state=>{
+      if(!sameSession(context))return;
       if(state==='SUBSCRIBED'){
         syncIndicator('Cloud terhubung · realtime aktif','');
         await checkRemoteVersion();
@@ -463,11 +467,13 @@
   }
   async function checkRemoteVersion(){
     if(!client||!member||!cloudStateReady)return;
+    const context=captureSession();
     try{
       const {data,error}=await client.from('satria_sync_events').select('version,actor_user_id,updated_at').eq('organization_id',orgId).maybeSingle();
+      if(!sameSession(context))return;
       if(error)throw error;
       if(data&&Number(data.version)>version)handleRealtimeNotice(data);
-    }catch(e){console.warn('SATRIA Realtime version check:',e?.message||e)}
+    }catch(e){if(sameSession(context))console.warn('SATRIA Realtime version check:',e?.message||e)}
   }
   function handleRealtimeNotice(eventRow){
     if(!member||!eventRow)return;
@@ -505,7 +511,7 @@
     try{
       if(!client||!member)throw new Error('Hubungkan dan masuk terlebih dahulu.');
       status('Membaca snapshot sesuai scope akses…');
-      let data=null,error=null;
+      let data=null,error=null,receivedScope=null;
       if(member.role==='admin'){
         const response=await client.from('satria_state').select('payload,version,updated_at,updated_by').eq('organization_id',orgId).maybeSingle();
         data=response.data;error=response.error;
@@ -515,7 +521,7 @@
         error=response.error;
         const scoped=response.data;
         if(!error&&scoped&&typeof scoped==='object'){
-          member.scope=scoped.scope||null;
+          receivedScope=scoped.scope||null;
           data={payload:scoped.payload,version:scoped.version,updated_at:scoped.updated_at,updated_by:scoped.updated_by};
         }
       }
@@ -523,30 +529,23 @@
       if(error)throw error;
       if(!data)throw new Error('Snapshot/scoped state belum tersedia. Admin harus menginisialisasi snapshot dan menetapkan minimal satu OPD serta satu tahun untuk akun non-admin.');
       if(!data.payload||typeof data.payload!=='object'||!Array.isArray(data.payload.paket)||!Array.isArray(data.payload.opd))throw new Error('Respons snapshot tidak memiliki struktur SATRIA yang valid.');
+      // Validate and project before ANY server-owned fields enter S or member.
+      // A malformed RPC reply cannot transiently expose another OPD/year.
+      const projected=member.role==='admin'?null:cloudScope.project(data.payload,receivedScope,member.role);
+      const assignedOpds=projected?projected.assignedOpds:'all';
+      const assignedYears=projected?projected.assignedYears:null;
+      const safePayload=projected?projected.payload:data.payload;
       const ui={...(S.ui||{})};
-      Object.assign(S,data.payload,{ui,log:[],dirty:false,chat:[],chatCtx:null});
-      const assignedOpds=member.role==='admin'?'all':(Array.isArray(member.scope?.opd_ids)?member.scope.opd_ids.map(String):[]);
-      const assignedYears=member.role==='admin'?null:(Array.isArray(member.scope?.years)?member.scope.years.map(Number).filter(Number.isFinite):[]);
+      Object.assign(S,safePayload,{ui,log:[],dirty:false,chat:[],chatCtx:null});
+      if(projected)member.scope=projected.scope;
       S.users=[{id:'auth-'+member.id,nama:member.account_type==='ppkom'?'PPKom · '+member.email:member.email,username:member.email,role:roleName(member.role),opd:assignedOpds,years:assignedYears,aktif:true}];S.ui.user=S.users[0].id;
       if(typeof normalizeData==='function')normalizeData();
       const previousCloudVersion=version;
       version=Number(data.version)||0;S.dirty=false;cloudStateReady=true;window.SATRIA_CLOUD_ADMIN_IMPORT_READY=false;
-      if(version!==previousCloudVersion)clearCloudTrash(); // another device may have archived or restored records
-      if(member.role!=='admin'){
-        const allowedOpds=assignedOpds;
-        const allowedYears=assignedYears||[];
-        if(!allowedOpds.length||!allowedYears.length)throw new Error('Akses akun belum memiliki assignment OPD dan tahun yang lengkap. Minta admin menetapkan keduanya.');
-        const allowedOpdSet=new Set(allowedOpds),allowedYearSet=new Set(allowedYears);
-        const missingOpds=allowedOpds.filter(id=>!(S.opd||[]).some(o=>String(o.id)===id));
-        if(missingOpds.length)throw new Error('Master OPD untuk assignment akun tidak ditemukan pada snapshot cloud. Minta admin sinkronkan Data Master OPD, lalu tekan Tarik dari Supabase.');
-        S.opd=(S.opd||[]).filter(o=>allowedOpdSet.has(String(o.id)));
-        S.unit=(S.unit||[]).filter(x=>allowedOpdSet.has(String(x.opd)));
-        S.pejabat=(S.pejabat||[]).filter(x=>allowedOpdSet.has(String(x.opd)));
-        S.paket=(S.paket||[]).filter(p=>allowedOpdSet.has(String(p.opd))&&allowedYearSet.has(Number(p.tahun)));
-        S.rupBank=(S.rupBank||[]).filter(r=>allowedOpdSet.has(String(r.opd))&&allowedYearSet.has(Number(r.tahun)));
-        S.tahun=(S.tahun||[]).map(Number).filter(y=>allowedYearSet.has(y)).sort((a,b)=>a-b);
-        if(!S.tahun.length)throw new Error('Tahun assignment tidak ditemukan pada snapshot saat ini. Minta admin sinkronkan daftar tahun dan data cloud.');
-        if(allowedOpds.length===1)S.ui.opd=allowedOpds[0];
+      if(version!==previousCloudVersion)clearCloudTrash();
+      if(projected){
+        const allowedOpdSet=new Set(assignedOpds);
+        if(assignedOpds.length===1)S.ui.opd=assignedOpds[0];
         else if(S.ui.opd!=='all'&&!allowedOpdSet.has(String(S.ui.opd)))S.ui.opd='all';
         if(!S.tahun.includes(Number(S.ui.tahun)))S.ui.tahun=S.tahun[0];
         // Persist only the scoped projection. In memory mode, remove the old full-snapshot cache instead of leaving it available to a later offline startup.
