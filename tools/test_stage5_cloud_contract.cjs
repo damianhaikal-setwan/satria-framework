@@ -13,7 +13,7 @@ for(const n of names){const pos=html.indexOf(`src="${n}"`);assert(pos>prev,`Wron
 assert.equal(html.split('./frontend/satria-cloud-delta.js').length-1,1);
 assert.equal(html.split('./frontend/satria-cloud-admin-create.js').length-1,1);
 assert.equal(html.split('./frontend/satria-cloud-admin-roster.js').length-1,1);
-assert(sw.includes('cloud-stage5'));
+assert(sw.includes('combined-p0p3')); // cache version advances with the coordinated release
 assert(!bridge.includes('function makeDelta(')&&!bridge.includes('function applyDeltaToPayload('));
 assert(bridge.includes('const {cloneJson,payloadEqual,makeDelta,applyDeltaToPayload}=cloudDelta'));
 assert(!bridge.includes('window.__satriaAdminUsersInstalled = true'));

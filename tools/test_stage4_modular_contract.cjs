@@ -29,5 +29,5 @@ for(const name of ['satria-document-templates.js','satria-view-performance.js','
  assert(sw.includes('./frontend/'+name),`PWA missing ${name}`);
  assert.equal(html.split('./frontend/'+name).length-1,1,`HTML must include ${name} once`);
 }
-assert(/(?:modular-stage4|cloud-stage5)/.test(sw),'New SW cache must be versioned');
+assert(/(?:modular-stage4|cloud-stage5|combined-p0p3)/.test(sw),'New SW cache must be versioned');
 console.log('PASS Stage4 modular contract: order, split modules, dedup CSS, a11y/print, image safety, PWA assets');

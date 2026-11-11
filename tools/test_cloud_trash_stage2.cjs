@@ -3,7 +3,7 @@ const fs=require('fs'), assert=require('node:assert/strict'), path=require('node
 const root=path.resolve(__dirname,'..');
 const sql=fs.readFileSync(path.join(root,'supabase/migrations/20261111170000_satria_cloud_recycle_atomic.sql'),'utf8');
 const cloud=fs.readFileSync(path.join(root,'frontend/refactor/js/05-cloud-sync.js'),'utf8');
-const app=fs.readFileSync(path.join(root,'frontend/refactor/js/01-app-core.js'),'utf8');
+const app=['frontend/refactor/js/01-app-core.js','frontend/satria-controller-recycle.js'].map(f=>fs.readFileSync(path.join(root,f),'utf8')).join('\n');
 for(const s of ['create table if not exists public.satria_trash_entries','enable row level security',
   'satria_user_can_access_scope','satria_is_admin','on public.satria_state','satria_require_archive_on_removal',
   'satria_apply_state_delta_internal','satria_archive_record','satria_restore_record',
