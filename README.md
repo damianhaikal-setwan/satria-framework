@@ -1,3 +1,5 @@
+> **Kandidat rilis gabungan Rekomendasi 1–5 (12 November 2026):** keamanan cache PWA, pengamatan status sinkronisasi, indeks Bank RUP, validasi delta, build frontend deterministik, serta pengujian CI satu-perintah. **45/45 pemeriksaan lokal dan 4/4 browser smoke lulus; Supabase staging nyata belum diuji.** Lihat [catatan rilis gabungan](docs/RILIS_GABUNGAN_REKOMENDASI_1_5_20261112.md).
+
 > **Tahap 4 modularisasi & UX (11-11-2026):** generator template dokumen, optimasi tampilan, dan CSS modal bersama telah dipisahkan; zoom mobile dan tabel cetak diperbaiki. **33/33 uji Node dan 11/11 uji browser lokal lulus; belum ada bukti pengujian Supabase staging/produksi.** Lihat [laporan Tahap 4](docs/IMPLEMENTASI-TAHAP-4-REFACTOR-OPTIMASI-20261111.md) dan [prioritas pengembangan lanjutan](docs/REKOMENDASI-SETELAH-TAHAP4-20261111.md). Unggah seluruh file frontend beserta `index.html` dan `sw.js` versi Tahap 4; bukan satu skrip saja.
 
 > **Tahap 2 cloud recycle (11-11-2026):** source dan migrasi tersedia untuk uji staging; lihat [panduan Tahap 2](docs/IMPLEMENTASI-TAHAP-2-SAMPAH-CLOUD-20261111.md). Belum ada bukti deployment Supabase.

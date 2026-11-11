@@ -1,5 +1,5 @@
 /* SATRIA PWA: network-first, precache all refactored assets for offline use. */
-const CACHE_NAME = 'satria-v3.0.59.59-pbj-2026-20261111-combined-p0p3';
+const CACHE_NAME = 'satria-v3.0.59.59-pbj-2026-20261112-combined-p0p3-opt5';
 const APP_ASSETS = [
   "./",
   "./index.html",
@@ -98,6 +98,14 @@ const APP_ASSETS = [
   "./frontend/refactor/js/35-satria-brief-hotfix-329-script.js"
 ];
 
+// Cache only shipped application assets. Never cache arbitrary same-origin API,
+// download, login, OAuth callback, or query-string responses.
+// Resolve relative to sw.js so this also works on GitHub Pages project subpaths.
+const APP_ROOT = new URL('./', self.location.href || self.location.origin + '/');
+const APP_PATHS = new Set(APP_ASSETS.map(asset => new URL(asset, APP_ROOT).pathname));
+const APP_HOME = new URL('./', APP_ROOT).pathname;
+const APP_INDEX = new URL('./index.html', APP_ROOT).pathname;
+
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     try {
@@ -123,10 +131,14 @@ self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
-  if (url.hostname.includes('supabase.co') || url.pathname.includes('/auth/') || url.search.includes('grant_type=password')) return;
   if (url.origin !== self.location.origin) return;
+  // Never store URLs with query parameters (including auth redirects and tokens).
+  if (url.search || !APP_PATHS.has(url.pathname)) return;
+  // Limit offline HTML fallback to the actual application entry point.
+  const isEntry = url.pathname === APP_HOME || url.pathname === APP_INDEX;
+  if (request.mode === 'navigate' && !isEntry) return;
   event.respondWith(fetch(request).then(async response => {
-    if (response.ok) {
+    if (response.ok && response.type !== 'opaque') {
       const copy = response.clone();
       try { (await caches.open(CACHE_NAME)).put(request, copy).catch(() => {}); } catch (_) {}
     }
@@ -134,8 +146,9 @@ self.addEventListener('fetch', event => {
   }).catch(async () => {
     const cached = await caches.match(request);
     if (cached) return cached;
-    // An HTML fallback must never masquerade as JavaScript/CSS.
-    if (request.mode === 'navigate') return await caches.match('./index.html') || Response.error();
+    // Missing JS/CSS must never receive an HTML response.
+    if (request.mode === 'navigate' && isEntry)
+      return await caches.match('./index.html') || Response.error();
     return Response.error();
   }));
 });
