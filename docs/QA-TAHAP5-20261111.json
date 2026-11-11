@@ -1,0 +1,25 @@
+{
+  "rilis": "3.0.59.59 — Tahap 5",
+  "basis": "Tahap 4",
+  "status_code": "LULUS UJI LOKAL — BUKAN SIAP PRODUKSI",
+  "node": {
+    "pass": 33,
+    "total": 33
+  },
+  "browser": {
+    "pass": 11,
+    "total": 11,
+    "keterangan": "Supabase browser memakai transport tiruan"
+  },
+  "static_security": {
+    "pass": 27,
+    "total": 27
+  },
+  "integrity": "PASS",
+  "supabase_postgresql_actual": "NOT RUN — staging tidak tersambung",
+  "supabase_rls_jwt_actual": "NOT RUN — token akun staging tidak tersedia",
+  "real_backup_restore": "NOT RUN",
+  "approval_tiers_added": false,
+  "sql_new_migrations": false,
+  "sql_readonly_stage5_gate": true
+}
