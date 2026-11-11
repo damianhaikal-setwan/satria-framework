@@ -2270,6 +2270,14 @@ document.addEventListener('click',e=>{
    if(!api?.ready){toast('Login dan tarik cloud lebih dahulu.');return}
    api.refresh().catch(err=>toast('Gagal memuat Sampah: '+err.message));return;
  }
+ if(a==='trashmore'){
+   if(!window.SATRIA_CLOUD_CONFIGURED)return;
+   const api=window.SATRIA_CLOUD_TRASH;
+   if(!api?.ready){toast('Masuk cloud dahulu untuk memuat arsip lama.');return}
+   if(api.loading||!api.hasMore)return;
+   t.disabled=true;t.textContent='Memuat arsip…';
+   api.loadMore().catch(err=>toast('Gagal memuat arsip lama: '+err.message));return;
+ }
  if(a==='trashrestore'){
    if(!canWrite()){toast('Viewer hanya dapat melihat Sampah');return}
    if(window.SATRIA_CLOUD_CONFIGURED){

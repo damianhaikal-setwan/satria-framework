@@ -58,8 +58,17 @@
   window.SATRIA_AUTO_SYNC_REQUEST=requestAutosave;
 
   // Stage 2: cloud Recycle Bin is server-owned and never mixed into S.sampah.
+  // Sampah tidak dibatasi pada 250 arsip: masing-masing tabel dipaginasi dengan
+  // offset tersendiri. Arsip lama tidak perlu dihapus atau diekspor untuk dipulihkan.
+  const TRASH_PAGE_SIZE=50;
   let trashRows=[], trashLoaded=false, trashLoading=null, trashBusy=false, trashError='', trashEpoch=0;
-  function clearCloudTrash(){trashEpoch++;trashRows=[];trashLoaded=false;trashError='';trashLoading=null}
+  let trashBaseRows=[], trashNestedRows=[], trashBaseOffset=0, trashNestedOffset=0;
+  let trashBaseDone=false, trashNestedDone=false;
+  function clearCloudTrash(){
+    trashEpoch++;trashRows=[];trashLoaded=false;trashError='';trashLoading=null;
+    trashBaseRows=[];trashNestedRows=[];trashBaseOffset=0;trashNestedOffset=0;
+    trashBaseDone=false;trashNestedDone=false;
+  }
   function trashAuthorized(){
     if(!window.SATRIA_CLOUD_CONFIGURED||!client||!member||!cloudStateReady)
       throw Error('Masuk Supabase dan tarik snapshot cloud sebelum memakai Sampah.');
@@ -71,43 +80,75 @@
        !lastSyncedPayload||!payloadEqual(currentPayload(),lastSyncedPayload))
       throw Error('Masih ada perubahan lokal, sinkronisasi, atau konflik. Selesaikan sinkronisasi sebelum menggunakan Sampah cloud.');
   }
-  async function loadCloudTrash(force=false){
+  function trashPageQuery(table,offset){
+    return client.from(table)
+      .select('id,collection,record_id,record_summary,deleted_at,deleted_by,opd_id,fiscal_year,retain_until')
+      .eq('organization_id',orgId).is('restored_at',null)
+      .order('deleted_at',{ascending:false}).order('id',{ascending:false})
+      .range(offset,offset+TRASH_PAGE_SIZE-1);
+  }
+  function normalizeTrashRows(rows,nestedFlag){
+    return rows.map(x=>({
+      id:x.id,collection:x.collection,originalId:x.record_id,record:{nama:x.record_summary},
+      deletedAt:x.deleted_at,deletedBy:x.deleted_by,retainUntil:x.retain_until,nested:nestedFlag
+    }));
+  }
+  function mergeTrashRows(){
+    // Offset pagination may overlap when another device adds an archive. Never
+    // display duplicate IDs; users can refresh to restart from the latest data.
+    const seen=new Set();
+    trashRows=trashBaseRows.concat(trashNestedRows)
+      .sort((a,b)=>String(b.deletedAt||'').localeCompare(String(a.deletedAt||''))||
+         String(b.id).localeCompare(String(a.id)))
+      .filter(x=>{const key=(x.nested?'nested:':'base:')+x.id;
+        if(seen.has(key))return false;seen.add(key);return true});
+  }
+  async function loadCloudTrash(force=false,more=false){
     trashAuthorized();
     if(force)clearCloudTrash();
-    if(trashLoaded)return trashRows;
     if(trashLoading)return trashLoading;
-    const epoch=trashEpoch;
-    const subject=member.id,organization=orgId;
+    if(trashLoaded&&!more)return trashRows;
+    if(trashLoaded&&trashBaseDone&&trashNestedDone)return trashRows;
+    const epoch=trashEpoch,context=captureSession();
+    const hasBase=!trashBaseDone,hasNested=!trashNestedDone;
     trashLoading=(async()=>{
-      // Read existing Stage 2 archives independently: a missing Stage 6 migration
-      // must NEVER hide an organization's existing (older) Recycle Bin contents.
       const [base,nested]=await Promise.all([
-        client.from('satria_trash_entries')
-          .select('id,collection,record_id,record_summary,deleted_at,deleted_by,opd_id,fiscal_year,retain_until')
-          .eq('organization_id',organization).is('restored_at',null)
-          .order('deleted_at',{ascending:false}).limit(250),
-        client.from('satria_nested_trash_entries')
-          .select('id,collection,record_id,record_summary,deleted_at,deleted_by,opd_id,fiscal_year,retain_until')
-          .eq('organization_id',organization).is('restored_at',null)
-          .order('deleted_at',{ascending:false}).limit(250)
+        hasBase?trashPageQuery('satria_trash_entries',trashBaseOffset):Promise.resolve({data:[],error:null}),
+        hasNested?trashPageQuery('satria_nested_trash_entries',trashNestedOffset):Promise.resolve({data:[],error:null})
       ]);
-      if(base.error)throw Error('Sampah cloud Tahap 2 tidak tersedia: '+base.error.message);
-      if(epoch===trashEpoch&&member?.id===subject&&orgId===organization){
-        const normalize=(rows,nestedFlag)=>(Array.isArray(rows)?rows:[]).map(x=>({
-          id:x.id,collection:x.collection,originalId:x.record_id,record:{nama:x.record_summary},
-          deletedAt:x.deleted_at,deletedBy:x.deleted_by,retainUntil:x.retain_until,nested:nestedFlag
-        }));
-        trashRows=normalize(base.data,false).concat(normalize(nested.data,true))
-          .sort((a,b)=>String(b.deletedAt||'').localeCompare(String(a.deletedAt||''))).slice(0,250);
-        trashLoaded=true;
-        trashError=nested.error?'Arsip penawaran/media belum tersedia: pasang migrasi Tahap 6 di staging.':'';
+      if(epoch!==trashEpoch||!sameSession(context))return false;
+      if(base?.error)throw Error('Sampah cloud tidak dapat dibaca: '+base.error.message);
+      if(!Array.isArray(base?.data))throw Error('Respons daftar Sampah cloud tidak valid.');
+      // Never replace a previously loaded page when a later request fails.
+      if(hasBase){
+        trashBaseRows.push(...normalizeTrashRows(base.data,false));
+        trashBaseOffset+=base.data.length;
+        trashBaseDone=base.data.length<TRASH_PAGE_SIZE;
       }
+      if(hasNested){
+        if(nested?.error||!Array.isArray(nested?.data)){
+          trashNestedDone=true;
+          trashError='Arsip penawaran/media belum bisa dibaca. Periksa migrasi atau akses Supabase staging.';
+        }else{
+          trashNestedRows.push(...normalizeTrashRows(nested.data,true));
+          trashNestedOffset+=nested.data.length;
+          trashNestedDone=nested.data.length<TRASH_PAGE_SIZE;
+          trashError='';
+        }
+      }
+      mergeTrashRows();trashLoaded=true;
       return trashRows;
     })().catch(err=>{
-      if(epoch===trashEpoch){trashError=String(err.message||err);trashLoaded=true;trashRows=[]}
-      return trashRows;
+      if(epoch===trashEpoch&&sameSession(context)){
+        trashError=String(err?.message||err);
+        if(!trashLoaded)trashLoaded=true; // The error is visible, but no data is invented.
+      }
+      return false;
     }).finally(()=>{
-      if(epoch===trashEpoch){trashLoading=null;if(S?.ui?.page==='sampah'&&typeof route==='function')route()}
+      if(epoch===trashEpoch&&sameSession(context)){
+        trashLoading=null;
+        if(S?.ui?.page==='sampah'&&typeof route==='function')route();
+      }
     });
     return trashLoading;
   }
@@ -185,8 +226,10 @@
   window.SATRIA_CLOUD_TRASH=Object.freeze({
     get items(){return trashRows.slice()}, get loaded(){return trashLoaded},
     get loading(){return Boolean(trashLoading)},get error(){return trashError},
+    get hasMore(){return trashLoaded&&(!trashBaseDone||!trashNestedDone)},
     get ready(){return Boolean(client&&member&&cloudStateReady)},
     ensureLoaded:()=>loadCloudTrash(false),refresh:()=>loadCloudTrash(true),
+    loadMore:()=>loadCloudTrash(false,true),
     archive:(collection,id)=>performCloudTrash('archive',collection,id),
     archiveNested,restore:id=>performCloudTrash('restore',id)
   });
