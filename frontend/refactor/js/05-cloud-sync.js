@@ -12,7 +12,6 @@
   function syncIndicator(message, kind=''){
     let e=$id('satriaCloudSyncIndicator');
     if(!e){e=document.createElement('span');e.id='satriaCloudSyncIndicator';e.className='satria-sync-indicator';e.setAttribute('role','status');e.setAttribute('aria-live','polite');
-      const style=document.createElement('style');style.textContent='.satria-sync-indicator{display:inline-flex;align-items:center;gap:6px;max-width:250px;padding:7px 10px;border:1px solid #cbdedb;border-radius:999px;background:#f0fdfa;color:#0f766e;font:600 11px/1.25 system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.satria-sync-indicator[data-kind=wait]{background:#fff7ed;border-color:#fed7aa;color:#9a3412}.satria-sync-indicator[data-kind=error]{background:#fef2f2;border-color:#fecaca;color:#b91c1c}.satria-sync-indicator[data-kind=muted]{background:#f8fafc;border-color:#e2e8f0;color:#64748b}@media(max-width:1100px){.satria-sync-indicator{max-width:155px;padding:6px 8px;font-size:10px}}@media(max-width:680px){.satria-sync-indicator{max-width:122px}}';document.head.appendChild(style);
       const b=$id('satriaCloudOpen');if(b)b.insertAdjacentElement('afterend',e);else document.body.appendChild(e);
     }
     e.textContent=message;e.title=message;e.dataset.kind=kind;

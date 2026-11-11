@@ -20,7 +20,7 @@
       const before=Array.isArray(base?.[collection])?base[collection]:[];
       const after=Array.isArray(target?.[collection])?target[collection]:[];
       const bm=new Map(),am=new Map();
-      for(const row of before){const id=rowKey(collection,row);if(id)bm.set(id,row)}
+      for(const row of before){const id=rowKey(collection,row);if(!id)throw new Error('Baseline cloud '+collection+' mempunyai baris tanpa ID. Periksa backup sebelum sinkronisasi.');if(bm.has(id))throw new Error('ID duplikat pada baseline '+collection+': '+id);bm.set(id,row)}
       for(const row of after){const id=rowKey(collection,row);if(!id)throw new Error('Data '+collection+' memiliki baris tanpa ID. Sinkronisasi dihentikan agar integritas data tidak rusak.');if(am.has(id))throw new Error('ID duplikat pada master '+collection+': '+id);am.set(id,row)}
       for(const [id,row] of bm){if(!am.has(id))changes.push({collection,op:'delete',id})}
       for(const [id,row] of am){if(!bm.has(id)||!payloadEqual(bm.get(id),row))changes.push({collection,op:'upsert',id,row:cloneJson(row)})}
@@ -42,8 +42,15 @@
     return changes;
   }
   function applyDeltaToPayload(base,changes){
+    if(!Array.isArray(changes))throw new Error('Delta cloud harus berupa daftar perubahan');
     const out=cloneJson(base||{});
     for(const change of changes){
+      if(!change||!String(change.collection||''))throw new Error('Delta cloud tidak valid');
+      if(change.op==='replace'&&!SETTING_DELTAS.includes(change.collection))throw new Error('Kolom konfigurasi delta tidak diizinkan');
+      if(change.op!=='replace'&&(!ARRAY_DELTAS.includes(change.collection)||!['delete','upsert'].includes(change.op)))
+        throw new Error('Operasi/koleksi delta tidak dikenal');
+      if(change.op==='upsert'&&(rowKey(change.collection,change.row)!==String(change.id)||!String(change.id)))
+        throw new Error('Identitas baris delta tidak konsisten');
       if(change.op==='replace'){out[change.collection]=cloneJson(change.value);continue}
       const rows=Array.isArray(out[change.collection])?out[change.collection].slice():[];
       const key=row=>rowKey(change.collection,row);
