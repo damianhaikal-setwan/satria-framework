@@ -63,7 +63,10 @@ Perbaikan ini memperbaiki error render pada Executive Briefing, membersihkan pat
 
 # SATRIA NEXT — Framework Pengadaan
 
-**Versi aplikasi: 3.0.59.39** · Ringkasan Utama HPS dan penetapan · Bank RUP manual dan impor JSON/CSV · Supabase (opsional sesuai konfigurasi instansi)
+> **Perapian repo P0–P3 (11 November 2026):** hanya berkas tidak terpakai, duplikat Supabase, dan catatan historis yang sudah ada di riwayat Git yang dieliminasi. Kode runtime, migrasi, dan seluruh alat uji aktif tidak diubah. Untuk deploy frontend statis gunakan paket khusus *frontend-runtime*; untuk mengembangkan source tetap gunakan repositori lengkap ini.
+
+
+**Versi aplikasi: 3.0.59.59** · Ringkasan Utama HPS dan penetapan · Bank RUP manual dan impor JSON/CSV · Supabase (opsional sesuai konfigurasi instansi)
 
 Versi ini menambahkan **Executive Briefing 3.0** (e-Purchasing, SPSE, gabungan), briefing per paket, cetak A4/PDF, daftar risiko, analisis penetapan dan penyedia, ringkasan per OPD, serta CSV. Lihat [panduan fitur](docs/EXECUTIVE-BRIEFING-3.0.59.27.md).
 
