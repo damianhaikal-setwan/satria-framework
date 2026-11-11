@@ -7,6 +7,7 @@ const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const core=fs.readFileSync(path.join(root,'frontend/refactor/js/01-app-core.js'),'utf8');
 const smart=fs.readFileSync(path.join(root,'frontend/refactor/js/17-satria-smart-survey-code.js'),'utf8');
+const documentTemplates=fs.readFileSync(path.join(root,'frontend/satria-document-templates.js'),'utf8');
 const supplierA='https://katalog.inaproc.id/toko-penyedia-a';
 const supplierB='https://katalog.inaproc.id/toko-penyedia-b';
 const productA='https://katalog.inaproc.id/penyedia-a/produk-pertama';
@@ -67,6 +68,6 @@ assert.equal(offers[2].sumberHarga,'','jika link master kosong jangan buat bukti
 assert.equal(offers[2].catalogRefs.i1.link,'https://katalog.inaproc.id/penyedia-c/produk');
 assert(events.filter(x=>x.includes('Smart Survey')).length===4,'semua penyimpanan diproses');
 assert(core.includes('value="${esc(satriaOfferPriceSource(w))}"'),'UI penawaran membaca sumber yang tepat');
-assert(core.includes("const source=String(pen.link||'').trim();"),'Dokumen memakai link toko penyedia');
+assert(documentTemplates.includes("const source=String(pen.link||'').trim();"),'Dokumen memakai link toko penyedia');
 assert(!smart.includes("w.sumberHarga=link||"),'URL produk tak boleh menimpa sumber penawaran');
 console.log('PASS: link toko per penyedia, data lama, 4 simpan Smart Survey, sumber kosong, sumber dokumen, isolasi URL per produk');

@@ -13,7 +13,7 @@ const p={id:'paket',pagu:2424500,tglNego:'2026-11-08',items:[{id:'item',nama:'Ba
 const w={id:'penawaran',pen:'penyedia',ongkir:0,harga:{item:500},nego:{},negoDetails:{},catalogRefs:{item:{beforeTax:450,taxAmount:50,displayPrice:500,taxMode:'effective11'}}};
 const other={id:'penawaran-lain',pen:'penyedia-lain',harga:{item:500},nego:{item:500}};
 p.penawaran=[w,other];
-const ctx={S:{penyedia:[{id:'penyedia',nama:'Toko A',link:'https://katalog.inaproc.id/toko-a'},{id:'penyedia-lain',nama:'Toko B'}]},
+const ctx={window:{SATRIA_PROCUREMENT_CORE:require('../frontend/satria-procurement-core.js')},S:{penyedia:[{id:'penyedia',nama:'Toko A',link:'https://katalog.inaproc.id/toko-a'},{id:'penyedia-lain',nama:'Toko B'}]},
  P:id=>id===p.id?p:undefined,PY:id=>({nama:id}),hps:pkg=>pkg.items.reduce((n,x)=>n+x.vol*x.hs,0),
  sum:(xs,fn)=>xs.reduce((t,x)=>t+fn(x),0),esc:x=>String(x),rp:n=>'Rp '+Math.round(n).toLocaleString('id-ID'),nf:n=>Math.round(n).toLocaleString('id-ID'),
  Math,Number,String,Set,Date,Intl};
@@ -23,7 +23,7 @@ vm.runInContext(from('function satriaOfferSupplierCatalogLink(', 'function satri
 vm.runInContext(from('const KN_TAX=', '/* SATRIA 3.0.47'),ctx);
 vm.runInContext(from('function satriaWriteNegotiatedItems(', 'function satriaNegotiationBridgeNotice('),ctx);
 vm.runInContext(from('function satriaOfferNegoBreakdown(', 'function fNego('),ctx);
-vm.runInContext(from('function satriaDocPricing(', 'function nodis('),ctx);
+vm.runInContext(from('function satriaDocPricing(', '/* Template dokumen dipisahkan'),ctx);
 vm.runInContext('KN.pid="paket"; KN.wid="penawaran"; knSetup(); KN.rows.item.negoBase="449"; KN.rows.item.dirty=true;',ctx);
 const row=ctx.knRowCalc(p.items[0]);
 assert.equal(row.base,449);

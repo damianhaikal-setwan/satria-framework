@@ -7,11 +7,11 @@ const start=html.indexOf('function rupBankKey(p){');
 const end=html.indexOf('function satriaRupPeriksaAlokasiPaket(',start);
 assert(start>0&&end>start,'RUP core/overview not found');
 const S={ui:{tahun:2026,opd:'all'},rupBank:[],paket:[],tahun:[2026]};
-const f=new Function('S','activeCloudScope','satriaSpseIs','kontrak','rp','esc',
+const f=new Function('S','activeCloudScope','satriaSpseIs','kontrak','rp','esc','window',
   html.slice(start,end)+ '\nreturn {satriaRupStatusAnggaran,satriaDashboardRupMetrics,satriaDashboardRupOverview,satriaRupBagianPagu,satriaRupBagianHps};');
 // kontrak(p) in production is only nonzero after the full winner validation gate.
 const {satriaRupStatusAnggaran,satriaDashboardRupMetrics,satriaDashboardRupOverview,satriaRupBagianPagu,satriaRupBagianHps}=f(
-  S,()=>null,p=>p.jalurPengadaan==='SPSE_MONITOR',p=>p.award||0,n=>`Rp${n}`,String);
+  S,()=>null,p=>p.jalurPengadaan==='SPSE_MONITOR',p=>p.award||0,n=>`Rp${n}`,String,{SATRIA_PROCUREMENT_CORE:require('../frontend/satria-procurement-core.js')});
 const R=(id,pagu,opd='a')=>({id,rup:id,nama:id,tahun:2026,opd,pagu});
 const P=(id,rup,hps,pagu,award=0)=>({id,opd:'a',tahun:2026,rup:rup.rup,rupBankId:rup.id,
   pagu,items:[{id:'i-'+id,nama:'Barang',vol:1,hs:hps}],award});

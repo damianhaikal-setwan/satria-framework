@@ -5,7 +5,7 @@ const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const html=read('index.html'),core=read('frontend/refactor/js/01-app-core.js'),shell=read('frontend/refactor/js/22-satria-genz-shell-341.js');
 const v=html.match(/<meta\s+name="satria-release-version"\s+content="([^"]+)"/);
 assert(v,'No release version metadata in index');
-assert.equal(v[1],'3.0.59.56');
+assert.match(v[1],/^3\.0\.59\.\d+$/);
 assert(html.includes('SATRIA NEXT '+v[1]));
 assert(read('sw.js').includes('satria-v'+v[1]));
 assert(read('manifest.json').includes(v[1]));

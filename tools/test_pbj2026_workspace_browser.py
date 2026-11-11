@@ -8,6 +8,7 @@ with sync_playwright() as w:
  errors=[]
  page.on('pageerror',lambda e:errors.append(str(e)))
  page.set_content('<main id="host"></main>')
+ page.add_script_tag(content=(root/'frontend/satria-procurement-core.js').read_text())
  page.add_script_tag(content=(root/'frontend/pbj2026-policy.js').read_text())
  page.evaluate('''() => {
    window.__pkg={id:'pbj2026',opd:'o1',tahun:2026,rup:'RUP-TEST',nama:'Paket Contoh',pagu:45000000,jenisPengadaan:'Barang',jalurPengadaan:'SPSE_MONITOR',spseMonitoring:{method:'Pengadaan Langsung'},items:[{id:'i1',nama:'Kertas',vol:3,hs:100000,satuan:'Rim'}],penawaran:[]};
