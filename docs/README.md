@@ -14,7 +14,7 @@ Dokumentasi operasional dan riwayat disimpan terpisah dari file aplikasi sehingg
 
 ## Catatan versi sebelumnya
 
-Dokumen pengembangan versi sebelumnya tetap berada dalam folder `docs/` untuk audit teknis. Catatan lama yang dahulu berada di root disimpan dalam [history/](history/). Contoh hasil cetak DPP berada di [assets/](assets/). Catatan ini tidak menggantikan panduan deploy aktif.
+Dokumen pengembangan versi sebelumnya tetap berada dalam folder `docs/` untuk audit teknis. Catatan versi lawas yang semula berada di `docs/history/` kini hanya tersedia melalui riwayat Git pada commit sebelum perapian P0–P3. Contoh hasil cetak DPP berada di [assets/](assets/). Catatan ini tidak menggantikan panduan deploy aktif.
 
 - [Hasil verifikasi ZIP GitHub terbaru (5 November 2026)](VERIFIKASI-ZIP-GITHUB-TERBARU-2026-11-05.md)
 

@@ -32,3 +32,7 @@ Tidak menghapus/memindahkan data pengguna di Supabase, tidak menerapkan migrasi,
 Lihat [laporan perbandingan SHA-256](VERIFIKASI-ZIP-GITHUB-TERBARU-2026-11-05.md). File kode dan migrasi produksi terbaru tidak diubah; hanya penataan repo, dokumentasi, dan skrip uji yang disesuaikan.
 
 > Perhatian: catatan perapian ini mengacu pada basis 3.0.59.21. Pembaruan tampilan dan kalkulasi versi 3.0.59.22 dijelaskan pada [catatan Ringkasan Utama](RINGKASAN-UTAMA-RUP-PENETAPAN-3.0.59.22.md).
+
+## Perapian lanjutan P0–P3 (11 November 2026)
+
+File `docs/history/` yang tidak dijalankan aplikasi dihapus dari snapshot terbaru karena tersedia melalui riwayat Git. Salinan Edge Function legacy, konfigurasi snippet, dua berkas SQL duplikat, dua helper frontend tanpa rujukan runtime, dan panduan unggah 3.0.59.36 juga dihapus. Lihat laporan audit efisiensi yang menyertai paket ZIP untuk daftar lengkap dan pemulihan jika diperlukan. Seluruh modul runtime, migrasi aktif, dan test dipertahankan.
