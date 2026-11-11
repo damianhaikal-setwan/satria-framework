@@ -22,17 +22,10 @@ checks={
 for name,ok in checks.items():print(('PASS' if ok else 'FAIL')+' — '+name)
 assert all(checks.values()), 'A static Bank RUP contract check failed'
 
-# JS delta logic executed in an isolated Node VM, without DOM or Supabase.
-start=html.index("const ARRAY_DELTAS=['rupBank'")
-end=html.index('function cancelAutosaveTimer()',start)
-js=html[start:end]
+# JS delta logic executed from the actual shared module, without DOM or Supabase.
 with tempfile.TemporaryDirectory(prefix='satria-test-') as td:
-    p=Path(td)/'test.js'
-    p.write_text('''const assert=require('node:assert/strict');
-const cloneJson=x=>x===undefined?undefined:JSON.parse(JSON.stringify(x));
-const payloadEqual=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
-'''+js+'''
-const base={tahun:[2026],opd:[{id:'o1',nama:'OPD'}],paket:[],rupBank:[]};
+    p=Path(td)/'test.cjs'
+    p.write_text("const assert=require('node:assert/strict');\nconst {makeDelta,applyDeltaToPayload}=require(" + repr(str(ROOT/'frontend/satria-cloud-delta.js')) + ");\n"+'''const base={tahun:[2026],opd:[{id:'o1',nama:'OPD'}],paket:[],rupBank:[]};
 const bank={id:'rup1',rup:'67090063',nama:'ATK',opd:'o1',tahun:2026,pagu:8000000};
 const pkg={id:'paket1',rup:'67090063',tahun:2026,opd:'o1',rupBankId:'rup1',items:[],penawaran:[]};
 const target={...base,rupBank:[bank],paket:[pkg]};

@@ -10,7 +10,7 @@ function readIndex(){
   // Inline the unflagged foundation in virtual HTML tests, too.
   html=html.replace('<script src="./frontend/satria-procurement-core.js"></script>', '<script>'+fs.readFileSync(path.join(root,'frontend/satria-procurement-core.js'),'utf8')+'</script>');
   html=html.replace('<script src="./frontend/refactor/js/00-core-guards.js"></script>', '<script>'+fs.readFileSync(path.join(root,'frontend/refactor/js/00-core-guards.js'),'utf8')+'</script>');
-  for(const name of ['satria-document-templates.js','satria-view-performance.js']){
+  for(const name of ['satria-document-templates.js','satria-view-performance.js','satria-cloud-delta.js','satria-cloud-admin-create.js','satria-cloud-admin-roster.js']){
     html=html.replace('<script src="./frontend/'+name+'"></script>', '<script>'+fs.readFileSync(path.join(root,'frontend',name),'utf8')+'</script>');
   }
   for(const name of ['satria-shared-modal-ui.css','satria-stage4-ux.css']){

@@ -9,7 +9,7 @@ def read_index():
     html=(ROOT/'index.html').read_text(encoding='utf-8')
     html=html.replace('<script src="./frontend/satria-procurement-core.js"></script>', '<script>'+(ROOT/'frontend/satria-procurement-core.js').read_text(encoding='utf-8')+'</script>')
     html=html.replace('<script src="./frontend/refactor/js/00-core-guards.js"></script>', '<script>'+(ROOT/'frontend/refactor/js/00-core-guards.js').read_text(encoding='utf-8')+'</script>')
-    for filename in ('satria-document-templates.js', 'satria-view-performance.js'):
+    for filename in ('satria-document-templates.js', 'satria-view-performance.js', 'satria-cloud-delta.js', 'satria-cloud-admin-create.js', 'satria-cloud-admin-roster.js'):
         html=html.replace('<script src="./frontend/'+filename+'"></script>', '<script>'+(ROOT/'frontend'/filename).read_text(encoding='utf-8')+'</script>')
     for filename in ('satria-shared-modal-ui.css','satria-stage4-ux.css'):
         html=html.replace('<link rel="stylesheet" href="./frontend/'+filename+'">', '<style>'+(ROOT/'frontend'/filename).read_text(encoding='utf-8')+'</style>')

@@ -4,7 +4,7 @@ const fs=require('node:fs');const vm=require('node:vm');const path=require('node
 const cloud=fs.readFileSync(path.join(__dirname,'../frontend/refactor/js/05-cloud-sync.js'),'utf8');
 const care=fs.readFileSync(path.join(__dirname,'../frontend/refactor/maintenance/care-center.js'),'utf8');
 const start=cloud.indexOf('  window.SATRIA_SYNC_HEALTH=Object.freeze(');
-const end=cloud.indexOf('  function cloneJson(',start);
+const end=cloud.indexOf('  // Stage 5B: use the pure calculation engine',start);
 assert(start>0 && end>start);
 const secret='jangan-tampil-private-credential';
 const state={dirty:true,records:[{name:secret}]};
