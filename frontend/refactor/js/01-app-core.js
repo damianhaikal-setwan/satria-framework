@@ -1343,7 +1343,7 @@ function satriaHpsDraftSave(p){
       }
       if(Object.keys(values).length)offerRefs.push({offerId:w.id,values});
     }
-    window.SATRIA_CORE_GUARDS.archiveSpecial(S,'item',String(it.id),{paketId:p.id,item:it,offerRefs},cur().nama);
+    window.SATRIA_CORE_GUARDS.archiveSpecial(S,'item',String(it.id),{paketId:p.id,item:it,offerRefs,position:p.items.findIndex(x=>String(x.id)===String(it.id)),priorId:p.items[p.items.findIndex(x=>String(x.id)===String(it.id))-1]?.id??null,nextId:p.items[p.items.findIndex(x=>String(x.id)===String(it.id))+1]?.id??null,parentScope:{opd:p.opd,tahun:p.tahun}},cur().nama);
   }
   p.items=next;
   for(const it of removed)for(const w of (p.penawaran||[]))for(const field of ['harga','nego','negoDetails','catalogRefs'])if(w[field])delete w[field][it.id];
@@ -2610,7 +2610,7 @@ document.addEventListener('click',e=>{
      api.archiveNested('penawaran',p.id,id).catch(err=>toast('Arsip penawaran dibatalkan: '+err.message));return;
    }
    if(satriaRecycleBlocked())return;
-   window.SATRIA_CORE_GUARDS.archiveSpecial(S,'penawaran',id,{paketId:p.id,offer:w},cur().nama);
+   window.SATRIA_CORE_GUARDS.archiveSpecial(S,'penawaran',id,{paketId:p.id,offer:w,position:p.penawaran.findIndex(x=>String(x.id)===String(w.id)),priorId:p.penawaran[p.penawaran.findIndex(x=>String(x.id)===String(w.id))-1]?.id??null,nextId:p.penawaran[p.penawaran.findIndex(x=>String(x.id)===String(w.id))+1]?.id??null,wasWinner:String(p.pemenangId||'')===String(w.id),itemsDigest:JSON.stringify(p.items||[]),parentScope:{opd:p.opd,tahun:p.tahun}},cur().nama);
    p.penawaran=p.penawaran.filter(x=>x.id!==id);if(p.pemenangId===id)p.pemenangId=null;
    sync('nego','Penawaran dipindah ke Sampah');return render();
  }
