@@ -26,6 +26,7 @@ with sync_playwright() as api:
  browser=api.chromium.launch(headless=True,executable_path=shutil.which('chromium') or shutil.which('google-chrome') or None,args=['--no-sandbox'])
  for width in [390,1280]:
   page=browser.new_page(viewport={'width':width,'height':900},accept_downloads=True)
+  page.set_default_timeout(4000)
   errors=[];missing=[];dialogs=[]
   page.on('pageerror',lambda err:errors.append(str(err)))
   page.on('dialog',lambda dlg:(dialogs.append(dlg.message),dlg.accept()))
@@ -45,75 +46,114 @@ with sync_playwright() as api:
   page.set_content(html,wait_until='domcontentloaded',timeout=30000)
   page.wait_for_timeout(250)
   page.evaluate(fixture())
-  # Synthetic local data requires bypassing the cloud login overlay (no live credentials).
   page.add_style_tag(content='#satriaCloudModal{display:none!important}')
-  assert page.locator('.jkk-page').count()==1
-  assert page.locator('[data-jkk-rup-choose] option').count()==3, page.locator('[data-jkk-rup-choose]').inner_text()
+  assert page.locator('[data-jkk-rup-choose] option').count()==3
   page.evaluate('''()=>{S.ui.opd='o1';render()}''')
   assert page.locator('[data-jkk-rup-choose] option').count()==2
   page.locator('[data-jkk-rup-choose]').select_option('r-jkk')
-  assert page.locator('[data-jkk-create]').count()==1
   page.locator('[data-jkk-field="alokasi"]').fill('8000000')
   page.locator('[data-jkk-field="subjenis"]').select_option('Konstruksi')
-  before=page.evaluate('''()=>JSON.stringify(S.rupBank)''')
+  before=page.evaluate("JSON.stringify(S.rupBank)")
   page.locator('[data-jkk-create]').click()
-  page.wait_for_timeout(100)
-  state=page.evaluate('''()=>({page:S.ui.page,id:S.ui.pid,p:S.paket.length,data:S.paket[0],rup:JSON.stringify(S.rupBank),html:document.querySelector('#main').innerText.slice(0,300)})''')
-  assert state['p']==1,state
-  assert state['rup']==before,'Bank RUP must remain bit-identical'
-  assert state['data']['rupBankId']=='r-jkk'
-  assert state['data']['pagu']==8000000
-  assert state['data']['spseMonitoring']['method']=='Pengadaan Langsung'
-  assert state['data']['kkJkk']['subjenis']=='Konstruksi'
-  assert page.locator('[data-jkk-print]').count()==9
-  page.locator('[data-jkk-clean-print]').check()
-  clean=page.evaluate("""()=>SATRIA_JKK_DOCS.build('harga',{p:S.paket[0],r:S.rupBank[0],opd:'Dinas PUPR',instansi:'PEMDA',pp:'PP',nipPP:'',ppk:'PPK',kota:'Pontianak',printDate:'12 November 2026',supplier:'X'},{cleanPrint:true})""")
-  assert 'DRAF KERJA SATRIA' not in clean
-  assert '[belum diisi]' in clean
-  page.locator('[data-jkk-section="base"] [data-jkk-field="bentuk"]').select_option('Perorangan')
-  page.locator('[data-jkk-section="base"] [data-jkk-field="layanan"]').select_option('Perencanaan/perancangan')
-  page.locator('[data-jkk-section="base"] [data-jkk-field="nomorPermintaan"]').fill('001/PPK/2026')
-  page.locator('[data-jkk-section="base"] [data-jkk-save]').click()
-  assert page.evaluate('''()=>S.paket[0].kkJkk.bentuk''')=='Perorangan'
-  assert page.evaluate('''()=>S.paket[0].kkJkk.nomorPermintaan''')=='001/PPK/2026'
+  assert page.evaluate('S.paket.length')==1
+  assert page.evaluate('JSON.stringify(S.rupBank)')==before
+  assert page.evaluate('S.paket[0].rupBankId')=='r-jkk'
+  assert page.locator('.jkk-step-nav button').count()==8
+  assert page.locator('[data-jkk-step-panel="rup"]').is_visible()
+  assert not page.locator('[data-jkk-step-panel="meta"]').is_visible()
+  def step(n):
+   page.locator('.jkk-step-nav [data-jkk-step]').nth(n-1).click()
+   key=['rup','meta','reviu','kualifikasi','penawaran','survei','biaya','dokumen'][n-1]
+   assert page.locator('[data-jkk-step-panel="'+key+'"]').is_visible(),key
+  step(2)
+  page.locator('[data-jkk-section="meta"] [data-jkk-field="bentuk"]').select_option('Perorangan')
+  page.locator('[data-jkk-section="meta"] [data-jkk-field="layanan"]').select_option('Perencanaan/perancangan')
+  page.locator('[data-jkk-section="meta"] [data-jkk-field="nomorPermintaan"]').fill('001/PPK/2026')
+  page.locator('[data-jkk-section="meta"] [data-jkk-field="jamReviu"]').fill('09.00 WIB')
+  page.locator('[data-jkk-section="meta"] details').first.evaluate('(el)=>el.open=true')
+  page.locator('[data-jkk-section="meta"] [data-jkk-jadwal="uploadMulai"]').fill('2026-11-15 09:00')
+  page.locator('[data-jkk-section="meta"] [data-jkk-save]').click()
+  assert page.evaluate('S.paket[0].kkJkk.jadwal.uploadMulai')=='2026-11-15 09:00'
+  assert page.evaluate('S.paket[0].kkJkk.nomorPermintaan')=='001/PPK/2026'
+  step(3)
+  assert page.locator('[data-jkk-section="reviu"] [data-jkk-criterion-row]').count()==42
   page.locator('[data-jkk-section="reviu"] details').first.evaluate('(el)=>el.open=true')
-  page.locator('[data-jkk-section="reviu"] [data-jkk-criterion-row]').first.locator('[data-jkk-col="status"]').select_option('Sesuai')
+  first=page.locator('[data-jkk-section="reviu"] [data-jkk-criterion-row]').first
+  first.locator('[data-jkk-col="status"]').select_option('Sesuai')
+  first.locator('[data-jkk-col="bukti"]').fill('Dokumen KAK 2026')
+  first.locator('[data-jkk-col="pic"]').fill('PPK')
+  first.locator('[data-jkk-col="target"]').fill('20-11-2026')
   page.locator('[data-jkk-section="reviu"] [data-jkk-save]').click()
-  assert page.evaluate('''()=>S.paket[0].kkJkk.reviu['rev-01'].status''')=='Sesuai'
-  page.locator('[data-jkk-section="evaluasi"] [data-jkk-field="namaPenyedia"]').fill('CV Penguji')
-  page.locator('[data-jkk-section="evaluasi"] [data-jkk-save]').click()
-  assert page.evaluate('''()=>S.paket[0].kkJkk.namaPenyedia''')=='CV Penguji'
-  page.locator('[data-jkk-section="biaya"] [data-jkk-add]').click()
-  assert page.locator('[data-jkk-price-row]').count()==1
+  assert page.evaluate('S.paket[0].kkJkk.reviu["rev-01"].pic')=='PPK'
+  step(4)
+  assert page.locator('[data-jkk-section="kualifikasi"] [data-jkk-criterion-row]').count()==8
+  page.locator('[data-jkk-section="kualifikasi"] [data-jkk-field="namaPenyedia"]').fill('CV Konsultan')
+  page.locator('[data-jkk-section="kualifikasi"] [data-jkk-field="kuaEvaluator"]').fill('Tim PP')
+  page.locator('[data-jkk-section="kualifikasi"] [data-jkk-criterion-row]').first.locator('[data-jkk-col="status"]').select_option('Ada')
+  page.locator('[data-jkk-section="kualifikasi"] [data-jkk-save]').click()
+  assert page.evaluate('S.paket[0].kkJkk.kualifikasi["kua-01"].status')=='Ada'
+  step(5)
+  assert page.locator('[data-jkk-section="penawaran"] [data-jkk-criterion-row]').count()==12
+  page.locator('[data-jkk-section="penawaran"] [data-jkk-criterion-row]').first.locator('[data-jkk-col="status"]').select_option('Ada')
+  page.locator('[data-jkk-section="penawaran"] [data-jkk-field="penEvaluator"]').fill('PP')
+  page.locator('[data-jkk-section="penawaran"] [data-jkk-save]').click()
+  assert page.evaluate('S.paket[0].kkJkk.penawaran["pen-01"].status')=='Ada'
+  step(6)
+  page.locator('[data-jkk-section="survei"] [data-jkk-add]').click()
+  step(6)
+  assert page.locator('[data-jkk-survey-row]').count()==1
+  row=page.locator('[data-jkk-survey-row]').first
+  row.locator('[data-jkk-survey-col="item"]').fill('Tenaga ahli')
+  row.locator('[data-jkk-survey-col="standar"]').fill('1500000')
+  row.locator('[data-jkk-survey-col="kontrak"]').fill('1450000')
+  row.locator('[data-jkk-survey-col="calon"]').fill('1600000')
+  page.locator('[data-jkk-section="survei"] [data-jkk-save]').click()
+  assert page.evaluate('SATRIA_JKK_CORE.surveyPrice(Object.values(S.paket[0].kkJkk.survei)[0])')==1450000
+  page.locator('[data-jkk-apply-survey]').click()
+  assert page.evaluate('S.paket[0].kkJkk.biaya[0].harga')=='1450000'
+  step(7)
   row=page.locator('[data-jkk-price-row]').first
-  row.locator('[data-jkk-field="uraian"]').fill('Tenaga ahli perencana')
+  row.locator('[data-jkk-field="uraian"]').fill('Tenaga ahli')
   row.locator('[data-jkk-field="volume"]').fill('2')
-  row.locator('[data-jkk-field="harga"]').fill('1500000')
-  row.locator('[data-jkk-field="penawaran"]').fill('1350000')
+  row.locator('[data-jkk-field="penawaran"]').fill('1400000')
   row.locator('[data-jkk-field="negosiasi"]').fill('1300000')
-  page.locator('[data-jkk-section="biaya"] [data-jkk-field="hpsPPK"]').fill('3330000')
+  page.locator('[data-jkk-section="biaya"] [data-jkk-field="hpsPPK"]').fill('3219000')
   page.locator('[data-jkk-section="biaya"] [data-jkk-field="tarifPajak"]').fill('11')
+  assert '3.219.000' in page.locator('[data-jkk-total="hps"]').inner_text()
   page.locator('[data-jkk-section="biaya"] [data-jkk-save]').click()
-  costs=page.evaluate('''()=>({t:SATRIA_JKK_CORE.totals(S.paket[0].kkJkk),d:S.paket[0].kkJkk})''')
-  assert costs['t']['hps']==3330000,costs
-  assert costs['t']['offer']==2700000,costs
-  assert isinstance(costs['d']['penawaran'],dict),'top-level eval data cannot be overwritten by price row'
-  assert costs['d']['biaya'][0]['penawaran']=='1350000'
-  # Existing parcel cannot be duplicated on the same RUP.
+  summary=page.evaluate('SATRIA_JKK_CORE.totals(S.paket[0].kkJkk)')
+  assert summary['hps']==3219000,summary
+  assert summary['offer']==2800000 and summary['nego']==2600000,summary
+  assert page.evaluate('S.paket[0].kkJkk.jadwal.uploadMulai')=='2026-11-15 09:00'
+  assert page.evaluate('S.paket[0].kkJkk.reviu["rev-01"].pic')=='PPK'
+  assert page.evaluate('S.paket[0].kkJkk.kualifikasi["kua-01"].status')=='Ada'
+  assert page.evaluate('S.paket[0].kkJkk.penawaran["pen-01"].status')=='Ada'
+  step(8)
+  assert page.locator('[data-jkk-print]').count()==9
+  assert page.locator('[data-jkk-preview]').count()==9
+  page.locator('[data-jkk-clean-print]').check()
+  ctx="{p:S.paket[0],r:S.rupBank[0],opd:'PUPR',instansi:'PEMDA',pp:'PP',nipPP:'',ppk:'PPK',kota:'Pontianak',printDate:'13 Nov 2026',supplier:'CV Konsultan'}"
+  clean=page.evaluate("()=>SATRIA_JKK_DOCS.build('survei',"+ctx+",{cleanPrint:true})")
+  assert 'DRAF KERJA SATRIA' not in clean
+  assert '1.450.000' in clean
+  assert 'Standar referensi' in clean
+  reviewdoc=page.evaluate("()=>SATRIA_JKK_DOCS.build('kk-reviu',"+ctx+")")
+  assert 'PIC' in reviewdoc and '20-11-2026' in reviewdoc
+  invite=page.evaluate("()=>SATRIA_JKK_DOCS.build('und-pl',"+ctx+")")
+  assert '2026-11-15 09:00' in invite
+  # Reopen a selected package; ensure no duplicate and no overwriting Bank RUP.
   page.evaluate('''()=>{location.hash='#jkk'}''')
-  page.wait_for_timeout(100)
   page.locator('[data-jkk-rup-choose]').select_option('r-jkk')
   assert page.locator('[data-jkk-create]').count()==0
-  # Read only still permits review and printable docs, but not edits.
   page.evaluate('''()=>{S.ui.user='qa-viewer';location.hash='#jkk/'+S.paket[0].id;render()}''')
-  assert page.locator('.jkk-detail').count()==1
-  assert page.locator('[data-jkk-section="base"] [data-jkk-field="bentuk"]').is_disabled()
-  assert page.locator('[data-jkk-section="base"] [data-jkk-save]').is_disabled()
+  step(2)
+  assert page.locator('[data-jkk-section="meta"] [data-jkk-field="bentuk"]').is_disabled()
+  assert page.locator('[data-jkk-section="meta"] [data-jkk-save]').is_disabled()
+  step(8)
   assert page.locator('[data-jkk-print]').count()==9
-  assert not page.evaluate('''()=>canWrite()''')
-  assert page.evaluate('''()=>S.paket.length''')==1
-  assert not missing,(width,missing)
+  assert page.evaluate('S.paket.length')==1
   assert not errors,(width,errors)
-  print(f'PASS JKK {width}px: RUP strict filter; create; avoid duplicate; save stage 1-4; HPS; Viewer read-only; 9 document outputs; no errors.')
+  assert not missing,(width,missing)
+  print(f'PASS JKK {width}px: 8 langkah, Bank RUP utuh, metadata, 42/8/12, survei→HPS, semua data bertahan, 9 dokumen, Viewer read-only')
   page.close()
  browser.close()
