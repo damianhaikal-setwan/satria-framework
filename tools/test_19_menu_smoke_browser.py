@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Local browser smoke of 19 original menu routes + Sampah.
+"""Local browser smoke of all menu routes, including modul JKK + Sampah.
 External scripts stubbed; NOT full E2E validation or live Supabase audit.
 """
 from pathlib import Path
@@ -7,7 +7,7 @@ import shutil
 from urllib.parse import urlparse
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
-EXPECTED=['dash','paket','kerja','kalk','input','spse','monitor','finance','quality','brief','satria360','dok','lap','master','set','care','user','panduan','chat','sampah']
+EXPECTED=['dash','paket','kerja','jkk','kalk','input','spse','monitor','finance','quality','brief','satria360','dok','lap','master','set','care','user','panduan','chat','sampah']
 with sync_playwright() as api:
  browser=api.chromium.launch(headless=True,executable_path=shutil.which('chromium') or shutil.which('google-chrome') or None,args=['--no-sandbox'])
  for width in (390,1280):
