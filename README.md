@@ -176,3 +176,9 @@ Menu **Ruang Kerja PP** baru menyatukan paket e-Purchasing dan Pengadaan Langsun
 ## Pembaruan 3.0.59.59 — dua format JSON SiRUP
 
 Lihat [panduan impor `data` dan `aaData`](docs/IMPOR-SIRUP-DUA-FORMAT-3.0.59.59.md). Gunakan `data` lengkap untuk klasifikasi jenis/metode; `aaData` hanya daftar ringkas dan tidak boleh mengisi jenis secara otomatis. Metode `Dikecualikan` dipertahankan terpisah.
+
+## Modul baru — SATRIA NEXT 3.0.59.60: Kertas Kerja Jasa Konsultansi Konstruksi
+
+Modul **KK Konsultansi Konstruksi** terintegrasi dengan Bank RUP untuk metode **Pengadaan Langsung** dan jenis **Jasa Konsultansi**, dengan konfirmasi subjenis **Konstruksi** berdasarkan KAK. Data tambahan bersifat non-destruktif (`paket.kkJkk`), 9 format cetak/PDF browser, reviu 42 kriteria, serta evaluasi Perorangan dan kerangka Badan Usaha. Tidak ada approval berjenjang atau unggah langsung ke LPSE.
+
+Dokumentasi, batasan, pengujian, dan langkah deploy aman: [MODUL-KK-JASA-KONSULTANSI-KONSTRUKSI-3.0.59.60](docs/MODUL-KK-JASA-KONSULTANSI-KONSTRUKSI-3.0.59.60.md).

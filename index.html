@@ -3,8 +3,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta name="satria-release-version" content="3.0.59.59">
-<title>SATRIA NEXT 3.0.59.59 | Dashboard Analytics Terintegrasi</title>
+<meta name="satria-release-version" content="3.0.59.60">
+<title>SATRIA NEXT 3.0.59.60 | Dashboard Analytics Terintegrasi</title>
 <meta name="description" content="SATRIA Framework merupakan platform tata kelola digital pemerintah yang mengintegrasikan perencanaan, pelaporan, analitik, otomasi dokumen, serta pengambilan keputusan berbasis data.">
 <script src="./frontend/refactor/maintenance/diagnostics.js"></script>
 <script src="./frontend/satria-procurement-core.js"></script>
@@ -15,12 +15,17 @@
 <script src="./frontend/pbj2026-ppkerja-adapter.js"></script>
 <script src="./frontend/satria-hps-generator.js"></script>
 <script src="./frontend/satria-pp-ecosystem.js"></script>
+<script src="./frontend/satria-jkk-schema.js"></script>
+<script src="./frontend/satria-jkk-core.js"></script>
+<script src="./frontend/satria-jkk-docs.js"></script>
+<script src="./frontend/satria-jkk-workspace.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/4.0.8/dexie.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="./frontend/pbj2026-workspace.css">
 <link rel="stylesheet" href="./frontend/satria-spse-selection-document.css">
 <link rel="stylesheet" href="./frontend/satria-hps-generator.css">
 <link rel="stylesheet" href="./frontend/satria-pp-ecosystem.css">
+<link rel="stylesheet" href="./frontend/satria-jkk-workspace.css">
 <link rel="stylesheet" href="./frontend/satria-next4.css">
 <link rel="stylesheet" href="./frontend/satria-operator-studio.css">
 <link rel="stylesheet" href="./frontend/satria-price-analysis.css">
@@ -80,7 +85,7 @@
 <div class="noise"></div>
 <header>
   <div class="header-left">
-    <div id="bLogoRow"><div><b id="hPemda">SATRIA <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">NEXT · 3.0.59.59</span></b><div id="hSub"><span style="font-weight:600;letter-spacing:-0.01em">Government work, in flow.</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px;opacity:.8">Simple • Connected • Accountable</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px">Multi OPD • Multi Tahun</span></div></div></div>
+    <div id="bLogoRow"><div><b id="hPemda">SATRIA <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;border-radius:9999px;background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;font-size:10px;font-weight:800;letter-spacing:0.08em;vertical-align:middle;box-shadow:0 2px 8px rgba(15,118,110,.25)">NEXT · 3.0.59.60</span></b><div id="hSub"><span style="font-weight:600;letter-spacing:-0.01em">Government work, in flow.</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px;opacity:.8">Simple • Connected • Accountable</span> <span style="opacity:.6;margin:0 6px">•</span> <span style="font-size:11px">Multi OPD • Multi Tahun</span></div></div></div>
   </div>
   <div class="header-right row"><button type="button" class="satria-cloud-btn" id="satriaCloudOpen" title="Konfigurasi autentikasi dan sinkronisasi Supabase">☁ Supabase</button><span id="satriaCloudSyncIndicator" class="satria-sync-indicator" role="status" aria-live="polite" title="Belum login ke cloud" data-kind="muted">Belum login ke cloud</span>
     <div class="control-group"><label>User <select id="selUser" title=""></select></label></div>
@@ -94,7 +99,7 @@
 </header>
 <nav id="nav" aria-label="Navigasi utama SATRIA"><a href="#dash" class="on" data-icon="dash">Ringkasan Utama</a><a href="#paket" class="" data-icon="paket">Paket Pengadaan</a><a href="#dok" class="" data-icon="dok">Dokumen Pengadaan</a><a href="#lap" class="" data-icon="lap">Laporan dan Analisis</a><a href="#panduan" class="" data-icon="panduan">Panduan Penggunaan</a><a href="#chat" class="" data-icon="chat">Asisten SATRIA</a></nav>
 <main id="main" tabindex="-1"><section class="card" aria-live="polite" style="max-width:900px;margin:26px auto"><h2>Memuat Ringkasan Utama SATRIA…</h2><p class="mut">Data Dashboard dihitung setelah paket dan Bank RUP dimuat. Pagu RUP, penggunaan terhitung, penetapan, dan realisasi pembayaran merupakan indikator yang berbeda.</p></section></main>
-<footer class="satria-global-footer no-print"><div class="foot-brand"><b>SATRIA NEXT</b><span>Integrated Government Intelligence Platform</span><span style="font-size:10px;opacity:.8">NEXT · 3.0.59.59</span></div><div class="foot-links"><span>Smart • Adaptive • Transparent • Responsive • Integrated • Accountable</span><span style="opacity:.4">|</span><span>Generated by SATRIA Framework</span></div></footer>
+<footer class="satria-global-footer no-print"><div class="foot-brand"><b>SATRIA NEXT</b><span>Integrated Government Intelligence Platform</span><span style="font-size:10px;opacity:.8">NEXT · 3.0.59.60</span></div><div class="foot-links"><span>Smart • Adaptive • Transparent • Responsive • Integrated • Accountable</span><span style="opacity:.4">|</span><span>Generated by SATRIA Framework</span></div></footer>
 <div id="toast"></div>
 <link rel="stylesheet" href="./frontend/refactor/css/03-dpp-control-panel.css" data-satria-refactor="style">
 <style id="satria352-dpp-controls"></style>
