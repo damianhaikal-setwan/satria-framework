@@ -182,3 +182,12 @@ Lihat [panduan impor `data` dan `aaData`](docs/IMPOR-SIRUP-DUA-FORMAT-3.0.59.59.
 Modul **KK Konsultansi Konstruksi** terintegrasi dengan Bank RUP untuk metode **Pengadaan Langsung** dan jenis **Jasa Konsultansi**, dengan konfirmasi subjenis **Konstruksi** berdasarkan KAK. Data tambahan bersifat non-destruktif (`paket.kkJkk`), 9 format cetak/PDF browser, reviu 42 kriteria, serta evaluasi Perorangan dan kerangka Badan Usaha. Tidak ada approval berjenjang atau unggah langsung ke LPSE.
 
 Dokumentasi, batasan, pengujian, dan langkah deploy aman: [MODUL-KK-JASA-KONSULTANSI-KONSTRUKSI-3.0.59.60](docs/MODUL-KK-JASA-KONSULTANSI-KONSTRUKSI-3.0.59.60.md).
+
+
+## Pembaruan 3.0.59.61 — Alur Excel delapan langkah JKK
+
+Kertas Kerja **Pengadaan Langsung — Jasa Konsultansi Konstruksi** kini memakai delapan langkah sesuai workbook: **(1) Pilih Bank RUP, (2) Identitas & Administrasi / INPUT_META, (3) Reviu 42 butir / INPUT_REVIU, (4) Evaluasi Kualifikasi, (5) Evaluasi Penawaran, (6) Survei Harga, (7) HPS dan Negosiasi, (8) Hasil Kertas Kerja**.
+
+Kelengkapan yang ditambahkan: jadwal unggah/pembukaan/evaluasi/klarifikasi/kontrak, PIC dan target reviu, metadata kualifikasi/penawaran yang dipisah, dan survei harga per rincian dengan referensi standar/kontrak/penawaran serta pilihan harga manual. Harga survei **hanya disalin ke tarif HPS setelah pengguna menekan tombol pilihan**. Format dokumen reviu, survei dan undangan menampilkan detail tambahan tersebut. Data lama di `paket.kkJkk` dipertahankan; tidak ada perubahan skema database atau data Bank RUP.
+
+Baca [Panduan alur 8 langkah dan deployment aman](docs/MODUL-KK-JKK-ALUR-EXCEL-8-LANGKAH-3.0.59.61.md). **Jangan deploy ke produksi sebelum cadangan dan uji sinkronisasi staging**. SATRIA tidak menggantikan LPSE/SPSE dan tidak mengunggah dokumen otomatis.
