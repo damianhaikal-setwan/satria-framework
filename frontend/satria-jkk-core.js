@@ -21,9 +21,17 @@
  }
  function eligiblePackage(p,bank){const match=rupForPackage(p,bank);if(match.issue)return {...match,eligible:false,issue:match.issue};if(!rupEligible(match.rup))return {...match,eligible:false,issue:'Jenis/metode di Bank RUP bukan Pengadaan Langsung — Jasa Konsultansi.'};if(!isPL(p)||!isConsult(p))return {...match,eligible:false,issue:'Jenis/metode paket berbeda; periksa pada paket/monitoring SPSE terlebih dahulu.'};return {...match,eligible:true,issue:''};}
  function subtypeConfirmed(p,r){return normalized(p?.kkJkk?.subjenis||p?.subjenisKonsultansi||r?.subjenisKonsultansi)==='konstruksi'||normalized(p?.jenisPengadaan)==='jasa konsultansi konstruksi'||normalized(r?.jenisPengadaan)==='jasa konsultansi konstruksi';}
- const blank=()=>({schema:1,subjenis:'',layanan:'',bentuk:'',nomorPermintaan:'',tanggalPermintaan:'',refKak:'',refHps:'',lokasi:'',durasi:'',tempatReviu:'',tanggalReviu:'',nomorUndReviu:'',nomorBaReviu:'',keputusanReviu:'',catatanReviu:'',tanggalUndangan:'',nomorUndangan:'',penyediaId:'',namaPenyedia:'',nomorPenawaran:'',tanggalPenawaran:'',tanggalEvaluasi:'',catatanEvaluasi:'',kesimpulanKualifikasi:'',kesimpulanPenawaran:'',tanggalNego:'',nomorBaNego:'',catatanNego:'',hasilNego:'',hpsPPK:'',tarifPajak:'',keteranganPajak:'',reviu:{},kualifikasi:{},penawaran:{},biaya:[],updatedAt:''});
+ const blank=()=>({schema:1,subjenis:'',layanan:'',bentuk:'',nomorPermintaan:'',tanggalPermintaan:'',refKak:'',refHps:'',lokasi:'',durasi:'',tempatReviu:'',tanggalReviu:'',nomorUndReviu:'',nomorBaReviu:'',keputusanReviu:'',catatanReviu:'',tanggalUndangan:'',nomorUndangan:'',penyediaId:'',namaPenyedia:'',nomorPenawaran:'',tanggalPenawaran:'',tanggalEvaluasi:'',catatanEvaluasi:'',kesimpulanKualifikasi:'',kesimpulanPenawaran:'',tanggalNego:'',nomorBaNego:'',catatanNego:'',hasilNego:'',hpsPPK:'',tarifPajak:'',keteranganPajak:'',reviu:{},kualifikasi:{},penawaran:{},biaya:[],survei:{},jadwal:{},jamReviu:'',alamatPekerjaan:'',waktuPemanfaatan:'',targetPerbaikan:'',kuaNoTglPenawaran:'',kuaTempatTglEvaluasi:'',kuaCatatan:'',kuaEvaluator:'',penNoTglPenawaran:'',penTempatTglEvaluasi:'',penCatatan:'',penEvaluator:'',updatedAt:''});
  const statuses=Object.freeze({reviu:['','Sesuai','Perlu perbaikan','Tidak berlaku'],eval:['','Ada','Tidak ada','Tidak dipersyaratkan']});
- function model(source){return {...blank(),...(source&&typeof source==='object'&&!Array.isArray(source)?source:{}),reviu:{...(source?.reviu||{})},kualifikasi:{...(source?.kualifikasi||{})},penawaran:{...(source?.penawaran||{})},biaya:list(source?.biaya).map(x=>({...x}))};}
+ function model(source){return {...blank(),...(source&&typeof source==='object'&&!Array.isArray(source)?source:{}),reviu:{...(source?.reviu||{})},kualifikasi:{...(source?.kualifikasi||{})},penawaran:{...(source?.penawaran||{})},biaya:list(source?.biaya).map(x=>({...x})),survei:{...(source?.survei||{})},jadwal:{...(source?.jadwal||{})}};}
+ // Harga survei hanya usulan pembanding; tidak menimpa HPS PPK tanpa tindakan pengguna.
+ const SURVEY_KEYS=Object.freeze(['standar','kontrak','calon','manual']);
+ function surveyPrice(row){
+  const item=row&&typeof row==='object'?row:{};
+  if(item.manual!==''&&item.manual!=null){return validMoney(item.manual)?Number(item.manual):null;}
+  const refs=['standar','kontrak','calon'].map(k=>item[k]).filter(x=>x!==''&&x!=null&&validMoney(x)).map(Number);
+  return refs.length?Math.min(...refs):null;
+ }
  const number=x=>x===''||x==null?null:Number(x);
  const validMoney=x=>x===''||x==null||Number.isSafeInteger(Number(x))&&Number(x)>=0&&Number(x)<=1e13;
  const validQty=x=>x!==''&&x!=null&&Number.isFinite(Number(x))&&Number(x)>0&&Number(x)<=1e7;
@@ -58,7 +66,17 @@
    if(obj.schema!==1)throw Error('Versi data kertas kerja belum didukung.');
    for(const [key,value] of Object.entries(obj))if(typeof value==='string'&&value.length>3000)throw Error('Isian terlalu panjang: '+key);
    if(!['','Konstruksi'].includes(obj.subjenis)||!['','Perorangan','Badan Usaha'].includes(obj.bentuk))throw Error('Pilihan jenis layanan/penyedia tidak valid.');
-   for(const k of ['reviu','kualifikasi','penawaran']){const src=obj[k];if(typeof src!=='object'||Array.isArray(src))throw Error('Struktur evaluasi tidak valid.');for(const [id,entry] of Object.entries(src)){if(!/^(rev-\d{2}|kua-\d{2}|pen-\d{2}|b-kua-\d{2}|b-pen-\d{2})$/.test(id))throw Error('ID kriteria tidak valid.');if(!statuses[k==='reviu'?'reviu':'eval'].includes(entry?.status||''))throw Error('Status kriteria tidak valid.');for(const name of ['bukti','catatan','tindakan'])if(String(entry?.[name]??'').length>1500)throw Error('Catatan kriteria terlalu panjang.')}}
+   for(const k of ['reviu','kualifikasi','penawaran']){const src=obj[k];if(typeof src!=='object'||Array.isArray(src))throw Error('Struktur evaluasi tidak valid.');for(const [id,entry] of Object.entries(src)){if(!/^(rev-\d{2}|kua-\d{2}|pen-\d{2}|b-kua-\d{2}|b-pen-\d{2})$/.test(id))throw Error('ID kriteria tidak valid.');if(!statuses[k==='reviu'?'reviu':'eval'].includes(entry?.status||''))throw Error('Status kriteria tidak valid.');for(const name of ['bukti','catatan','tindakan','pic','target'])if(String(entry?.[name]??'').length>1500)throw Error('Catatan kriteria terlalu panjang.')}}
+   if(!obj.survei||typeof obj.survei!=='object'||Array.isArray(obj.survei))throw Error('Struktur survei tidak valid.');
+   if(!obj.jadwal||typeof obj.jadwal!=='object'||Array.isArray(obj.jadwal))throw Error('Struktur jadwal tidak valid.');
+   const JADWAL_KEYS=['uploadMulai','uploadSelesai','pembukaanMulai','pembukaanSelesai','evaluasiMulai','evaluasiSelesai','klarifikasiMulai','klarifikasiSelesai','kontrakMulai','kontrakSelesai'];
+   for(const [k,v] of Object.entries(obj.jadwal))if(!JADWAL_KEYS.includes(k)||String(v??'').length>250)throw Error('Kolom jadwal tidak valid.');
+   if(Object.keys(obj.survei).length>100)throw Error('Terlalu banyak baris survei.');
+   for(const [id,item] of Object.entries(obj.survei)){
+     if(!/^jkk-[a-z\d_-]{1,64}$/i.test(id)||!item||typeof item!=='object'||Array.isArray(item))throw Error('ID rincian survei tidak valid.');
+     for(const k of SURVEY_KEYS)if(!validMoney(item[k]))throw Error('Angka survei tidak valid: '+k);
+     for(const k of ['kualifikasi','keterangan','item'])if(String(item[k]??'').length>1200)throw Error('Catatan survei terlalu panjang.');
+   }
    if(obj.biaya.length>100)throw Error('Maksimal 100 rincian per paket untuk menjaga kinerja.');
    const ids=new Set();for(const row of obj.biaya){if(!/^jkk-[a-z\d_-]{1,64}$/i.test(str(row.id,100))||ids.has(row.id))throw Error('ID rincian biaya tidak valid/duplikat.');ids.add(row.id);if(!['Personel','Nonpersonel'].includes(row.kategori)||!validQty(row.volume)||!validMoney(row.harga)||!validMoney(row.penawaran)||!validMoney(row.negosiasi)||str(row.uraian).length>250)throw Error('Rincian biaya tidak valid.');}
    const sums=totals(obj);if(sums.invalid||[sums.base,sums.tax,sums.hps,sums.offer,sums.nego].some(x=>x!==null&&!Number.isSafeInteger(x)))throw Error('Jumlah rincian biaya tidak valid atau melampaui ketelitian rupiah.');
@@ -66,5 +84,5 @@
    if(!validMoney(obj.hpsPPK)||obj.tarifPajak!==''&&(!Number.isFinite(Number(obj.tarifPajak))||Number(obj.tarifPajak)<0||Number(obj.tarifPajak)>100))throw Error('HPS PPK/tarif pajak tidak valid.');
    return obj;
  }
- return {rupEligible,isPL,isConsult,rupForPackage,eligiblePackage,subtypeConfirmed,blank,model,clean,totals,warnings,progress,validMoney,validQty,statuses};
+ return {rupEligible,isPL,isConsult,rupForPackage,eligiblePackage,subtypeConfirmed,blank,model,clean,totals,warnings,progress,validMoney,validQty,statuses,surveyPrice};
 });
