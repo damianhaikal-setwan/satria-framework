@@ -1588,7 +1588,14 @@ function warnDoc(p){
  return all.length?`<div class="card no-print" style="border-color:#e0a800"><b class=warn>Dokumen belum lengkap</b><p class=mut>Perlu: ${all.join(', ')}. Lengkapi melalui menu Paket Pengadaan atau Data Master.</p></div>`:'';
 }
 function vDok(){
- const L=filt(),selected=P(S.ui.dpid),p=selected&&!satriaSpseIs(selected)?selected:L[0];
+ const L=filt(),selected=P(S.ui.dpid);
+ // JKK memakai generator dokumen sendiri; tidak membuka 15 template E-Purchasing yang berbeda tujuan.
+ const docScope=activeCloudScope();
+ const selectedAllowed=selected&&!selected.arsip&&Number(selected.tahun)===Number(S.ui.tahun)&&(S.ui.opd==='all'||String(selected.opd)===String(S.ui.opd))&&(!docScope||(docScope.opdIds.includes(String(selected.opd))&&docScope.years.includes(Number(selected.tahun))));
+ if(selectedAllowed&&window.SATRIA_PL_INTEGRATION?.classification(selected,S.rupBank||[])?.jkk){
+   return `<section class="card" style="padding:24px"><h2>Dokumen Pengadaan Langsung Jasa Konsultansi Konstruksi</h2><p>Dokumen paket ini disusun melalui Kertas Kerja JKK 8 Langkah. Template pada pusat dokumen umum diperuntukkan untuk jenis pengadaan lain.</p><a class="btn" href="#jkk/${encodeURIComponent(selected.id)}">Buka Kertas Kerja JKK →</a><p class="mut">Tidak ada data RUP, HPS PPK, atau rincian paket lama yang diubah.</p></section>`;
+ }
+ const p=selected&&!satriaSpseIs(selected)?selected:L[0];
  if(!p)return '<div class=card>Belum ada paket pada tahun ini. Tambahkan paket melalui menu Paket Pengadaan.</div>';
  const T=[['nodis','1 Nota Dinas'],['idkb','2 Identifikasi Kebutuhan Pengadaan'],['rfi','3 Hasil Permintaan Informasi (RFI)'],['bahepe','4 Berita Acara Evaluasi Penyedia'],['metode','5 Formulir Penetapan E-Purchasing'],['sppbj','6 Surat Perintah Pengadaan kepada PP'],['spek','7 Spesifikasi Teknis'],['dpp','8 Dokumen Persiapan Pengadaan (DPP)'],['lamp','9 Lampiran Referensi Harga'],['reviu','10 Berita Acara Reviu DPP'],['bahp','11 Berita Acara Hasil Pemilihan'],['survei','12 Survei Harga'],['hpsnego','13 HPS dan Negosiasi'],['kknego','14 Kertas Kerja Negosiasi'],['analisa','15 Analisis Kewajaran Harga & Bukti']];
  const docContent = DOCS[S.ui.dok] ? satriaSafeDocHtml(DOCS[S.ui.dok](p)) : '<p class=mut>Dokumen tidak tersedia</p>';
@@ -2215,6 +2222,7 @@ function render(){
  $('#selOpd').title=cloudScope?(visibleOpds.length===1?'OPD otomatis mengikuti assignment akun Anda.':`Hanya ${visibleOpds.length} OPD yang ditugaskan kepada akun ini.`):'Pilih OPD untuk memfilter data aplikasi.';
  if(!allowed(u.page))u.page='dash';$('#selUser').innerHTML=S.users.filter(x=>x.aktif!==false).map(x=>`<option value="${x.id}" ${x.id===S.ui.user?'selected':''}>${esc(x.nama)} (${x.role})</option>`).join('');
  $('#nav').innerHTML=NAV.filter(([k])=>allowed(k)).map(([k,t])=>`<a href="#${k}" class="${u.page===k?'on':''}" ${u.page===k?'aria-current="page"':''}>${t}</a>`).join('');
+ if(u.page==='paket'&&u.pid&&window.SATRIA_PL_INTEGRATION?.classification(P(u.pid),S.rupBank||[])?.jkk){u.page='jkk';try{history.replaceState(null,'',location.pathname+location.search+'#jkk/'+encodeURIComponent(u.pid))}catch(_){} }
  if(u.page==='paket'&&u.pid&&satriaSpseIs(P(u.pid))&&!satriaPlSpseRincian(P(u.pid))){u.page='spse';try{history.replaceState(null,'',location.pathname+location.search+'#spse/'+encodeURIComponent(u.pid))}catch(_){}}
  const V={sampah:vSampah,dash:()=>vDash()+satriaOpsDashWidget(),monitor:satriaOpsMonitor,finance:satriaOpsFinance,quality:satriaOpsQuality,care:()=>window.SATRIA_CARE?.page?.()||'<section class="card">Perawatan SATRIA belum dimuat; periksa file aplikasi atau muat ulang halaman.</section>',paket:()=>u.pid?(satriaPlSpseRincian(P(u.pid))?vDetailPlRincian(P(u.pid)):vDetail(P(u.pid))):vPaket(),jkk:()=>window.SATRIA_JKK_WORKSPACE?.page?.()||'<section class="card">Modul Kertas Kerja Konsultansi Konstruksi belum dimuat.</section>',kerja:()=>window.SATRIA_PP_ECOSYSTEM?.page?.((S.paket||[]).filter(p=>Number(p.tahun)===Number(u.tahun)&&(u.opd==='all'||String(p.opd)===String(u.opd))&&(!cloudScope||(cloudScope.opdIds.includes(String(p.opd))&&cloudScope.years.includes(Number(p.tahun))))),u.pid)||'<section class="card">Ruang Kerja PP belum dimuat. Periksa aset aplikasi.</section>',kalk:vKalk,input:vInputRup,spse:vSpse,brief:vBrief,satria360:()=>window.SATRIA_NEXT4?.vSatria360?.()||'<div class="card">SATRIA 360° sedang dimuat.</div>',analisa:()=>window.SATRIA_PRICE_ANALYSIS?.page?.()||'<div class="card">Analisis Harga belum dimuat. Muat ulang aplikasi.</div>',dok:vDok,lap:vLap,master:vMaster,set:vSet,user:vUser,panduan:vPanduan,chat:vChat};
  $('#main').innerHTML=(V[u.page]||vDash)();
