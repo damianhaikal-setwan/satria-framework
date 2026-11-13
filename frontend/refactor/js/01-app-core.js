@@ -1186,6 +1186,30 @@ function vPaket(){const demoJumlah=satriaSubDemoJumlah();const demoNotice=demoJu
 function readiness(p){const reuse=S.paket.filter(x=>x.id!==p.id&&rupBankKey(x)===rupBankKey(p)&&String(p.rup||'').trim()).length;const H=hps(p);
 const C=[['Kode RUP',!!p.rup],['Pagu',p.pagu>0],['Rincian barang',p.items.length>0],['HPS ≤ pagu',H>0&&H<=p.pagu],['Penawaran',p.penawaran.length>0],['Pemenang',!!pemenang(p)],['Tgl DPP',!!p.tglDpp],['PPK aktif',!!p.ppk && S.pejabat.some(x=>String(x.id)===String(p.ppk)&&String(x.opd)===String(p.opd)&&x.aktif!==false)],['Tgl BA Hasil',!!p.tglBahp]];
 return `<div class=row style="margin-bottom:10px">${C.map(([t,ok])=>`<span class=pill style="background:${ok?'#dff5e8':'#fde3e0'}">${ok?'✔':'✖'} ${t}</span>`).join('')}</div>${reuse?'<p class=mut>ℹ Kode RUP ini juga digunakan '+reuse+' paket lain. Periksa alokasi pagu dan nomor dokumen tiap paket agar tidak dihitung/diterbitkan ganda.</p>':''}`}
+ /* Pengadaan Langsung yang tercatat dalam SPSE memiliki HPS pendukung sendiri.
+    #paket/<id> membuka rincian hanya untuk metode PL; monitoring tetap #spse/<id>.
+    Jangan memperlakukan paket SPSE sebagai transaksi e-Purchasing. */
+ function satriaPlSpseRincian(p){
+  return !!p&&satriaSpseIs(p)&&String(p.spseMonitoring?.method||'').trim().toLowerCase()==='pengadaan langsung';
+ }
+ function vDetailPlRincian(p){
+  if(!satriaPlSpseRincian(p))return '<section class="card">Paket bukan Pengadaan Langsung SPSE. Periksa metode paket terlebih dahulu.</section>';
+  const scope=activeCloudScope();
+  if(scope&&(!scope.opdIds.includes(String(p.opd))||!scope.years.includes(Number(p.tahun))))return '<section class="card">Paket berada di luar penugasan OPD/tahun akun Anda.</section>';
+  const total=hps(p),over=total>Number(p.pagu||0);
+  const jkk=!!window.SATRIA_JKK_CORE?.eligiblePackage?.(p,S.rupBank||[])?.eligible;
+  return `<section class="satria-pl-rincian-page">
+   <div class="row satria342-detail-heading" style="justify-content:space-between;gap:12px;flex-wrap:wrap"><div>
+    <a href="#spse/${encodeURIComponent(p.id)}">← Kembali ke Monitoring SPSE</a>
+    <h2 style="margin:8px 0;color:#fff!important">Rincian Kebutuhan & HPS — Pengadaan Langsung</h2>
+    <p class="mut">${esc(p.nama)} · RUP ${esc(p.rup)} · TA ${esc(p.tahun)} · ${esc(O(p.opd).singkat)}</p>
+   </div><div class="row" style="flex-wrap:wrap;gap:8px"><a class="btn g" href="#spse/${encodeURIComponent(p.id)}">Monitoring SPSE</a>${jkk?`<a class="btn" href="#jkk/${encodeURIComponent(p.id)}">Kertas Kerja Konsultansi Konstruksi (8 Langkah) →</a>`:''}</div></div>
+   <div class="card" style="margin-top:14px"><p><b>Rincian ini hanya data pendukung SATRIA.</b> Tidak mengubah data Bank RUP, kontrak, pembayaran, maupun tahap SPSE. Isi nama komponen, volume, satuan, dan harga satuan, kemudian tekan <b>Simpan Semua Rincian</b>.</p>
+   ${jkk?'<p class="mut">Untuk rincian biaya personel/nonpersonel, survei harga, HPS dan negosiasi pada Jasa Konsultansi Konstruksi, gunakan langkah 6–7 di modul Kertas Kerja 8 Langkah. Kedua rincian tidak disalin otomatis satu sama lain.</p>':''}
+   <div class="row" style="gap:16px;flex-wrap:wrap"><span class="pill">Pagu paket: ${rp(p.pagu)}</span><span class="pill">Total HPS rincian: ${rp(total)}</span>${over?'<span class="pill bad">⚠ HPS melebihi pagu; periksa sebelum menggunakan dokumen</span>':''}</div></div>
+   <div class="card" style="margin-top:14px">${fItems(p)}</div>
+  </section>`;
+ }
 function vDetail(p){
  if(!p)return '<div class=card>Paket tidak ditemukan.</div>';
  const H=hps(p),dl=S.ui.ptab;
@@ -1281,6 +1305,7 @@ function satriaHpsDraftTotals(d){
 }
 function satriaHpsDraftMarkup(p){
  const d=satriaHpsDraft(p),count=d.items.length,H=hps(p),preview=satriaHpsDraftTotals(d);
+ const pl=typeof satriaPlSpseRincian==='function'&&satriaPlSpseRincian(p),satuanNama=pl?'komponen':'barang';
  const editable=satriaHpsCanEdit(p);
  const diff=(+p.pagu||0)-H;
  const field=(it,name,label,value,mode='text')=>`<label class="satria-hps-field satria-hps-${name}"><span>${label}</span><input type="text" inputmode="${mode}" autocomplete="off" data-hps-edit="1" data-pid="${esc(p.id)}" data-id="${esc(it.id)}" data-f="${name}" aria-label="${label}" value="${esc(value)}" ${editable?'':'disabled'}></label>`;
@@ -1289,7 +1314,7 @@ function satriaHpsDraftMarkup(p){
   const subtotal=Number.isFinite(qty)&&Number.isFinite(price)?rp(qty*price):'—';
   return `<div class="satria-hps-entry" data-hps-row="${esc(it.id)}">
     <strong class="satria-hps-num">${index+1}</strong>
-    ${field(it,'nama','Nama barang',it.nama||'')}
+    ${field(it,'nama',pl?'Nama komponen / jasa':'Nama barang',it.nama||'')}
     ${field(it,'vol','Volume',it.vol??'','decimal')}
     ${field(it,'satuan','Satuan',it.satuan||'')}
     ${field(it,'hs','HPS satuan (Rp)',it.hs===undefined?'':String(it.hs).match(/^\d+$/)?nf(it.hs):it.hs,'numeric')}
@@ -1297,11 +1322,11 @@ function satriaHpsDraftMarkup(p){
     <button type="button" class="d satria-hps-remove" data-act="hpsdraftdel" data-pid="${esc(p.id)}" data-id="${esc(it.id)}" ${editable?'':'disabled'} title="Tandai barang untuk dihapus setelah Simpan">Hapus</button>
    </div>`;
  }).join('');
- return `<section class="satria342-section-intro" aria-label="Ringkasan rincian dan HPS"><div class="satria342-intro-text"><span class="satria342-eyebrow">TAHAP 02 / RINCIAN & HPS</span><h3>Susun kebutuhan barang</h3><p>Isi semua barang dahulu, lalu klik <b>Simpan Semua Rincian</b>. Angka tersimpan, negosiasi dan dokumen tidak berubah selama masih berupa draf.</p></div><div class="satria342-stat-grid"><div><small>Barang tersimpan</small><strong>${p.items.length}</strong></div><div><small>HPS tersimpan</small><strong>${rp(H)}</strong></div><div class="${diff<0?'satria342-over-budget':''}"><small>${diff<0?'Melebihi pagu':'Sisa pagu'}</small><strong>${rp(Math.abs(diff))}</strong></div></div></section>
+ return `<section class="satria342-section-intro" aria-label="Ringkasan rincian dan HPS"><div class="satria342-intro-text"><span class="satria342-eyebrow">TAHAP 02 / RINCIAN & HPS</span><h3>${pl?'Susun rincian kebutuhan / biaya':'Susun kebutuhan barang'}</h3><p>Isi semua ${satuanNama} dahulu, lalu klik <b>Simpan Semua Rincian</b>. Angka tersimpan, negosiasi dan dokumen tidak berubah selama masih berupa draf.</p></div><div class="satria342-stat-grid"><div><small>${pl?'Komponen':'Barang'} tersimpan</small><strong>${p.items.length}</strong></div><div><small>HPS tersimpan</small><strong>${rp(H)}</strong></div><div class="${diff<0?'satria342-over-budget':''}"><small>${diff<0?'Melebihi pagu':'Sisa pagu'}</small><strong>${rp(Math.abs(diff))}</strong></div></div></section>
  <section class="satria-hps-draft" data-hps-draft="${esc(p.id)}">
-  <div class="satria-hps-draft-intro"><div><strong>Isi rincian — ${count} barang</strong><p>Baris tidak dibuat ulang saat digeser. Volume tidak berubah dengan roda mouse. Contoh: 4.849 (ribuan), 1,5 (pecahan). Gunakan Tab untuk berpindah kolom.</p></div><span class="pill" data-hps-status aria-live="polite">${d.dirty?'● Ada isian belum disimpan':'✓ Semua rincian tersimpan'}</span></div>
-  <div class="satria-hps-scroller" role="region" aria-label="Daftar isian rincian kebutuhan dan HPS" tabindex="0"><div class="satria-hps-grid-head"><span>No.</span><span>Nama barang</span><span>Volume</span><span>Satuan</span><span>HPS satuan</span><span>Jumlah</span><span>Aksi</span></div>${rows||'<p class="mut" style="padding:16px">Belum ada barang. Klik Tambah Barang untuk mulai.</p>'}</div>
-  <div class="satria-hps-draft-bottom"><div class="satria-hps-actions"><button type="button" class="g" data-act="hpsdraftadd" data-pid="${esc(p.id)}" ${editable?'':'disabled'}>+ Tambah Barang</button><button type="button" data-act="hpsdraftsave" data-pid="${esc(p.id)}" ${editable?'':'disabled'}>Simpan Semua Rincian</button><button type="button" class="g" data-act="hpsdraftdiscard" data-pid="${esc(p.id)}" ${editable?'':'disabled'}>Batalkan Perubahan</button></div><div class="satria-hps-preview"><small>Total sementara (belum tersimpan)</small><strong data-hps-preview>${preview===null?'Lengkapi volume & HPS':rp(preview)}</strong><small>Pagu: ${rp(p.pagu)} · ${count} barang</small></div></div>
+  <div class="satria-hps-draft-intro"><div><strong>Isi rincian — ${count} ${satuanNama}</strong><p>Baris tidak dibuat ulang saat digeser. Volume tidak berubah dengan roda mouse. Contoh: 4.849 (ribuan), 1,5 (pecahan). Gunakan Tab untuk berpindah kolom.</p></div><span class="pill" data-hps-status aria-live="polite">${d.dirty?'● Ada isian belum disimpan':'✓ Semua rincian tersimpan'}</span></div>
+  <div class="satria-hps-scroller" role="region" aria-label="Daftar isian rincian kebutuhan dan HPS" tabindex="0"><div class="satria-hps-grid-head"><span>No.</span><span>${pl?'Komponen / jasa':'Nama barang'}</span><span>Volume</span><span>Satuan</span><span>HPS satuan</span><span>Jumlah</span><span>Aksi</span></div>${rows||'<p class="mut" style="padding:16px">Belum ada ${satuanNama}. Klik Tambah untuk mulai.</p>'}</div>
+  <div class="satria-hps-draft-bottom"><div class="satria-hps-actions"><button type="button" class="g" data-act="hpsdraftadd" data-pid="${esc(p.id)}" ${editable?'':'disabled'}>+ Tambah ${pl?'Komponen':'Barang'}</button><button type="button" data-act="hpsdraftsave" data-pid="${esc(p.id)}" ${editable?'':'disabled'}>Simpan Semua Rincian</button><button type="button" class="g" data-act="hpsdraftdiscard" data-pid="${esc(p.id)}" ${editable?'':'disabled'}>Batalkan Perubahan</button></div><div class="satria-hps-preview"><small>Total sementara (belum tersimpan)</small><strong data-hps-preview>${preview===null?'Lengkapi volume & HPS':rp(preview)}</strong><small>Pagu: ${rp(p.pagu)} · ${count} ${satuanNama}</small></div></div>
   <p class="mut satria-hps-guidance">Perubahan baru memengaruhi HPS, penawaran, dan dokumen setelah <b>Simpan Semua Rincian</b>. Isian yang belum disimpan dipertahankan saat berpindah tab di sesi ini; memuat ulang/menutup browser akan membuang draf.</p>
  </section>`;
 }
@@ -2190,8 +2215,8 @@ function render(){
  $('#selOpd').title=cloudScope?(visibleOpds.length===1?'OPD otomatis mengikuti assignment akun Anda.':`Hanya ${visibleOpds.length} OPD yang ditugaskan kepada akun ini.`):'Pilih OPD untuk memfilter data aplikasi.';
  if(!allowed(u.page))u.page='dash';$('#selUser').innerHTML=S.users.filter(x=>x.aktif!==false).map(x=>`<option value="${x.id}" ${x.id===S.ui.user?'selected':''}>${esc(x.nama)} (${x.role})</option>`).join('');
  $('#nav').innerHTML=NAV.filter(([k])=>allowed(k)).map(([k,t])=>`<a href="#${k}" class="${u.page===k?'on':''}" ${u.page===k?'aria-current="page"':''}>${t}</a>`).join('');
- if(u.page==='paket'&&u.pid&&satriaSpseIs(P(u.pid))){u.page='spse';try{history.replaceState(null,'',location.pathname+location.search+'#spse/'+encodeURIComponent(u.pid))}catch(_){}}
- const V={sampah:vSampah,dash:()=>vDash()+satriaOpsDashWidget(),monitor:satriaOpsMonitor,finance:satriaOpsFinance,quality:satriaOpsQuality,care:()=>window.SATRIA_CARE?.page?.()||'<section class="card">Perawatan SATRIA belum dimuat; periksa file aplikasi atau muat ulang halaman.</section>',paket:()=>u.pid?vDetail(P(u.pid)):vPaket(),jkk:()=>window.SATRIA_JKK_WORKSPACE?.page?.()||'<section class="card">Modul Kertas Kerja Konsultansi Konstruksi belum dimuat.</section>',kerja:()=>window.SATRIA_PP_ECOSYSTEM?.page?.((S.paket||[]).filter(p=>Number(p.tahun)===Number(u.tahun)&&(u.opd==='all'||String(p.opd)===String(u.opd))&&(!cloudScope||(cloudScope.opdIds.includes(String(p.opd))&&cloudScope.years.includes(Number(p.tahun))))),u.pid)||'<section class="card">Ruang Kerja PP belum dimuat. Periksa aset aplikasi.</section>',kalk:vKalk,input:vInputRup,spse:vSpse,brief:vBrief,satria360:()=>window.SATRIA_NEXT4?.vSatria360?.()||'<div class="card">SATRIA 360° sedang dimuat.</div>',analisa:()=>window.SATRIA_PRICE_ANALYSIS?.page?.()||'<div class="card">Analisis Harga belum dimuat. Muat ulang aplikasi.</div>',dok:vDok,lap:vLap,master:vMaster,set:vSet,user:vUser,panduan:vPanduan,chat:vChat};
+ if(u.page==='paket'&&u.pid&&satriaSpseIs(P(u.pid))&&!satriaPlSpseRincian(P(u.pid))){u.page='spse';try{history.replaceState(null,'',location.pathname+location.search+'#spse/'+encodeURIComponent(u.pid))}catch(_){}}
+ const V={sampah:vSampah,dash:()=>vDash()+satriaOpsDashWidget(),monitor:satriaOpsMonitor,finance:satriaOpsFinance,quality:satriaOpsQuality,care:()=>window.SATRIA_CARE?.page?.()||'<section class="card">Perawatan SATRIA belum dimuat; periksa file aplikasi atau muat ulang halaman.</section>',paket:()=>u.pid?(satriaPlSpseRincian(P(u.pid))?vDetailPlRincian(P(u.pid)):vDetail(P(u.pid))):vPaket(),jkk:()=>window.SATRIA_JKK_WORKSPACE?.page?.()||'<section class="card">Modul Kertas Kerja Konsultansi Konstruksi belum dimuat.</section>',kerja:()=>window.SATRIA_PP_ECOSYSTEM?.page?.((S.paket||[]).filter(p=>Number(p.tahun)===Number(u.tahun)&&(u.opd==='all'||String(p.opd)===String(u.opd))&&(!cloudScope||(cloudScope.opdIds.includes(String(p.opd))&&cloudScope.years.includes(Number(p.tahun))))),u.pid)||'<section class="card">Ruang Kerja PP belum dimuat. Periksa aset aplikasi.</section>',kalk:vKalk,input:vInputRup,spse:vSpse,brief:vBrief,satria360:()=>window.SATRIA_NEXT4?.vSatria360?.()||'<div class="card">SATRIA 360° sedang dimuat.</div>',analisa:()=>window.SATRIA_PRICE_ANALYSIS?.page?.()||'<div class="card">Analisis Harga belum dimuat. Muat ulang aplikasi.</div>',dok:vDok,lap:vLap,master:vMaster,set:vSet,user:vUser,panduan:vPanduan,chat:vChat};
  $('#main').innerHTML=(V[u.page]||vDash)();
  window.SATRIA_NEXT4?.enhance?.();
  window.SATRIA_OPERATOR_STUDIO?.enhance?.();
