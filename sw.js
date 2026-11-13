@@ -1,5 +1,5 @@
 /* SATRIA PWA: network-first, precache all refactored assets for offline use. */
-const CACHE_NAME = 'satria-v3.0.59.62-pbj-2026-20261112-combined-p0p3-opt5-stability6-scope7-trash8-rel9-integrity10';
+const CACHE_NAME = 'satria-v3.0.59.63-pbj-2026-20261112-combined-p0p3-opt5-stability6-scope7-trash8-rel9-integrity10';
 const APP_ASSETS = [
   "./",
   "./index.html",
@@ -22,6 +22,7 @@ const APP_ASSETS = [
   "./frontend/satria-pp-ecosystem.css",
   "./frontend/satria-jkk-schema.js",
   "./frontend/satria-jkk-core.js",
+  "./frontend/satria-pl-integration.js",
   "./frontend/satria-jkk-docs.js",
   "./frontend/satria-jkk-workspace.js",
   "./frontend/satria-jkk-workspace.css",

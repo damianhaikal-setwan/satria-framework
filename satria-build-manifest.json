@@ -1,5 +1,5 @@
 {
-  "file_count": 104,
+  "file_count": 105,
   "files": {
     "_headers": {
       "bytes": 33,
@@ -126,8 +126,8 @@
       "sha256": "a97afcc635b2ef663c637179d08ed8df046f5a2e6e7ef003ba4be98e02123110"
     },
     "frontend/refactor/js/01-app-core.js": {
-      "bytes": 330241,
-      "sha256": "49f1b651c6b1923b01be6458456ee086c57185f683b4799effc8b216db7ad8ed"
+      "bytes": 331436,
+      "sha256": "cb78bc61cb0450f415c4d6642ad04cd7725812b23b9d6219e2d26d020f28522b"
     },
     "frontend/refactor/js/02-premium-ui.js": {
       "bytes": 3603,
@@ -238,8 +238,8 @@
       "sha256": "37fc9c803a3b8209b2794c049e69112951f2d9cbcde3eb9c99154ab77e4ac1f5"
     },
     "frontend/refactor/js/30-satria-spse-monitor-v1.js": {
-      "bytes": 38722,
-      "sha256": "00e1f03b85207a7a98750297932ecdd91ab775c8ffbec636ab3bdd1ddaed39ee"
+      "bytes": 41821,
+      "sha256": "d7a7fcb7440254d408a4a573d7b116c9b9cec418d2687e5c662524a84f064d38"
     },
     "frontend/refactor/js/31-satria-ops-v2.js": {
       "bytes": 22823,
@@ -318,12 +318,12 @@
       "sha256": "7fa0af1b8815260d42e85292dc60688f51a6217796259d6024c8b3c827fcd51d"
     },
     "frontend/satria-jkk-core.js": {
-      "bytes": 10976,
-      "sha256": "7d79b4e49dee7d08d52a79a8aff9ad203e9530c2c2d9d3ddefe9f68945e8da90"
+      "bytes": 11830,
+      "sha256": "071e8d6a7969a3c5b6781d46bae2c3d4cfe741f911e5928645819208b4c35d33"
     },
     "frontend/satria-jkk-docs.js": {
-      "bytes": 13974,
-      "sha256": "06b9e13d6c8e777d6859054f02ade83b0fd70c3c1631146bee08e11b7480832e"
+      "bytes": 19801,
+      "sha256": "93e6773ee177723d92b9975e020c2bf0b96a9b66640b1c44f7ef600cbe52a909"
     },
     "frontend/satria-jkk-schema.js": {
       "bytes": 15330,
@@ -334,8 +334,8 @@
       "sha256": "795dee4f2fd48214ad6c6a632d4636ba40486ec225db07eac0d484e663bbf96a"
     },
     "frontend/satria-jkk-workspace.js": {
-      "bytes": 37408,
-      "sha256": "f79721c2ddd8d9c5855182004d10139437d0e30d34c68fb760d70333dd8c0965"
+      "bytes": 40811,
+      "sha256": "0bfff0f8969c2b3822977cf38c9e0fa0df52d3de3725040acbef45d7fd37e706"
     },
     "frontend/satria-next4.css": {
       "bytes": 9864,
@@ -357,13 +357,17 @@
       "bytes": 10789,
       "sha256": "0716e96f755b11e0436ce4f6557eadf0768e84e32485d0548146ae98e689832e"
     },
+    "frontend/satria-pl-integration.js": {
+      "bytes": 3519,
+      "sha256": "14be2b61cdd5d875e8b55756aee21eb0d2d02987a70d76282d0199486a301177"
+    },
     "frontend/satria-pp-ecosystem.css": {
       "bytes": 4559,
       "sha256": "82afe41374e556634c2649c61655e27b1fcb79a0cd4d1ff030dd554e793f257e"
     },
     "frontend/satria-pp-ecosystem.js": {
-      "bytes": 21456,
-      "sha256": "d766aac3f25e84d5cbd5405753fd7f5c6148ea9e682a9e73b3d5eadedda5ea73"
+      "bytes": 23867,
+      "sha256": "5ebe5706b8f553cdd2d4bf45e32fe15696f6d9a3a9bd3d37b14f6c4914c0a1a7"
     },
     "frontend/satria-price-analysis.css": {
       "bytes": 29407,
@@ -386,16 +390,16 @@
       "sha256": "87e34f27ff842a54aff95e7c8e037f4d17be076b524f1372efccb3909ff4cd11"
     },
     "frontend/satria-spse-selection-document.js": {
-      "bytes": 22388,
-      "sha256": "8237d03ee9ede03aa63ebb6d9ee0ef9791c90475140f1111478f7f44299328ed"
+      "bytes": 23043,
+      "sha256": "2e7b63aafedd1c4265e2befc50ef0ad31e7af4cfb8732c9290e577dee4351160"
     },
     "frontend/satria-stage4-ux.css": {
       "bytes": 1737,
       "sha256": "8e0bd4257ae29007d65be2efcdd119f1bcc7928c222def67e1925c50bf0d6f26"
     },
     "frontend/satria-view-performance.js": {
-      "bytes": 26512,
-      "sha256": "cc13c238f3005640ab30543fea17c773423a1e718ad907ee05e1a30ca9d54e32"
+      "bytes": 27188,
+      "sha256": "8b686e2ef1bf535b7d5ab9ad857f0c39107d20eef81695d51dd55cbc66dca17f"
     },
     "icon-192.png": {
       "bytes": 3840,
@@ -406,16 +410,16 @@
       "sha256": "544daedeb0c67770bb512042401b428fa4d85dede12cdad5de5e9421352ce139"
     },
     "index.html": {
-      "bytes": 25101,
-      "sha256": "394617eaf1f67668edfa18533c52071685ba43b4658fecf2c4f87f899159ebf1"
+      "bytes": 25161,
+      "sha256": "7738813ccce44c1576114381b122e673720ffc8ee5abb27637f6a363f6c7d677"
     },
     "manifest.json": {
       "bytes": 834,
-      "sha256": "ed26c27f5b63fbd0e89d06b3c3bbe95a6c7f21b089a10f40a33a22d369a199df"
+      "sha256": "96c428d3361ba50405c3e94d7ffc4016519326eda1d5a230374b67b288f85cfd"
     },
     "sw.js": {
-      "bytes": 7587,
-      "sha256": "08d0095415dc6a648d6b51c7e9f35713d0384eeea24592d78d58d7b0f3c421d0"
+      "bytes": 7628,
+      "sha256": "e8daf891c192c6f6419e4ef9dd751f3d0482bd1528c2e64a84296333aaf70d26"
     }
   }
 }
