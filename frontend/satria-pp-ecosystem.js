@@ -11,6 +11,9 @@
 })(typeof window !== 'undefined' ? window : null, function (root) {
   'use strict';
   const core = root?.SATRIA_PROCUREMENT_CORE || (typeof module === 'object' && module.exports ? require('./satria-procurement-core.js') : null);
+  const integration = root?.SATRIA_PL_INTEGRATION || (typeof module==='object'&&module.exports?require('./satria-pl-integration.js'):null);
+  const jkkCore = root?.SATRIA_JKK_CORE || (typeof module==='object'&&module.exports?require('./satria-jkk-core.js'):null);
+  const jkkSchema = root?.SATRIA_JKK_SCHEMA || (typeof module==='object'&&module.exports?require('./satria-jkk-schema.js'):null);
   const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt = n => 'Rp ' + Math.round(Number(n) || 0).toLocaleString('id-ID');
   const str = (v, max = 1000) => String(v ?? '').trim().slice(0, max);
@@ -32,9 +35,12 @@
   function assess(p) {
     const mode = method(p), items = Array.isArray(p?.items) ? p.items : [], offers = Array.isArray(p?.penawaran) ? p.penawaran : [], m = p?.spseMonitoring || {};
     const cross = core.packageSnapshot(p, typeof S !== 'undefined' ? S.rupBank : []);
-    const total = cross.hps;
+    const summary = integration.financial(p, typeof S !== 'undefined' ? S.rupBank : []);
+    const jkk = summary.kind.jkk, total = summary.total;
+    const jkkModel = jkk ? jkkCore.model(p.kkJkk) : null, progress=jkk ? jkkCore.progress(jkkModel,jkkSchema) : null;
+    const enoughJkk = jkk && progress.reviu===progress.semuaReviu && progress.kua===progress.semuaKua && progress.pen===progress.semuaPen;
     const basic = !!str(p?.rup) && !!str(p?.nama) && Number(p?.pagu) > 0;
-    const itemsGood = items.length > 0 && items.every(i => str(i.nama) && Number(i.vol) > 0 && Number(i.hs) > 0) && total <= Number(p.pagu) && Number.isSafeInteger(Math.round(total));
+    const itemsGood = jkk ? summary.complete && total<=Number(p.pagu) : (items.length > 0 && items.every(i => str(i.nama) && Number(i.vol) > 0 && Number(i.hs) > 0) && total <= Number(p.pagu) && Number.isSafeInteger(Math.round(total)));
     const source = offers.some(w => str(w.sumberHarga) && str(w.tanggalHarga));
     const notes = logItems(p, 'notes'), refs = logItems(p, 'evidence');
     let awardValid = !!p?.pemenangId;
@@ -44,23 +50,26 @@
 
     const stages = [
       {id:'persiapan', name:'Paket & RUP', recorded:basic, detail:basic?'Identitas dan pagu tercatat':'Periksa kode RUP, nama, dan pagu'},
-      {id:'harga', name:'Kebutuhan & HPS', recorded:itemsGood, detail:itemsGood?'Rincian HPS tersedia dan tidak melebihi pagu':'Periksa rincian volume, HPS, dan pagu; monitoring SPSE boleh menggunakan DPP eksternal'},
+      {id:'harga', name:'Kebutuhan & HPS', recorded:itemsGood, detail:itemsGood?(jkk?'Bersumber dari rincian biaya JKK, bukan data HPS lama':'Rincian HPS tersedia dan tidak melebihi pagu'):(jkk?'Isi rincian dan dasar pajak pada langkah 7 Kertas Kerja JKK':'Periksa rincian volume, HPS, dan pagu; monitoring SPSE boleh menggunakan DPP eksternal')},
       {id:'proses', name:mode==='ep'?'Survei, negosiasi & penetapan':mode==='pl'?'Proses Pengadaan Langsung SPSE':'Konfirmasi metode paket',
         recorded:mode==='ep' ? !!(source && awardValid && p?.tglPenetapan) : mode==='pl' ? !!(m.sourceAsOf && Array.isArray(m.stages) && m.stages.some(s => s.actual)) : false,
         detail:mode==='ep'?'Pastikan sumber harga, penawaran, hasil negosiasi dan penetapan':'Catat hanya perkembangan yang terjadi di SPSE resmi'},
-      {id:'dokumen', name:'Dokumen pendukung', recorded:mode==='ep' ? !!p?.tglDpp && itemsGood : false,
-        detail:mode==='ep'?'Pilih DPP/HPS dan periksa pratinjau':'Draf pemilihan, BA reviu DPP dan analisa pasar harus diperiksa isinya'},
+      {id:'dokumen', name:'Dokumen pendukung', recorded:mode==='ep' ? !!p?.tglDpp && itemsGood : jkk ? enoughJkk : false,
+        detail:mode==='ep'?'Pilih DPP/HPS dan periksa pratinjau':jkk?`JKK: reviu ${progress.reviu}/${progress.semuaReviu}, kualifikasi ${progress.kua}/${progress.semuaKua}, penawaran ${progress.pen}/${progress.semuaPen}; cek dokumen per jenis`:'Draf pemilihan, BA reviu DPP dan analisa pasar harus diperiksa isinya'},
       {id:'arsip', name:'Bukti & catatan pekerjaan', recorded:refs.length > 0, detail:'Lampirkan tautan atau nomor referensi bukti; tidak mengunggah berkas ke sistem resmi'}
     ];
     const concerns=[...cross.rup.issues];
     if(mode==='other') concerns.push('Metode belum dikenali sebagai E-Purchasing atau Pengadaan Langsung. Jangan membuat dokumen pemilihan yang tidak sesuai kewenangan.');
     if(!str(p?.jenisPengadaan)||!str(p?.metodePemilihan)&&!str(m.method)) concerns.push('Jenis atau metode belum lengkap. Cocokkan dengan SiRUP dan data paket sebelum menyiapkan dokumen.');
+    if(jkk && summary.conflict)concerns.push('Rincian lama ('+fmt(summary.legacy)+') berbeda dengan rincian JKK ('+fmt(summary.total)+'). Rincian lama tidak ditimpa.');
+    if(jkk && !summary.complete && summary.legacy!==null)concerns.push('Rincian lama tersedia, namun JKK belum lengkap. Salin secara eksplisit lewat langkah 7 atau isi rincian JKK.');
+    if(jkk && summary.ppk!==null && summary.total!==null && Math.round(summary.total)!==Math.round(summary.ppk))concerns.push('Total rincian JKK berbeda dari nilai HPS PPK yang direferensikan.');
     if(total>Number(p?.pagu||0) && total>0) concerns.push('Total HPS tercatat melebihi pagu paket.');
     if(!itemsGood && mode==='pl' && p?.jalurPengadaan==='SPSE_MONITOR') concerns.push('Monitoring SPSE belum memuat rincian HPS di SATRIA; cocokkan DPP/HPS dari sumber resmi.');
     if(mode==='ep' && !source) concerns.push('Belum ada sumber harga dan tanggal referensi yang dapat diperiksa pada penawaran paket.');
     if(mode==='ep' && p?.pemenangId && !awardValid) concerns.push('Penetapan tercatat, tetapi hasil evaluasi penetapannya belum valid. Periksa total HPS dan pagu pada modul asal.');
     if(mode==='pl' && p?.jalurPengadaan!=='SPSE_MONITOR') concerns.push('Metode Pengadaan Langsung tercatat, namun paket belum terkait monitoring SPSE SATRIA; periksa pencatatannya.');
-    return {mode, total, rupStatus:cross.rup, stages, concerns, docs: root?.SATRIA_PBJ_POLICY?.documentPlan?.(p) || null, notes, refs, recorded:stages.filter(s=>s.recorded).length};
+    return {mode, total, finance:summary, jkk, rupStatus:cross.rup, stages, concerns, docs: root?.SATRIA_PBJ_POLICY?.documentPlan?.(p) || null, notes, refs, recorded:stages.filter(s=>s.recorded).length};
   }
   function canAccess(p, visible) { return !!p && (!Array.isArray(visible) || visible.some(x => String(x.id) === String(p.id))); }
   function canEdit(p) {
@@ -72,10 +81,13 @@
   function docs(p,a) {
     const list=a.docs?.docs||[];
     const labels=list.map(d=>`<li>${safe(d.label)} <span>${d.available?'Draf/fitur terkait tersedia':'Format belum dikonfirmasi — jangan dibuat otomatis'}</span></li>`).join('');
-    const ep=a.mode==='ep';const pl=a.mode==='pl';const spse=pl&&p.jalurPengadaan==='SPSE_MONITOR';
-    return `<section class="pp-block"><h3>Dokumen berdasarkan metode</h3><p>${safe(a.docs?.note||'Metode harus dipastikan agar dokumen tepat.')}</p><ul class="pp-document-list">${labels||'<li>Belum ada dokumen yang direkomendasikan otomatis.</li>'}</ul>
-    <div class="pp-actions">${ep?`<button type="button" data-pp-go="docs">Buka 15 template & generator HPS</button><a href="#dok">Dokumen Pengadaan →</a>`:''}${spse?`<button type="button" data-pp-go="spse-docs">Susun Dokumen Pemilihan SPSE</button><button type="button" data-pp-draft="reviu-dpp">Cetak draf BA Reviu DPP</button><button type="button" data-pp-draft="analisa-pasar">Cetak draf Analisa Pasar</button>`:''}${spse?`<a href="#paket/${pathId(p)}">Isi rincian kebutuhan/HPS →</a>`:''}<a href="#${spse?'spse':'paket'}/${pathId(p)}">Buka ${spse?'Monitoring SPSE':'Paket Pengadaan'} →</a></div>
-    <p class="pp-muted">Tidak ada unggah otomatis ke SPSE/INAPROC. HRS belum digenerasikan karena formatnya belum terverifikasi. Dokumen draf tetap memerlukan pemeriksaan pejabat yang berwenang.</p></section>`;
+    const ep=a.mode==='ep',pl=a.mode==='pl',spse=pl&&p.jalurPengadaan==='SPSE_MONITOR';
+    const id=pathId(p);
+    const content=a.jkk?`<a href="#jkk/${id}">Buka Kertas Kerja JKK 8 Langkah & dokumennya →</a><a href="#spse/${id}">Monitoring SPSE (catatan resmi manual) →</a>`:
+       ep?`<button type="button" data-pp-go="docs">Buka template & generator HPS</button><a href="#dok">Dokumen Pengadaan →</a>`:
+       spse&&integration.isGoodsPL?.(p)?`<button type="button" data-pp-go="spse-docs">Susun Dokumen Pemilihan SPSE (Barang/Jasa Lainnya)</button><button type="button" data-pp-draft="reviu-dpp">Cetak draf BA Reviu DPP</button><button type="button" data-pp-draft="analisa-pasar">Cetak draf Analisa Pasar</button><a href="#paket/${id}">Isi rincian kebutuhan/HPS →</a><a href="#spse/${id}">Monitoring SPSE →</a>`:
+       spse?`<p class="pp-muted">Generator Barang/Jasa Lainnya tidak berlaku untuk jenis paket ini. Gunakan dokumen pemilihan sesuai jenis pekerjaan.</p><a href="#spse/${id}">Monitoring SPSE →</a>`:`<a href="#paket/${id}">Buka paket →</a>`;
+    return `<section class="pp-block"><h3>Dokumen berdasarkan metode dan jenis</h3><p>${safe(a.jkk?'Jasa Konsultansi Konstruksi: gunakan sumber kertas kerja JKK, bukan template Barang/Jasa Lainnya.':a.docs?.note||'Metode perlu dipastikan.')}</p><ul class="pp-document-list">${a.jkk?'<li>Dokumen kerja JKK: reviu, evaluasi, survei, HPS dan negosiasi; draf Dokumen Pemilihan khusus JKK hanya bahan pelengkap.</li>':labels||'<li>Belum ada format dokumen.</li>'}</ul><div class="pp-actions">${content}</div><p class="pp-muted">Tidak ada unggah otomatis ke SPSE/INAPROC atau persetujuan berjenjang.</p></section>`;
   }
   function records(p,a,readonly) {
     const entries = arr => arr.slice(-10).reverse().map(r=>`<li><b>${safe(r.title||TOPICS[r.topic]||'Catatan')}</b><small>${safe((r.date||r.at||'').slice(0,16))} · ${safe(r.by||'-')}</small><span>${safe(r.text||r.reference||'')}</span>${r.url?`<a href="${safe(r.url)}" target="_blank" rel="noopener noreferrer">Buka referensi eksternal</a>`:''}</li>`).join('')||'<li>Belum ada catatan.</li>';
@@ -143,7 +155,7 @@
       const host=button.closest('[data-pp-panel]');if(!host)return;
       ev.preventDefault();ev.stopImmediatePropagation();
       const p=findCurrent(host);if(!p){root.alert('Paket tidak tersedia dalam hak akses/filter tahun dan OPD aktif.');return;}
-      if(button.hasAttribute('data-pp-go')){if(typeof S!=='undefined'){S.ui.dpid=p.id;S.ui.dok='dpp';}location.hash='#dok';if(typeof render==='function')render();return;}
+      if(button.hasAttribute('data-pp-go')){if(button.dataset.ppGo==='spse-docs'&&!integration.isGoodsPL?.(p)){root.alert('Generator ini hanya untuk Barang/Jasa Lainnya. Gunakan modul dokumen sesuai jenis pengadaan.');return;}if(typeof S!=='undefined'){S.ui.dpid=p.id;S.ui.dok='dpp';}location.hash='#dok';if(typeof render==='function')render();return;}
       if(button.hasAttribute('data-pp-draft')){
         const kind=button.dataset.ppDraft;
         if(method(p)!=='pl'||p.jalurPengadaan!=='SPSE_MONITOR'||!['pemilihan','reviu-dpp','analisa-pasar'].includes(kind)||!root.SATRIA_PBJ_POLICY?.documentPlan(p).docs.some(d=>d.code===kind&&d.available)){root.alert('Draf hanya untuk Pengadaan Langsung SPSE pada kewenangan yang telah diperiksa.');return;}

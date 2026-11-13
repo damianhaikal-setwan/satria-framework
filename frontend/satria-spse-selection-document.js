@@ -76,6 +76,11 @@
  }
  function rowLabel(p){return String(p?.rup||p?.id||'paket');}
  function panel(p){if(!isEligible(p))return '';
+  if(kind(p)!=='barang-jasa'){
+   const isJkk=!!root?.SATRIA_PL_INTEGRATION?.classification?.(p,root?.S?.rupBank||[])?.jkk;
+   const id=safe(p.id);
+   return `<section class="sd-editor"><h3>Dokumen Pemilihan — template khusus diperlukan</h3><p class="pbj-note">Template Barang/Jasa Lainnya tidak digunakan untuk ${safe(p.jenisPengadaan||'jenis ini')}. ${isJkk?'Gunakan Kertas Kerja JKK 8 Langkah. Kerangka dokumen pemilihan JKK hanya berupa draf kerja, bukan MDP resmi.':'Gunakan dokumen pemilihan yang sesuai jenis pekerjaan dan ketentuan resmi.'}</p>${isJkk?`<a href="#jkk/${encodeURIComponent(id)}">Buka Kertas Kerja JKK →</a>`:''}</section>`;
+  }
   const id=String(p.id),state=pending.get(id)||record(p),res=assessment(p,state,false),can=editable(p),stored=record(p);
   const options=FIELDS.map(([key,label,type,max])=>`<label>${safe(label)}${REQUIRED.includes(key)?' <span aria-label="wajib">*</span>':''}${type==='textarea'?`<textarea data-sd-field="${key}" maxlength="${max}" rows="${key==='rancanganSpk'?7:3}" ${can?'':'disabled'}>${safe(state[key])}</textarea>`:`<input data-sd-field="${key}" type="${type}" maxlength="${max}" value="${safe(state[key])}" ${can?'':'disabled'}>`}</label>`).join('');
   const age=stored?.savedAt?`Terakhir disimpan: ${safe(stored.savedAt)}`:'Belum pernah disimpan';

@@ -272,6 +272,10 @@ function vDokOptimized(){
     (!scope||(scope.years.includes(Number(x.tahun))&&scope.opdIds.includes(String(x.opd)))));
   const allPackages=[...L,...spseL];
   const p=allPackages.find(x=>x.id===S.ui.dpid)||allPackages[0];
+  // Jangan tampilkan form Barang/Jasa Lainnya atau template E-P untuk JKK.
+  if(p&&window.SATRIA_PL_INTEGRATION?.classification(p,S.rupBank||[])?.jkk){
+    return `<section class="dok-studio dok-jkk-redirect"><div class="card"><h2>Dokumen Pengadaan Langsung Jasa Konsultansi Konstruksi</h2><p>Gunakan Kertas Kerja JKK 8 Langkah untuk administrasi, reviu, evaluasi, survei biaya, HPS/negosiasi dan pratinjau dokumen.</p><a class="btn" href="#jkk/${encodeURIComponent(p.id)}">Buka Kertas Kerja JKK →</a><p class="mut">Template umum Barang/Jasa Lainnya tidak berlaku untuk paket ini. Kerangka Dokumen Pemilihan JKK masih draf kerja, bukan MDP resmi.</p></div></section>`;
+  }
   if(p&&satriaSpseIs(p)){
     return `<div class="dok-studio dok-spse-workspace">
       <section class="dok-hero no-print"><div class="dok-hero-copy"><span class="dok-eyebrow"><i></i> SATRIA / SPSE DOCUMENT WORKSPACE</span><h2>Dokumen Pemilihan.<br><em>Disusun dari paket, diperiksa pejabat.</em></h2><p>Pengadaan Langsung: dokumen untuk sistem SPSE resmi. Tanpa mengisi ulang HPS dan identitas RUP.</p></div></section>
